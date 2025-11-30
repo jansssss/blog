@@ -1,0 +1,10 @@
+# robots.txt
+
+User-agent: *
+Disallow: /private/
+Disallow: /admin/
+Allow: /
+
+
+# Sitemap location
+# Sitemap: https://.com/sitemap.xml

@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import 'react-quill/dist/quill.snow.css'
 
@@ -16,7 +17,7 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 
 const Editor = ({ value, onChange }: EditorProps) => {
 
-  const modules = {
+  const modules = useMemo(() => ({
     toolbar: [
       [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
@@ -26,9 +27,9 @@ const Editor = ({ value, onChange }: EditorProps) => {
       ['link', 'image'],
       ['clean'],
     ],
-  }
+  }), [])
 
-  const formats = [
+  const formats = useMemo(() => [
     'header',
     'bold',
     'italic',
@@ -42,7 +43,7 @@ const Editor = ({ value, onChange }: EditorProps) => {
     'background',
     'link',
     'image',
-  ]
+  ], [])
 
   return (
     <div className="bg-white">

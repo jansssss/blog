@@ -150,3 +150,4 @@ MIT License
 
 **현재 상태**: 1단계 프론트엔드 완료 ✅
 **다음 단계**: Supabase 연동 (2단계)
+# Force Vercel rebuild

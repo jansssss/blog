@@ -1,6 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import 'react-quill/dist/quill.snow.css'
 
@@ -9,11 +8,13 @@ interface EditorProps {
   onChange: (value: string) => void
 }
 
+// Dynamic import를 컴포넌트 외부로 이동
+const ReactQuill = dynamic(() => import('react-quill'), {
+  ssr: false,
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded" />
+})
+
 const Editor = ({ value, onChange }: EditorProps) => {
-  const ReactQuill = useMemo(
-    () => dynamic(() => import('react-quill'), { ssr: false }),
-    []
-  )
 
   const modules = {
     toolbar: [

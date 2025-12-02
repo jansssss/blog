@@ -1,10 +1,21 @@
-import { getLatestPosts, getAllCategories } from '@/lib/mock-data'
 import BlogCard from '@/components/BlogCard'
 import { Button } from '@/components/ui/button'
+import { supabase } from '@/lib/supabase'
 
-export default function HomePage() {
-  const posts = getLatestPosts()
-  const categories = getAllCategories()
+export default async function HomePage() {
+  // Supabase에서 최신 게시글 가져오기
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('published', true)
+    .order('published_at', { ascending: false })
+    .limit(10)
+
+  // Supabase에서 카테고리 가져오기
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('name')
+    .order('name')
 
   return (
     <div className="container py-10">
@@ -23,9 +34,9 @@ export default function HomePage() {
       <section className="mb-10">
         <div className="flex flex-wrap gap-2 justify-center">
           <Button variant="default">전체</Button>
-          {categories.map((category) => (
-            <Button key={category} variant="outline">
-              {category}
+          {categories?.map((category) => (
+            <Button key={category.name} variant="outline">
+              {category.name}
             </Button>
           ))}
         </div>
@@ -35,7 +46,7 @@ export default function HomePage() {
       <section>
         <h2 className="mb-6 text-2xl font-bold">최신 게시글</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
+          {posts?.map((post) => (
             <BlogCard key={post.id} post={post} />
           ))}
         </div>

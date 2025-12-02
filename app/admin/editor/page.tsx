@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Editor from '@/components/Editor'
 import { generateSlug } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
 
 export default function AdminEditorPage() {
   const router = useRouter()
@@ -40,21 +41,54 @@ export default function AdminEditorPage() {
   }
 
   const handleSave = async () => {
-    const postData = {
-      title,
-      slug,
-      summary,
-      content,
-      category,
-      tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      thumbnail_url: thumbnailUrl || undefined,
-      published,
+    if (!title || !slug || !content) {
+      alert('제목, 슬러그, 본문은 필수 항목입니다.')
+      return
     }
 
-    console.log('저장할 데이터:', postData)
+    try {
+      const adminId = localStorage.getItem('adminId')
 
-    // 2단계에서 Supabase API 호출로 교체 예정
-    alert('게시글이 저장되었습니다!\n\n(현재는 프론트엔드 전용이므로 실제 저장되지 않습니다.)\n2단계에서 Supabase 연동 시 DB에 저장됩니다.')
+      const postData = {
+        title,
+        slug,
+        summary,
+        content,
+        category,
+        tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        thumbnail_url: thumbnailUrl || null,
+        published,
+        published_at: published ? new Date().toISOString() : null,
+        author_id: adminId,
+      }
+
+      const { data, error } = await supabase
+        .from('posts')
+        .insert([postData])
+        .select()
+
+      if (error) {
+        console.error('저장 오류:', error)
+        alert(`게시글 저장 중 오류가 발생했습니다: ${error.message}`)
+        return
+      }
+
+      alert('게시글이 성공적으로 저장되었습니다!')
+
+      // 저장 후 폼 초기화
+      setTitle('')
+      setSlug('')
+      setSummary('')
+      setContent('')
+      setTags('')
+      setThumbnailUrl('')
+
+      // 메인 페이지로 이동
+      router.push('/')
+    } catch (err) {
+      console.error('예상치 못한 오류:', err)
+      alert('게시글 저장 중 오류가 발생했습니다.')
+    }
   }
 
   const handlePreview = () => {
@@ -224,10 +258,7 @@ export default function AdminEditorPage() {
                 onChange={(e) => setThumbnailUrl(e.target.value)}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                이미지 URL을 입력하세요
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                2단계: Supabase Storage 업로드 기능 추가 예정
+                이미지 URL을 입력하세요 (Unsplash 등 외부 이미지 사용 가능)
               </p>
             </CardContent>
           </Card>

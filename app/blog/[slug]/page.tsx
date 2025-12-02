@@ -2,19 +2,29 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Calendar, Tag, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { getPostBySlug, mockPosts } from '@/lib/mock-data'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { supabase } from '@/lib/supabase'
 
 export async function generateStaticParams() {
-  return mockPosts.map((post) => ({
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('slug')
+    .eq('published', true)
+
+  return posts?.map((post) => ({
     slug: post.slug,
-  }))
+  })) || []
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const { data: post } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single()
 
   if (!post) {
     return {
@@ -40,7 +50,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const { data: post } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single()
 
   if (!post) {
     notFound()

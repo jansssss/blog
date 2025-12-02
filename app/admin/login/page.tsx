@@ -6,6 +6,7 @@ import { Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { supabase } from '@/lib/supabase'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -20,14 +21,34 @@ export default function AdminLoginPage() {
     setLoading(true)
 
     try {
-      // 임시 인증 로직 (프론트엔드 전용)
-      // 2단계에서 Supabase Auth로 교체 예정
-      if (email === 'admin@blog.com' && password === 'admin123') {
-        // 로컬스토리지에 임시 토큰 저장
-        localStorage.setItem('isAdmin', 'true')
-        router.push('/admin/editor')
-      } else {
+      // Supabase Auth로 로그인
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
         setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        return
+      }
+
+      if (data.user) {
+        // admins 테이블에서 해당 사용자 확인
+        const { data: admin } = await supabase
+          .from('admins')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+
+        if (admin) {
+          // 로컬스토리지에 관리자 정보 저장
+          localStorage.setItem('isAdmin', 'true')
+          localStorage.setItem('adminId', data.user.id)
+          router.push('/admin/editor')
+        } else {
+          setError('관리자 권한이 없습니다.')
+          await supabase.auth.signOut()
+        }
       }
     } catch (err) {
       setError('로그인 중 오류가 발생했습니다.')
@@ -89,12 +110,8 @@ export default function AdminLoginPage() {
             </Button>
 
             <div className="mt-4 rounded-md bg-muted p-3 text-xs text-muted-foreground">
-              <p className="font-semibold">테스트 계정:</p>
-              <p>이메일: admin@blog.com</p>
-              <p>비밀번호: admin123</p>
-              <p className="mt-2 text-[10px]">
-                * 이 로그인은 임시 구현입니다. 2단계에서 Supabase Auth로 교체됩니다.
-              </p>
+              <p className="font-semibold">관리자 로그인</p>
+              <p className="mt-2">Supabase에서 생성한 관리자 계정으로 로그인하세요.</p>
             </div>
           </form>
         </CardContent>

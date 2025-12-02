@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import 'react-quill/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.snow.css'
 
 interface EditorProps {
   value: string
@@ -10,7 +10,7 @@ interface EditorProps {
 }
 
 // Dynamic import를 컴포넌트 외부로 이동
-const ReactQuill = dynamic(() => import('react-quill'), {
+const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded" />
 })

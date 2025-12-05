@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import EditButton from '@/components/EditButton'
 
+// 동적 렌더링 강제 (항상 최신 데이터 표시)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function generateStaticParams() {
   const { data: posts } = await supabase
     .from('posts')

@@ -2,6 +2,10 @@ import BlogCard from '@/components/BlogCard'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
+// 동적 렌더링 강제 (항상 최신 데이터 표시)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function HomePage() {
   // Supabase에서 최신 게시글 가져오기
   const { data: posts } = await supabase

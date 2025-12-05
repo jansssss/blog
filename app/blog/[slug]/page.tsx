@@ -10,17 +10,7 @@ import EditButton from '@/components/EditButton'
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-export async function generateStaticParams() {
-  const { data: posts } = await supabase
-    .from('posts')
-    .select('slug')
-    .eq('published', true)
-
-  return posts?.map((post) => ({
-    slug: post.slug,
-  })) || []
-}
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

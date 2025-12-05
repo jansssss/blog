@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
+import EditButton from '@/components/EditButton'
 
 export async function generateStaticParams() {
   const { data: posts } = await supabase
@@ -63,13 +64,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <article className="container py-10">
-      {/* Back Button */}
-      <Link href="/">
-        <Button variant="ghost" className="mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          목록으로
-        </Button>
-      </Link>
+      {/* Back Button & Edit Button */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link href="/">
+          <Button variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            목록으로
+          </Button>
+        </Link>
+        <EditButton postId={post.id} />
+      </div>
 
       {/* Thumbnail */}
       {post.thumbnail_url && (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,12 @@ import { supabase } from '@/lib/supabase'
 
 export default function AdminEditorPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const postId = searchParams.get('id')
+
   const [mounted, setMounted] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [summary, setSummary] = useState('')
@@ -29,8 +34,49 @@ export default function AdminEditorPage() {
     const isAdmin = localStorage.getItem('isAdmin')
     if (!isAdmin) {
       router.push('/admin/login')
+      return
     }
-  }, [router])
+
+    // 수정 모드인 경우 게시글 데이터 로드
+    if (postId) {
+      loadPost(postId)
+    }
+  }, [router, postId])
+
+  const loadPost = async (id: string) => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        console.error('게시글 로드 오류:', error)
+        alert('게시글을 불러오는데 실패했습니다.')
+        router.push('/admin/editor')
+        return
+      }
+
+      if (data) {
+        setIsEditMode(true)
+        setTitle(data.title)
+        setSlug(data.slug)
+        setSummary(data.summary || '')
+        setContent(data.content)
+        setCategory(data.category || '개발')
+        setTags(Array.isArray(data.tags) ? data.tags.join(', ') : '')
+        setThumbnailUrl(data.thumbnail_url || '')
+        setPublished(data.published)
+      }
+    } catch (err) {
+      console.error('예상치 못한 오류:', err)
+      alert('게시글을 불러오는데 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleTitleChange = (value: string) => {
     setTitle(value)
@@ -62,26 +108,35 @@ export default function AdminEditorPage() {
         author_id: adminId,
       }
 
-      const { data, error } = await supabase
-        .from('posts')
-        .insert([postData])
-        .select()
+      if (isEditMode && postId) {
+        // 수정 모드
+        const { error } = await supabase
+          .from('posts')
+          .update(postData)
+          .eq('id', postId)
 
-      if (error) {
-        console.error('저장 오류:', error)
-        alert(`게시글 저장 중 오류가 발생했습니다: ${error.message}`)
-        return
+        if (error) {
+          console.error('수정 오류:', error)
+          alert(`게시글 수정 중 오류가 발생했습니다: ${error.message}`)
+          return
+        }
+
+        alert('게시글이 성공적으로 수정되었습니다!')
+      } else {
+        // 새 글 작성 모드
+        const { error } = await supabase
+          .from('posts')
+          .insert([postData])
+          .select()
+
+        if (error) {
+          console.error('저장 오류:', error)
+          alert(`게시글 저장 중 오류가 발생했습니다: ${error.message}`)
+          return
+        }
+
+        alert('게시글이 성공적으로 저장되었습니다!')
       }
-
-      alert('게시글이 성공적으로 저장되었습니다!')
-
-      // 저장 후 폼 초기화
-      setTitle('')
-      setSlug('')
-      setSummary('')
-      setContent('')
-      setTags('')
-      setThumbnailUrl('')
 
       // 메인 페이지로 이동
       router.push('/')
@@ -100,6 +155,17 @@ export default function AdminEditorPage() {
     return null
   }
 
+  if (loading) {
+    return (
+      <div className="container py-10 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">게시글 로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container py-10">
       {/* Header */}
@@ -111,7 +177,7 @@ export default function AdminEditorPage() {
               블로그로
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">새 글 작성</h1>
+          <h1 className="text-3xl font-bold">{isEditMode ? '글 수정' : '새 글 작성'}</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handlePreview}>

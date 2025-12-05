@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ import Editor from '@/components/Editor'
 import { generateSlug } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
-export default function AdminEditorPage() {
+function AdminEditorContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const postId = searchParams.get('id')
@@ -41,6 +41,7 @@ export default function AdminEditorPage() {
     if (postId) {
       loadPost(postId)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, postId])
 
   const loadPost = async (id: string) => {
@@ -331,5 +332,20 @@ export default function AdminEditorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AdminEditorPage() {
+  return (
+    <Suspense fallback={
+      <div className="container py-10 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <AdminEditorContent />
+    </Suspense>
   )
 }

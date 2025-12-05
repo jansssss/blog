@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BookOpen } from 'lucide-react'
+import LogoutButton from './LogoutButton'
 
 export default function Header() {
   return (
@@ -23,6 +24,7 @@ export default function Header() {
           >
             관리자
           </Link>
+          <LogoutButton />
         </nav>
       </div>
     </header>

@@ -13,7 +13,10 @@ export const revalidate = 0
 export const dynamicParams = true
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+  const { slug: encodedSlug } = await params
+  // URL 디코딩 (한글 slug 지원)
+  const slug = decodeURIComponent(encodedSlug)
+
   const { data: post } = await supabase
     .from('posts')
     .select('*')
@@ -44,7 +47,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+  const { slug: encodedSlug } = await params
+  // URL 디코딩 (한글 slug 지원)
+  const slug = decodeURIComponent(encodedSlug)
+
   const { data: post } = await supabase
     .from('posts')
     .select('*')

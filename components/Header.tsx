@@ -49,7 +49,15 @@ export default function Header() {
               관리자
             </Link>
           ) : (
-            <LogoutButton />
+            <>
+              <Link
+                href="/admin/editor"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                새 글쓰기
+              </Link>
+              <LogoutButton />
+            </>
           )}
         </nav>
       </div>

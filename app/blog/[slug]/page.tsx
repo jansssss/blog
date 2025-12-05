@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import EditButton from '@/components/EditButton'
+import DeleteButton from '@/components/DeleteButton'
 
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
@@ -64,7 +65,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <article className="container py-10">
-      {/* Back Button & Edit Button */}
+      {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">
           <Button variant="ghost">
@@ -72,7 +73,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             목록으로
           </Button>
         </Link>
-        <EditButton postId={post.id} />
+        <div className="flex gap-2">
+          <EditButton postId={post.id} />
+          <DeleteButton postId={post.id} />
+        </div>
       </div>
 
       {/* Thumbnail */}

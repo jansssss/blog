@@ -22,6 +22,9 @@ export default function LogoutButton() {
     // 로그아웃: localStorage에서 관리자 상태 제거
     localStorage.removeItem('isAdmin')
 
+    // 커스텀 이벤트 발생 (Header 업데이트용)
+    window.dispatchEvent(new Event('storage'))
+
     // 홈으로 리다이렉트
     router.push('/')
     router.refresh()

@@ -25,11 +25,11 @@ export default async function HomePage() {
     <div className="container py-10">
       {/* Hero Section */}
       <section className="mb-12 text-center">
-        <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl leading-relaxed">
-          모두의 궁금증을 해결하기위한 <br />
+        <h1 className="mb-6 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl" style={{ lineHeight: '1.6' }}>
+          모두의 궁금증을 해결하기위한 <br className="mb-2" />
           <span className="text-primary">생활정보 블로그</span>
         </h1>
-        <p className="mx-auto max-w-2xl text-base text-muted-foreground mt-4">
+        <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground mt-6">
           AI, 재테크, 노무, 개발 등 다양한 주제의 전문 콘텐츠를 만나보세요
         </p>
       </section>

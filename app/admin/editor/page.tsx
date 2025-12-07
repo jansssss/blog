@@ -4,12 +4,17 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import Editor from '@/components/Editor'
 import { generateSlug } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+
+const Editor = dynamic(() => import('@/components/Editor'), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
+})
 
 function AdminEditorContent() {
   const router = useRouter()

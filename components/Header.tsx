@@ -7,7 +7,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="flex items-center space-x-2">
           <BookOpen className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">CMS Blog</span>
+          <span className="text-xl font-bold">we Blog</span>
         </Link>
 
         <nav className="ml-auto flex items-center space-x-6">

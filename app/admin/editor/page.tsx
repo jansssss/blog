@@ -28,7 +28,7 @@ function AdminEditorContent() {
   const [slug, setSlug] = useState('')
   const [summary, setSummary] = useState('')
   const [content, setContent] = useState('')
-  const [category, setCategory] = useState('개발')
+  const [category, setCategory] = useState('금융')
   const [tags, setTags] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [published, setPublished] = useState(true)
@@ -71,7 +71,7 @@ function AdminEditorContent() {
         setSlug(data.slug)
         setSummary(data.summary || '')
         setContent(data.content)
-        setCategory(data.category || '개발')
+        setCategory(data.category || '금융')
         setTags(Array.isArray(data.tags) ? data.tags.join(', ') : '')
         setThumbnailUrl(data.thumbnail_url || '')
         setPublished(data.published)
@@ -280,10 +280,10 @@ function AdminEditorContent() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
+                  <option value="금융">금융</option>
+                  <option value="세금">세금</option>
+                  <option value="대출">대출</option>
                   <option value="AI">AI</option>
-                  <option value="재테크">재테크</option>
-                  <option value="노무">노무</option>
-                  <option value="개발">개발</option>
                 </select>
               </div>
 

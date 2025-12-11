@@ -30,7 +30,7 @@ export default async function HomePage() {
           <span className="text-primary">생활정보 블로그</span>
         </h1>
         <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground mt-6">
-          AI, 재테크, 노무, 개발 등 다양한 주제의 전문 콘텐츠를 만나보세요
+          금융, 세금, 대출, AI 등 다양한 주제의 전문 콘텐츠를 만나보세요
         </p>
       </section>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import LogoutButton from './LogoutButton'
 import { useEffect, useState } from 'react'
 
@@ -29,9 +30,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="group">
-          <span className="text-2xl font-thin tracking-wider transition-all duration-300 group-hover:scale-105 inline-block">
-            specialll
-          </span>
+          <Image
+            src="/top-logo.png"
+            alt="Special"
+            width={120}
+            height={40}
+            className="transition-all duration-300 group-hover:scale-105"
+            priority
+          />
         </Link>
 
         <nav className="ml-auto flex items-center space-x-6">

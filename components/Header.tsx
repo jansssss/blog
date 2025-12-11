@@ -31,7 +31,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="group">
           <Image
-            src="/logo.png"
+            src="/logoo.png"
             alt="Special"
             width={120}
             height={40}

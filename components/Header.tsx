@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BookOpen } from 'lucide-react'
+import Image from 'next/image'
 import LogoutButton from './LogoutButton'
 import { useEffect, useState } from 'react'
 
@@ -30,19 +30,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="group">
-          <span
-            className="text-3xl font-normal italic transition-all duration-300 group-hover:scale-105"
-            style={{
-              fontFamily: "'Edwardian Script ITC', 'Apple Chancery', 'Brush Script MT', cursive",
-              color: '#C8102E',
-              textShadow: '1px 1px 2px rgba(200, 16, 46, 0.15)',
-              letterSpacing: '0.05em',
-              fontStyle: 'italic',
-              transform: 'skewX(-5deg)'
-            }}
-          >
-            special
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Special"
+            width={120}
+            height={40}
+            className="transition-all duration-300 group-hover:scale-105"
+            priority
+          />
         </Link>
 
         <nav className="ml-auto flex items-center space-x-6">

@@ -29,9 +29,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">we Blog</span>
+        <Link href="/" className="flex items-center space-x-3 group">
+          <div className="relative">
+            <BookOpen className="h-7 w-7 text-violet-600 transition-transform group-hover:scale-110 group-hover:rotate-12" />
+            <div className="absolute inset-0 h-7 w-7 bg-violet-600 opacity-20 blur-md transition-opacity group-hover:opacity-40"></div>
+          </div>
+          <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent tracking-tight">
+            special
+          </span>
         </Link>
 
         <nav className="ml-auto flex items-center space-x-6">

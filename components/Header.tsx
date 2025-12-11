@@ -31,15 +31,17 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="group">
           <span
-            className="text-4xl font-bold italic tracking-wide transition-all duration-300 group-hover:scale-105"
+            className="text-3xl font-normal italic transition-all duration-300 group-hover:scale-105"
             style={{
-              fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive",
+              fontFamily: "'Edwardian Script ITC', 'Apple Chancery', 'Brush Script MT', cursive",
               color: '#C8102E',
-              textShadow: '2px 2px 4px rgba(200, 16, 46, 0.2)',
-              WebkitTextStroke: '0.5px rgba(200, 16, 46, 0.3)'
+              textShadow: '1px 1px 2px rgba(200, 16, 46, 0.15)',
+              letterSpacing: '0.05em',
+              fontStyle: 'italic',
+              transform: 'skewX(-5deg)'
             }}
           >
-            Special
+            special
           </span>
         </Link>
 

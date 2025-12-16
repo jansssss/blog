@@ -123,7 +123,7 @@ export default function TermsPage() {
 
         <div className="mt-8 pt-6 border-t">
           <p className="text-gray-700">
-            <strong>시행일자:</strong> 2025년 1월 1일
+            <strong>시행일자:</strong> 2025년 10월 1일
           </p>
         </div>
       </div>

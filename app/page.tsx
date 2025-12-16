@@ -10,9 +10,10 @@ export const revalidate = 0
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: Promise<{ page?: string }>
 }) {
-  const currentPage = Number(searchParams.page) || 1
+  const params = await searchParams
+  const currentPage = Number(params.page) || 1
   const postsPerPage = 12
   const offset = (currentPage - 1) * postsPerPage
 

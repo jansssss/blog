@@ -7,7 +7,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">제1조 (목적)</h2>
           <p className="text-gray-700 leading-relaxed">
-            본 약관은 본 블로그(이하 "사이트")가 제공하는 모든 서비스의 이용과 관련하여
+            본 약관은 본 블로그(이하 사이트)가 제공하는 모든 서비스의 이용과 관련하여
             사이트와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
           </p>
         </section>
@@ -15,9 +15,9 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">제2조 (정의)</h2>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li><strong>"사이트"</strong>란 본 블로그 웹사이트를 의미합니다.</li>
-            <li><strong>"이용자"</strong>란 사이트에 접속하여 본 약관에 따라 서비스를 이용하는 모든 방문자를 의미합니다.</li>
-            <li><strong>"콘텐츠"</strong>란 사이트에 게시된 글, 이미지, 영상 등 모든 정보를 의미합니다.</li>
+            <li><strong>사이트</strong>란 본 블로그 웹사이트를 의미합니다.</li>
+            <li><strong>이용자</strong>란 사이트에 접속하여 본 약관에 따라 서비스를 이용하는 모든 방문자를 의미합니다.</li>
+            <li><strong>콘텐츠</strong>란 사이트에 게시된 글, 이미지, 영상 등 모든 정보를 의미합니다.</li>
           </ul>
         </section>
 

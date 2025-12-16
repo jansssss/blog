@@ -123,28 +123,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </div>
       </header>
 
-      {/* AdSense Top */}
-      <div className="mb-8 rounded-lg border-2 border-dashed border-muted p-4 text-center">
-        <p className="text-xs text-muted-foreground">광고 영역 (상단)</p>
-      </div>
-
       {/* Post Content */}
       <div
         className="prose prose-lg max-w-none"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
-
-      {/* AdSense Middle */}
-      <div className="my-8 rounded-lg border-2 border-dashed border-muted p-4 text-center">
-        <p className="text-xs text-muted-foreground">광고 영역 (중간)</p>
-      </div>
-
-      {/* Related Posts / CTA could go here */}
-
-      {/* AdSense Bottom */}
-      <div className="mt-8 rounded-lg border-2 border-dashed border-muted p-4 text-center">
-        <p className="text-xs text-muted-foreground">광고 영역 (하단)</p>
-      </div>
 
       {/* Back to List */}
       <div className="mt-12 text-center">

@@ -91,9 +91,6 @@ export default function AboutPage() {
             <p className="text-gray-700 mb-2">
               <strong>이메일:</strong> goooods@naver.com
             </p>
-            <p className="text-gray-700">
-              <strong>GitHub:</strong> <a href="https://github.com/jansssss" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">github.com/jansssss</a>
-            </p>
           </div>
         </section>
 

@@ -27,6 +27,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6676446565175753"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={inter.className}>
         <div className="relative flex min-h-screen flex-col">
           <Header />

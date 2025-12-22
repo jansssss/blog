@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-// 동적 렌더링 강제 (항상 최신 데이터 표시)
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// ISR 설정 (60초마다 재검증)
+export const revalidate = 60
 
 export default async function HomePage({
   searchParams,
@@ -17,27 +16,32 @@ export default async function HomePage({
   const postsPerPage = 12
   const offset = (currentPage - 1) * postsPerPage
 
-  // 전체 게시글 수 가져오기
-  const { count } = await supabase
-    .from('posts')
-    .select('*', { count: 'exact', head: true })
-    .eq('published', true)
-
-  // Supabase에서 게시글 가져오기 (페이지네이션 적용)
-  const { data: posts } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('published', true)
-    .order('published_at', { ascending: false })
-    .range(offset, offset + postsPerPage - 1)
+  // 병렬로 데이터 가져오기 (성능 개선)
+  const [
+    { count },
+    { data: posts },
+    { data: categories }
+  ] = await Promise.all([
+    // 전체 게시글 수
+    supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('published', true),
+    // 게시글 목록
+    supabase
+      .from('posts')
+      .select('*')
+      .eq('published', true)
+      .order('published_at', { ascending: false })
+      .range(offset, offset + postsPerPage - 1),
+    // 카테고리 목록
+    supabase
+      .from('categories')
+      .select('name')
+      .order('name')
+  ])
 
   const totalPages = Math.ceil((count || 0) / postsPerPage)
-
-  // Supabase에서 카테고리 가져오기
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('name')
-    .order('name')
 
   return (
     <div className="container py-10">

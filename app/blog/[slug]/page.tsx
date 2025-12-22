@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <article className="container py-10">
+    <article className="container max-w-5xl py-10">
       {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">

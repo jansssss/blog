@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <article className="container max-w-5xl py-10">
+    <article className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">
       {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">
@@ -125,7 +125,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       {/* Post Content */}
       <div
-        className="prose prose-lg max-w-none"
+        className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-base prose-p:leading-relaxed"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 

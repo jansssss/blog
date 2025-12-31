@@ -10,12 +10,30 @@ export const revalidate = 60
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; category?: string }>
 }) {
   const params = await searchParams
   const currentPage = Number(params.page) || 1
+  const selectedCategory = params.category || null
   const postsPerPage = 12
   const offset = (currentPage - 1) * postsPerPage
+
+  // 카테고리별 쿼리 생성
+  const postsQuery = supabase
+    .from('posts')
+    .select('*')
+    .eq('published', true)
+
+  const countQuery = supabase
+    .from('posts')
+    .select('*', { count: 'exact', head: true })
+    .eq('published', true)
+
+  // 카테고리 필터 적용
+  if (selectedCategory) {
+    postsQuery.eq('category', selectedCategory)
+    countQuery.eq('category', selectedCategory)
+  }
 
   // 병렬로 데이터 가져오기 (성능 개선)
   const [
@@ -23,23 +41,9 @@ export default async function HomePage({
     { data: posts },
     { data: categories }
   ] = await Promise.all([
-    // 전체 게시글 수
-    supabase
-      .from('posts')
-      .select('*', { count: 'exact', head: true })
-      .eq('published', true),
-    // 게시글 목록
-    supabase
-      .from('posts')
-      .select('*')
-      .eq('published', true)
-      .order('published_at', { ascending: false })
-      .range(offset, offset + postsPerPage - 1),
-    // 카테고리 목록
-    supabase
-      .from('categories')
-      .select('name')
-      .order('name')
+    countQuery,
+    postsQuery.order('published_at', { ascending: false }).range(offset, offset + postsPerPage - 1),
+    supabase.from('categories').select('name').order('name')
   ])
 
   const totalPages = Math.ceil((count || 0) / postsPerPage)
@@ -63,11 +67,17 @@ export default async function HomePage({
       {/* Categories */}
       <section className="mb-10">
         <div className="flex flex-wrap gap-2 justify-center">
-          <Button variant="default">전체</Button>
-          {categories?.map((category) => (
-            <Button key={category.name} variant="outline">
-              {category.name}
+          <Link href="/">
+            <Button variant={!selectedCategory ? 'default' : 'outline'}>
+              전체
             </Button>
+          </Link>
+          {categories?.map((category) => (
+            <Link key={category.name} href={`/?category=${encodeURIComponent(category.name)}`}>
+              <Button variant={selectedCategory === category.name ? 'default' : 'outline'}>
+                {category.name}
+              </Button>
+            </Link>
           ))}
         </div>
       </section>
@@ -85,14 +95,14 @@ export default async function HomePage({
         {totalPages > 1 && (
           <div className="mt-12 flex justify-center items-center gap-2">
             {currentPage > 1 && (
-              <Link href={`/?page=${currentPage - 1}`}>
+              <Link href={`/?page=${currentPage - 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
                 <Button variant="outline">이전</Button>
               </Link>
             )}
 
             <div className="flex gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Link key={page} href={`/?page=${page}`}>
+                <Link key={page} href={`/?page=${page}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
                   <Button
                     variant={page === currentPage ? 'default' : 'outline'}
                     size="sm"
@@ -104,7 +114,7 @@ export default async function HomePage({
             </div>
 
             {currentPage < totalPages && (
-              <Link href={`/?page=${currentPage + 1}`}>
+              <Link href={`/?page=${currentPage + 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
                 <Button variant="outline">다음</Button>
               </Link>
             )}

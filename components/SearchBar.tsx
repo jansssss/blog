@@ -17,11 +17,11 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-12 mt-8">
-      <form onSubmit={handleSubmit} className="relative group">
+    <div className="w-full max-w-3xl mx-auto mb-12 mt-8 px-4">
+      <form onSubmit={handleSubmit} className="relative group overflow-visible">
         {/* Gradient Background Effect */}
         <div
-          className={`absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500 ${
+          className={`absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none ${
             isFocused ? 'opacity-30' : ''
           }`}
         />

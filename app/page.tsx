@@ -45,9 +45,9 @@ export default async function HomePage({
   const totalPages = Math.ceil((count || 0) / postsPerPage)
 
   return (
-    <div className="container py-10">
+    <div className="container py-10 overflow-x-hidden">
       {/* Hero Section */}
-      <section className="mb-12 text-center">
+      <section className="mb-12 text-center overflow-visible">
         <h1 className="mb-6 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl" style={{ lineHeight: '1.6' }}>
           모두의 궁금증을 해결하기위한 <br className="mb-2" />
           <span className="text-primary">생활정보 블로그</span>

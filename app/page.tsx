@@ -2,6 +2,7 @@ import BlogCard from '@/components/BlogCard'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import SearchBar from '@/components/SearchBar'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -54,6 +55,9 @@ export default async function HomePage({
         <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground mt-6">
           금융, 세금, 대출, AI 등 다양한 주제의 전문 콘텐츠를 만나보세요
         </p>
+
+        {/* AI-Style Search Bar */}
+        <SearchBar />
       </section>
 
       {/* Categories */}

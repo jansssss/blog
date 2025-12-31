@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Save, Eye } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { generateSlug } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { uploadThumbnail } from '@/lib/upload'
+import Image from 'next/image'
 
 const Editor = dynamic(() => import('@/components/Editor'), {
   ssr: false,
@@ -20,10 +22,12 @@ function AdminEditorContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const postId = searchParams.get('id')
+  const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
   const [mounted, setMounted] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [summary, setSummary] = useState('')
@@ -149,6 +153,40 @@ function AdminEditorContent() {
     } catch (err) {
       console.error('예상치 못한 오류:', err)
       alert('게시글 저장 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 이미지 파일 검증
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.')
+      return
+    }
+
+    // 파일 크기 제한 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 5MB 이하여야 합니다.')
+      return
+    }
+
+    setUploadingThumbnail(true)
+    const url = await uploadThumbnail(file)
+    setUploadingThumbnail(false)
+
+    if (url) {
+      setThumbnailUrl(url)
+    } else {
+      alert('썸네일 업로드에 실패했습니다.')
+    }
+  }
+
+  const handleRemoveThumbnail = () => {
+    setThumbnailUrl('')
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = ''
     }
   }
 
@@ -323,15 +361,58 @@ function AdminEditorContent() {
             <CardHeader>
               <CardTitle>썸네일 이미지</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Input
-                placeholder="https://example.com/image.jpg"
-                value={thumbnailUrl}
-                onChange={(e) => setThumbnailUrl(e.target.value)}
-              />
-              <p className="mt-2 text-xs text-muted-foreground">
-                이미지 URL을 입력하세요 (Unsplash 등 외부 이미지 사용 가능)
-              </p>
+            <CardContent className="space-y-4">
+              {/* 썸네일 미리보기 */}
+              {thumbnailUrl && (
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                  <Image
+                    src={thumbnailUrl}
+                    alt="썸네일 미리보기"
+                    fill
+                    className="object-cover"
+                  />
+                  <button
+                    onClick={handleRemoveThumbnail}
+                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* 업로드 버튼 */}
+              <div>
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => thumbnailInputRef.current?.click()}
+                  disabled={uploadingThumbnail}
+                  className="w-full"
+                >
+                  {uploadingThumbnail ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                      업로드 중...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      썸네일 업로드
+                    </>
+                  )}
+                </Button>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  권장 크기: 1200x630px, 최대 5MB
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

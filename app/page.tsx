@@ -48,6 +48,48 @@ export default async function HomePage({
 
   const totalPages = Math.ceil((count || 0) / postsPerPage)
 
+  // 페이지네이션 버튼 생성 로직
+  const getPageNumbers = () => {
+    const maxVisiblePages = 7 // 데스크톱에서 표시할 최대 페이지 수
+    const pages: (number | string)[] = []
+
+    if (totalPages <= maxVisiblePages) {
+      // 총 페이지가 적으면 모두 표시
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
+    }
+
+    // 항상 첫 페이지 표시
+    pages.push(1)
+
+    // 현재 페이지 주변 페이지 계산
+    const startPage = Math.max(2, currentPage - 2)
+    const endPage = Math.min(totalPages - 1, currentPage + 2)
+
+    // 첫 페이지와 시작 페이지 사이에 생략 표시
+    if (startPage > 2) {
+      pages.push('...')
+    }
+
+    // 중간 페이지들
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    // 끝 페이지와 마지막 페이지 사이에 생략 표시
+    if (endPage < totalPages - 1) {
+      pages.push('...')
+    }
+
+    // 항상 마지막 페이지 표시
+    if (totalPages > 1) {
+      pages.push(totalPages)
+    }
+
+    return pages
+  }
+
+  const pageNumbers = getPageNumbers()
+
   return (
     <div className="container py-10 overflow-x-hidden">
       {/* Hero Section */}
@@ -93,29 +135,40 @@ export default async function HomePage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-12 flex justify-center items-center gap-2">
+          <div className="mt-12 flex flex-wrap justify-center items-center gap-2">
             {currentPage > 1 && (
               <Link href={`/?page=${currentPage - 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
-                <Button variant="outline">이전</Button>
+                <Button variant="outline" size="sm">이전</Button>
               </Link>
             )}
 
-            <div className="flex gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Link key={page} href={`/?page=${page}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
-                  <Button
-                    variant={page === currentPage ? 'default' : 'outline'}
-                    size="sm"
-                  >
-                    {page}
-                  </Button>
-                </Link>
-              ))}
+            <div className="flex gap-1 flex-wrap justify-center">
+              {pageNumbers.map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <span key={`ellipsis-${index}`} className="px-3 py-2 text-sm text-muted-foreground">
+                      ...
+                    </span>
+                  )
+                }
+
+                return (
+                  <Link key={page} href={`/?page=${page}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
+                    <Button
+                      variant={page === currentPage ? 'default' : 'outline'}
+                      size="sm"
+                      className="min-w-[40px]"
+                    >
+                      {page}
+                    </Button>
+                  </Link>
+                )
+              })}
             </div>
 
             {currentPage < totalPages && (
               <Link href={`/?page=${currentPage + 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`}>
-                <Button variant="outline">다음</Button>
+                <Button variant="outline" size="sm">다음</Button>
               </Link>
             )}
           </div>

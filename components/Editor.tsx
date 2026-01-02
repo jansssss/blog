@@ -174,8 +174,8 @@ const Editor = ({ value, onChange }: EditorProps) => {
   )
 
   return (
-    <div className="border rounded-lg shadow-sm bg-white">
-      <div className="border-b bg-gray-50 p-3 sticky top-0 z-10">
+    <div className="border rounded-lg shadow-sm bg-white flex flex-col max-h-[calc(100vh-200px)]">
+      <div className="border-b bg-gray-50 p-3 sticky top-0 z-10 flex-shrink-0">
         <div className="flex flex-wrap gap-1">
           {/* Undo/Redo */}
           <div className="flex gap-1 pr-2 border-r">
@@ -353,7 +353,9 @@ const Editor = ({ value, onChange }: EditorProps) => {
         </div>
       </div>
 
-      <EditorContent editor={editor} />
+      <div className="flex-1 overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   )
 }

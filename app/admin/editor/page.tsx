@@ -105,24 +105,23 @@ function AdminEditorContent() {
     try {
       const adminId = localStorage.getItem('adminId')
 
-      const postData = {
-        title,
-        slug,
-        summary,
-        content,
-        category,
-        tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        thumbnail_url: thumbnailUrl || null,
-        published,
-        published_at: published ? new Date().toISOString() : null,
-        author_id: adminId,
-      }
-
       if (isEditMode && postId) {
-        // 수정 모드
+        // 수정 모드 - published_at은 업데이트하지 않음
+        const updateData = {
+          title,
+          slug,
+          summary,
+          content,
+          category,
+          tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          thumbnail_url: thumbnailUrl || null,
+          published,
+          author_id: adminId,
+        }
+
         const { error } = await supabase
           .from('posts')
-          .update(postData)
+          .update(updateData)
           .eq('id', postId)
 
         if (error) {
@@ -133,10 +132,23 @@ function AdminEditorContent() {
 
         alert('게시글이 성공적으로 수정되었습니다!')
       } else {
-        // 새 글 작성 모드
+        // 새 글 작성 모드 - published_at 설정
+        const insertData = {
+          title,
+          slug,
+          summary,
+          content,
+          category,
+          tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          thumbnail_url: thumbnailUrl || null,
+          published,
+          published_at: published ? new Date().toISOString() : null,
+          author_id: adminId,
+        }
+
         const { error } = await supabase
           .from('posts')
-          .insert([postData])
+          .insert([insertData])
           .select()
 
         if (error) {

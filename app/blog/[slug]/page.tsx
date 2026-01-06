@@ -150,59 +150,58 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       />
 
       {/* Previous/Next Post Navigation */}
-      <div className="mt-12 pt-8 border-t">
-        <div className="flex flex-col gap-3">
+      <div className="mt-16 mb-8">
+        {/* Navigation Links */}
+        <div className="border-y divide-y">
           {/* Previous Post */}
           {prevPost ? (
             <Link
               href={`/blog/${encodeURIComponent(prevPost.slug)}`}
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-accent transition-colors group"
+              className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
-              <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">이전 글</p>
-                <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors truncate">
                   {prevPost.title}
-                </p>
+                </span>
               </div>
             </Link>
           ) : (
-            <div className="flex items-center gap-2 py-2 px-3 text-muted-foreground/50">
+            <div className="py-4 flex items-center gap-3 text-muted-foreground/30">
               <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-              <p className="text-sm">이전 글이 없습니다</p>
+              <span className="text-sm">이전 글이 없습니다</span>
             </div>
           )}
-
-          {/* Back to List */}
-          <div className="text-center py-2">
-            <Link href="/">
-              <Button>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                목록으로 돌아가기
-              </Button>
-            </Link>
-          </div>
 
           {/* Next Post */}
           {nextPost ? (
             <Link
               href={`/blog/${encodeURIComponent(nextPost.slug)}`}
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-accent transition-colors group"
+              className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">다음 글</p>
-                <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+              <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
+                <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors truncate text-right">
                   {nextPost.title}
-                </p>
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
             </Link>
           ) : (
-            <div className="flex items-center gap-2 py-2 px-3 text-muted-foreground/50">
-              <p className="text-sm flex-1">다음 글이 없습니다</p>
+            <div className="py-4 flex items-center gap-3 justify-end text-muted-foreground/30">
+              <span className="text-sm">다음 글이 없습니다</span>
               <ChevronRight className="h-4 w-4 flex-shrink-0" />
             </div>
           )}
+        </div>
+
+        {/* Back to List Button */}
+        <div className="text-center mt-8">
+          <Link href="/">
+            <Button size="lg">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              목록으로 돌아가기
+            </Button>
+          </Link>
         </div>
       </div>
     </article>

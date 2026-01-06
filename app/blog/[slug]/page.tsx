@@ -151,73 +151,59 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       {/* Previous/Next Post Navigation */}
       <div className="mt-12 pt-8 border-t">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-3">
           {/* Previous Post */}
-          <div className="flex">
-            {prevPost ? (
-              <Link
-                href={`/blog/${encodeURIComponent(prevPost.slug)}`}
-                className="flex items-start gap-3 p-4 rounded-lg border hover:border-primary hover:bg-accent transition-all group w-full"
-              >
-                <ChevronLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary mt-1 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-muted-foreground mb-1">이전 글</p>
-                  <p className="font-medium group-hover:text-primary transition-colors line-clamp-2">
-                    {prevPost.title}
-                  </p>
-                </div>
-              </Link>
-            ) : (
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-dashed opacity-50 w-full">
-                <ChevronLeft className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground mb-1">이전 글</p>
-                  <p className="font-medium text-muted-foreground">
-                    이전 글이 없습니다
-                  </p>
-                </div>
+          {prevPost ? (
+            <Link
+              href={`/blog/${encodeURIComponent(prevPost.slug)}`}
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-accent transition-colors group"
+            >
+              <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">이전 글</p>
+                <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                  {prevPost.title}
+                </p>
               </div>
-            )}
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2 py-2 px-3 text-muted-foreground/50">
+              <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+              <p className="text-sm">이전 글이 없습니다</p>
+            </div>
+          )}
+
+          {/* Back to List */}
+          <div className="text-center py-2">
+            <Link href="/">
+              <Button>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                목록으로 돌아가기
+              </Button>
+            </Link>
           </div>
 
           {/* Next Post */}
-          <div className="flex">
-            {nextPost ? (
-              <Link
-                href={`/blog/${encodeURIComponent(nextPost.slug)}`}
-                className="flex items-start gap-3 p-4 rounded-lg border hover:border-primary hover:bg-accent transition-all group w-full"
-              >
-                <div className="flex-1 min-w-0 text-right">
-                  <p className="text-sm text-muted-foreground mb-1">다음 글</p>
-                  <p className="font-medium group-hover:text-primary transition-colors line-clamp-2">
-                    {nextPost.title}
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary mt-1 flex-shrink-0" />
-              </Link>
-            ) : (
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-dashed opacity-50 w-full">
-                <div className="flex-1 text-right">
-                  <p className="text-sm text-muted-foreground mb-1">다음 글</p>
-                  <p className="font-medium text-muted-foreground">
-                    다음 글이 없습니다
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
+          {nextPost ? (
+            <Link
+              href={`/blog/${encodeURIComponent(nextPost.slug)}`}
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-accent transition-colors group"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">다음 글</p>
+                <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                  {nextPost.title}
+                </p>
               </div>
-            )}
-          </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0" />
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2 py-2 px-3 text-muted-foreground/50">
+              <p className="text-sm flex-1">다음 글이 없습니다</p>
+              <ChevronRight className="h-4 w-4 flex-shrink-0" />
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Back to List */}
-      <div className="mt-8 text-center">
-        <Link href="/">
-          <Button variant="outline" size="lg">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            목록으로 돌아가기
-          </Button>
-        </Link>
       </div>
     </article>
   )

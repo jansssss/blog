@@ -150,43 +150,23 @@ export default function InfoWidget() {
 
   const fetchStock = async () => {
     try {
-      // Yahoo Finance API - KOSPI (^KS11)
-      const response = await fetch(
-        'https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?interval=1d&range=5d'
-      )
-      const data = await response.json()
+      // 서버사이드 API 사용 (CORS 문제 해결)
+      const response = await fetch('/api/stock/kospi')
+      const result = await response.json()
 
-      console.log('Stock API Response:', data) // 디버깅용
+      console.log('Stock API Response:', result)
 
-      if (data.chart?.result?.[0]) {
-        const result = data.chart.result[0]
-        const meta = result.meta
-
-        // 현재가와 이전 종가
-        const currentPrice = meta.regularMarketPrice
-        const previousClose = meta.chartPreviousClose || meta.previousClose
-
-        console.log('Current Price:', currentPrice, 'Previous Close:', previousClose)
-
-        if (currentPrice && previousClose) {
-          const change = currentPrice - previousClose
-          const changePercent = (change / previousClose) * 100
-
-          setStock({
-            value: parseFloat(currentPrice.toFixed(2)),
-            change: parseFloat(change.toFixed(2)),
-            changePercent: parseFloat(changePercent.toFixed(2))
-          })
-
-          console.log('Stock data set:', {
-            value: currentPrice,
-            change: change,
-            changePercent: changePercent
-          })
-        } else {
-          console.error('Missing price data:', { currentPrice, previousClose })
-        }
+      if (result.success && result.data) {
+        setStock({
+          value: result.data.value,
+          change: result.data.change,
+          changePercent: result.data.changePercent
+        })
+        console.log('Stock data set:', result.data)
+      } else {
+        console.error('Stock API returned unsuccessful response:', result)
       }
+
       setLoading(false)
     } catch (error) {
       console.error('Stock fetch error:', error)

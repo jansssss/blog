@@ -60,27 +60,38 @@ export default function InfoWidget() {
   }, [])
 
   useEffect(() => {
-    // localStorage에서 저장된 도시 불러오기
-    const savedCity = localStorage.getItem('selectedCity')
-    if (savedCity) {
-      const city = CITIES.find(c => c.name === savedCity)
-      if (city) setSelectedCity(city)
-    } else if (isMobile && 'geolocation' in navigator) {
-      // 모바일: 현재 위치 감지
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchWeatherByCoords(position.coords.latitude, position.coords.longitude)
-        },
-        () => {
-          // 위치 권한 거부 시 서울 기본값
-          fetchWeather(selectedCity)
+    // 초기 데이터 로드
+    const loadInitialData = async () => {
+      // localStorage에서 저장된 도시 불러오기
+      const savedCity = localStorage.getItem('selectedCity')
+      let cityToUse = selectedCity
+
+      if (savedCity) {
+        const city = CITIES.find(c => c.name === savedCity)
+        if (city) {
+          cityToUse = city
+          setSelectedCity(city)
         }
-      )
-    } else {
-      fetchWeather(selectedCity)
+      }
+
+      // 모바일에서 위치 정보 시도
+      if (isMobile && 'geolocation' in navigator && !savedCity) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            fetchWeatherByCoords(position.coords.latitude, position.coords.longitude)
+          },
+          () => {
+            fetchWeather(cityToUse)
+          }
+        )
+      } else {
+        fetchWeather(cityToUse)
+      }
+
+      fetchStock()
     }
 
-    fetchStock()
+    loadInitialData()
 
     // 5분마다 갱신
     const interval = setInterval(() => {
@@ -89,7 +100,7 @@ export default function InfoWidget() {
     }, 5 * 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [isMobile])
+  }, [])
 
   const fetchWeatherByCoords = async (lat: number, lon: number) => {
     try {
@@ -141,7 +152,7 @@ export default function InfoWidget() {
     try {
       // Yahoo Finance API - KOSPI (^KS11)
       const response = await fetch(
-        'https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?interval=1d&range=1d'
+        'https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?interval=1d&range=5d'
       )
       const data = await response.json()
 
@@ -150,40 +161,36 @@ export default function InfoWidget() {
       if (data.chart?.result?.[0]) {
         const result = data.chart.result[0]
         const meta = result.meta
-        const quote = result.indicators?.quote?.[0]
 
-        // 현재가: meta.regularMarketPrice가 최신값
-        let currentPrice = meta.regularMarketPrice
-
-        // regularMarketPrice가 없으면 quote의 마지막 close 값 사용
-        if (!currentPrice && quote?.close) {
-          const closeArray = quote.close.filter((v: number) => v !== null)
-          currentPrice = closeArray[closeArray.length - 1]
-        }
-
+        // 현재가와 이전 종가
+        const currentPrice = meta.regularMarketPrice
         const previousClose = meta.chartPreviousClose || meta.previousClose
+
+        console.log('Current Price:', currentPrice, 'Previous Close:', previousClose)
 
         if (currentPrice && previousClose) {
           const change = currentPrice - previousClose
           const changePercent = (change / previousClose) * 100
 
           setStock({
-            value: Math.round(currentPrice * 100) / 100, // 소수점 2자리
-            change: Math.round(change * 100) / 100,
+            value: parseFloat(currentPrice.toFixed(2)),
+            change: parseFloat(change.toFixed(2)),
             changePercent: parseFloat(changePercent.toFixed(2))
           })
+
+          console.log('Stock data set:', {
+            value: currentPrice,
+            change: change,
+            changePercent: changePercent
+          })
+        } else {
+          console.error('Missing price data:', { currentPrice, previousClose })
         }
       }
+      setLoading(false)
     } catch (error) {
       console.error('Stock fetch error:', error)
-      // 실패 시에도 기존 값 유지 (초기값만 설정)
-      if (!stock) {
-        setStock({
-          value: 0,
-          change: 0,
-          changePercent: 0
-        })
-      }
+      setLoading(false)
     }
   }
 
@@ -206,27 +213,27 @@ export default function InfoWidget() {
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div className="container py-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="container py-2 px-3">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto">
           {/* 날씨 정보 */}
-          <div className="flex items-center gap-3 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
             <div className="relative">
               <button
                 onClick={() => setShowCitySelector(!showCitySelector)}
-                className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors"
+                className="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors"
               >
-                <MapPin className="w-4 h-4" />
-                <span>{selectedCity.name}</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${showCitySelector ? 'rotate-180' : ''}`} />
+                <MapPin className="w-3 h-3" />
+                <span className="hidden sm:inline">{selectedCity.name}</span>
+                <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showCitySelector ? 'rotate-180' : ''}`} />
               </button>
 
               {showCitySelector && (
-                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 min-w-[120px]">
+                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 min-w-[100px]">
                   {CITIES.map((city) => (
                     <button
                       key={city.name}
                       onClick={() => handleCityChange(city)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
                         city.name === selectedCity.name ? 'bg-gray-100 dark:bg-gray-700 font-medium' : ''
                       }`}
                     >
@@ -237,15 +244,15 @@ export default function InfoWidget() {
               )}
             </div>
 
-            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block" />
 
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{weather?.icon}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xl">{weather?.icon}</span>
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
                   {weather?.temp}°C
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
                   습도 {weather?.humidity}%
                 </span>
               </div>
@@ -253,28 +260,28 @@ export default function InfoWidget() {
           </div>
 
           {/* 코스피 정보 */}
-          <div className="flex items-center gap-3 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
               코스피
             </span>
 
-            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
 
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
                 {stock?.value.toLocaleString()}
               </span>
               {stock && stock.change > 0 ? (
-                <div className="flex items-center gap-1 text-red-600">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm font-medium">
+                <div className="flex items-center gap-0.5 text-red-600">
+                  <TrendingUp className="w-3 h-3" />
+                  <span className="text-xs font-medium">
                     +{stock.changePercent}%
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-blue-600">
-                  <TrendingDown className="w-4 h-4" />
-                  <span className="text-sm font-medium">
+                <div className="flex items-center gap-0.5 text-blue-600">
+                  <TrendingDown className="w-3 h-3" />
+                  <span className="text-xs font-medium">
                     {stock?.changePercent}%
                   </span>
                 </div>

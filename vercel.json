@@ -2,11 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/news-fetch",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/draft-generate",
-      "schedule": "10 * * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }

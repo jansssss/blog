@@ -27,6 +27,20 @@ const CITIES = [
   { name: '수원', lat: 37.2636, lon: 127.0286 },
 ]
 
+// OpenWeatherMap 날씨 코드를 이모지로 변환
+function getWeatherIcon(weatherId: number): string {
+  if (weatherId >= 200 && weatherId < 300) return '⛈️' // 천둥번개
+  if (weatherId >= 300 && weatherId < 400) return '🌦️' // 이슬비
+  if (weatherId >= 500 && weatherId < 600) return '🌧️' // 비
+  if (weatherId >= 600 && weatherId < 700) return '❄️' // 눈
+  if (weatherId >= 700 && weatherId < 800) return '🌫️' // 안개/연무
+  if (weatherId === 800) return '☀️' // 맑음
+  if (weatherId === 801) return '🌤️' // 약간 흐림
+  if (weatherId === 802) return '⛅' // 흐림
+  if (weatherId >= 803) return '☁️' // 많이 흐림
+  return '🌤️'
+}
+
 export default function InfoWidget() {
   const [selectedCity, setSelectedCity] = useState(CITIES[0])
   const [showCitySelector, setShowCitySelector] = useState(false)
@@ -79,14 +93,20 @@ export default function InfoWidget() {
 
   const fetchWeatherByCoords = async (lat: number, lon: number) => {
     try {
-      // OpenWeatherMap API 호출 (무료 API 키 필요)
-      // 임시 더미 데이터
-      setWeather({
-        temp: -1,
-        humidity: 40,
-        icon: '❄️',
-        description: '눈'
-      })
+      const API_KEY = '48d5ebc4a7208643947ff76715bbb880'
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=kr&appid=${API_KEY}`
+      )
+      const data = await response.json()
+
+      if (data.main && data.weather) {
+        setWeather({
+          temp: Math.round(data.main.temp),
+          humidity: data.main.humidity,
+          icon: getWeatherIcon(data.weather[0].id),
+          description: data.weather[0].description
+        })
+      }
       setLoading(false)
     } catch (error) {
       console.error('Weather fetch error:', error)
@@ -96,14 +116,20 @@ export default function InfoWidget() {
 
   const fetchWeather = async (city: typeof CITIES[0]) => {
     try {
-      // OpenWeatherMap API 호출
-      // 임시 더미 데이터
-      setWeather({
-        temp: -1,
-        humidity: 40,
-        icon: '❄️',
-        description: '눈'
-      })
+      const API_KEY = '48d5ebc4a7208643947ff76715bbb880'
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&units=metric&lang=kr&appid=${API_KEY}`
+      )
+      const data = await response.json()
+
+      if (data.main && data.weather) {
+        setWeather({
+          temp: Math.round(data.main.temp),
+          humidity: data.main.humidity,
+          icon: getWeatherIcon(data.weather[0].id),
+          description: data.weather[0].description
+        })
+      }
       setLoading(false)
     } catch (error) {
       console.error('Weather fetch error:', error)
@@ -113,15 +139,36 @@ export default function InfoWidget() {
 
   const fetchStock = async () => {
     try {
-      // Yahoo Finance API 또는 한국거래소 API
-      // 임시 더미 데이터
-      setStock({
-        value: 4586.32,
-        change: 34.32,
-        changePercent: 0.75
-      })
+      // Yahoo Finance API - KOSPI (^KS11)
+      const response = await fetch(
+        'https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?interval=1d&range=1d'
+      )
+      const data = await response.json()
+
+      if (data.chart?.result?.[0]) {
+        const result = data.chart.result[0]
+        const quote = result.indicators.quote[0]
+        const meta = result.meta
+
+        const currentPrice = meta.regularMarketPrice || quote.close[quote.close.length - 1]
+        const previousClose = meta.chartPreviousClose
+        const change = currentPrice - previousClose
+        const changePercent = (change / previousClose) * 100
+
+        setStock({
+          value: currentPrice,
+          change: change,
+          changePercent: parseFloat(changePercent.toFixed(2))
+        })
+      }
     } catch (error) {
       console.error('Stock fetch error:', error)
+      // 실패 시 기본값 유지
+      setStock({
+        value: 2500.0,
+        change: 0,
+        changePercent: 0
+      })
     }
   }
 

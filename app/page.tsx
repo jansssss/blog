@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
+import InfoWidget from '@/components/InfoWidget'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -91,9 +92,13 @@ export default async function HomePage({
   const pageNumbers = getPageNumbers()
 
   return (
-    <div className="container py-10 overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="mb-12 text-center overflow-visible">
+    <>
+      {/* Info Widget - 날씨 & 코스피 */}
+      <InfoWidget />
+
+      <div className="container py-10 overflow-x-hidden">
+        {/* Hero Section */}
+        <section className="mb-12 text-center overflow-visible">
         <h1 className="mb-6 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl" style={{ lineHeight: '1.6' }}>
           모두의 궁금증을 해결하기위한 <br className="mb-2" />
           <span className="text-primary">생활정보 블로그</span>
@@ -174,6 +179,7 @@ export default async function HomePage({
           </div>
         )}
       </section>
-    </div>
+      </div>
+    </>
   )
 }

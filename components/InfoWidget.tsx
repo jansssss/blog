@@ -145,30 +145,45 @@ export default function InfoWidget() {
       )
       const data = await response.json()
 
+      console.log('Stock API Response:', data) // 디버깅용
+
       if (data.chart?.result?.[0]) {
         const result = data.chart.result[0]
-        const quote = result.indicators.quote[0]
         const meta = result.meta
+        const quote = result.indicators?.quote?.[0]
 
-        const currentPrice = meta.regularMarketPrice || quote.close[quote.close.length - 1]
-        const previousClose = meta.chartPreviousClose
-        const change = currentPrice - previousClose
-        const changePercent = (change / previousClose) * 100
+        // 현재가: meta.regularMarketPrice가 최신값
+        let currentPrice = meta.regularMarketPrice
 
-        setStock({
-          value: currentPrice,
-          change: change,
-          changePercent: parseFloat(changePercent.toFixed(2))
-        })
+        // regularMarketPrice가 없으면 quote의 마지막 close 값 사용
+        if (!currentPrice && quote?.close) {
+          const closeArray = quote.close.filter((v: number) => v !== null)
+          currentPrice = closeArray[closeArray.length - 1]
+        }
+
+        const previousClose = meta.chartPreviousClose || meta.previousClose
+
+        if (currentPrice && previousClose) {
+          const change = currentPrice - previousClose
+          const changePercent = (change / previousClose) * 100
+
+          setStock({
+            value: Math.round(currentPrice * 100) / 100, // 소수점 2자리
+            change: Math.round(change * 100) / 100,
+            changePercent: parseFloat(changePercent.toFixed(2))
+          })
+        }
       }
     } catch (error) {
       console.error('Stock fetch error:', error)
-      // 실패 시 기본값 유지
-      setStock({
-        value: 2500.0,
-        change: 0,
-        changePercent: 0
-      })
+      // 실패 시에도 기존 값 유지 (초기값만 설정)
+      if (!stock) {
+        setStock({
+          value: 0,
+          change: 0,
+          changePercent: 0
+        })
+      }
     }
   }
 

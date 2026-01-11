@@ -61,6 +61,18 @@ export default function Header() {
               >
                 새 글쓰기
               </Link>
+              <Link
+                href="/admin/news"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                뉴스 관리
+              </Link>
+              <Link
+                href="/admin/drafts"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                초안 관리
+              </Link>
               <LogoutButton />
             </>
           )}
@@ -107,6 +119,20 @@ export default function Header() {
                   onClick={closeMobileMenu}
                 >
                   새 글쓰기
+                </Link>
+                <Link
+                  href="/admin/news"
+                  className="text-sm font-medium transition-colors hover:text-primary py-2"
+                  onClick={closeMobileMenu}
+                >
+                  뉴스 관리
+                </Link>
+                <Link
+                  href="/admin/drafts"
+                  className="text-sm font-medium transition-colors hover:text-primary py-2"
+                  onClick={closeMobileMenu}
+                >
+                  초안 관리
                 </Link>
                 <div onClick={closeMobileMenu}>
                   <LogoutButton />

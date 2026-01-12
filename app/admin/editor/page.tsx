@@ -46,8 +46,26 @@ function AdminEditorContent() {
       return
     }
 
+    // 초안에서 온 경우 데이터 로드
+    const draftData = sessionStorage.getItem('draftToEdit')
+    if (draftData) {
+      try {
+        const parsed = JSON.parse(draftData)
+        setTitle(parsed.title || '')
+        setSlug(parsed.slug || '')
+        setSummary(parsed.summary || '')
+        setContent(parsed.content || '')
+        setCategory(parsed.category || '금융')
+        setTags(Array.isArray(parsed.tags) ? parsed.tags.join(', ') : '')
+        setThumbnailUrl(parsed.thumbnailUrl || '')
+        // 데이터 로드 후 세션 스토리지 비우기
+        sessionStorage.removeItem('draftToEdit')
+      } catch (e) {
+        console.error('초안 데이터 파싱 오류:', e)
+      }
+    }
     // 수정 모드인 경우 게시글 데이터 로드
-    if (postId) {
+    else if (postId) {
       loadPost(postId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

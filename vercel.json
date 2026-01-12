@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/news-automation",
-      "schedule": "47 2 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }

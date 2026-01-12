@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
-import { ArrowLeft, Save, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, Save, CheckCircle, XCircle, Edit } from 'lucide-react'
 
 interface Draft {
   id: string
@@ -123,6 +123,25 @@ export default function DraftEditPage() {
     }
   }
 
+  const handleEditInEditor = () => {
+    // 초안 내용을 에디터로 전달
+    const draftData = {
+      title,
+      slug,
+      summary,
+      content,
+      category,
+      tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      thumbnailUrl
+    }
+
+    // 세션 스토리지에 임시 저장
+    sessionStorage.setItem('draftToEdit', JSON.stringify(draftData))
+
+    // 에디터로 이동
+    router.push('/admin/editor')
+  }
+
   const handleApprove = async () => {
     if (!confirm('이 초안을 승인하고 블로그에 발행하시겠습니까?')) {
       return
@@ -213,6 +232,10 @@ export default function DraftEditPage() {
           <h1 className="text-3xl font-bold">초안 편집</h1>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleEditInEditor} variant="outline">
+            <Edit className="mr-2 h-4 w-4" />
+            에디터로 편집
+          </Button>
           <Button onClick={handleSave} disabled={saving} variant="outline">
             <Save className="mr-2 h-4 w-4" />
             저장

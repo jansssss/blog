@@ -159,7 +159,10 @@ export async function GET(request: Request) {
           const feed = await parser.parseURL(source.url)
 
           if (feed.items && feed.items.length > 0) {
-            for (const item of feed.items) {
+            // 최신 20개만 처리
+            const itemsToProcess = feed.items.slice(0, 20)
+
+            for (const item of itemsToProcess) {
               if (!item.title || !item.link) continue
 
               results.fetch.total++

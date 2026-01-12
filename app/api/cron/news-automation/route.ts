@@ -331,72 +331,12 @@ export async function GET(request: Request) {
     }
 
     console.log('[NEWS-AUTOMATION] Step 1 completed:', results.fetch)
+    console.log('[NEWS-AUTOMATION] Workflow completed - RSS collection only')
 
     // ============================================
-    // STEP 2: 초안 생성
+    // 초안 생성은 수동으로 변경 (API 비용 절감)
+    // 뉴스 관리 페이지에서 선택적으로 생성
     // ============================================
-    console.log('[NEWS-AUTOMATION] Step 2: Generating drafts...')
-
-    const { data: newsItems, error: newsError } = await supabaseAdmin
-      .from('news_items')
-      .select('*')
-      .eq('draft_generated', false)
-      .eq('excluded', false)
-      .order('pub_date', { ascending: false })
-      .limit(10)
-
-    if (newsError) {
-      console.error('[NEWS-AUTOMATION] News items error:', newsError)
-      throw new Error('Failed to fetch news items')
-    }
-
-    if (newsItems && newsItems.length > 0) {
-      for (const item of newsItems) {
-        try {
-          results.draft.processed++
-          console.log(`[NEWS-AUTOMATION] Processing: ${item.title}`)
-
-          const { title, summary, content, tags } = await generateDraftContentWithAI(item)
-          const slug = generateSlug(title)
-
-          const { data: draft, error: draftError } = await supabaseAdmin
-            .from('drafts')
-            .insert({
-              news_item_id: item.id,
-              title,
-              slug,
-              summary,
-              content,
-              category: item.category,
-              tags,
-              status: 'pending'
-            })
-            .select()
-            .single()
-
-          if (draftError) {
-            console.error('[NEWS-AUTOMATION] Draft error:', draftError)
-            results.draft.errors++
-            continue
-          }
-
-          await supabaseAdmin
-            .from('news_items')
-            .update({ draft_generated: true })
-            .eq('id', item.id)
-
-          results.draft.created++
-          console.log(`[NEWS-AUTOMATION] Draft created: ${draft.id}`)
-
-        } catch (itemError) {
-          console.error(`[NEWS-AUTOMATION] Item error:`, itemError)
-          results.draft.errors++
-        }
-      }
-    }
-
-    console.log('[NEWS-AUTOMATION] Step 2 completed:', results.draft)
-    console.log('[NEWS-AUTOMATION] Workflow completed successfully')
 
     return NextResponse.json({
       success: true,

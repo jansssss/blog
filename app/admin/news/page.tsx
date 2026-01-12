@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Trash2, RefreshCw } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Trash2, RefreshCw, Sparkles } from 'lucide-react'
 
 interface NewsItem {
   id: string
@@ -24,6 +24,8 @@ export default function AdminNewsPage() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'generated' | 'excluded'>('all')
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     // 로그인 체크
@@ -93,6 +95,65 @@ export default function AdminNewsPage() {
     }
   }
 
+  const handleSelectItem = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedItems(prev => [...prev, id])
+    } else {
+      setSelectedItems(prev => prev.filter(item => item !== id))
+    }
+  }
+
+  const handleSelectAll = () => {
+    const pendingItems = newsItems.filter(item => !item.draft_generated && !item.excluded)
+    if (selectedItems.length === pendingItems.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(pendingItems.map(item => item.id))
+    }
+  }
+
+  const handleGenerateDrafts = async () => {
+    if (selectedItems.length === 0) {
+      alert('초안을 생성할 뉴스를 선택해주세요.')
+      return
+    }
+
+    if (!confirm(`선택한 ${selectedItems.length}개 뉴스로 AI 초안을 생성하시겠습니까?\n\n⚠️ Perplexity API 비용이 발생합니다.`)) {
+      return
+    }
+
+    setGenerating(true)
+    try {
+      const response = await fetch('/api/admin/news/generate-draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newsItemIds: selectedItems
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '초안 생성 실패')
+      }
+
+      alert(`✅ ${data.results.success.length}개 초안 생성 완료!\n❌ ${data.results.failed.length}개 실패`)
+
+      // 목록 새로고침
+      setSelectedItems([])
+      loadNewsItems()
+
+    } catch (error) {
+      console.error('AI 초안 생성 오류:', error)
+      alert(error instanceof Error ? error.message : '초안 생성 중 오류가 발생했습니다.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleString('ko-KR', {
@@ -118,42 +179,68 @@ export default function AdminNewsPage() {
           </Link>
           <h1 className="text-3xl font-bold">뉴스 관리</h1>
         </div>
-        <Button onClick={loadNewsItems} variant="outline" size="sm">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          새로고침
-        </Button>
+        <div className="flex gap-2">
+          {selectedItems.length > 0 && (
+            <Button
+              onClick={handleGenerateDrafts}
+              disabled={generating}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              {generating ? 'AI 생성 중...' : `AI 초안 생성 (${selectedItems.length})`}
+            </Button>
+          )}
+          <Button onClick={loadNewsItems} variant="outline" size="sm">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            새로고침
+          </Button>
+        </div>
       </div>
 
-      {/* 필터 */}
-      <div className="mb-6 flex gap-2">
-        <Button
-          variant={filter === 'all' ? 'default' : 'outline'}
-          onClick={() => setFilter('all')}
-          size="sm"
-        >
-          전체
-        </Button>
-        <Button
-          variant={filter === 'pending' ? 'default' : 'outline'}
-          onClick={() => setFilter('pending')}
-          size="sm"
-        >
-          초안 대기중
-        </Button>
-        <Button
-          variant={filter === 'generated' ? 'default' : 'outline'}
-          onClick={() => setFilter('generated')}
-          size="sm"
-        >
-          초안 생성됨
-        </Button>
-        <Button
-          variant={filter === 'excluded' ? 'default' : 'outline'}
-          onClick={() => setFilter('excluded')}
-          size="sm"
-        >
-          제외됨
-        </Button>
+      {/* 필터 및 전체 선택 */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex gap-2">
+          <Button
+            variant={filter === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilter('all')}
+            size="sm"
+          >
+            전체
+          </Button>
+          <Button
+            variant={filter === 'pending' ? 'default' : 'outline'}
+            onClick={() => setFilter('pending')}
+            size="sm"
+          >
+            초안 대기중
+          </Button>
+          <Button
+            variant={filter === 'generated' ? 'default' : 'outline'}
+            onClick={() => setFilter('generated')}
+            size="sm"
+          >
+            초안 생성됨
+          </Button>
+          <Button
+            variant={filter === 'excluded' ? 'default' : 'outline'}
+            onClick={() => setFilter('excluded')}
+            size="sm"
+          >
+            제외됨
+          </Button>
+        </div>
+
+        {filter === 'pending' && newsItems.some(item => !item.draft_generated && !item.excluded) && (
+          <Button
+            onClick={handleSelectAll}
+            variant="ghost"
+            size="sm"
+          >
+            {selectedItems.length === newsItems.filter(item => !item.draft_generated && !item.excluded).length
+              ? '전체 해제'
+              : '전체 선택'}
+          </Button>
+        )}
       </div>
 
       {/* 통계 */}
@@ -187,7 +274,19 @@ export default function AdminNewsPage() {
           {newsItems.map((item) => (
             <Card key={item.id} className={item.excluded ? 'opacity-50' : ''}>
               <CardContent className="pt-6">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  {/* 체크박스 (초안 미생성 & 미제외 항목만) */}
+                  {!item.draft_generated && !item.excluded && (
+                    <div className="pt-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      />
+                    </div>
+                  )}
+
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
@@ -218,6 +317,7 @@ export default function AdminNewsPage() {
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   </div>
+
                   <div className="flex gap-2">
                     <Button
                       variant={item.excluded ? 'outline' : 'destructive'}

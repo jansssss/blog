@@ -10,19 +10,141 @@ import Parser from 'rss-parser'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { generateSlug } from '@/lib/utils'
+import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const parser = new Parser()
 
+// Perplexity API 클라이언트 (OpenAI SDK 호환)
+const perplexity = new OpenAI({
+  apiKey: process.env.PERPLEXITY_API_KEY || '',
+  baseURL: 'https://api.perplexity.ai'
+})
+
 // SHA-256 해시 생성
 function generateHash(title: string, link: string): string {
   return createHash('sha256').update(`${title}${link}`).digest('hex')
 }
 
-// 템플릿 기반 초안 생성
-function generateDraftContent(newsItem: any): { title: string; summary: string; content: string; tags: string[] } {
+// Perplexity API를 사용한 고품질 초안 생성
+async function generateDraftContentWithAI(newsItem: any): Promise<{ title: string; summary: string; content: string; tags: string[] }> {
+  const originalTitle = newsItem.title
+  const newsLink = newsItem.link
+  const category = newsItem.category || '금융'
+
+  try {
+    // Perplexity API로 뉴스 분석 및 초안 생성
+    const response = await perplexity.chat.completions.create({
+      model: 'sonar-pro',
+      messages: [
+        {
+          role: 'system',
+          content: `당신은 금융 뉴스를 실질적인 대출·금융 판단 정보로 변환하는 전문 작가입니다.
+
+**핵심 원칙**:
+1. 뉴스의 정책/변화를 정확히 파악하고, 그것이 "실제 개인의 대출"에 미치는 구체적 영향을 분석
+2. 일반론 금지 - 뉴스에 나온 실제 정책, 수치, 조건만 사용
+3. 관련 없는 DSR, 금리, 신규대출 이야기 금지 - 뉴스 주제와 직결된 내용만
+4. 계산 예시는 뉴스의 실제 수치 기반으로만 작성
+5. YMYL(금융 허위 정보) 주의 - 추측이나 일반적 조언 지양
+
+**출력 형식**: 마크다운`
+        },
+        {
+          role: 'user',
+          content: `다음 금융 뉴스를 분석하여 "이 정책이 내 대출에 정확히 무엇을 바꾸는가?"에 답하는 블로그 글을 작성하세요.
+
+**뉴스 제목**: ${originalTitle}
+**뉴스 링크**: ${newsLink}
+**카테고리**: ${category}
+
+뉴스를 직접 검색하여 원문을 파악하고, 다음 구조로 작성하세요:
+
+# [뉴스 기반 SEO 제목]
+
+## 한 줄 요약
+- 정책/변화의 핵심을 1문장으로
+
+## 이슈 배경
+- 이 정책이 왜 나왔는가?
+- 누구를 대상으로 하는가?
+- 구체적인 변화 내용 (수치, 조건 포함)
+
+## 내 대출에 미치는 영향
+**뉴스와 직접 관련된 영향만 작성**
+- 대상자: 누가 영향을 받는가
+- 변화: 무엇이 달라지는가
+- 조건: 어떤 조건이 필요한가
+
+## 계산 예시
+**뉴스의 실제 수치를 사용**
+- 예시 1: [구체적 상황]
+  - 현재 상태
+  - 변화 후 상태
+  - 실질적 효과
+
+## 실제 활용 방법
+- 단계별 실행 방법
+- 준비해야 할 서류나 조건
+- 주의사항
+
+## FAQ
+- Q1: [이 정책 관련 질문]
+- Q2: [대상자 관련 질문]
+- Q3: [실행 방법 관련 질문]
+
+## 주의사항
+> ⚠️ 이 글은 ${originalTitle}에 대한 정보 제공 목적이며, 개인 상황에 따라 적용이 다를 수 있습니다.
+
+---
+**출처**: ${newsLink}
+**관련 키워드**: ${category}, [뉴스 관련 키워드 3-5개]`
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 4000
+    })
+
+    const aiContent = response.choices[0]?.message?.content || ''
+
+    if (!aiContent) {
+      throw new Error('AI 생성 실패')
+    }
+
+    // 제목 추출 (첫 번째 # 헤딩)
+    const titleMatch = aiContent.match(/^#\s+(.+)$/m)
+    const seoTitle = titleMatch ? titleMatch[1].trim() : `${originalTitle} - 대출 영향 분석`
+
+    // 요약 추출 (한 줄 요약 섹션)
+    const summaryMatch = aiContent.match(/##\s+한 줄 요약\s*\n-\s*(.+)/i)
+    const summary = summaryMatch
+      ? summaryMatch[1].trim()
+      : `${originalTitle}에 대한 금융 정책 분석 및 대출 영향을 자세히 알아봅니다.`
+
+    // 태그 추출 (관련 키워드 섹션에서)
+    const tagsMatch = aiContent.match(/\*\*관련 키워드\*\*:\s*(.+)$/m)
+    const tags = tagsMatch
+      ? tagsMatch[1].split(',').map(t => t.trim()).filter(Boolean).slice(0, 5)
+      : [category, '금융', '대출']
+
+    return {
+      title: seoTitle,
+      summary,
+      content: aiContent,
+      tags
+    }
+
+  } catch (error) {
+    console.error('[AI-DRAFT] Perplexity API 오류, 폴백 사용:', error)
+    // API 실패 시 기본 템플릿으로 폴백
+    return generateDraftContentFallback(newsItem)
+  }
+}
+
+// 폴백: 템플릿 기반 초안 생성
+function generateDraftContentFallback(newsItem: any): { title: string; summary: string; content: string; tags: string[] } {
   const originalTitle = newsItem.title
   const category = newsItem.category || '금융'
 
@@ -234,7 +356,7 @@ export async function GET(request: Request) {
           results.draft.processed++
           console.log(`[NEWS-AUTOMATION] Processing: ${item.title}`)
 
-          const { title, summary, content, tags } = generateDraftContent(item)
+          const { title, summary, content, tags } = await generateDraftContentWithAI(item)
           const slug = generateSlug(title)
 
           const { data: draft, error: draftError } = await supabaseAdmin

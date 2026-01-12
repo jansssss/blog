@@ -36,6 +36,15 @@ export default function Footer() {
             </Link>
           </div>
 
+          {/* 고지사항 */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-center text-sm text-blue-800">
+                ⚠️ 본 사이트는 금융 상품 판매를 하지 않으며, 일반 정보 제공을 목적으로 운영됩니다.
+              </p>
+            </div>
+          </div>
+
           {/* 하단 정보 */}
           <div className="flex flex-col items-center gap-2">
             <p className="text-center text-sm text-gray-600">

@@ -86,7 +86,7 @@ export default function PrivacyPage() {
             변경 시 웹사이트를 통해 공지합니다.
           </p>
           <p className="text-gray-700 mt-4">
-            <strong>시행일자:</strong> 2025년 1월 1일
+            <strong>시행일자:</strong> 2025년 12월 20일
           </p>
         </section>
       </div>

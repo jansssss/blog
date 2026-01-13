@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
 import { ArrowLeft, Save, CheckCircle, XCircle, Edit } from 'lucide-react'
+import { marked } from 'marked'
 
 interface Draft {
   id: string
@@ -123,13 +124,16 @@ export default function DraftEditPage() {
     }
   }
 
-  const handleEditInEditor = () => {
+  const handleEditInEditor = async () => {
+    // 마크다운을 HTML로 변환
+    const htmlContent = await marked.parse(content)
+
     // 초안 내용을 에디터로 전달
     const draftData = {
       title,
       slug,
       summary,
-      content,
+      content: htmlContent, // HTML로 변환된 콘텐츠
       category,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
       thumbnailUrl

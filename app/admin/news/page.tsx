@@ -154,6 +154,33 @@ export default function AdminNewsPage() {
     }
   }
 
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`"${title}"\n\n이 뉴스를 완전히 삭제하시겠습니까?\n\n⚠️ 삭제 후 복구할 수 없습니다.`)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('news_items')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('삭제 오류:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+        return
+      }
+
+      // UI에서 제거
+      setNewsItems(prev => prev.filter(item => item.id !== id))
+      alert('삭제되었습니다.')
+
+    } catch (err) {
+      console.error('예상치 못한 오류:', err)
+      alert('삭제 중 오류가 발생했습니다.')
+    }
+  }
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleString('ko-KR', {
@@ -319,13 +346,32 @@ export default function AdminNewsPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button
-                      variant={item.excluded ? 'outline' : 'destructive'}
-                      size="sm"
-                      onClick={() => handleExclude(item.id, item.excluded)}
-                    >
-                      {item.excluded ? '복원' : '제외'}
-                    </Button>
+                    {item.excluded ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleExclude(item.id, item.excluded)}
+                        >
+                          복원
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(item.id, item.title)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleExclude(item.id, item.excluded)}
+                      >
+                        제외
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

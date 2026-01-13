@@ -44,6 +44,10 @@ export default function AdminLoginPage() {
           // 로컬스토리지에 관리자 정보 저장
           localStorage.setItem('isAdmin', 'true')
           localStorage.setItem('adminId', data.user.id)
+
+          // Header 업데이트를 위한 커스텀 이벤트 발생
+          window.dispatchEvent(new Event('loginStateChange'))
+
           router.push('/')
         } else {
           setError('관리자 권한이 없습니다.')

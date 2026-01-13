@@ -20,10 +20,18 @@ export default function Header() {
       setIsAdmin(adminStatus === 'true')
     }
 
+    // 커스텀 이벤트 리스너 (같은 탭에서 로그인 감지)
+    const handleLoginStateChange = () => {
+      const adminStatus = localStorage.getItem('isAdmin')
+      setIsAdmin(adminStatus === 'true')
+    }
+
     window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('loginStateChange', handleLoginStateChange)
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('loginStateChange', handleLoginStateChange)
     }
   }, [])
 

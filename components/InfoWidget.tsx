@@ -93,10 +93,20 @@ export default function InfoWidget() {
 
     loadInitialData()
 
-    // 5분마다 갱신
+    // 5분마다 갱신 (코스피는 장 시간에만)
     const interval = setInterval(() => {
       fetchWeather(selectedCity)
-      fetchStock()
+
+      // 코스피 장 시간 체크 (평일 09:00 ~ 16:00 KST)
+      const now = new Date()
+      const hour = now.getHours()
+      const day = now.getDay() // 0=일요일, 6=토요일
+      const isWeekday = day >= 1 && day <= 5
+      const isMarketHours = hour >= 9 && hour < 16
+
+      if (isWeekday && isMarketHours) {
+        fetchStock()
+      }
     }, 5 * 60 * 1000)
 
     return () => clearInterval(interval)

@@ -57,11 +57,13 @@ async function generateDraftContentWithAI(newsItem: any): Promise<{ title: strin
           role: 'user',
           content: `다음 금융 뉴스를 분석하여 "독자의 돈에 정확히 무엇이 달라지는가?"에 답하는 블로그 글을 작성하세요.
 
+**[중요] 반드시 아래 뉴스 제목의 내용만 다루세요. 다른 관련 뉴스로 주제를 바꾸지 마세요.**
+
 **뉴스 제목**: ${originalTitle}
 **뉴스 링크**: ${newsLink}
 **카테고리**: ${category}
 
-뉴스를 직접 검색하여 원문을 파악하고, 다음 구조로 작성하세요:
+위 뉴스 제목 "${originalTitle}"의 내용을 중심으로 다음 구조로 작성하세요:
 
 # [독자 대상] + [핵심 변화] - [구체적 금액/수치]
 예: "직장인·자가용 운전자 자동차 보험료 9000원 인상" 또는 "30대 신혼부부 주담대 원금 상환 유예 가능"

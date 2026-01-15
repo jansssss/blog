@@ -21,7 +21,6 @@ const ERROR_CODES = {
   RATE_LIMIT: 'OPENAI_RATE_LIMIT',
   API_ERROR: 'OPENAI_API_ERROR',
   PARSE_ERROR: 'OPENAI_PARSE_ERROR',
-  VALIDATION_ERROR: 'COLUMNIST_VALIDATION_ERROR',
   UNKNOWN: 'UNKNOWN_ERROR'
 }
 
@@ -131,30 +130,15 @@ export async function POST(request: Request) {
 
     const markdown = parsed.markdown || cleanDraft
 
-    // 결과물 품질 검증
+    // 결과물 품질 검증 (경고만, 실패로 처리하지 않음)
     const validation = validateColumnistOutput(markdown)
     if (!validation.isValid) {
-      console.error('[COLUMNIST] 품질 검증 실패:', validation.failures)
-      return NextResponse.json({
-        success: false,
-        error_stage: 'COLUMNIST',
-        error_code: ERROR_CODES.VALIDATION_ERROR,
-        error: '칼럼니스트 품질 검증 실패',
-        error_message: validation.failures.join('; '),
-        validation_failures: validation.failures,
-        used_phrases: usedPhrases,
-        phrase_seed: phraseSeed,
-        // 검증 실패해도 결과물은 반환 (재시도 시 활용 가능)
-        partial_result: {
-          title: parsed.title,
-          metaDescription: parsed.meta_description,
-          tags: parsed.tags,
-          markdown: markdown
-        }
-      }, { status: 400 })
+      console.warn('[COLUMNIST] 품질 검증 경고:', validation.failures)
+      // 검증 실패해도 결과물은 반환 (로그만 남김)
+    } else {
+      console.log('[COLUMNIST] 품질 검증 통과!')
     }
 
-    console.log('[COLUMNIST] 품질 검증 통과!')
     console.log('[COLUMNIST] 칼럼니스트 완료!')
 
     return NextResponse.json({
@@ -167,7 +151,10 @@ export async function POST(request: Request) {
       // 디버깅용 정보
       used_phrases: usedPhrases,
       phrase_seed: phraseSeed,
-      phrase_count: usedPhrases.length
+      phrase_count: usedPhrases.length,
+      // 품질 검증 결과 (경고용)
+      validation_passed: validation.isValid,
+      validation_warnings: validation.failures
     })
 
   } catch (error) {

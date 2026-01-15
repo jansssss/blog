@@ -274,10 +274,27 @@ export default function AdminDraftsPage() {
         return
       }
 
-      // 편집자 콘텐츠가 있으면 칼럼니스트부터 시작
+      // 편집자 콘텐츠 확인
       let cleanDraft = editor_content
 
+      // cleanDraft가 없으면 DB에서 다시 조회
       if (!cleanDraft) {
+        const { data: latestDraft } = await supabase
+          .from('drafts')
+          .select('editor_content, stage')
+          .eq('id', draftId)
+          .single()
+
+        if (latestDraft?.editor_content) {
+          cleanDraft = latestDraft.editor_content
+          console.log('[RESUME] DB에서 editor_content 로드 완료')
+        }
+      }
+
+      // editor_content가 없고 stage가 편집자 이전이면 편집자부터 시작
+      const needsEditor = !cleanDraft
+
+      if (needsEditor) {
         // 편집자부터 시작
         setResumingStep('editor')
         console.log('[RESUME] 편집자 단계 시작...')
@@ -285,52 +302,56 @@ export default function AdminDraftsPage() {
         // 초안 content 가져오기
         const { data: fullDraft } = await supabase
           .from('drafts')
-          .select('content')
+          .select('content, editor_content')
           .eq('id', draftId)
           .single()
 
-        if (!fullDraft?.content) {
+        // DB에서 editor_content가 있으면 사용
+        if (fullDraft?.editor_content) {
+          console.log('[RESUME] DB에서 editor_content 발견, 칼럼니스트로 건너뜀')
+          cleanDraft = fullDraft.editor_content
+        } else if (!fullDraft?.content) {
           throw new Error('초안 내용을 찾을 수 없습니다.')
-        }
+        } else {
+          const editorResponse = await fetch('/api/rewrite/editor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ draft: fullDraft.content })
+          })
 
-        const editorResponse = await fetch('/api/rewrite/editor', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ draft: fullDraft.content })
-        })
+          const contentType = editorResponse.headers.get('content-type')
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('편집자 API 타임아웃 또는 서버 오류')
+          }
 
-        const contentType = editorResponse.headers.get('content-type')
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('편집자 API 타임아웃 또는 서버 오류')
-        }
+          const editorData = await editorResponse.json()
 
-        const editorData = await editorResponse.json()
+          if (!editorResponse.ok || !editorData.success) {
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: 'EDITOR',
+                error_code: editorData.error_code || 'UNKNOWN_ERROR',
+                error_message: editorData.error_message || editorData.error
+              })
+              .eq('id', draftId)
+            throw new Error(editorData.error || '편집자 처리 실패')
+          }
 
-        if (!editorResponse.ok || !editorData.success) {
+          cleanDraft = editorData.cleanDraft
+
+          // 편집자 결과 저장
           await supabase
             .from('drafts')
             .update({
-              stage: 'FAILED',
-              error_stage: 'EDITOR',
-              error_code: editorData.error_code || 'UNKNOWN_ERROR',
-              error_message: editorData.error_message || editorData.error
+              stage: 'EDITOR_DONE',
+              editor_content: cleanDraft
             })
             .eq('id', draftId)
-          throw new Error(editorData.error || '편집자 처리 실패')
+
+          console.log('[RESUME] 편집자 완료!')
         }
-
-        cleanDraft = editorData.cleanDraft
-
-        // 편집자 결과 저장
-        await supabase
-          .from('drafts')
-          .update({
-            stage: 'EDITOR_DONE',
-            editor_content: cleanDraft
-          })
-          .eq('id', draftId)
-
-        console.log('[RESUME] 편집자 완료!')
       }
 
       // Rate Limit 방지 딜레이

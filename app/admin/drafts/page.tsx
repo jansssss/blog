@@ -15,6 +15,7 @@ interface Draft {
   summary: string
   category: string
   status: string
+  stage: string
   created_at: string
 }
 
@@ -200,6 +201,32 @@ export default function AdminDraftsPage() {
                       <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
                         {draft.category}
                       </span>
+                      {/* Stage 배지 */}
+                      {draft.stage === 'COLUMNIST_DONE' && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                          ✓ 완료
+                        </span>
+                      )}
+                      {draft.stage === 'PERPLEXITY_DONE' && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                          1차 완료
+                        </span>
+                      )}
+                      {draft.stage === 'EDITOR_DONE' && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                          2차 완료
+                        </span>
+                      )}
+                      {(draft.stage === 'FAILED' || draft.stage === 'EDITOR_FAILED' || draft.stage === 'COLUMNIST_FAILED') && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                          ✗ 실패
+                        </span>
+                      )}
+                      {!draft.stage && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                          초안
+                        </span>
+                      )}
                     </div>
                     <h3 className="font-semibold mb-2">{draft.title}</h3>
                     <p className="text-sm text-muted-foreground mb-2 line-clamp-2">

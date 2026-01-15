@@ -139,21 +139,26 @@ export default function AdminNewsPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('news_items')
-        .delete()
-        .in('id', selectedItems)
+      // API를 통한 일괄 삭제 (supabaseAdmin 사용)
+      const response = await fetch('/api/admin/news/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newsItemIds: selectedItems })
+      })
 
-      if (error) {
-        console.error('일괄 삭제 오류:', error)
-        alert('삭제 중 오류가 발생했습니다.')
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('일괄 삭제 오류:', data)
+        alert(`삭제 중 오류가 발생했습니다: ${data.error || '알 수 없는 오류'}`)
         return
       }
 
       // UI에서 제거
       setNewsItems(prev => prev.filter(item => !selectedItems.includes(item.id)))
+      const deletedCount = selectedItems.length
       setSelectedItems([])
-      alert(`${selectedItems.length}개 뉴스가 삭제되었습니다.`)
+      alert(`${deletedCount}개 뉴스가 삭제되었습니다.`)
 
     } catch (err) {
       console.error('예상치 못한 오류:', err)
@@ -175,14 +180,17 @@ export default function AdminNewsPage() {
     setGenerating(true)
     setCurrentItemIndex(0)
 
-    const results = { success: 0, failed: 0 }
+    const results = { success: 0, failed: 0, failedItems: [] as string[] }
 
     for (let i = 0; i < selectedItems.length; i++) {
       setCurrentItemIndex(i + 1)
+      let draftId: string | null = null
 
       try {
         // 1단계: Perplexity AI로 초안 생성
         setProcessingStep('perplexity')
+        console.log(`[AI-PIPELINE] 1단계: Perplexity 초안 생성 시작 (뉴스: ${selectedItems[i]})`)
+
         const perplexityResponse = await fetch('/api/admin/news/generate-draft', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -190,13 +198,16 @@ export default function AdminNewsPage() {
         })
 
         if (!perplexityResponse.ok) {
-          throw new Error('Perplexity 초안 생성 실패')
+          const errorData = await perplexityResponse.json().catch(() => ({}))
+          console.error('[AI-PIPELINE] Perplexity 응답 오류:', errorData)
+          throw new Error(`Perplexity 초안 생성 실패: ${errorData.error || perplexityResponse.status}`)
         }
 
-        await perplexityResponse.json()
+        const perplexityData = await perplexityResponse.json()
+        console.log('[AI-PIPELINE] Perplexity 완료:', perplexityData)
 
         // 생성된 초안 가져오기
-        const { data: draft } = await supabase
+        const { data: draft, error: draftFetchError } = await supabase
           .from('drafts')
           .select('*')
           .eq('news_item_id', selectedItems[i])
@@ -204,47 +215,84 @@ export default function AdminNewsPage() {
           .limit(1)
           .single()
 
-        if (!draft) {
+        if (draftFetchError || !draft) {
+          console.error('[AI-PIPELINE] 초안 조회 실패:', draftFetchError)
           throw new Error('생성된 초안을 찾을 수 없습니다.')
         }
 
+        draftId = draft.id
+        console.log(`[AI-PIPELINE] 초안 ID: ${draftId}`)
+
+        // stage를 PERPLEXITY_DONE으로 업데이트
+        await supabase
+          .from('drafts')
+          .update({ stage: 'PERPLEXITY_DONE' })
+          .eq('id', draftId)
+
         // 2단계: 편집자 AI로 팩트체크
         setProcessingStep('editor')
+        console.log('[AI-PIPELINE] 2단계: 편집자 처리 시작')
+
         const rewriteResponse = await fetch('/api/rewrite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ draft: draft.content })
+          body: JSON.stringify({ draft: draft.content, draftId })
         })
 
-        if (!rewriteResponse.ok) {
-          throw new Error('편집자 처리 실패')
+        const rewriteData = await rewriteResponse.json()
+
+        if (!rewriteResponse.ok || !rewriteData.success) {
+          console.error('[AI-PIPELINE] 편집자/칼럼니스트 오류:', rewriteData)
+
+          // 실패 stage 업데이트
+          await supabase
+            .from('drafts')
+            .update({ stage: rewriteData.stage || 'FAILED' })
+            .eq('id', draftId)
+
+          throw new Error(`${rewriteData.error || '편집자 처리 실패'}: ${rewriteData.details || ''}`)
         }
 
-        // 3단계: 칼럼니스트 AI로 글 작성 (rewrite API가 2단계 모두 처리)
+        // 3단계: 칼럼니스트 완료 (rewrite API가 2단계 모두 처리)
         setProcessingStep('columnist')
-        const rewriteData = await rewriteResponse.json()
+        console.log('[AI-PIPELINE] 3단계: 칼럼니스트 완료')
 
         // 4단계: 최종 저장
         setProcessingStep('saving')
+        console.log('[AI-PIPELINE] 4단계: 최종 저장')
+
         const { error: updateError } = await supabase
           .from('drafts')
           .update({
             title: rewriteData.title,
             summary: rewriteData.metaDescription,
             content: rewriteData.markdown,
-            tags: rewriteData.tags
+            tags: rewriteData.tags,
+            stage: 'COLUMNIST_DONE'
           })
-          .eq('id', draft.id)
+          .eq('id', draftId)
 
         if (updateError) {
-          throw new Error('초안 업데이트 실패')
+          console.error('[AI-PIPELINE] 초안 업데이트 오류:', updateError)
+          throw new Error(`초안 업데이트 실패: ${updateError.message}`)
         }
 
+        console.log(`[AI-PIPELINE] 성공 완료: ${draftId}`)
         results.success++
 
       } catch (error) {
-        console.error(`뉴스 ${selectedItems[i]} 처리 실패:`, error)
+        const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
+        console.error(`[AI-PIPELINE] 뉴스 ${selectedItems[i]} 처리 실패:`, errorMessage)
         results.failed++
+        results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${errorMessage}`)
+
+        // 실패 시 stage 업데이트
+        if (draftId) {
+          await supabase
+            .from('drafts')
+            .update({ stage: 'FAILED' })
+            .eq('id', draftId)
+        }
       }
     }
 
@@ -256,7 +304,14 @@ export default function AdminNewsPage() {
       setSelectedItems([])
       loadNewsItems()
 
-      alert(`✅ ${results.success}개 초안 생성 완료!\n❌ ${results.failed}개 실패`)
+      let message = `✅ ${results.success}개 초안 생성 완료!`
+      if (results.failed > 0) {
+        message += `\n❌ ${results.failed}개 실패`
+        if (results.failedItems.length > 0) {
+          message += `\n\n실패 상세:\n${results.failedItems.join('\n')}`
+        }
+      }
+      alert(message)
     }, 1000)
   }
 

@@ -159,9 +159,10 @@ async function runColumnistPass(cleanDraft: string): Promise<{
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { draft, topic, blogStyle } = body
+    const { draft, draftId } = body
 
     if (!draft || typeof draft !== 'string') {
+      console.error('[REWRITE] 오류: draft가 없거나 문자열이 아님')
       return NextResponse.json(
         { error: '초안(draft)이 필요합니다.' },
         { status: 400 }
@@ -169,6 +170,7 @@ export async function POST(request: Request) {
     }
 
     if (!process.env.OPENAI_API_KEY) {
+      console.error('[REWRITE] 오류: OPENAI_API_KEY 환경변수 미설정')
       return NextResponse.json(
         { error: 'OpenAI API 키가 설정되지 않았습니다.' },
         { status: 500 }
@@ -176,22 +178,49 @@ export async function POST(request: Request) {
     }
 
     console.log('[REWRITE] 1차 편집자 단계 시작...')
+    console.log('[REWRITE] 초안 길이:', draft.length, '자')
 
     // 1차: 편집자 단계
-    const editorResult = await runEditorPass(draft)
-
-    console.log('[REWRITE] 편집자 노트:', editorResult.editorNotes)
-    console.log('[REWRITE] 검산 결과:', editorResult.calcChecks)
+    let editorResult
+    try {
+      editorResult = await runEditorPass(draft)
+      console.log('[REWRITE] 편집자 노트:', editorResult.editorNotes)
+      console.log('[REWRITE] 검산 결과:', editorResult.calcChecks)
+    } catch (editorError) {
+      console.error('[REWRITE] 편집자 단계 오류:', editorError)
+      return NextResponse.json({
+        success: false,
+        stage: 'EDITOR_FAILED',
+        error: '편집자 처리 중 오류 발생',
+        details: editorError instanceof Error ? editorError.message : 'Unknown error'
+      }, { status: 500 })
+    }
 
     console.log('[REWRITE] 2차 칼럼니스트 단계 시작...')
 
     // 2차: 칼럼니스트 단계
-    const columnistResult = await runColumnistPass(editorResult.cleanDraft)
+    let columnistResult
+    try {
+      columnistResult = await runColumnistPass(editorResult.cleanDraft)
+      console.log('[REWRITE] 칼럼니스트 완료!')
+    } catch (columnistError) {
+      console.error('[REWRITE] 칼럼니스트 단계 오류:', columnistError)
+      return NextResponse.json({
+        success: false,
+        stage: 'COLUMNIST_FAILED',
+        error: '칼럼니스트 처리 중 오류 발생',
+        details: columnistError instanceof Error ? columnistError.message : 'Unknown error',
+        // 편집자 결과는 반환 (부분 성공)
+        editorNotes: editorResult.editorNotes,
+        cleanDraft: editorResult.cleanDraft
+      }, { status: 500 })
+    }
 
-    console.log('[REWRITE] 완료!')
+    console.log('[REWRITE] 모든 단계 완료!')
 
     return NextResponse.json({
       success: true,
+      stage: 'COLUMNIST_DONE',
       title: columnistResult.title,
       metaDescription: columnistResult.metaDescription,
       tags: columnistResult.tags,
@@ -201,9 +230,11 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    console.error('[REWRITE] 오류:', error)
+    console.error('[REWRITE] 예상치 못한 오류:', error)
     return NextResponse.json(
       {
+        success: false,
+        stage: 'FAILED',
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

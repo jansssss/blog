@@ -1,10 +1,15 @@
 /**
  * OpenAI 칼럼니스트 단계 API (2단계)
  * gpt-4o로 최종 블로그 글 작성
+ *
+ * v2: 사람 문구풀(Human Phrase Pool)을 랜덤 주입하여
+ *     더 자연스럽고 풍성한 본문 생성
  */
 
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { pickHumanPhrases } from '@/lib/ohyess/humanPhrases.v1'
+import { buildColumnistPrompt, validateColumnistOutput } from '@/lib/prompts/columnist'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,6 +21,7 @@ const ERROR_CODES = {
   RATE_LIMIT: 'OPENAI_RATE_LIMIT',
   API_ERROR: 'OPENAI_API_ERROR',
   PARSE_ERROR: 'OPENAI_PARSE_ERROR',
+  VALIDATION_ERROR: 'COLUMNIST_VALIDATION_ERROR',
   UNKNOWN: 'UNKNOWN_ERROR'
 }
 
@@ -54,42 +60,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || ''
 })
 
-const COLUMNIST_SYSTEM_PROMPT = `너는 한국어 블로그 '칼럼니스트'다.
-입력으로 주어지는 clean_draft(이미 팩트체크 완료된 초안)를 바탕으로,
-사람이 쓴 것처럼 자연스럽고 따뜻한 설명형 글로 재작성한다.
-
-핵심 목표:
-- 도입부 3문단: (1)독자 상황 공감 (2)이 글이 필요한 이유 (3)얻는 것
-- 문장을 부드럽게, 설명을 친절하게
-- 독자가 "나랑 무슨 상관?"을 초반 15줄 안에 해소
-- 섹션 구조는 반드시 고정(아래 순서):
-  1. H1 제목 (SEO)
-  2. 도입부 3문단
-  3. 한 줄 요약
-  4. 이슈 배경
-  5. 나에게 미치는 영향 (대상/변화/조건)
-  6. 계산 예시 (정확한 수치)
-  7. 사례 (가상 인물, 과장 금지)
-  8. 실제 활용 방법 (1~3단계)
-  9. FAQ (3개)
-  10. 정리
-  11. 주의사항 (투자/금융 고지)
-  12. SEO 태그 3개
-
-금지:
-- 새로운 숫자/팩트 추가 금지
-- 단정적 투자 권유 금지(정보 제공)
-- 과도한 행동 유도 문구 금지
-
-출력은 JSON으로만:
-{
-  "title": "SEO형 H1 제목",
-  "meta_description": "150~170자 검색 설명",
-  "tags": ["태그1","태그2","태그3"],
-  "markdown": "최종 글(마크다운)"
-}`
-
 export async function POST(request: Request) {
+  // 랜덤 선택된 문구 (디버깅용으로 응답에 포함)
+  let usedPhrases: string[] = []
+  let phraseSeed: string = ''
+
   try {
     const body = await request.json()
     const { cleanDraft } = body
@@ -111,11 +86,24 @@ export async function POST(request: Request) {
     console.log('[COLUMNIST] 칼럼니스트 단계 시작...')
     console.log('[COLUMNIST] 초안 길이:', cleanDraft.length, '자')
 
+    // 사람 문구풀에서 6~10개 랜덤 선택
+    const { phrases, seed } = pickHumanPhrases(6, 10)
+    usedPhrases = phrases
+    phraseSeed = seed
+    console.log(`[COLUMNIST] Human Phrase Pool: ${phrases.length}개 선택 (seed: ${seed})`)
+    console.log('[COLUMNIST] 선택된 문구:', phrases.slice(0, 3).map(p => p.slice(0, 20) + '...'))
+
+    // 프롬프트 빌드
+    const { systemPrompt, userPrompt } = buildColumnistPrompt({
+      cleanDraft,
+      humanPhrases: phrases
+    })
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: COLUMNIST_SYSTEM_PROMPT },
-        { role: 'user', content: `다음 초안을 블로그 글로 재작성해주세요:\n\n${cleanDraft}` }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
       ],
       temperature: 0.5,
       max_tokens: 4000,
@@ -135,10 +123,38 @@ export async function POST(request: Request) {
         error_stage: 'COLUMNIST',
         error_code: ERROR_CODES.PARSE_ERROR,
         error: 'AI 응답 파싱 실패',
-        error_message: 'JSON 파싱 실패'
+        error_message: 'JSON 파싱 실패',
+        used_phrases: usedPhrases,
+        phrase_seed: phraseSeed
       }, { status: 500 })
     }
 
+    const markdown = parsed.markdown || cleanDraft
+
+    // 결과물 품질 검증
+    const validation = validateColumnistOutput(markdown)
+    if (!validation.isValid) {
+      console.error('[COLUMNIST] 품질 검증 실패:', validation.failures)
+      return NextResponse.json({
+        success: false,
+        error_stage: 'COLUMNIST',
+        error_code: ERROR_CODES.VALIDATION_ERROR,
+        error: '칼럼니스트 품질 검증 실패',
+        error_message: validation.failures.join('; '),
+        validation_failures: validation.failures,
+        used_phrases: usedPhrases,
+        phrase_seed: phraseSeed,
+        // 검증 실패해도 결과물은 반환 (재시도 시 활용 가능)
+        partial_result: {
+          title: parsed.title,
+          metaDescription: parsed.meta_description,
+          tags: parsed.tags,
+          markdown: markdown
+        }
+      }, { status: 400 })
+    }
+
+    console.log('[COLUMNIST] 품질 검증 통과!')
     console.log('[COLUMNIST] 칼럼니스트 완료!')
 
     return NextResponse.json({
@@ -147,7 +163,11 @@ export async function POST(request: Request) {
       title: parsed.title || '제목 없음',
       metaDescription: parsed.meta_description || '',
       tags: parsed.tags || [],
-      markdown: parsed.markdown || cleanDraft
+      markdown: markdown,
+      // 디버깅용 정보
+      used_phrases: usedPhrases,
+      phrase_seed: phraseSeed,
+      phrase_count: usedPhrases.length
     })
 
   } catch (error) {
@@ -159,7 +179,9 @@ export async function POST(request: Request) {
       error_stage: 'COLUMNIST',
       error_code: errorInfo.code,
       error: errorInfo.message,
-      error_message: error instanceof Error ? error.message : 'Unknown error'
+      error_message: error instanceof Error ? error.message : 'Unknown error',
+      used_phrases: usedPhrases,
+      phrase_seed: phraseSeed
     }, { status: 500 })
   }
 }

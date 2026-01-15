@@ -229,40 +229,132 @@ export default function AdminNewsPage() {
           .update({ stage: 'PERPLEXITY_DONE' })
           .eq('id', draftId)
 
-        // 2단계: 편집자 AI로 팩트체크
+        // 2단계: 편집자 AI로 팩트체크 (분리된 API 호출)
         setProcessingStep('editor')
         console.log('[AI-PIPELINE] 2단계: 편집자 처리 시작')
 
-        const rewriteResponse = await fetch('/api/rewrite', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ draft: draft.content, draftId })
-        })
+        let editorData
+        try {
+          const editorResponse = await fetch('/api/rewrite/editor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ draft: draft.content })
+          })
 
-        const rewriteData = await rewriteResponse.json()
+          // 응답이 JSON인지 확인
+          const contentType = editorResponse.headers.get('content-type')
+          if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await editorResponse.text()
+            console.error('[AI-PIPELINE] 편집자 API 비정상 응답:', textResponse.slice(0, 200))
+            throw new Error('편집자 API 타임아웃 또는 서버 오류')
+          }
 
-        if (!rewriteResponse.ok || !rewriteData.success) {
-          console.error('[AI-PIPELINE] 편집자/칼럼니스트 오류:', rewriteData)
+          editorData = await editorResponse.json()
 
-          // 에러 정보와 중간 결과물을 DB에 저장
-          await supabase
-            .from('drafts')
-            .update({
-              stage: 'FAILED',
-              error_stage: rewriteData.error_stage || null,
-              error_code: rewriteData.error_code || null,
-              error_message: rewriteData.error_message || rewriteData.error || null,
-              editor_content: rewriteData.editor_content || null,
-              columnist_content: rewriteData.columnist_content || null
-            })
-            .eq('id', draftId)
+          if (!editorResponse.ok || !editorData.success) {
+            console.error('[AI-PIPELINE] 편집자 오류:', editorData)
 
-          throw new Error(`${rewriteData.error || '편집자 처리 실패'}`)
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: editorData.error_stage || 'EDITOR',
+                error_code: editorData.error_code || 'UNKNOWN_ERROR',
+                error_message: editorData.error_message || editorData.error || '편집자 처리 실패'
+              })
+              .eq('id', draftId)
+
+            throw new Error(`${editorData.error || '편집자 처리 실패'}`)
+          }
+
+          console.log('[AI-PIPELINE] 편집자 완료!')
+        } catch (fetchError) {
+          // fetch 자체 실패 (네트워크 오류, 타임아웃 등)
+          if (fetchError instanceof Error && !fetchError.message.includes('처리 실패')) {
+            console.error('[AI-PIPELINE] 편집자 API fetch 오류:', fetchError)
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: 'EDITOR',
+                error_code: 'TIMEOUT_ERROR',
+                error_message: fetchError.message
+              })
+              .eq('id', draftId)
+          }
+          throw fetchError
         }
 
-        // 3단계: 칼럼니스트 완료 (rewrite API가 2단계 모두 처리)
+        // 편집자 결과 저장 (중간 저장)
+        await supabase
+          .from('drafts')
+          .update({
+            stage: 'EDITOR_DONE',
+            editor_content: editorData.cleanDraft
+          })
+          .eq('id', draftId)
+
+        // Rate Limit 방지를 위한 딜레이 (800~1500ms)
+        const delay = Math.floor(Math.random() * 700) + 800
+        console.log(`[AI-PIPELINE] Rate Limit 방지 딜레이: ${delay}ms`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+
+        // 3단계: 칼럼니스트 AI (분리된 API 호출)
         setProcessingStep('columnist')
-        console.log('[AI-PIPELINE] 3단계: 칼럼니스트 완료')
+        console.log('[AI-PIPELINE] 3단계: 칼럼니스트 처리 시작')
+
+        let columnistData
+        try {
+          const columnistResponse = await fetch('/api/rewrite/columnist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cleanDraft: editorData.cleanDraft })
+          })
+
+          // 응답이 JSON인지 확인
+          const contentType = columnistResponse.headers.get('content-type')
+          if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await columnistResponse.text()
+            console.error('[AI-PIPELINE] 칼럼니스트 API 비정상 응답:', textResponse.slice(0, 200))
+            throw new Error('칼럼니스트 API 타임아웃 또는 서버 오류')
+          }
+
+          columnistData = await columnistResponse.json()
+
+          if (!columnistResponse.ok || !columnistData.success) {
+            console.error('[AI-PIPELINE] 칼럼니스트 오류:', columnistData)
+
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: columnistData.error_stage || 'COLUMNIST',
+                error_code: columnistData.error_code || 'UNKNOWN_ERROR',
+                error_message: columnistData.error_message || columnistData.error || '칼럼니스트 처리 실패',
+                editor_content: editorData.cleanDraft
+              })
+              .eq('id', draftId)
+
+            throw new Error(`${columnistData.error || '칼럼니스트 처리 실패'}`)
+          }
+
+          console.log('[AI-PIPELINE] 칼럼니스트 완료!')
+        } catch (fetchError) {
+          if (fetchError instanceof Error && !fetchError.message.includes('처리 실패')) {
+            console.error('[AI-PIPELINE] 칼럼니스트 API fetch 오류:', fetchError)
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: 'COLUMNIST',
+                error_code: 'TIMEOUT_ERROR',
+                error_message: fetchError.message,
+                editor_content: editorData.cleanDraft
+              })
+              .eq('id', draftId)
+          }
+          throw fetchError
+        }
 
         // 4단계: 최종 저장
         setProcessingStep('saving')
@@ -271,15 +363,13 @@ export default function AdminNewsPage() {
         const { error: updateError } = await supabase
           .from('drafts')
           .update({
-            title: rewriteData.title,
-            summary: rewriteData.metaDescription,
-            content: rewriteData.markdown,
-            tags: rewriteData.tags,
+            title: columnistData.title,
+            summary: columnistData.metaDescription,
+            content: columnistData.markdown,
+            tags: columnistData.tags,
             stage: 'SAVED',
-            // 중간 결과물 저장
-            editor_content: rewriteData.editor_content || null,
-            columnist_content: rewriteData.columnist_content || null,
-            // 에러 정보 초기화
+            editor_content: editorData.cleanDraft,
+            columnist_content: columnistData.markdown,
             error_stage: null,
             error_code: null,
             error_message: null
@@ -289,7 +379,6 @@ export default function AdminNewsPage() {
         if (updateError) {
           console.error('[AI-PIPELINE] 초안 업데이트 오류:', updateError)
 
-          // 저장 실패 시 에러 정보 기록
           await supabase
             .from('drafts')
             .update({
@@ -297,9 +386,8 @@ export default function AdminNewsPage() {
               error_stage: 'SAVE',
               error_code: 'SAVE_ERROR',
               error_message: updateError.message,
-              // 칼럼니스트 결과는 저장 (재시도 시 활용)
-              editor_content: rewriteData.editor_content || null,
-              columnist_content: rewriteData.columnist_content || null
+              editor_content: editorData.cleanDraft,
+              columnist_content: columnistData.markdown
             })
             .eq('id', draftId)
 

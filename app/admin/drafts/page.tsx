@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { ArrowLeft, Eye, Trash2, RefreshCw, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Eye, Trash2, RefreshCw, RotateCcw, Sparkles } from 'lucide-react'
 
 interface Draft {
   id: string
@@ -136,6 +136,7 @@ export default function AdminDraftsPage() {
   const router = useRouter()
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [resumingId, setResumingId] = useState<string | null>(null)
+  const [resumingStep, setResumingStep] = useState<'idle' | 'editor' | 'columnist' | 'saving' | 'done'>('idle')
   const [loading, setLoading] = useState(true)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
 
@@ -231,34 +232,211 @@ export default function AdminDraftsPage() {
     }
   }
 
-  // 이어하기 (resume) 핸들러
+  // 이어하기 (resume) 핸들러 - 분리된 API 직접 호출
   const handleResume = async (draft: Draft) => {
     if (!confirm(`"${draft.title}" 초안의 AI 작업을 이어서 진행하시겠습니까?\n\n⚠️ API 비용이 발생합니다.`)) {
       return
     }
 
     setResumingId(draft.id)
+    setResumingStep('idle')
 
     try {
-      const response = await fetch('/api/admin/drafts/resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftId: draft.id })
-      })
+      const { editor_content, columnist_content, id: draftId } = draft
 
-      const data = await response.json()
+      // 칼럼니스트 콘텐츠가 있으면 저장만 재시도
+      if (columnist_content) {
+        setResumingStep('saving')
+        console.log('[RESUME] 저장 재시도...')
 
-      if (!response.ok) {
-        throw new Error(data.error || '이어하기 실패')
+        const { error: saveError } = await supabase
+          .from('drafts')
+          .update({
+            content: columnist_content,
+            stage: 'SAVED',
+            error_stage: null,
+            error_code: null,
+            error_message: null
+          })
+          .eq('id', draftId)
+
+        if (saveError) {
+          throw new Error(`저장 실패: ${saveError.message}`)
+        }
+
+        setResumingStep('done')
+        setTimeout(() => {
+          alert('저장이 완료되었습니다.')
+          loadDrafts()
+          setResumingId(null)
+          setResumingStep('idle')
+        }, 500)
+        return
       }
 
-      alert('AI 작업이 완료되었습니다.')
-      loadDrafts() // 목록 새로고침
+      // 편집자 콘텐츠가 있으면 칼럼니스트부터 시작
+      let cleanDraft = editor_content
+
+      if (!cleanDraft) {
+        // 편집자부터 시작
+        setResumingStep('editor')
+        console.log('[RESUME] 편집자 단계 시작...')
+
+        // 초안 content 가져오기
+        const { data: fullDraft } = await supabase
+          .from('drafts')
+          .select('content')
+          .eq('id', draftId)
+          .single()
+
+        if (!fullDraft?.content) {
+          throw new Error('초안 내용을 찾을 수 없습니다.')
+        }
+
+        const editorResponse = await fetch('/api/rewrite/editor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ draft: fullDraft.content })
+        })
+
+        const contentType = editorResponse.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('편집자 API 타임아웃 또는 서버 오류')
+        }
+
+        const editorData = await editorResponse.json()
+
+        if (!editorResponse.ok || !editorData.success) {
+          await supabase
+            .from('drafts')
+            .update({
+              stage: 'FAILED',
+              error_stage: 'EDITOR',
+              error_code: editorData.error_code || 'UNKNOWN_ERROR',
+              error_message: editorData.error_message || editorData.error
+            })
+            .eq('id', draftId)
+          throw new Error(editorData.error || '편집자 처리 실패')
+        }
+
+        cleanDraft = editorData.cleanDraft
+
+        // 편집자 결과 저장
+        await supabase
+          .from('drafts')
+          .update({
+            stage: 'EDITOR_DONE',
+            editor_content: cleanDraft
+          })
+          .eq('id', draftId)
+
+        console.log('[RESUME] 편집자 완료!')
+      }
+
+      // Rate Limit 방지 딜레이
+      const delay = Math.floor(Math.random() * 700) + 800
+      await new Promise(resolve => setTimeout(resolve, delay))
+
+      // 칼럼니스트 단계
+      setResumingStep('columnist')
+      console.log('[RESUME] 칼럼니스트 단계 시작...')
+
+      const columnistResponse = await fetch('/api/rewrite/columnist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cleanDraft })
+      })
+
+      const contentType = columnistResponse.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('칼럼니스트 API 타임아웃 또는 서버 오류')
+      }
+
+      const columnistData = await columnistResponse.json()
+
+      if (!columnistResponse.ok || !columnistData.success) {
+        await supabase
+          .from('drafts')
+          .update({
+            stage: 'FAILED',
+            error_stage: 'COLUMNIST',
+            error_code: columnistData.error_code || 'UNKNOWN_ERROR',
+            error_message: columnistData.error_message || columnistData.error,
+            editor_content: cleanDraft
+          })
+          .eq('id', draftId)
+        throw new Error(columnistData.error || '칼럼니스트 처리 실패')
+      }
+
+      console.log('[RESUME] 칼럼니스트 완료!')
+
+      // 최종 저장
+      setResumingStep('saving')
+      console.log('[RESUME] 최종 저장...')
+
+      const { error: updateError } = await supabase
+        .from('drafts')
+        .update({
+          title: columnistData.title,
+          summary: columnistData.metaDescription,
+          content: columnistData.markdown,
+          tags: columnistData.tags,
+          stage: 'SAVED',
+          editor_content: cleanDraft,
+          columnist_content: columnistData.markdown,
+          error_stage: null,
+          error_code: null,
+          error_message: null
+        })
+        .eq('id', draftId)
+
+      if (updateError) {
+        await supabase
+          .from('drafts')
+          .update({
+            stage: 'FAILED',
+            error_stage: 'SAVE',
+            error_code: 'SAVE_ERROR',
+            error_message: updateError.message,
+            editor_content: cleanDraft,
+            columnist_content: columnistData.markdown
+          })
+          .eq('id', draftId)
+        throw new Error(`저장 실패: ${updateError.message}`)
+      }
+
+      setResumingStep('done')
+      console.log('[RESUME] 완료!')
+
+      setTimeout(() => {
+        alert('AI 작업이 완료되었습니다.')
+        loadDrafts()
+        setResumingId(null)
+        setResumingStep('idle')
+      }, 500)
+
     } catch (err) {
       console.error('이어하기 오류:', err)
       alert(`이어하기 실패: ${err instanceof Error ? err.message : '알 수 없는 오류'}`)
-    } finally {
+      loadDrafts()
       setResumingId(null)
+      setResumingStep('idle')
+    }
+  }
+
+  // 이어하기 진행 메시지
+  const getResumingMessage = () => {
+    switch (resumingStep) {
+      case 'editor':
+        return '📝 편집자가 팩트체크 및 교정 중...'
+      case 'columnist':
+        return '✍️ 칼럼니스트가 글을 작성 중...'
+      case 'saving':
+        return '💾 저장 중...'
+      case 'done':
+        return '✅ 완료!'
+      default:
+        return '준비 중...'
     }
   }
 
@@ -297,6 +475,118 @@ export default function AdminDraftsPage() {
           </Button>
         </div>
       </div>
+
+      {/* 이어하기 진행 상태 모달 */}
+      {resumingId && (
+        <Card className="mb-6 border-2 border-orange-500 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-100 via-yellow-100 to-orange-100 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+               style={{ backgroundSize: '200% 100%', animation: 'shimmer 2s infinite linear' }} />
+
+          <CardContent className="py-8 relative z-10">
+            <div className="flex flex-col items-center gap-6">
+              {/* 로딩 애니메이션 */}
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-200 border-t-orange-600"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-orange-600 animate-pulse" />
+                </div>
+              </div>
+
+              {/* 메시지 */}
+              <div className="text-center">
+                <p className="text-xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent animate-pulse">
+                  {getResumingMessage()}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  이어하기 진행 중...
+                </p>
+              </div>
+
+              {/* 진행 단계 표시 */}
+              <div className="flex items-center gap-3 mt-2">
+                {/* Step 1: Editor */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  resumingStep === 'editor'
+                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    : resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {resumingStep === 'editor' && (
+                    <span className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">1. 편집자</span>
+                </div>
+
+                {/* Arrow 1 */}
+                <div className={`transition-all duration-300 ${
+                  resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 2: Columnist */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  resumingStep === 'columnist'
+                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    : resumingStep === 'saving' || resumingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {resumingStep === 'columnist' && (
+                    <span className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">2. 칼럼니스트</span>
+                </div>
+
+                {/* Arrow 2 */}
+                <div className={`transition-all duration-300 ${
+                  resumingStep === 'saving' || resumingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 3: Save */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  resumingStep === 'saving'
+                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    : resumingStep === 'done'
+                      ? 'bg-green-500 text-white scale-110'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {resumingStep === 'saving' && (
+                    <span className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-50" />
+                  )}
+                  {resumingStep === 'done' && (
+                    <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">3. 저장</span>
+                </div>
+              </div>
+
+              {/* 프로그레스 바 */}
+              <div className="w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all duration-500 ease-out"
+                  style={{
+                    width: resumingStep === 'editor' ? '33%'
+                         : resumingStep === 'columnist' ? '66%'
+                         : resumingStep === 'saving' ? '90%'
+                         : resumingStep === 'done' ? '100%' : '10%'
+                  }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 전체 선택 */}
       {drafts.length > 0 && (

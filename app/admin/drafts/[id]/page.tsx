@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
-import { ArrowLeft, Save, CheckCircle, XCircle, Edit } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Edit } from 'lucide-react'
 import { marked } from 'marked'
 
 interface Draft {
@@ -146,62 +146,29 @@ export default function DraftEditPage() {
     router.push('/admin/editor')
   }
 
-  const handleApprove = async () => {
-    if (!confirm('이 초안을 승인하고 블로그에 발행하시겠습니까?')) {
+  const handleDelete = async () => {
+    if (!confirm('이 초안을 삭제하시겠습니까?\n\n⚠️ 삭제 후 복구할 수 없습니다.')) {
       return
     }
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/drafts/${draftId}/approve`, {
-        method: 'POST'
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Approval failed')
-      }
-
-      const result = await response.json()
-      alert(`승인되었습니다! 게시글 ID: ${result.postId}`)
-      router.push('/admin/drafts')
-    } catch (err) {
-      console.error('승인 오류:', err)
-      alert(`승인 중 오류가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleReject = async () => {
-    if (!confirm('이 초안을 반려하시겠습니까?')) {
-      return
-    }
-
-    setSaving(true)
-    try {
-      const adminId = localStorage.getItem('adminId')
-
       const { error } = await supabase
         .from('drafts')
-        .update({
-          status: 'rejected',
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: adminId
-        })
+        .delete()
         .eq('id', draftId)
 
       if (error) {
-        console.error('반려 처리 오류:', error)
-        alert('반려 처리 중 오류가 발생했습니다.')
+        console.error('삭제 오류:', error)
+        alert('삭제 중 오류가 발생했습니다.')
         return
       }
 
-      alert('초안이 반려되었습니다.')
+      alert('초안이 삭제되었습니다.')
       router.push('/admin/drafts')
     } catch (err) {
       console.error('예상치 못한 오류:', err)
-      alert('반려 처리 중 오류가 발생했습니다.')
+      alert('삭제 중 오류가 발생했습니다.')
     } finally {
       setSaving(false)
     }
@@ -244,18 +211,10 @@ export default function DraftEditPage() {
             <Save className="mr-2 h-4 w-4" />
             저장
           </Button>
-          {draft.status === 'pending' && (
-            <>
-              <Button onClick={handleReject} disabled={saving} variant="destructive">
-                <XCircle className="mr-2 h-4 w-4" />
-                반려
-              </Button>
-              <Button onClick={handleApprove} disabled={saving}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                승인 및 발행
-              </Button>
-            </>
-          )}
+          <Button onClick={handleDelete} disabled={saving} variant="destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            삭제
+          </Button>
         </div>
       </div>
 

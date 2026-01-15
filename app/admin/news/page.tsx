@@ -19,6 +19,9 @@ interface NewsItem {
   created_at: string
 }
 
+// 진행 상태 타입
+type ProcessingStep = 'idle' | 'perplexity' | 'editor' | 'columnist' | 'saving' | 'done' | 'error'
+
 export default function AdminNewsPage() {
   const router = useRouter()
   const [newsItems, setNewsItems] = useState<NewsItem[]>([])
@@ -26,6 +29,8 @@ export default function AdminNewsPage() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'generated' | 'excluded'>('all')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [generating, setGenerating] = useState(false)
+  const [processingStep, setProcessingStep] = useState<ProcessingStep>('idle')
+  const [currentItemIndex, setCurrentItemIndex] = useState(0)
 
   useEffect(() => {
     // 로그인 체크
@@ -112,46 +117,147 @@ export default function AdminNewsPage() {
     }
   }
 
+  // 제외된 뉴스 전체 선택
+  const handleSelectAllExcluded = () => {
+    const excludedItems = newsItems.filter(item => item.excluded)
+    if (selectedItems.length === excludedItems.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(excludedItems.map(item => item.id))
+    }
+  }
+
+  // 일괄 삭제
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0) {
+      alert('삭제할 뉴스를 선택해주세요.')
+      return
+    }
+
+    if (!confirm(`선택한 ${selectedItems.length}개 뉴스를 완전히 삭제하시겠습니까?\n\n⚠️ 삭제 후 복구할 수 없습니다.`)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('news_items')
+        .delete()
+        .in('id', selectedItems)
+
+      if (error) {
+        console.error('일괄 삭제 오류:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+        return
+      }
+
+      // UI에서 제거
+      setNewsItems(prev => prev.filter(item => !selectedItems.includes(item.id)))
+      setSelectedItems([])
+      alert(`${selectedItems.length}개 뉴스가 삭제되었습니다.`)
+
+    } catch (err) {
+      console.error('예상치 못한 오류:', err)
+      alert('삭제 중 오류가 발생했습니다.')
+    }
+  }
+
+  // AI 초안 생성 (3단계 파이프라인)
   const handleGenerateDrafts = async () => {
     if (selectedItems.length === 0) {
       alert('초안을 생성할 뉴스를 선택해주세요.')
       return
     }
 
-    if (!confirm(`선택한 ${selectedItems.length}개 뉴스로 AI 초안을 생성하시겠습니까?\n\n⚠️ Perplexity API 비용이 발생합니다.`)) {
+    if (!confirm(`선택한 ${selectedItems.length}개 뉴스로 AI 초안을 생성하시겠습니까?\n\n⚠️ API 비용이 발생합니다.`)) {
       return
     }
 
     setGenerating(true)
-    try {
-      const response = await fetch('/api/admin/news/generate-draft', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          newsItemIds: selectedItems
+    setCurrentItemIndex(0)
+
+    const results = { success: 0, failed: 0 }
+
+    for (let i = 0; i < selectedItems.length; i++) {
+      setCurrentItemIndex(i + 1)
+
+      try {
+        // 1단계: Perplexity AI로 초안 생성
+        setProcessingStep('perplexity')
+        const perplexityResponse = await fetch('/api/admin/news/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newsItemIds: [selectedItems[i]] })
         })
-      })
 
-      const data = await response.json()
+        if (!perplexityResponse.ok) {
+          throw new Error('Perplexity 초안 생성 실패')
+        }
 
-      if (!response.ok) {
-        throw new Error(data.error || '초안 생성 실패')
+        await perplexityResponse.json()
+
+        // 생성된 초안 가져오기
+        const { data: draft } = await supabase
+          .from('drafts')
+          .select('*')
+          .eq('news_item_id', selectedItems[i])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (!draft) {
+          throw new Error('생성된 초안을 찾을 수 없습니다.')
+        }
+
+        // 2단계: 편집자 AI로 팩트체크
+        setProcessingStep('editor')
+        const rewriteResponse = await fetch('/api/rewrite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ draft: draft.content })
+        })
+
+        if (!rewriteResponse.ok) {
+          throw new Error('편집자 처리 실패')
+        }
+
+        // 3단계: 칼럼니스트 AI로 글 작성 (rewrite API가 2단계 모두 처리)
+        setProcessingStep('columnist')
+        const rewriteData = await rewriteResponse.json()
+
+        // 4단계: 최종 저장
+        setProcessingStep('saving')
+        const { error: updateError } = await supabase
+          .from('drafts')
+          .update({
+            title: rewriteData.title,
+            summary: rewriteData.metaDescription,
+            content: rewriteData.markdown,
+            tags: rewriteData.tags
+          })
+          .eq('id', draft.id)
+
+        if (updateError) {
+          throw new Error('초안 업데이트 실패')
+        }
+
+        results.success++
+
+      } catch (error) {
+        console.error(`뉴스 ${selectedItems[i]} 처리 실패:`, error)
+        results.failed++
       }
+    }
 
-      alert(`✅ ${data.results.success.length}개 초안 생성 완료!\n❌ ${data.results.failed.length}개 실패`)
+    setProcessingStep('done')
 
-      // 목록 새로고침
+    setTimeout(() => {
+      setGenerating(false)
+      setProcessingStep('idle')
       setSelectedItems([])
       loadNewsItems()
 
-    } catch (error) {
-      console.error('AI 초안 생성 오류:', error)
-      alert(error instanceof Error ? error.message : '초안 생성 중 오류가 발생했습니다.')
-    } finally {
-      setGenerating(false)
-    }
+      alert(`✅ ${results.success}개 초안 생성 완료!\n❌ ${results.failed}개 실패`)
+    }, 1000)
   }
 
   const handleDelete = async (id: string, title: string) => {
@@ -192,7 +298,28 @@ export default function AdminNewsPage() {
     })
   }
 
+  // 진행 상태 메시지
+  const getProcessingMessage = () => {
+    switch (processingStep) {
+      case 'perplexity':
+        return '🔍 Perplexity AI로 뉴스를 분석하여 초안 작성 중...'
+      case 'editor':
+        return '📝 편집자가 팩트체크 및 교정 중...'
+      case 'columnist':
+        return '✍️ 칼럼니스트가 글을 작성 중...'
+      case 'saving':
+        return '💾 초안 저장 중...'
+      case 'done':
+        return '✅ 완료!'
+      case 'error':
+        return '❌ 오류 발생'
+      default:
+        return ''
+    }
+  }
+
   const filteredCount = newsItems.length
+  const excludedItems = newsItems.filter(item => item.excluded)
 
   return (
     <div className="container py-10">
@@ -207,7 +334,16 @@ export default function AdminNewsPage() {
           <h1 className="text-3xl font-bold">뉴스 관리</h1>
         </div>
         <div className="flex gap-2">
-          {selectedItems.length > 0 && (
+          {filter === 'excluded' && selectedItems.length > 0 && (
+            <Button
+              onClick={handleBulkDelete}
+              variant="destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              일괄 삭제 ({selectedItems.length})
+            </Button>
+          )}
+          {filter !== 'excluded' && selectedItems.length > 0 && (
             <Button
               onClick={handleGenerateDrafts}
               disabled={generating}
@@ -224,33 +360,171 @@ export default function AdminNewsPage() {
         </div>
       </div>
 
+      {/* AI 처리 진행 상태 표시 */}
+      {generating && (
+        <Card className="mb-6 border-2 border-purple-500 overflow-hidden relative">
+          {/* 배경 그라데이션 애니메이션 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-100 via-blue-100 to-purple-100 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2s_infinite]"
+               style={{ backgroundSize: '200% 100%', animation: 'shimmer 2s infinite linear' }} />
+
+          <CardContent className="py-8 relative z-10">
+            <div className="flex flex-col items-center gap-6">
+              {/* 로딩 애니메이션 */}
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-purple-600 animate-pulse" />
+                </div>
+              </div>
+
+              {/* 메시지 */}
+              <div className="text-center">
+                <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
+                  {getProcessingMessage()}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  처리 중: {currentItemIndex} / {selectedItems.length}
+                </p>
+              </div>
+
+              {/* 진행 단계 표시 - 애니메이션 추가 */}
+              <div className="flex items-center gap-3 mt-2">
+                {/* Step 1: Perplexity */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  processingStep === 'perplexity'
+                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    : processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {processingStep === 'perplexity' && (
+                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">1. Perplexity</span>
+                </div>
+
+                {/* Arrow 1 */}
+                <div className={`transition-all duration-300 ${
+                  processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 2: Editor */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  processingStep === 'editor'
+                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    : processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {processingStep === 'editor' && (
+                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">2. 편집자</span>
+                </div>
+
+                {/* Arrow 2 */}
+                <div className={`transition-all duration-300 ${
+                  processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 3: Columnist */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  processingStep === 'columnist'
+                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    : processingStep === 'saving' || processingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {processingStep === 'columnist' && (
+                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">3. 칼럼니스트</span>
+                </div>
+
+                {/* Arrow 3 */}
+                <div className={`transition-all duration-300 ${
+                  processingStep === 'saving' || processingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 4: Save */}
+                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  processingStep === 'saving'
+                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    : processingStep === 'done'
+                      ? 'bg-green-500 text-white scale-110'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {processingStep === 'saving' && (
+                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
+                  )}
+                  {processingStep === 'done' && (
+                    <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">4. 저장</span>
+                </div>
+              </div>
+
+              {/* 프로그레스 바 */}
+              <div className="w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500 ease-out"
+                  style={{
+                    width: processingStep === 'perplexity' ? '25%'
+                         : processingStep === 'editor' ? '50%'
+                         : processingStep === 'columnist' ? '75%'
+                         : processingStep === 'saving' ? '90%'
+                         : processingStep === 'done' ? '100%' : '0%'
+                  }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 필터 및 전체 선택 */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex gap-2">
           <Button
             variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
+            onClick={() => { setFilter('all'); setSelectedItems([]) }}
             size="sm"
           >
             전체
           </Button>
           <Button
             variant={filter === 'pending' ? 'default' : 'outline'}
-            onClick={() => setFilter('pending')}
+            onClick={() => { setFilter('pending'); setSelectedItems([]) }}
             size="sm"
           >
             초안 대기중
           </Button>
           <Button
             variant={filter === 'generated' ? 'default' : 'outline'}
-            onClick={() => setFilter('generated')}
+            onClick={() => { setFilter('generated'); setSelectedItems([]) }}
             size="sm"
           >
             초안 생성됨
           </Button>
           <Button
             variant={filter === 'excluded' ? 'default' : 'outline'}
-            onClick={() => setFilter('excluded')}
+            onClick={() => { setFilter('excluded'); setSelectedItems([]) }}
             size="sm"
           >
             제외됨
@@ -264,6 +538,18 @@ export default function AdminNewsPage() {
             size="sm"
           >
             {selectedItems.length === newsItems.filter(item => !item.draft_generated && !item.excluded).length
+              ? '전체 해제'
+              : '전체 선택'}
+          </Button>
+        )}
+
+        {filter === 'excluded' && excludedItems.length > 0 && (
+          <Button
+            onClick={handleSelectAllExcluded}
+            variant="ghost"
+            size="sm"
+          >
+            {selectedItems.length === excludedItems.length
               ? '전체 해제'
               : '전체 선택'}
           </Button>
@@ -302,7 +588,7 @@ export default function AdminNewsPage() {
             <Card key={item.id} className={item.excluded ? 'opacity-50' : ''}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  {/* 체크박스 (초안 미생성 & 미제외 항목만) */}
+                  {/* 체크박스 (초안 미생성 & 미제외 항목) */}
                   {!item.draft_generated && !item.excluded && (
                     <div className="pt-1">
                       <input
@@ -310,6 +596,18 @@ export default function AdminNewsPage() {
                         checked={selectedItems.includes(item.id)}
                         onChange={(e) => handleSelectItem(item.id, e.target.checked)}
                         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      />
+                    </div>
+                  )}
+
+                  {/* 체크박스 (제외된 항목용) */}
+                  {item.excluded && filter === 'excluded' && (
+                    <div className="pt-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-500 cursor-pointer"
                       />
                     </div>
                   )}
@@ -387,7 +685,8 @@ export default function AdminNewsPage() {
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• RSS에서 자동으로 수집된 뉴스가 여기에 표시됩니다.</li>
             <li>• "제외" 버튼을 클릭하면 해당 뉴스는 초안 생성 대상에서 제외됩니다.</li>
-            <li>• 초안이 생성되면 "초안 관리" 페이지에서 확인하고 승인할 수 있습니다.</li>
+            <li>• 초안이 생성되면 "초안 관리" 페이지에서 확인할 수 있습니다.</li>
+            <li>• "제외됨" 탭에서 전체 선택 후 일괄 삭제할 수 있습니다.</li>
           </ul>
         </CardContent>
       </Card>

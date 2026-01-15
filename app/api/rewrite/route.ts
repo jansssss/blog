@@ -11,6 +11,47 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // 최대 60초
 
+// OpenAI 에러 코드 정의
+const ERROR_CODES = {
+  QUOTA_EXCEEDED: 'OPENAI_QUOTA_EXCEEDED',
+  RATE_LIMIT: 'OPENAI_RATE_LIMIT',
+  API_ERROR: 'OPENAI_API_ERROR',
+  PARSE_ERROR: 'OPENAI_PARSE_ERROR',
+  UNKNOWN: 'UNKNOWN_ERROR'
+}
+
+// OpenAI 에러 분석 함수
+function analyzeOpenAIError(error: unknown): { code: string; message: string; isQuotaError: boolean } {
+  if (error instanceof OpenAI.APIError) {
+    const status = error.status
+    const message = error.message || 'OpenAI API 오류'
+
+    // 429 에러 처리 (Rate limit / Quota exceeded)
+    if (status === 429) {
+      const isQuotaExceeded = message.toLowerCase().includes('quota') ||
+                              message.toLowerCase().includes('exceeded') ||
+                              message.toLowerCase().includes('billing')
+      return {
+        code: isQuotaExceeded ? ERROR_CODES.QUOTA_EXCEEDED : ERROR_CODES.RATE_LIMIT,
+        message: isQuotaExceeded ? 'AI 사용 한도 초과' : 'AI 요청 제한 초과',
+        isQuotaError: isQuotaExceeded
+      }
+    }
+
+    return {
+      code: ERROR_CODES.API_ERROR,
+      message: `OpenAI API 오류 (${status})`,
+      isQuotaError: false
+    }
+  }
+
+  return {
+    code: ERROR_CODES.UNKNOWN,
+    message: error instanceof Error ? error.message : 'Unknown error',
+    isQuotaError: false
+  }
+}
+
 // OpenAI 클라이언트
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || ''
@@ -188,13 +229,25 @@ export async function POST(request: Request) {
       console.log('[REWRITE] 검산 결과:', editorResult.calcChecks)
     } catch (editorError) {
       console.error('[REWRITE] 편집자 단계 오류:', editorError)
+      const errorInfo = analyzeOpenAIError(editorError)
+
       return NextResponse.json({
         success: false,
-        stage: 'EDITOR_FAILED',
-        error: '편집자 처리 중 오류 발생',
-        details: editorError instanceof Error ? editorError.message : 'Unknown error'
+        stage: 'FAILED',
+        error_stage: 'EDITOR',
+        error_code: errorInfo.code,
+        error: errorInfo.message,
+        error_message: editorError instanceof Error ? editorError.message : 'Unknown error',
+        // 중간 결과 없음
+        editor_content: null,
+        columnist_content: null
       }, { status: 500 })
     }
+
+    // Rate Limit 방지를 위한 딜레이 (800~1500ms 랜덤)
+    const delay = Math.floor(Math.random() * 700) + 800 // 800~1500ms
+    console.log(`[REWRITE] Rate Limit 방지 딜레이: ${delay}ms`)
+    await new Promise(resolve => setTimeout(resolve, delay))
 
     console.log('[REWRITE] 2차 칼럼니스트 단계 시작...')
 
@@ -205,14 +258,19 @@ export async function POST(request: Request) {
       console.log('[REWRITE] 칼럼니스트 완료!')
     } catch (columnistError) {
       console.error('[REWRITE] 칼럼니스트 단계 오류:', columnistError)
+      const errorInfo = analyzeOpenAIError(columnistError)
+
       return NextResponse.json({
         success: false,
-        stage: 'COLUMNIST_FAILED',
-        error: '칼럼니스트 처리 중 오류 발생',
-        details: columnistError instanceof Error ? columnistError.message : 'Unknown error',
+        stage: 'FAILED',
+        error_stage: 'COLUMNIST',
+        error_code: errorInfo.code,
+        error: errorInfo.message,
+        error_message: columnistError instanceof Error ? columnistError.message : 'Unknown error',
         // 편집자 결과는 반환 (부분 성공)
+        editor_content: editorResult.cleanDraft,
         editorNotes: editorResult.editorNotes,
-        cleanDraft: editorResult.cleanDraft
+        columnist_content: null
       }, { status: 500 })
     }
 
@@ -225,6 +283,9 @@ export async function POST(request: Request) {
       metaDescription: columnistResult.metaDescription,
       tags: columnistResult.tags,
       markdown: columnistResult.markdown,
+      // 중간 결과물도 함께 반환
+      editor_content: editorResult.cleanDraft,
+      columnist_content: columnistResult.markdown,
       editorNotes: editorResult.editorNotes,
       calcChecks: editorResult.calcChecks
     })

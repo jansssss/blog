@@ -244,13 +244,20 @@ export default function AdminNewsPage() {
         if (!rewriteResponse.ok || !rewriteData.success) {
           console.error('[AI-PIPELINE] 편집자/칼럼니스트 오류:', rewriteData)
 
-          // 실패 stage 업데이트
+          // 에러 정보와 중간 결과물을 DB에 저장
           await supabase
             .from('drafts')
-            .update({ stage: rewriteData.stage || 'FAILED' })
+            .update({
+              stage: 'FAILED',
+              error_stage: rewriteData.error_stage || null,
+              error_code: rewriteData.error_code || null,
+              error_message: rewriteData.error_message || rewriteData.error || null,
+              editor_content: rewriteData.editor_content || null,
+              columnist_content: rewriteData.columnist_content || null
+            })
             .eq('id', draftId)
 
-          throw new Error(`${rewriteData.error || '편집자 처리 실패'}: ${rewriteData.details || ''}`)
+          throw new Error(`${rewriteData.error || '편집자 처리 실패'}`)
         }
 
         // 3단계: 칼럼니스트 완료 (rewrite API가 2단계 모두 처리)
@@ -268,12 +275,34 @@ export default function AdminNewsPage() {
             summary: rewriteData.metaDescription,
             content: rewriteData.markdown,
             tags: rewriteData.tags,
-            stage: 'COLUMNIST_DONE'
+            stage: 'SAVED',
+            // 중간 결과물 저장
+            editor_content: rewriteData.editor_content || null,
+            columnist_content: rewriteData.columnist_content || null,
+            // 에러 정보 초기화
+            error_stage: null,
+            error_code: null,
+            error_message: null
           })
           .eq('id', draftId)
 
         if (updateError) {
           console.error('[AI-PIPELINE] 초안 업데이트 오류:', updateError)
+
+          // 저장 실패 시 에러 정보 기록
+          await supabase
+            .from('drafts')
+            .update({
+              stage: 'FAILED',
+              error_stage: 'SAVE',
+              error_code: 'SAVE_ERROR',
+              error_message: updateError.message,
+              // 칼럼니스트 결과는 저장 (재시도 시 활용)
+              editor_content: rewriteData.editor_content || null,
+              columnist_content: rewriteData.columnist_content || null
+            })
+            .eq('id', draftId)
+
           throw new Error(`초안 업데이트 실패: ${updateError.message}`)
         }
 
@@ -286,12 +315,26 @@ export default function AdminNewsPage() {
         results.failed++
         results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${errorMessage}`)
 
-        // 실패 시 stage 업데이트
+        // 실패 시 stage 업데이트 (위에서 이미 처리되지 않은 경우)
         if (draftId) {
-          await supabase
+          // 이미 에러 정보가 저장되어 있지 않은 경우에만 업데이트
+          const { data: currentDraft } = await supabase
             .from('drafts')
-            .update({ stage: 'FAILED' })
+            .select('stage')
             .eq('id', draftId)
+            .single()
+
+          if (currentDraft && currentDraft.stage !== 'FAILED') {
+            await supabase
+              .from('drafts')
+              .update({
+                stage: 'FAILED',
+                error_stage: 'UNKNOWN',
+                error_code: 'UNKNOWN_ERROR',
+                error_message: errorMessage
+              })
+              .eq('id', draftId)
+          }
         }
       }
     }

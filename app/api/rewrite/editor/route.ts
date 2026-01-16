@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         { role: 'user', content: `다음 초안을 편집해주세요:\n\n${draft}` }
       ],
       temperature: 0.3,
-      max_tokens: 2000,
+      max_tokens: 4000,
       response_format: { type: 'json_object' }
     })
 
@@ -113,14 +113,17 @@ export async function POST(request: Request) {
     let parsed
     try {
       parsed = JSON.parse(content)
-    } catch {
-      console.error('[EDITOR] JSON 파싱 실패:', content.slice(0, 200))
+    } catch (parseError) {
+      console.error('[EDITOR] JSON 파싱 실패')
+      console.error('[EDITOR] 파싱 에러:', parseError instanceof Error ? parseError.message : parseError)
+      console.error('[EDITOR] 응답 시작 500자:', content.slice(0, 500))
+      console.error('[EDITOR] 응답 끝 200자:', content.slice(-200))
       return NextResponse.json({
         success: false,
         error_stage: 'EDITOR',
         error_code: ERROR_CODES.PARSE_ERROR,
         error: 'AI 응답 파싱 실패',
-        error_message: 'JSON 파싱 실패'
+        error_message: `JSON 파싱 실패: ${parseError instanceof Error ? parseError.message : 'Unknown'}`
       }, { status: 500 })
     }
 

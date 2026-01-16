@@ -56,7 +56,9 @@ function analyzeOpenAIError(error: unknown): { code: string; message: string; is
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
+  apiKey: process.env.OPENAI_API_KEY || '',
+  timeout: 50000, // 50초 타임아웃 (Vercel 60초 전에 끝내기)
+  maxRetries: 2   // 실패 시 2번 재시도
 })
 
 export async function POST(request: Request) {

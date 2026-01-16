@@ -51,7 +51,9 @@ function analyzeOpenAIError(error: unknown): { code: string; message: string; is
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
+  apiKey: process.env.OPENAI_API_KEY || '',
+  timeout: 50000, // 50초 타임아웃 (Vercel 60초 전에 끝내기)
+  maxRetries: 2   // 실패 시 2번 재시도
 })
 
 const EDITOR_SYSTEM_PROMPT = `너는 한국어 경제/생활정보 블로그의 '편집장(팩트체크+교열)'이다.

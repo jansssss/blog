@@ -108,22 +108,12 @@ export default function AdminNewsPage() {
     }
   }
 
+  // 현재 필터의 모든 아이템 전체 선택/해제
   const handleSelectAll = () => {
-    const pendingItems = newsItems.filter(item => !item.draft_generated && !item.excluded)
-    if (selectedItems.length === pendingItems.length) {
+    if (selectedItems.length === newsItems.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(pendingItems.map(item => item.id))
-    }
-  }
-
-  // 제외된 뉴스 전체 선택
-  const handleSelectAllExcluded = () => {
-    const excludedItems = newsItems.filter(item => item.excluded)
-    if (selectedItems.length === excludedItems.length) {
-      setSelectedItems([])
-    } else {
-      setSelectedItems(excludedItems.map(item => item.id))
+      setSelectedItems(newsItems.map(item => item.id))
     }
   }
 
@@ -512,7 +502,6 @@ export default function AdminNewsPage() {
   }
 
   const filteredCount = newsItems.length
-  const excludedItems = newsItems.filter(item => item.excluded)
 
   return (
     <div className="container py-10">
@@ -724,25 +713,14 @@ export default function AdminNewsPage() {
           </Button>
         </div>
 
-        {filter === 'pending' && newsItems.some(item => !item.draft_generated && !item.excluded) && (
+        {/* 전체 선택 버튼 - 현재 필터에 맞게 표시 */}
+        {newsItems.length > 0 && (
           <Button
             onClick={handleSelectAll}
             variant="ghost"
             size="sm"
           >
-            {selectedItems.length === newsItems.filter(item => !item.draft_generated && !item.excluded).length
-              ? '전체 해제'
-              : '전체 선택'}
-          </Button>
-        )}
-
-        {filter === 'excluded' && excludedItems.length > 0 && (
-          <Button
-            onClick={handleSelectAllExcluded}
-            variant="ghost"
-            size="sm"
-          >
-            {selectedItems.length === excludedItems.length
+            {selectedItems.length === newsItems.length
               ? '전체 해제'
               : '전체 선택'}
           </Button>
@@ -781,8 +759,8 @@ export default function AdminNewsPage() {
             <Card key={item.id} className={item.excluded ? 'opacity-50' : ''}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  {/* 체크박스 (초안 미생성 & 미제외 항목) */}
-                  {!item.draft_generated && !item.excluded && (
+                  {/* 체크박스 - 모든 항목에 표시 */}
+                  {!item.excluded && (
                     <div className="pt-1">
                       <input
                         type="checkbox"
@@ -794,7 +772,7 @@ export default function AdminNewsPage() {
                   )}
 
                   {/* 체크박스 (제외된 항목용) */}
-                  {item.excluded && filter === 'excluded' && (
+                  {item.excluded && (
                     <div className="pt-1">
                       <input
                         type="checkbox"

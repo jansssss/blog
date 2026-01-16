@@ -183,6 +183,13 @@ export default function AdminNewsPage() {
     const results = { success: 0, failed: 0, failedItems: [] as string[] }
 
     for (let i = 0; i < selectedItems.length; i++) {
+      // 첫 번째 아이템이 아니면 아이템 간 딜레이 추가 (3~5초)
+      if (i > 0) {
+        const itemDelay = Math.floor(Math.random() * 2000) + 3000
+        console.log(`[AI-PIPELINE] 다음 아이템 처리 전 딜레이: ${itemDelay}ms`)
+        await new Promise(resolve => setTimeout(resolve, itemDelay))
+      }
+
       setCurrentItemIndex(i + 1)
       let draftId: string | null = null
 
@@ -294,8 +301,8 @@ export default function AdminNewsPage() {
           })
           .eq('id', draftId)
 
-        // Rate Limit 방지를 위한 딜레이 (800~1500ms)
-        const delay = Math.floor(Math.random() * 700) + 800
+        // Rate Limit 방지를 위한 딜레이 (2000~3000ms로 증가)
+        const delay = Math.floor(Math.random() * 1000) + 2000
         console.log(`[AI-PIPELINE] Rate Limit 방지 딜레이: ${delay}ms`)
         await new Promise(resolve => setTimeout(resolve, delay))
 
@@ -520,16 +527,16 @@ export default function AdminNewsPage() {
           <h1 className="text-3xl font-bold">뉴스 관리</h1>
         </div>
         <div className="flex gap-2">
-          {filter === 'excluded' && selectedItems.length > 0 && (
+          {selectedItems.length > 0 && (
             <Button
               onClick={handleBulkDelete}
               variant="destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              일괄 삭제 ({selectedItems.length})
+              선택 삭제 ({selectedItems.length})
             </Button>
           )}
-          {filter !== 'excluded' && selectedItems.length > 0 && (
+          {selectedItems.length > 0 && (
             <Button
               onClick={handleGenerateDrafts}
               disabled={generating}

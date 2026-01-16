@@ -354,8 +354,9 @@ export default function AdminDraftsPage() {
         }
       }
 
-      // Rate Limit 방지 딜레이
-      const delay = Math.floor(Math.random() * 700) + 800
+      // Rate Limit 방지 딜레이 (2000~3000ms)
+      const delay = Math.floor(Math.random() * 1000) + 2000
+      console.log(`[RESUME] Rate Limit 방지 딜레이: ${delay}ms`)
       await new Promise(resolve => setTimeout(resolve, delay))
 
       // 칼럼니스트 단계

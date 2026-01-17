@@ -22,6 +22,39 @@ interface NewsItem {
 // 진행 상태 타입
 type ProcessingStep = 'idle' | 'perplexity' | 'editor' | 'columnist' | 'saving' | 'done' | 'error'
 
+// API 호출 with 재시도 (1회 재시도, 3초 대기)
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retryDelay = 3000
+): Promise<Response> {
+  try {
+    const response = await fetch(url, options)
+
+    // JSON 응답인지 확인
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('API 타임아웃 또는 서버 오류')
+    }
+
+    return response
+  } catch (error) {
+    console.log(`[RETRY] 첫 번째 시도 실패, ${retryDelay}ms 후 재시도...`)
+
+    // 재시도 전 대기
+    await new Promise(resolve => setTimeout(resolve, retryDelay))
+
+    // 1회 재시도
+    const retryResponse = await fetch(url, options)
+    const retryContentType = retryResponse.headers.get('content-type')
+    if (!retryContentType || !retryContentType.includes('application/json')) {
+      throw new Error('API 타임아웃 또는 서버 오류 (재시도 실패)')
+    }
+
+    return retryResponse
+  }
+}
+
 export default function AdminNewsPage() {
   const router = useRouter()
   const [newsItems, setNewsItems] = useState<NewsItem[]>([])
@@ -232,19 +265,16 @@ export default function AdminNewsPage() {
 
         let editorData
         try {
-          const editorResponse = await fetch('/api/rewrite/editor', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ draft: draft.content })
-          })
-
-          // 응답이 JSON인지 확인
-          const contentType = editorResponse.headers.get('content-type')
-          if (!contentType || !contentType.includes('application/json')) {
-            const textResponse = await editorResponse.text()
-            console.error('[AI-PIPELINE] 편집자 API 비정상 응답:', textResponse.slice(0, 200))
-            throw new Error('편집자 API 타임아웃 또는 서버 오류')
-          }
+          // 재시도 로직 포함 API 호출
+          const editorResponse = await fetchWithRetry(
+            '/api/rewrite/editor',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ draft: draft.content })
+            },
+            4000 // 4초 후 재시도
+          )
 
           editorData = await editorResponse.json()
 
@@ -291,8 +321,8 @@ export default function AdminNewsPage() {
           })
           .eq('id', draftId)
 
-        // Rate Limit 방지를 위한 딜레이 (2000~3000ms로 증가)
-        const delay = Math.floor(Math.random() * 1000) + 2000
+        // Rate Limit 방지를 위한 딜레이 (4000~6000ms - 안정성 우선)
+        const delay = Math.floor(Math.random() * 2000) + 4000
         console.log(`[AI-PIPELINE] Rate Limit 방지 딜레이: ${delay}ms`)
         await new Promise(resolve => setTimeout(resolve, delay))
 
@@ -302,19 +332,16 @@ export default function AdminNewsPage() {
 
         let columnistData
         try {
-          const columnistResponse = await fetch('/api/rewrite/columnist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cleanDraft: editorData.cleanDraft })
-          })
-
-          // 응답이 JSON인지 확인
-          const contentType = columnistResponse.headers.get('content-type')
-          if (!contentType || !contentType.includes('application/json')) {
-            const textResponse = await columnistResponse.text()
-            console.error('[AI-PIPELINE] 칼럼니스트 API 비정상 응답:', textResponse.slice(0, 200))
-            throw new Error('칼럼니스트 API 타임아웃 또는 서버 오류')
-          }
+          // 재시도 로직 포함 API 호출
+          const columnistResponse = await fetchWithRetry(
+            '/api/rewrite/columnist',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ cleanDraft: editorData.cleanDraft })
+            },
+            5000 // 5초 후 재시도 (칼럼니스트는 더 오래 걸림)
+          )
 
           columnistData = await columnistResponse.json()
 
@@ -504,40 +531,50 @@ export default function AdminNewsPage() {
   const filteredCount = newsItems.length
 
   return (
-    <div className="container py-10">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="container py-6 px-4 md:py-10 md:px-6">
+      {/* 모바일 최적화 헤더 */}
+      <div className="mb-6 space-y-4">
+        {/* 상단: 뒤로가기 + 제목 */}
+        <div className="flex items-center gap-2 md:gap-4">
           <Link href="/admin/editor">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              관리자 홈
+            <Button variant="ghost" size="sm" className="px-2 md:px-3">
+              <ArrowLeft className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">관리자 홈</span>
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">뉴스 관리</h1>
+          <h1 className="text-xl md:text-3xl font-bold">뉴스 관리</h1>
         </div>
-        <div className="flex gap-2">
+
+        {/* 액션 버튼들 - 모바일에서 가로 스크롤 */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
           {selectedItems.length > 0 && (
             <Button
               onClick={handleBulkDelete}
               variant="destructive"
+              size="sm"
+              className="shrink-0"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              선택 삭제 ({selectedItems.length})
+              <Trash2 className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">선택 삭제</span>
+              <span className="ml-1">({selectedItems.length})</span>
             </Button>
           )}
           {selectedItems.length > 0 && (
             <Button
               onClick={handleGenerateDrafts}
               disabled={generating}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              size="sm"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shrink-0"
             >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {generating ? 'AI 생성 중...' : `AI 초안 생성 (${selectedItems.length})`}
+              <Sparkles className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">{generating ? 'AI 생성 중...' : 'AI 초안 생성'}</span>
+              <span className="sm:hidden">{generating ? '생성중' : 'AI생성'}</span>
+              <span className="ml-1">({selectedItems.length})</span>
             </Button>
           )}
-          <Button onClick={loadNewsItems} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            새로고침
+          <Button onClick={loadNewsItems} variant="outline" size="sm" className="shrink-0">
+            <RefreshCw className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">새로고침</span>
           </Button>
         </div>
       </div>
@@ -550,32 +587,32 @@ export default function AdminNewsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2s_infinite]"
                style={{ backgroundSize: '200% 100%', animation: 'shimmer 2s infinite linear' }} />
 
-          <CardContent className="py-8 relative z-10">
-            <div className="flex flex-col items-center gap-6">
-              {/* 로딩 애니메이션 */}
+          <CardContent className="py-4 md:py-8 relative z-10">
+            <div className="flex flex-col items-center gap-4 md:gap-6">
+              {/* 로딩 애니메이션 - 모바일에서 작게 */}
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-4 border-purple-200 border-t-purple-600"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-purple-600 animate-pulse" />
+                  <Sparkles className="h-4 w-4 md:h-6 md:w-6 text-purple-600 animate-pulse" />
                 </div>
               </div>
 
               {/* 메시지 */}
-              <div className="text-center">
-                <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
+              <div className="text-center px-2">
+                <p className="text-base md:text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
                   {getProcessingMessage()}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">
                   처리 중: {currentItemIndex} / {selectedItems.length}
                 </p>
               </div>
 
-              {/* 진행 단계 표시 - 애니메이션 추가 */}
-              <div className="flex items-center gap-3 mt-2">
+              {/* 진행 단계 표시 - 모바일에서 2x2 그리드, 데스크톱에서 가로 배치 */}
+              <div className="grid grid-cols-2 gap-2 md:flex md:items-center md:gap-3 mt-2 w-full md:w-auto px-4 md:px-0">
                 {/* Step 1: Perplexity */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   processingStep === 'perplexity'
-                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
                     : processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
@@ -586,8 +623,8 @@ export default function AdminNewsPage() {
                   <span className="relative">1. Perplexity</span>
                 </div>
 
-                {/* Arrow 1 */}
-                <div className={`transition-all duration-300 ${
+                {/* Arrow 1 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -597,9 +634,9 @@ export default function AdminNewsPage() {
                 </div>
 
                 {/* Step 2: Editor */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   processingStep === 'editor'
-                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
                     : processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
@@ -610,8 +647,8 @@ export default function AdminNewsPage() {
                   <span className="relative">2. 편집자</span>
                 </div>
 
-                {/* Arrow 2 */}
-                <div className={`transition-all duration-300 ${
+                {/* Arrow 2 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -621,9 +658,9 @@ export default function AdminNewsPage() {
                 </div>
 
                 {/* Step 3: Columnist */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   processingStep === 'columnist'
-                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
                     : processingStep === 'saving' || processingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
@@ -634,8 +671,8 @@ export default function AdminNewsPage() {
                   <span className="relative">3. 칼럼니스트</span>
                 </div>
 
-                {/* Arrow 3 */}
-                <div className={`transition-all duration-300 ${
+                {/* Arrow 3 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   processingStep === 'saving' || processingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -645,11 +682,11 @@ export default function AdminNewsPage() {
                 </div>
 
                 {/* Step 4: Save */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   processingStep === 'saving'
-                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
                     : processingStep === 'done'
-                      ? 'bg-green-500 text-white scale-110'
+                      ? 'bg-green-500 text-white md:scale-110'
                       : 'bg-gray-200 text-gray-500'
                 }`}>
                   {processingStep === 'saving' && (
@@ -681,12 +718,13 @@ export default function AdminNewsPage() {
       )}
 
       {/* 필터 및 전체 선택 */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0">
           <Button
             variant={filter === 'all' ? 'default' : 'outline'}
             onClick={() => { setFilter('all'); setSelectedItems([]) }}
             size="sm"
+            className="shrink-0"
           >
             전체
           </Button>
@@ -694,20 +732,23 @@ export default function AdminNewsPage() {
             variant={filter === 'pending' ? 'default' : 'outline'}
             onClick={() => { setFilter('pending'); setSelectedItems([]) }}
             size="sm"
+            className="shrink-0"
           >
-            초안 대기중
+            대기중
           </Button>
           <Button
             variant={filter === 'generated' ? 'default' : 'outline'}
             onClick={() => { setFilter('generated'); setSelectedItems([]) }}
             size="sm"
+            className="shrink-0"
           >
-            초안 생성됨
+            생성됨
           </Button>
           <Button
             variant={filter === 'excluded' ? 'default' : 'outline'}
             onClick={() => { setFilter('excluded'); setSelectedItems([]) }}
             size="sm"
+            className="shrink-0"
           >
             제외됨
           </Button>
@@ -719,6 +760,7 @@ export default function AdminNewsPage() {
             onClick={handleSelectAll}
             variant="ghost"
             size="sm"
+            className="self-end md:self-auto"
           >
             {selectedItems.length === newsItems.length
               ? '전체 해제'
@@ -754,73 +796,68 @@ export default function AdminNewsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {newsItems.map((item) => (
             <Card key={item.id} className={item.excluded ? 'opacity-50' : ''}>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  {/* 체크박스 - 모든 항목에 표시 */}
-                  {!item.excluded && (
-                    <div className="pt-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(item.id)}
-                        onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                      />
-                    </div>
-                  )}
+              <CardContent className="p-4 md:pt-6">
+                <div className="flex items-start gap-3 md:gap-4">
+                  {/* 체크박스 */}
+                  <div className="pt-1 shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.id)}
+                      onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                      className={`h-4 w-4 rounded border-gray-300 cursor-pointer ${
+                        item.excluded
+                          ? 'text-red-500 focus:ring-red-500'
+                          : 'text-primary focus:ring-primary'
+                      }`}
+                    />
+                  </div>
 
-                  {/* 체크박스 (제외된 항목용) */}
-                  {item.excluded && (
-                    <div className="pt-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(item.id)}
-                        onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-500 cursor-pointer"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+                  <div className="flex-1 min-w-0">
+                    {/* 태그 */}
+                    <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
+                      <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
                         {item.category}
                       </span>
                       {item.draft_generated && (
-                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                          초안 생성됨
+                        <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">
+                          생성됨
                         </span>
                       )}
                       {item.excluded && (
-                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                        <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">
                           제외됨
                         </span>
                       )}
                     </div>
-                    <h3 className="font-semibold mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      발행일: {formatDate(item.pub_date)}
-                    </p>
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-                    >
-                      원문 보기
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                    {/* 제목 */}
+                    <h3 className="font-semibold text-sm md:text-base mb-1.5 md:mb-2 line-clamp-2">{item.title}</h3>
+                    {/* 날짜 및 링크 */}
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground">
+                      <span>{formatDate(item.pub_date)}</span>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        원문
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* 액션 버튼 - 모바일에서 세로 배치 */}
+                  <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 shrink-0">
                     {item.excluded ? (
                       <>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleExclude(item.id, item.excluded)}
+                          className="text-xs md:text-sm px-2 md:px-3"
                         >
                           복원
                         </Button>
@@ -828,8 +865,9 @@ export default function AdminNewsPage() {
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDelete(item.id, item.title)}
+                          className="px-2 md:px-3"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                         </Button>
                       </>
                     ) : (
@@ -837,6 +875,7 @@ export default function AdminNewsPage() {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleExclude(item.id, item.excluded)}
+                        className="text-xs md:text-sm px-2 md:px-3"
                       >
                         제외
                       </Button>

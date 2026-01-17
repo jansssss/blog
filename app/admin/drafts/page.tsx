@@ -8,6 +8,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Eye, Trash2, RefreshCw, RotateCcw, Sparkles } from 'lucide-react'
 
+// API 호출 with 재시도 (1회 재시도)
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retryDelay = 3000
+): Promise<Response> {
+  try {
+    const response = await fetch(url, options)
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('API 타임아웃 또는 서버 오류')
+    }
+    return response
+  } catch (error) {
+    console.log(`[RETRY] 첫 번째 시도 실패, ${retryDelay}ms 후 재시도...`)
+    await new Promise(resolve => setTimeout(resolve, retryDelay))
+
+    const retryResponse = await fetch(url, options)
+    const retryContentType = retryResponse.headers.get('content-type')
+    if (!retryContentType || !retryContentType.includes('application/json')) {
+      throw new Error('API 타임아웃 또는 서버 오류 (재시도 실패)')
+    }
+    return retryResponse
+  }
+}
+
 interface Draft {
   id: string
   title: string
@@ -313,16 +339,16 @@ export default function AdminDraftsPage() {
         } else if (!fullDraft?.content) {
           throw new Error('초안 내용을 찾을 수 없습니다.')
         } else {
-          const editorResponse = await fetch('/api/rewrite/editor', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ draft: fullDraft.content })
-          })
-
-          const contentType = editorResponse.headers.get('content-type')
-          if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('편집자 API 타임아웃 또는 서버 오류')
-          }
+          // 재시도 로직 포함 API 호출
+          const editorResponse = await fetchWithRetry(
+            '/api/rewrite/editor',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ draft: fullDraft.content })
+            },
+            4000 // 4초 후 재시도
+          )
 
           const editorData = await editorResponse.json()
 
@@ -354,8 +380,8 @@ export default function AdminDraftsPage() {
         }
       }
 
-      // Rate Limit 방지 딜레이 (2000~3000ms)
-      const delay = Math.floor(Math.random() * 1000) + 2000
+      // Rate Limit 방지 딜레이 (4000~6000ms - 안정성 우선)
+      const delay = Math.floor(Math.random() * 2000) + 4000
       console.log(`[RESUME] Rate Limit 방지 딜레이: ${delay}ms`)
       await new Promise(resolve => setTimeout(resolve, delay))
 
@@ -363,16 +389,16 @@ export default function AdminDraftsPage() {
       setResumingStep('columnist')
       console.log('[RESUME] 칼럼니스트 단계 시작...')
 
-      const columnistResponse = await fetch('/api/rewrite/columnist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cleanDraft })
-      })
-
-      const contentType = columnistResponse.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('칼럼니스트 API 타임아웃 또는 서버 오류')
-      }
+      // 재시도 로직 포함 API 호출
+      const columnistResponse = await fetchWithRetry(
+        '/api/rewrite/columnist',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cleanDraft })
+        },
+        5000 // 5초 후 재시도
+      )
 
       const columnistData = await columnistResponse.json()
 
@@ -473,27 +499,32 @@ export default function AdminDraftsPage() {
   const stats = getStats()
 
   return (
-    <div className="container py-10">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="container py-6 px-4 md:py-10 md:px-6">
+      {/* 모바일 최적화 헤더 */}
+      <div className="mb-6 space-y-4">
+        {/* 상단: 뒤로가기 + 제목 */}
+        <div className="flex items-center gap-2 md:gap-4">
           <Link href="/admin/editor">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              관리자 홈
+            <Button variant="ghost" size="sm" className="px-2 md:px-3">
+              <ArrowLeft className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">관리자 홈</span>
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">초안 관리</h1>
+          <h1 className="text-xl md:text-3xl font-bold">초안 관리</h1>
         </div>
-        <div className="flex gap-2">
+
+        {/* 액션 버튼들 */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
           {selectedItems.length > 0 && (
-            <Button onClick={handleBulkDelete} variant="destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              일괄 삭제 ({selectedItems.length})
+            <Button onClick={handleBulkDelete} variant="destructive" size="sm" className="shrink-0">
+              <Trash2 className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">선택 삭제</span>
+              <span className="ml-1">({selectedItems.length})</span>
             </Button>
           )}
-          <Button onClick={loadDrafts} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            새로고침
+          <Button onClick={loadDrafts} variant="outline" size="sm" className="shrink-0">
+            <RefreshCw className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">새로고침</span>
           </Button>
         </div>
       </div>
@@ -505,32 +536,32 @@ export default function AdminDraftsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
                style={{ backgroundSize: '200% 100%', animation: 'shimmer 2s infinite linear' }} />
 
-          <CardContent className="py-8 relative z-10">
-            <div className="flex flex-col items-center gap-6">
-              {/* 로딩 애니메이션 */}
+          <CardContent className="py-4 md:py-8 relative z-10">
+            <div className="flex flex-col items-center gap-4 md:gap-6">
+              {/* 로딩 애니메이션 - 모바일에서 작게 */}
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-200 border-t-orange-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-4 border-orange-200 border-t-orange-600"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-orange-600 animate-pulse" />
+                  <Sparkles className="h-4 w-4 md:h-6 md:w-6 text-orange-600 animate-pulse" />
                 </div>
               </div>
 
               {/* 메시지 */}
-              <div className="text-center">
-                <p className="text-xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent animate-pulse">
+              <div className="text-center px-2">
+                <p className="text-base md:text-xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent animate-pulse">
                   {getResumingMessage()}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">
                   이어하기 진행 중...
                 </p>
               </div>
 
-              {/* 진행 단계 표시 */}
-              <div className="flex items-center gap-3 mt-2">
+              {/* 진행 단계 표시 - 모바일에서 그리드, 데스크톱에서 가로 */}
+              <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:gap-3 mt-2 w-full md:w-auto px-4 md:px-0">
                 {/* Step 1: Editor */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'editor'
-                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
                     : resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
@@ -541,8 +572,8 @@ export default function AdminDraftsPage() {
                   <span className="relative">1. 편집자</span>
                 </div>
 
-                {/* Arrow 1 */}
-                <div className={`transition-all duration-300 ${
+                {/* Arrow 1 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -552,9 +583,9 @@ export default function AdminDraftsPage() {
                 </div>
 
                 {/* Step 2: Columnist */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'columnist'
-                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
                     : resumingStep === 'saving' || resumingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
@@ -565,8 +596,8 @@ export default function AdminDraftsPage() {
                   <span className="relative">2. 칼럼니스트</span>
                 </div>
 
-                {/* Arrow 2 */}
-                <div className={`transition-all duration-300 ${
+                {/* Arrow 2 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   resumingStep === 'saving' || resumingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -576,11 +607,11 @@ export default function AdminDraftsPage() {
                 </div>
 
                 {/* Step 3: Save */}
-                <div className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'saving'
-                    ? 'bg-orange-600 text-white scale-110 shadow-lg shadow-orange-300'
+                    ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
                     : resumingStep === 'done'
-                      ? 'bg-green-500 text-white scale-110'
+                      ? 'bg-green-500 text-white md:scale-110'
                       : 'bg-gray-200 text-gray-500'
                 }`}>
                   {resumingStep === 'saving' && (
@@ -594,7 +625,7 @@ export default function AdminDraftsPage() {
               </div>
 
               {/* 프로그레스 바 */}
-              <div className="w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+              <div className="w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden mt-2 mx-4 md:mx-0">
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all duration-500 ease-out"
                   style={{
@@ -623,38 +654,38 @@ export default function AdminDraftsPage() {
         </div>
       )}
 
-      {/* 통계 */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      {/* 통계 - 모바일에서 2x2 그리드 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">총 초안</CardTitle>
+          <CardHeader className="pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">총 초안</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="pt-0 p-3 md:p-6">
+            <div className="text-xl md:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">완료</CardTitle>
+          <CardHeader className="pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-green-600">완료</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.saved}</div>
+          <CardContent className="pt-0 p-3 md:p-6">
+            <div className="text-xl md:text-2xl font-bold text-green-600">{stats.saved}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-600">진행중</CardTitle>
+          <CardHeader className="pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-yellow-600">진행중</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.partial}</div>
+          <CardContent className="pt-0 p-3 md:p-6">
+            <div className="text-xl md:text-2xl font-bold text-yellow-600">{stats.partial}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-600">실패</CardTitle>
+          <CardHeader className="pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-red-600">실패</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.failed}</div>
+          <CardContent className="pt-0 p-3 md:p-6">
+            <div className="text-xl md:text-2xl font-bold text-red-600">{stats.failed}</div>
           </CardContent>
         </Card>
       </div>
@@ -674,13 +705,13 @@ export default function AdminDraftsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {drafts.map((draft) => (
             <Card key={draft.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
+              <CardContent className="p-4 md:pt-6">
+                <div className="flex items-start gap-3 md:gap-4">
                   {/* 체크박스 */}
-                  <div className="pt-1">
+                  <div className="pt-1 shrink-0">
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(draft.id)}
@@ -689,9 +720,10 @@ export default function AdminDraftsPage() {
                     />
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+                  <div className="flex-1 min-w-0">
+                    {/* 태그 */}
+                    <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
+                      <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
                         {draft.category}
                       </span>
                       {/* Stage 기반 배지 */}
@@ -699,7 +731,7 @@ export default function AdminDraftsPage() {
                         const badge = getStageBadge(draft)
                         return (
                           <span
-                            className={`inline-block px-2 py-1 text-xs rounded-full ${badge.className}`}
+                            className={`inline-block px-2 py-0.5 text-xs rounded-full ${badge.className}`}
                             title={badge.tooltip}
                           >
                             {badge.label}
@@ -707,21 +739,26 @@ export default function AdminDraftsPage() {
                         )
                       })()}
                     </div>
-                    <h3 className="font-semibold mb-2">{draft.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                    {/* 제목 */}
+                    <h3 className="font-semibold text-sm md:text-base mb-1.5 md:mb-2 line-clamp-2">{draft.title}</h3>
+                    {/* 요약 */}
+                    <p className="text-xs md:text-sm text-muted-foreground mb-1.5 md:mb-2 line-clamp-2">
                       {draft.summary}
                     </p>
                     {/* 에러 메시지 표시 (실패한 경우) */}
                     {draft.stage === 'FAILED' && draft.error_message && (
-                      <p className="text-xs text-red-600 mb-2 line-clamp-1" title={draft.error_message}>
-                        {truncateErrorMessage(draft.error_message, 80)}
+                      <p className="text-xs text-red-600 mb-1.5 line-clamp-1" title={draft.error_message}>
+                        {truncateErrorMessage(draft.error_message, 60)}
                       </p>
                     )}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>생성일: {formatDate(draft.created_at)}</span>
+                    {/* 날짜 */}
+                    <div className="text-xs text-muted-foreground">
+                      <span>{formatDate(draft.created_at)}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
+
+                  {/* 액션 버튼 - 모바일에서 세로 배치 */}
+                  <div className="flex flex-col gap-1.5 md:gap-2 shrink-0">
                     {/* 이어하기 버튼 (실패 또는 중간 단계인 경우) */}
                     {canResume(draft) && (
                       <Button
@@ -729,16 +766,16 @@ export default function AdminDraftsPage() {
                         variant="default"
                         onClick={() => handleResume(draft)}
                         disabled={resumingId === draft.id}
-                        className="bg-orange-500 hover:bg-orange-600"
+                        className="bg-orange-500 hover:bg-orange-600 text-xs md:text-sm px-2 md:px-3"
                       >
-                        <RotateCcw className={`mr-2 h-4 w-4 ${resumingId === draft.id ? 'animate-spin' : ''}`} />
-                        {resumingId === draft.id ? '진행중...' : '이어하기'}
+                        <RotateCcw className={`h-3.5 w-3.5 md:h-4 md:w-4 md:mr-2 ${resumingId === draft.id ? 'animate-spin' : ''}`} />
+                        <span className="hidden md:inline">{resumingId === draft.id ? '진행중...' : '이어하기'}</span>
                       </Button>
                     )}
                     <Link href={`/admin/drafts/${draft.id}`}>
-                      <Button size="sm" variant="outline">
-                        <Eye className="mr-2 h-4 w-4" />
-                        편집
+                      <Button size="sm" variant="outline" className="text-xs md:text-sm px-2 md:px-3 w-full">
+                        <Eye className="h-3.5 w-3.5 md:h-4 md:w-4 md:mr-2" />
+                        <span className="hidden md:inline">편집</span>
                       </Button>
                     </Link>
                   </div>

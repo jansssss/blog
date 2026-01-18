@@ -65,11 +65,16 @@ export async function GET(request: Request) {
           continue
         }
 
-        // 각 피드 아이템 처리
+        // 각 피드 아이템 처리 (소스당 최대 10개)
+        const maxItemsPerSource = 10
+        let sourceItemCount = 0
+
         for (const item of feed.items) {
           if (!item.title || !item.link) continue
+          if (sourceItemCount >= maxItemsPerSource) break
 
           totalItems++
+          sourceItemCount++
 
           const hash = generateHash(item.title, item.link)
           const pubDate = item.pubDate ? new Date(item.pubDate) : new Date()

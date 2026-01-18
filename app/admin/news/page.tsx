@@ -22,36 +22,22 @@ interface NewsItem {
 // 진행 상태 타입
 type ProcessingStep = 'idle' | 'perplexity' | 'editor' | 'columnist' | 'saving' | 'done' | 'error'
 
-// API 호출 with 재시도 (1회 재시도, 3초 대기)
-async function fetchWithRetry(
-  url: string,
-  options: RequestInit,
-  retryDelay = 3000
-): Promise<Response> {
-  try {
-    const response = await fetch(url, options)
-
-    // JSON 응답인지 확인
-    const contentType = response.headers.get('content-type')
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('API 타임아웃 또는 서버 오류')
-    }
-
-    return response
-  } catch (error) {
-    console.log(`[RETRY] 첫 번째 시도 실패, ${retryDelay}ms 후 재시도...`)
-
-    // 재시도 전 대기
-    await new Promise(resolve => setTimeout(resolve, retryDelay))
-
-    // 1회 재시도
-    const retryResponse = await fetch(url, options)
-    const retryContentType = retryResponse.headers.get('content-type')
-    if (!retryContentType || !retryContentType.includes('application/json')) {
-      throw new Error('API 타임아웃 또는 서버 오류 (재시도 실패)')
-    }
-
-    return retryResponse
+// Draft stage → ProcessingStep 매핑
+function stageToStep(stage: string): ProcessingStep {
+  switch (stage) {
+    case 'NEW':
+    case 'QUEUED':
+      return 'perplexity'
+    case 'PERPLEXITY_DONE':
+      return 'editor'
+    case 'EDITOR_DONE':
+      return 'columnist'
+    case 'SAVED':
+      return 'done'
+    case 'FAILED':
+      return 'error'
+    default:
+      return 'idle'
   }
 }
 
@@ -189,7 +175,7 @@ export default function AdminNewsPage() {
     }
   }
 
-  // AI 초안 생성 (3단계 파이프라인)
+  // AI 초안 생성 (process-next 기반 파이프라인)
   const handleGenerateDrafts = async () => {
     if (selectedItems.length === 0) {
       alert('초안을 생성할 뉴스를 선택해주세요.')
@@ -202,253 +188,162 @@ export default function AdminNewsPage() {
 
     setGenerating(true)
     setCurrentItemIndex(0)
+    setProcessingStep('perplexity')
 
     const results = { success: 0, failed: 0, failedItems: [] as string[] }
+    const draftIds: string[] = []
 
-    for (let i = 0; i < selectedItems.length; i++) {
-      // 첫 번째 아이템이 아니면 아이템 간 딜레이 추가 (3~5초)
-      if (i > 0) {
-        const itemDelay = Math.floor(Math.random() * 2000) + 3000
-        console.log(`[AI-PIPELINE] 다음 아이템 처리 전 딜레이: ${itemDelay}ms`)
-        await new Promise(resolve => setTimeout(resolve, itemDelay))
-      }
+    try {
+      // 1단계: 선택한 뉴스들로 draft 생성 (stage: NEW)
+      console.log('[AI-PIPELINE] Draft 생성 시작...')
 
-      setCurrentItemIndex(i + 1)
-      let draftId: string | null = null
+      for (let i = 0; i < selectedItems.length; i++) {
+        setCurrentItemIndex(i + 1)
 
-      try {
-        // 1단계: Perplexity AI로 초안 생성
-        setProcessingStep('perplexity')
-        console.log(`[AI-PIPELINE] 1단계: Perplexity 초안 생성 시작 (뉴스: ${selectedItems[i]})`)
-
-        const perplexityResponse = await fetch('/api/admin/news/generate-draft', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ newsItemIds: [selectedItems[i]] })
-        })
-
-        if (!perplexityResponse.ok) {
-          const errorData = await perplexityResponse.json().catch(() => ({}))
-          console.error('[AI-PIPELINE] Perplexity 응답 오류:', errorData)
-          throw new Error(`Perplexity 초안 생성 실패: ${errorData.error || perplexityResponse.status}`)
+        // 아이템 간 딜레이 (Rate Limit 방지)
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
         }
 
-        const perplexityData = await perplexityResponse.json()
-        console.log('[AI-PIPELINE] Perplexity 완료:', perplexityData)
-
-        // 생성된 초안 가져오기
-        const { data: draft, error: draftFetchError } = await supabase
-          .from('drafts')
-          .select('*')
-          .eq('news_item_id', selectedItems[i])
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-
-        if (draftFetchError || !draft) {
-          console.error('[AI-PIPELINE] 초안 조회 실패:', draftFetchError)
-          throw new Error('생성된 초안을 찾을 수 없습니다.')
-        }
-
-        draftId = draft.id
-        console.log(`[AI-PIPELINE] 초안 ID: ${draftId}`)
-
-        // stage를 PERPLEXITY_DONE으로 업데이트
-        await supabase
-          .from('drafts')
-          .update({ stage: 'PERPLEXITY_DONE' })
-          .eq('id', draftId)
-
-        // 2단계: 편집자 AI로 팩트체크 (분리된 API 호출)
-        setProcessingStep('editor')
-        console.log('[AI-PIPELINE] 2단계: 편집자 처리 시작')
-
-        let editorData
         try {
-          // 재시도 로직 포함 API 호출
-          const editorResponse = await fetchWithRetry(
-            '/api/rewrite/editor',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ draft: draft.content })
-            },
-            4000 // 4초 후 재시도
-          )
-
-          editorData = await editorResponse.json()
-
-          if (!editorResponse.ok || !editorData.success) {
-            console.error('[AI-PIPELINE] 편집자 오류:', editorData)
-
-            await supabase
-              .from('drafts')
-              .update({
-                stage: 'FAILED',
-                error_stage: editorData.error_stage || 'EDITOR',
-                error_code: editorData.error_code || 'UNKNOWN_ERROR',
-                error_message: editorData.error_message || editorData.error || '편집자 처리 실패'
-              })
-              .eq('id', draftId)
-
-            throw new Error(`${editorData.error || '편집자 처리 실패'}`)
-          }
-
-          console.log('[AI-PIPELINE] 편집자 완료!')
-        } catch (fetchError) {
-          // fetch 자체 실패 (네트워크 오류, 타임아웃 등)
-          if (fetchError instanceof Error && !fetchError.message.includes('처리 실패')) {
-            console.error('[AI-PIPELINE] 편집자 API fetch 오류:', fetchError)
-            await supabase
-              .from('drafts')
-              .update({
-                stage: 'FAILED',
-                error_stage: 'EDITOR',
-                error_code: 'TIMEOUT_ERROR',
-                error_message: fetchError.message
-              })
-              .eq('id', draftId)
-          }
-          throw fetchError
-        }
-
-        // 편집자 결과 저장 (중간 저장)
-        await supabase
-          .from('drafts')
-          .update({
-            stage: 'EDITOR_DONE',
-            editor_content: editorData.cleanDraft
+          const response = await fetch('/api/admin/news/generate-draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newsItemIds: [selectedItems[i]] })
           })
-          .eq('id', draftId)
 
-        // Rate Limit 방지를 위한 딜레이 (4000~6000ms - 안정성 우선)
-        const delay = Math.floor(Math.random() * 2000) + 4000
-        console.log(`[AI-PIPELINE] Rate Limit 방지 딜레이: ${delay}ms`)
-        await new Promise(resolve => setTimeout(resolve, delay))
-
-        // 3단계: 칼럼니스트 AI (분리된 API 호출)
-        setProcessingStep('columnist')
-        console.log('[AI-PIPELINE] 3단계: 칼럼니스트 처리 시작')
-
-        let columnistData
-        try {
-          // 재시도 로직 포함 API 호출
-          const columnistResponse = await fetchWithRetry(
-            '/api/rewrite/columnist',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ cleanDraft: editorData.cleanDraft })
-            },
-            5000 // 5초 후 재시도 (칼럼니스트는 더 오래 걸림)
-          )
-
-          columnistData = await columnistResponse.json()
-
-          if (!columnistResponse.ok || !columnistData.success) {
-            console.error('[AI-PIPELINE] 칼럼니스트 오류:', columnistData)
-
-            await supabase
-              .from('drafts')
-              .update({
-                stage: 'FAILED',
-                error_stage: columnistData.error_stage || 'COLUMNIST',
-                error_code: columnistData.error_code || 'UNKNOWN_ERROR',
-                error_message: columnistData.error_message || columnistData.error || '칼럼니스트 처리 실패',
-                editor_content: editorData.cleanDraft
-              })
-              .eq('id', draftId)
-
-            throw new Error(`${columnistData.error || '칼럼니스트 처리 실패'}`)
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error('[AI-PIPELINE] Draft 생성 실패:', errorData)
+            results.failed++
+            results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: Draft 생성 실패`)
+            continue
           }
 
-          console.log('[AI-PIPELINE] 칼럼니스트 완료!')
-        } catch (fetchError) {
-          if (fetchError instanceof Error && !fetchError.message.includes('처리 실패')) {
-            console.error('[AI-PIPELINE] 칼럼니스트 API fetch 오류:', fetchError)
-            await supabase
-              .from('drafts')
-              .update({
-                stage: 'FAILED',
-                error_stage: 'COLUMNIST',
-                error_code: 'TIMEOUT_ERROR',
-                error_message: fetchError.message,
-                editor_content: editorData.cleanDraft
-              })
-              .eq('id', draftId)
-          }
-          throw fetchError
-        }
-
-        // 4단계: 최종 저장
-        setProcessingStep('saving')
-        console.log('[AI-PIPELINE] 4단계: 최종 저장')
-
-        const { error: updateError } = await supabase
-          .from('drafts')
-          .update({
-            title: columnistData.title,
-            summary: columnistData.metaDescription,
-            content: columnistData.markdown,
-            tags: columnistData.tags,
-            stage: 'SAVED',
-            editor_content: editorData.cleanDraft,
-            columnist_content: columnistData.markdown,
-            error_stage: null,
-            error_code: null,
-            error_message: null
-          })
-          .eq('id', draftId)
-
-        if (updateError) {
-          console.error('[AI-PIPELINE] 초안 업데이트 오류:', updateError)
-
-          await supabase
+          // 생성된 draft ID 조회
+          const { data: draft } = await supabase
             .from('drafts')
-            .update({
-              stage: 'FAILED',
-              error_stage: 'SAVE',
-              error_code: 'SAVE_ERROR',
-              error_message: updateError.message,
-              editor_content: editorData.cleanDraft,
-              columnist_content: columnistData.markdown
-            })
-            .eq('id', draftId)
-
-          throw new Error(`초안 업데이트 실패: ${updateError.message}`)
-        }
-
-        console.log(`[AI-PIPELINE] 성공 완료: ${draftId}`)
-        results.success++
-
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
-        console.error(`[AI-PIPELINE] 뉴스 ${selectedItems[i]} 처리 실패:`, errorMessage)
-        results.failed++
-        results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${errorMessage}`)
-
-        // 실패 시 stage 업데이트 (위에서 이미 처리되지 않은 경우)
-        if (draftId) {
-          // 이미 에러 정보가 저장되어 있지 않은 경우에만 업데이트
-          const { data: currentDraft } = await supabase
-            .from('drafts')
-            .select('stage')
-            .eq('id', draftId)
+            .select('id')
+            .eq('news_item_id', selectedItems[i])
+            .order('created_at', { ascending: false })
+            .limit(1)
             .single()
 
-          if (currentDraft && currentDraft.stage !== 'FAILED') {
-            await supabase
-              .from('drafts')
-              .update({
-                stage: 'FAILED',
-                error_stage: 'UNKNOWN',
-                error_code: 'UNKNOWN_ERROR',
-                error_message: errorMessage
-              })
-              .eq('id', draftId)
+          if (draft) {
+            draftIds.push(draft.id)
+            console.log(`[AI-PIPELINE] Draft 생성됨: ${draft.id}`)
           }
+        } catch (err) {
+          console.error('[AI-PIPELINE] Draft 생성 오류:', err)
+          results.failed++
+          results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${err instanceof Error ? err.message : '오류'}`)
         }
       }
+
+      if (draftIds.length === 0) {
+        throw new Error('생성된 draft가 없습니다.')
+      }
+
+      // 2단계: process-next 폴링으로 파이프라인 진행
+      console.log(`[AI-PIPELINE] ${draftIds.length}개 draft 파이프라인 시작...`)
+
+      let completedCount = 0
+      let failedCount = 0
+      const processedDrafts = new Set<string>()
+      let noProgressCount = 0
+      const maxNoProgress = 20 // 폴링 최대 횟수 (약 60초)
+
+      while (completedCount + failedCount < draftIds.length && noProgressCount < maxNoProgress) {
+        // process-next 호출 (서버가 처리 가능한 draft 하나 선택)
+        try {
+          const processResponse = await fetch('/api/admin/drafts/process-next', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          })
+
+          const processResult = await processResponse.json()
+          console.log('[AI-PIPELINE] process-next 결과:', processResult)
+
+          if (processResult.ok && processResult.draftId) {
+            noProgressCount = 0 // 진행됨
+
+            // UI 업데이트
+            const step = stageToStep(processResult.newStage || '')
+            setProcessingStep(step)
+
+            if (processResult.newStage === 'SAVED') {
+              if (!processedDrafts.has(processResult.draftId)) {
+                processedDrafts.add(processResult.draftId)
+                completedCount++
+                results.success++
+                console.log(`[AI-PIPELINE] 완료: ${processResult.draftId} (${completedCount}/${draftIds.length})`)
+              }
+            } else if (processResult.newStage === 'FAILED') {
+              if (!processedDrafts.has(processResult.draftId)) {
+                processedDrafts.add(processResult.draftId)
+                failedCount++
+                results.failed++
+                results.failedItems.push(`${processResult.draftId.slice(0, 8)}...: ${processResult.error || '처리 실패'}`)
+                console.log(`[AI-PIPELINE] 실패: ${processResult.draftId}`)
+              }
+            }
+          } else {
+            // 처리할 draft가 없음 (모두 완료되었거나 락 대기 중)
+            noProgressCount++
+          }
+        } catch (err) {
+          console.error('[AI-PIPELINE] process-next 오류:', err)
+          noProgressCount++
+        }
+
+        // 현재 draft 상태 확인 (UI 동기화)
+        const { data: currentDrafts } = await supabase
+          .from('drafts')
+          .select('id, stage')
+          .in('id', draftIds)
+
+        if (currentDrafts) {
+          let inProgress = false
+          for (const d of currentDrafts) {
+            if (d.stage === 'SAVED' && !processedDrafts.has(d.id)) {
+              processedDrafts.add(d.id)
+              completedCount++
+              results.success++
+            } else if (d.stage === 'FAILED' && !processedDrafts.has(d.id)) {
+              processedDrafts.add(d.id)
+              failedCount++
+              results.failed++
+            } else if (!['SAVED', 'FAILED'].includes(d.stage)) {
+              inProgress = true
+              setProcessingStep(stageToStep(d.stage))
+            }
+          }
+
+          // 모든 draft 완료 확인
+          if (completedCount + failedCount >= draftIds.length) {
+            break
+          }
+
+          // 진행 중인 draft가 없으면 대기
+          if (!inProgress) {
+            noProgressCount++
+          }
+        }
+
+        // 폴링 간격 (3초)
+        await new Promise(resolve => setTimeout(resolve, 3000))
+        setCurrentItemIndex(completedCount + failedCount)
+      }
+
+      if (noProgressCount >= maxNoProgress) {
+        console.warn('[AI-PIPELINE] 폴링 타임아웃 - 일부 draft가 완료되지 않았을 수 있습니다.')
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
+      console.error('[AI-PIPELINE] 파이프라인 오류:', errorMessage)
+      results.failedItems.push(errorMessage)
     }
 
     setProcessingStep('done')

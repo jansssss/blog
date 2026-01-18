@@ -10,11 +10,14 @@ import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
-// Perplexity API 클라이언트
+// Perplexity API 클라이언트 (타임아웃/재시도 설정 추가)
 const perplexity = new OpenAI({
   apiKey: process.env.PERPLEXITY_API_KEY || '',
-  baseURL: 'https://api.perplexity.ai'
+  baseURL: 'https://api.perplexity.ai',
+  timeout: 50000,  // 50초 타임아웃 (Vercel 60초 전에 끝내기)
+  maxRetries: 2    // 실패 시 2번 재시도
 })
 
 // Perplexity API를 사용한 고품질 초안 생성
@@ -197,7 +200,7 @@ export async function POST(request: Request) {
         const { title, summary, content, tags } = await generateDraftContentWithAI(newsItem)
         const slug = generateSlug(title)
 
-        // 초안 저장
+        // 초안 저장 (stage: PERPLEXITY_DONE - 이미 Perplexity 처리 완료)
         const { data: draft, error: draftError } = await supabaseAdmin
           .from('drafts')
           .insert({
@@ -208,7 +211,9 @@ export async function POST(request: Request) {
             content,
             category: newsItem.category,
             tags,
-            status: 'pending'
+            status: 'pending',
+            stage: 'PERPLEXITY_DONE',
+            attempts: 0
           })
           .select()
           .single()

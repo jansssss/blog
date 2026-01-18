@@ -75,23 +75,18 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
     }
 
-    // 초안 상태 업데이트 (승인됨 + 발행된 게시글 ID 저장)
-    const { error: updateError } = await supabaseAdmin
+    // 초안 삭제 (posts에 복사 완료되었으므로 더 이상 필요 없음)
+    const { error: deleteError } = await supabaseAdmin
       .from('drafts')
-      .update({
-        status: 'approved',
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id,
-        published_post_id: post.id
-      })
+      .delete()
       .eq('id', draftId)
 
-    if (updateError) {
-      console.error('[APPROVE] Draft update error:', updateError)
+    if (deleteError) {
+      console.error('[APPROVE] Draft delete error:', deleteError)
       // 게시글은 이미 생성되었으므로 에러를 로그만 남기고 계속 진행
     }
 
-    console.log(`[APPROVE] Draft ${draftId} approved and published as post ${post.id}`)
+    console.log(`[APPROVE] Draft ${draftId} approved, published as post ${post.id}, and deleted`)
 
     return NextResponse.json({
       success: true,

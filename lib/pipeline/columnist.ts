@@ -131,7 +131,11 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
         tags: parsed.tags || [],
         markdown: markdown,
         usedPhrases,
-        phraseSeed
+        phraseSeed,
+        // 검증 결과 추가
+        validationPassed: validation.isValid,
+        validationFailures: validation.failures,
+        validationWarnings: validation.warnings
       }
     }
 

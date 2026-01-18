@@ -323,7 +323,7 @@ async function processNextStep(
         }
       }
 
-      // [수정 3] 최종 결과 저장 + 오류 필드 초기화
+      // [수정 3] 최종 결과 저장 + 오류 필드 초기화 + 검증 결과
       await supabaseAdmin
         .from('drafts')
         .update({
@@ -333,6 +333,10 @@ async function processNextStep(
           tags: result.data.tags,
           columnist_content: result.data.markdown,
           stage: 'SAVED',
+          // 검증 결과 저장
+          validation_passed: result.data.validationPassed,
+          validation_failures: result.data.validationFailures || [],
+          validation_warnings: result.data.validationWarnings || [],
           // 오류/재시도 필드 초기화
           error_stage: null,
           error_code: null,

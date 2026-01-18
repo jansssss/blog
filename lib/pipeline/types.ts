@@ -50,6 +50,10 @@ export interface ColumnistResult {
   markdown: string
   usedPhrases: string[]
   phraseSeed: string
+  // 검증 결과
+  validationPassed: boolean
+  validationFailures: string[]
+  validationWarnings: string[]
 }
 
 // Draft 레코드 (DB)
@@ -76,6 +80,10 @@ export interface DraftRecord {
   next_retry_at: string | null
   last_error: string | null
   created_at: string
+  // 검증 결과 컬럼
+  validation_passed: boolean | null
+  validation_failures: string[]
+  validation_warnings: string[]
 }
 
 // 뉴스 아이템 레코드 (DB)

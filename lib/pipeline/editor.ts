@@ -88,7 +88,7 @@ export async function runEditor(draft: string): Promise<PipelineResult<EditorRes
         { role: 'user', content: `다음 초안을 편집해주세요:\n\n${draft}` }
       ],
       temperature: 0.3,
-      max_tokens: 4000,
+      max_tokens: 8000,
       response_format: { type: 'json_object' }
     })
 

@@ -94,27 +94,29 @@ async function acquireLock(specificDraftId?: string): Promise<{
       .in('stage', PROCESSABLE_STAGES)
   } else {
     // 처리 가능한 draft 선택
-    // [수정 1] stage가 처리 가능 + 락 없음/만료 + next_retry_at 조건
+    // 단순화: stage만 확인하고, locked_at/next_retry_at은 NULL 허용
     query = query
       .in('stage', PROCESSABLE_STAGES)
-      .or(`locked_at.is.null,locked_at.lt.${lockExpiry}`)
-      .or(`next_retry_at.is.null,next_retry_at.lte.${now}`)
+      .is('locked_at', null)  // 락이 없는 것만
       .order('created_at', { ascending: true })
       .limit(1)
   }
 
   const { data: drafts, error: selectError } = await query
 
-  if (selectError || !drafts || drafts.length === 0) {
+  if (selectError) {
+    console.error('[PROCESS-NEXT] 쿼리 오류:', selectError)
+    return null
+  }
+
+  if (!drafts || drafts.length === 0) {
     console.log('[PROCESS-NEXT] 처리할 draft 없음')
     return null
   }
 
   const draft = drafts[0]
 
-  // [수정 1, 2] 락 획득 시도 (원자적 업데이트) - stage + locked_at + next_retry_at 조건 모두 검증
-  // Supabase에서 복합 조건을 안전하게 걸기 위해 RPC를 쓰거나,
-  // 여기서는 select 후 update의 조건을 최대한 강화
+  // 락 획득 시도 - 단순화된 조건
   const { data: lockedDraft, error: lockError } = await supabaseAdmin
     .from('drafts')
     .update({
@@ -122,14 +124,12 @@ async function acquireLock(specificDraftId?: string): Promise<{
       locked_by: WORKER_ID
     })
     .eq('id', draft.id)
-    .in('stage', PROCESSABLE_STAGES)  // [수정 2] stage 조건
-    .or(`locked_at.is.null,locked_at.lt.${lockExpiry}`)
-    .or(`next_retry_at.is.null,next_retry_at.lte.${now}`)  // [수정 1] next_retry_at 조건
+    .is('locked_at', null)  // 아직 락이 없는 경우만
     .select()
     .single()
 
   if (lockError || !lockedDraft) {
-    console.log('[PROCESS-NEXT] 락 획득 실패 (다른 워커가 먼저 처리 또는 조건 불충족)')
+    console.log('[PROCESS-NEXT] 락 획득 실패 (다른 워커가 먼저 처리)')
     return null
   }
 

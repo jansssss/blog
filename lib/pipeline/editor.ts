@@ -9,7 +9,7 @@ import type { PipelineResult, EditorResult } from './types'
 // OpenAI 클라이언트
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
-  timeout: 50000,
+  timeout: 45000,  // 45초 (Vercel 60초 제한에 여유 15초 확보)
   maxRetries: 2
 })
 
@@ -88,7 +88,7 @@ export async function runEditor(draft: string): Promise<PipelineResult<EditorRes
         { role: 'user', content: `다음 초안을 편집해주세요:\n\n${draft}` }
       ],
       temperature: 0.3,
-      max_tokens: 8000,
+      max_tokens: 4000,  // 실제 응답은 2000~3000자 수준, 4000이면 충분
       response_format: { type: 'json_object' }
     })
 

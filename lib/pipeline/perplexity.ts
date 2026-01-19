@@ -10,7 +10,7 @@ import type { PipelineResult, PerplexityResult, NewsItemRecord } from './types'
 const perplexity = new OpenAI({
   apiKey: process.env.PERPLEXITY_API_KEY || '',
   baseURL: 'https://api.perplexity.ai',
-  timeout: 50000,
+  timeout: 45000,  // 45초 (Vercel 60초 제한에 여유 15초 확보)
   maxRetries: 2
 })
 

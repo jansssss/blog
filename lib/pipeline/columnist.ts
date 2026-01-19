@@ -11,7 +11,7 @@ import type { PipelineResult, ColumnistResult } from './types'
 // OpenAI 클라이언트
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
-  timeout: 50000,
+  timeout: 45000,  // 45초 (Vercel 60초 제한에 여유 15초 확보)
   maxRetries: 2
 })
 

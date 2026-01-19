@@ -191,8 +191,8 @@ async function handleFailure(
 
     console.log(`[PROCESS-NEXT] 최대 재시도 초과 → FAILED: ${draftId}`)
   } else {
-    // 재시도 예약 (backoff: 5분 * attempts)
-    const backoffMinutes = 5 * newAttempts
+    // 재시도 예약 (backoff: 2분 * attempts)
+    const backoffMinutes = 2 * newAttempts
     const nextRetry = new Date(Date.now() + backoffMinutes * 60 * 1000).toISOString()
 
     await supabaseAdmin
@@ -235,16 +235,21 @@ async function processNextStep(
         return { newStage: 'FAILED', error: '뉴스 아이템 정보 없음', permanent: true }
       }
 
+      console.log(`[PROCESS-NEXT] Perplexity 시작 (title: ${newsItem.title.slice(0, 30)}...)`)
+      const perplexityStartTime = Date.now()
       const result = await runPerplexity({
         title: newsItem.title,
         link: newsItem.link,
         category: newsItem.category
       })
+      console.log(`[PROCESS-NEXT] Perplexity 완료 (${Date.now() - perplexityStartTime}ms)`)
 
       if (!result.success || !result.data) {
+        const errorDetail = `Perplexity 처리 실패 [${result.error?.code || 'UNKNOWN'}]: ${result.error?.message || '알 수 없는 오류'}`
+        console.error(`[PROCESS-NEXT] ${errorDetail}`)
         return {
           newStage: currentStage, // stage 유지 (재시도 가능)
-          error: result.error?.message || 'Perplexity 처리 실패'
+          error: errorDetail
         }
       }
 
@@ -278,12 +283,17 @@ async function processNextStep(
         return { newStage: 'FAILED', error: '초안 내용 없음', permanent: true }
       }
 
+      console.log(`[PROCESS-NEXT] Editor 시작 (content 길이: ${draftContent.length}자)`)
+      const editorStartTime = Date.now()
       const result = await runEditor(draftContent)
+      console.log(`[PROCESS-NEXT] Editor 완료 (${Date.now() - editorStartTime}ms)`)
 
       if (!result.success || !result.data) {
+        const errorDetail = `Editor 처리 실패 [${result.error?.code || 'UNKNOWN'}]: ${result.error?.message || '알 수 없는 오류'}`
+        console.error(`[PROCESS-NEXT] ${errorDetail}`)
         return {
           newStage: currentStage,
-          error: result.error?.message || 'Editor 처리 실패'
+          error: errorDetail
         }
       }
 
@@ -314,12 +324,17 @@ async function processNextStep(
         return { newStage: 'FAILED', error: '편집된 초안 없음', permanent: true }
       }
 
+      console.log(`[PROCESS-NEXT] Columnist 시작 (editor_content 길이: ${editorContent.length}자)`)
+      const columnistStartTime = Date.now()
       const result = await runColumnist(editorContent)
+      console.log(`[PROCESS-NEXT] Columnist 완료 (${Date.now() - columnistStartTime}ms)`)
 
       if (!result.success || !result.data) {
+        const errorDetail = `Columnist 처리 실패 [${result.error?.code || 'UNKNOWN'}]: ${result.error?.message || '알 수 없는 오류'}`
+        console.error(`[PROCESS-NEXT] ${errorDetail}`)
         return {
           newStage: currentStage,
-          error: result.error?.message || 'Columnist 처리 실패'
+          error: errorDetail
         }
       }
 

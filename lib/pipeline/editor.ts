@@ -88,7 +88,7 @@ export async function runEditor(draft: string): Promise<PipelineResult<EditorRes
         { role: 'user', content: `다음 초안을 편집해주세요:\n\n${draft}` }
       ],
       temperature: 0.3,
-      max_tokens: 4000,  // 실제 응답은 2000~3000자 수준, 4000이면 충분
+      max_tokens: 8000,  // JSON 응답이 잘리지 않도록 충분히 확보
       response_format: { type: 'json_object' }
     })
 

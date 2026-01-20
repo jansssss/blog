@@ -51,6 +51,10 @@ export async function POST(request: Request) {
       metaDescription: result.data.metaDescription,
       tags: result.data.tags,
       markdown: result.data.markdown,
+      // 품질 검증 결과
+      validationPassed: result.data.validationPassed,
+      validationFailures: result.data.validationFailures || [],
+      validationWarnings: result.data.validationWarnings || [],
       // 디버깅용
       used_phrases: result.data.usedPhrases,
       phrase_seed: result.data.phraseSeed,

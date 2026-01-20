@@ -47,6 +47,9 @@ interface Draft {
   error_message: string | null
   editor_content: string | null
   columnist_content: string | null
+  validation_passed: boolean | null
+  validation_failures: string[] | null
+  validation_warnings: string[] | null
   created_at: string
 }
 
@@ -73,14 +76,30 @@ const truncateErrorMessage = (message: string | null, maxLength: number = 60): s
 
 // Stage 기반 배지 생성
 const getStageBadge = (draft: Draft): { label: string; className: string; tooltip?: string } => {
-  const { stage, error_stage, error_code, error_message, editor_content, columnist_content } = draft
+  const { stage, error_stage, error_code, error_message, editor_content, columnist_content, validation_passed, validation_failures, validation_warnings } = draft
 
-  // 완료 상태
-  if (stage === 'SAVED') {
+  // 완료 상태 - 품질 검증 결과 포함
+  if (stage === 'SAVED' || stage === 'COLUMNIST_DONE') {
+    // 품질 검증 실패
+    if (validation_passed === false) {
+      const failCount = validation_failures?.length || 0
+      const warnCount = validation_warnings?.length || 0
+      return {
+        label: `⚠️ 완성 (검증실패 ${failCount})`,
+        className: 'bg-orange-100 text-orange-800',
+        tooltip: `실패: ${failCount}개, 경고: ${warnCount}개 - 편집 시 확인 필요`
+      }
+    }
+    // 품질 검증 경고만 있음
+    if (validation_warnings && validation_warnings.length > 0) {
+      return {
+        label: `✓ 완성 (경고 ${validation_warnings.length})`,
+        className: 'bg-yellow-100 text-yellow-800',
+        tooltip: `경고 ${validation_warnings.length}개 - 편집 시 참고`
+      }
+    }
+    // 품질 검증 완전 통과
     return { label: '✓ 초안 완성', className: 'bg-green-100 text-green-800' }
-  }
-  if (stage === 'COLUMNIST_DONE') {
-    return { label: '✓ 3차 완료', className: 'bg-green-100 text-green-800' }
   }
   if (stage === 'EDITOR_DONE') {
     return { label: '2차 완료', className: 'bg-blue-100 text-blue-800' }
@@ -434,7 +453,11 @@ export default function AdminDraftsPage() {
           columnist_content: columnistData.markdown,
           error_stage: null,
           error_code: null,
-          error_message: null
+          error_message: null,
+          // 품질 검증 결과 저장
+          validation_passed: columnistData.validationPassed ?? null,
+          validation_failures: columnistData.validationFailures || [],
+          validation_warnings: columnistData.validationWarnings || []
         })
         .eq('id', draftId)
 
@@ -457,7 +480,18 @@ export default function AdminDraftsPage() {
       console.log('[RESUME] 완료!')
 
       setTimeout(() => {
-        alert('✅ 편집 및 글작성이 완료되었습니다!')
+        // 품질 검증 결과에 따른 메시지
+        let message = '✅ 편집 및 글작성이 완료되었습니다!'
+
+        if (columnistData.validationPassed === false) {
+          const failCount = columnistData.validationFailures?.length || 0
+          const warnCount = columnistData.validationWarnings?.length || 0
+          message += `\n\n⚠️ 품질 검증 이슈 발견:\n- 실패: ${failCount}개\n- 경고: ${warnCount}개\n\n초안 편집에서 상세 내용을 확인하세요.`
+        } else if (columnistData.validationWarnings?.length > 0) {
+          message += `\n\n💡 품질 경고 ${columnistData.validationWarnings.length}개 - 편집 시 참고하세요.`
+        }
+
+        alert(message)
         loadDrafts()
         setResumingId(null)
         setResumingStep('idle')

@@ -22,6 +22,9 @@ interface Draft {
   tags: string[]
   thumbnail_url: string | null
   status: string
+  validation_passed: boolean | null
+  validation_failures: string[] | null
+  validation_warnings: string[] | null
   created_at: string
 }
 
@@ -219,6 +222,44 @@ export default function DraftEditPage() {
       </div>
 
       <div className="grid gap-6">
+        {/* 품질 검증 결과 - 실패/경고가 있을 때만 표시 */}
+        {(draft.validation_passed === false || (draft.validation_warnings && draft.validation_warnings.length > 0)) && (
+          <Card className={draft.validation_passed === false ? 'border-orange-500 bg-orange-50' : 'border-yellow-500 bg-yellow-50'}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                {draft.validation_passed === false ? '⚠️ 품질 검증 실패' : '💡 품질 검증 경고'}
+                <span className="text-sm font-normal text-muted-foreground">
+                  - 아래 내용을 참고하여 편집하세요
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* 실패 항목 */}
+              {draft.validation_failures && draft.validation_failures.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-red-700 mb-1">❌ 실패 ({draft.validation_failures.length}개)</h4>
+                  <ul className="list-disc list-inside text-sm text-red-600 space-y-0.5">
+                    {draft.validation_failures.map((f, i) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* 경고 항목 */}
+              {draft.validation_warnings && draft.validation_warnings.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-yellow-700 mb-1">⚠️ 경고 ({draft.validation_warnings.length}개)</h4>
+                  <ul className="list-disc list-inside text-sm text-yellow-700 space-y-0.5">
+                    {draft.validation_warnings.map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* 기본 정보 */}
         <Card>
           <CardHeader>

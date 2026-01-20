@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/news-automation",
+      "path": "/api/cron/news-fetch",
       "schedule": "0 0 * * *"
     }
   ]

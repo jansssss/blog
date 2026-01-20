@@ -258,9 +258,9 @@ export default function AdminDraftsPage() {
     }
   }
 
-  // 이어하기 (resume) 핸들러 - 분리된 API 직접 호출
+  // 편집 및 글작성 핸들러 - Editor + Columnist 실행
   const handleResume = async (draft: Draft) => {
-    if (!confirm(`"${draft.title}" 초안의 AI 작업을 이어서 진행하시겠습니까?\n\n⚠️ API 비용이 발생합니다.`)) {
+    if (!confirm(`"${draft.title}" 초안을 편집하고 글작성을 진행하시겠습니까?\n\n📝 편집자가 팩트체크/교정 후\n✍️ 칼럼니스트가 최종 글을 작성합니다.\n\n⚠️ API 비용이 발생합니다.`)) {
       return
     }
 
@@ -457,32 +457,32 @@ export default function AdminDraftsPage() {
       console.log('[RESUME] 완료!')
 
       setTimeout(() => {
-        alert('AI 작업이 완료되었습니다.')
+        alert('✅ 편집 및 글작성이 완료되었습니다!')
         loadDrafts()
         setResumingId(null)
         setResumingStep('idle')
       }, 500)
 
     } catch (err) {
-      console.error('이어하기 오류:', err)
-      alert(`이어하기 실패: ${err instanceof Error ? err.message : '알 수 없는 오류'}`)
+      console.error('편집 및 글작성 오류:', err)
+      alert(`편집 및 글작성 실패: ${err instanceof Error ? err.message : '알 수 없는 오류'}`)
       loadDrafts()
       setResumingId(null)
       setResumingStep('idle')
     }
   }
 
-  // 이어하기 진행 메시지
+  // 편집 및 글작성 진행 메시지
   const getResumingMessage = () => {
     switch (resumingStep) {
       case 'editor':
         return '📝 편집자가 팩트체크 및 교정 중...'
       case 'columnist':
-        return '✍️ 칼럼니스트가 글을 작성 중...'
+        return '✍️ 칼럼니스트가 최종 글 작성 중...'
       case 'saving':
-        return '💾 저장 중...'
+        return '💾 최종 저장 중...'
       case 'done':
-        return '✅ 완료!'
+        return '✅ 글작성 완료!'
       default:
         return '준비 중...'
     }
@@ -529,7 +529,7 @@ export default function AdminDraftsPage() {
         </div>
       </div>
 
-      {/* 이어하기 진행 상태 모달 */}
+      {/* 편집 및 글작성 진행 상태 모달 */}
       {resumingId && (
         <Card className="mb-6 border-2 border-orange-500 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-100 via-yellow-100 to-orange-100 animate-pulse" />
@@ -552,7 +552,7 @@ export default function AdminDraftsPage() {
                   {getResumingMessage()}
                 </p>
                 <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">
-                  이어하기 진행 중...
+                  편집 및 글작성 진행 중...
                 </p>
               </div>
 
@@ -759,7 +759,7 @@ export default function AdminDraftsPage() {
 
                   {/* 액션 버튼 - 모바일에서 세로 배치 */}
                   <div className="flex flex-col gap-1.5 md:gap-2 shrink-0">
-                    {/* 이어하기 버튼 (실패 또는 중간 단계인 경우) */}
+                    {/* 편집 및 글작성 버튼 (1차 완료 또는 실패 상태인 경우) */}
                     {canResume(draft) && (
                       <Button
                         size="sm"
@@ -769,7 +769,7 @@ export default function AdminDraftsPage() {
                         className="bg-orange-500 hover:bg-orange-600 text-xs md:text-sm px-2 md:px-3"
                       >
                         <RotateCcw className={`h-3.5 w-3.5 md:h-4 md:w-4 md:mr-2 ${resumingId === draft.id ? 'animate-spin' : ''}`} />
-                        <span className="hidden md:inline">{resumingId === draft.id ? '진행중...' : '이어하기'}</span>
+                        <span className="hidden md:inline">{resumingId === draft.id ? '진행중...' : '편집 및 글작성'}</span>
                       </Button>
                     )}
                     <Link href={`/admin/drafts/${draft.id}`}>

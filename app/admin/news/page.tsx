@@ -19,27 +19,8 @@ interface NewsItem {
   created_at: string
 }
 
-// 진행 상태 타입
-type ProcessingStep = 'idle' | 'perplexity' | 'editor' | 'columnist' | 'saving' | 'done' | 'error'
-
-// Draft stage → ProcessingStep 매핑
-function stageToStep(stage: string): ProcessingStep {
-  switch (stage) {
-    case 'NEW':
-    case 'QUEUED':
-      return 'perplexity'
-    case 'PERPLEXITY_DONE':
-      return 'editor'
-    case 'EDITOR_DONE':
-      return 'columnist'
-    case 'SAVED':
-      return 'done'
-    case 'FAILED':
-      return 'error'
-    default:
-      return 'idle'
-  }
-}
+// 진행 상태 타입 (Perplexity만 사용)
+type ProcessingStep = 'idle' | 'perplexity' | 'done' | 'error'
 
 export default function AdminNewsPage() {
   const router = useRouter()
@@ -175,14 +156,14 @@ export default function AdminNewsPage() {
     }
   }
 
-  // AI 초안 생성 (process-next 기반 파이프라인)
+  // AI 초안 생성 (Perplexity만 실행 - 1차 완료 상태로 저장)
   const handleGenerateDrafts = async () => {
     if (selectedItems.length === 0) {
       alert('초안을 생성할 뉴스를 선택해주세요.')
       return
     }
 
-    if (!confirm(`선택한 ${selectedItems.length}개 뉴스로 AI 초안을 생성하시겠습니까?\n\n⚠️ API 비용이 발생합니다.`)) {
+    if (!confirm(`선택한 ${selectedItems.length}개 뉴스로 AI 초안을 생성하시겠습니까?\n\n✅ Perplexity AI로 1차 초안이 생성됩니다.\n✅ 생성 후 '초안 관리'에서 '편집 및 글작성' 버튼으로 완성하세요.\n\n⚠️ API 비용이 발생합니다.`)) {
       return
     }
 
@@ -191,11 +172,9 @@ export default function AdminNewsPage() {
     setProcessingStep('perplexity')
 
     const results = { success: 0, failed: 0, failedItems: [] as string[] }
-    const draftIds: string[] = []
 
     try {
-      // 1단계: 선택한 뉴스들로 draft 생성 (stage: NEW)
-      console.log('[AI-PIPELINE] Draft 생성 시작...')
+      console.log('[PERPLEXITY] 초안 생성 시작...')
 
       for (let i = 0; i < selectedItems.length; i++) {
         setCurrentItemIndex(i + 1)
@@ -212,137 +191,28 @@ export default function AdminNewsPage() {
             body: JSON.stringify({ newsItemIds: [selectedItems[i]] })
           })
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            console.error('[AI-PIPELINE] Draft 생성 실패:', errorData)
+          const responseData = await response.json()
+
+          if (!response.ok || !responseData.success) {
+            console.error('[PERPLEXITY] 생성 실패:', responseData)
             results.failed++
-            results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: Draft 생성 실패`)
+            results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${responseData.error || '생성 실패'}`)
             continue
           }
 
-          // 생성된 draft ID 조회
-          const { data: draft } = await supabase
-            .from('drafts')
-            .select('id')
-            .eq('news_item_id', selectedItems[i])
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single()
+          results.success++
+          console.log(`[PERPLEXITY] 성공: ${i + 1}/${selectedItems.length}`)
 
-          if (draft) {
-            draftIds.push(draft.id)
-            console.log(`[AI-PIPELINE] Draft 생성됨: ${draft.id}`)
-          }
         } catch (err) {
-          console.error('[AI-PIPELINE] Draft 생성 오류:', err)
+          console.error('[PERPLEXITY] 오류:', err)
           results.failed++
           results.failedItems.push(`${selectedItems[i].slice(0, 8)}...: ${err instanceof Error ? err.message : '오류'}`)
         }
       }
 
-      if (draftIds.length === 0) {
-        throw new Error('생성된 draft가 없습니다.')
-      }
-
-      // 2단계: process-next 폴링으로 파이프라인 진행
-      console.log(`[AI-PIPELINE] ${draftIds.length}개 draft 파이프라인 시작...`)
-
-      let completedCount = 0
-      let failedCount = 0
-      const processedDrafts = new Set<string>()
-      let noProgressCount = 0
-      const maxNoProgress = 20 // 폴링 최대 횟수 (약 60초)
-
-      while (completedCount + failedCount < draftIds.length && noProgressCount < maxNoProgress) {
-        // process-next 호출 (서버가 처리 가능한 draft 하나 선택)
-        try {
-          const processResponse = await fetch('/api/admin/drafts/process-next', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-          })
-
-          const processResult = await processResponse.json()
-          console.log('[AI-PIPELINE] process-next 결과:', processResult)
-
-          if (processResult.ok && processResult.draftId) {
-            noProgressCount = 0 // 진행됨
-
-            // UI 업데이트
-            const step = stageToStep(processResult.newStage || '')
-            setProcessingStep(step)
-
-            if (processResult.newStage === 'SAVED') {
-              if (!processedDrafts.has(processResult.draftId)) {
-                processedDrafts.add(processResult.draftId)
-                completedCount++
-                results.success++
-                console.log(`[AI-PIPELINE] 완료: ${processResult.draftId} (${completedCount}/${draftIds.length})`)
-              }
-            } else if (processResult.newStage === 'FAILED') {
-              if (!processedDrafts.has(processResult.draftId)) {
-                processedDrafts.add(processResult.draftId)
-                failedCount++
-                results.failed++
-                results.failedItems.push(`${processResult.draftId.slice(0, 8)}...: ${processResult.error || '처리 실패'}`)
-                console.log(`[AI-PIPELINE] 실패: ${processResult.draftId}`)
-              }
-            }
-          } else {
-            // 처리할 draft가 없음 (모두 완료되었거나 락 대기 중)
-            noProgressCount++
-          }
-        } catch (err) {
-          console.error('[AI-PIPELINE] process-next 오류:', err)
-          noProgressCount++
-        }
-
-        // 현재 draft 상태 확인 (UI 동기화)
-        const { data: currentDrafts } = await supabase
-          .from('drafts')
-          .select('id, stage')
-          .in('id', draftIds)
-
-        if (currentDrafts) {
-          let inProgress = false
-          for (const d of currentDrafts) {
-            if (d.stage === 'SAVED' && !processedDrafts.has(d.id)) {
-              processedDrafts.add(d.id)
-              completedCount++
-              results.success++
-            } else if (d.stage === 'FAILED' && !processedDrafts.has(d.id)) {
-              processedDrafts.add(d.id)
-              failedCount++
-              results.failed++
-            } else if (!['SAVED', 'FAILED'].includes(d.stage)) {
-              inProgress = true
-              setProcessingStep(stageToStep(d.stage))
-            }
-          }
-
-          // 모든 draft 완료 확인
-          if (completedCount + failedCount >= draftIds.length) {
-            break
-          }
-
-          // 진행 중인 draft가 없으면 대기
-          if (!inProgress) {
-            noProgressCount++
-          }
-        }
-
-        // 폴링 간격 (3초)
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        setCurrentItemIndex(completedCount + failedCount)
-      }
-
-      if (noProgressCount >= maxNoProgress) {
-        console.warn('[AI-PIPELINE] 폴링 타임아웃 - 일부 draft가 완료되지 않았을 수 있습니다.')
-      }
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
-      console.error('[AI-PIPELINE] 파이프라인 오류:', errorMessage)
+      console.error('[PERPLEXITY] 전체 오류:', errorMessage)
       results.failedItems.push(errorMessage)
     }
 
@@ -354,11 +224,11 @@ export default function AdminNewsPage() {
       setSelectedItems([])
       loadNewsItems()
 
-      let message = `✅ ${results.success}개 초안 생성 완료!`
+      let message = `✅ ${results.success}개 1차 초안 생성 완료!\n\n📝 '초안 관리'에서 '편집 및 글작성' 버튼을 눌러 완성하세요.`
       if (results.failed > 0) {
-        message += `\n❌ ${results.failed}개 실패`
+        message += `\n\n❌ ${results.failed}개 실패`
         if (results.failedItems.length > 0) {
-          message += `\n\n실패 상세:\n${results.failedItems.join('\n')}`
+          message += `\n${results.failedItems.join('\n')}`
         }
       }
       alert(message)
@@ -403,19 +273,13 @@ export default function AdminNewsPage() {
     })
   }
 
-  // 진행 상태 메시지
+  // 진행 상태 메시지 (Perplexity만)
   const getProcessingMessage = () => {
     switch (processingStep) {
       case 'perplexity':
-        return '🔍 Perplexity AI로 뉴스를 분석하여 초안 작성 중...'
-      case 'editor':
-        return '📝 편집자가 팩트체크 및 교정 중...'
-      case 'columnist':
-        return '✍️ 칼럼니스트가 글을 작성 중...'
-      case 'saving':
-        return '💾 초안 저장 중...'
+        return '🔍 Perplexity AI로 뉴스를 분석하여 1차 초안 작성 중...'
       case 'done':
-        return '✅ 완료!'
+        return '✅ 1차 초안 생성 완료!'
       case 'error':
         return '❌ 오류 발생'
       default:
@@ -502,95 +366,41 @@ export default function AdminNewsPage() {
                 </p>
               </div>
 
-              {/* 진행 단계 표시 - 모바일에서 2x2 그리드, 데스크톱에서 가로 배치 */}
-              <div className="grid grid-cols-2 gap-2 md:flex md:items-center md:gap-3 mt-2 w-full md:w-auto px-4 md:px-0">
-                {/* Step 1: Perplexity */}
-                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
+              {/* 진행 단계 표시 - 단순화 (Perplexity만) */}
+              <div className="flex items-center gap-3 mt-2">
+                {/* Step 1: Perplexity 분석 */}
+                <div className={`relative flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
                   processingStep === 'perplexity'
-                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
-                    : processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
+                    ? 'bg-purple-600 text-white scale-110 shadow-lg shadow-purple-300'
+                    : processingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
                 }`}>
                   {processingStep === 'perplexity' && (
                     <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
                   )}
-                  <span className="relative">1. Perplexity</span>
+                  <span className="relative">🔍 Perplexity 분석</span>
                 </div>
 
-                {/* Arrow 1 - 데스크톱에서만 표시 */}
-                <div className={`hidden md:block transition-all duration-300 ${
-                  processingStep === 'editor' || processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
-                    ? 'text-green-500' : 'text-gray-300'
+                {/* Arrow */}
+                <div className={`transition-all duration-300 ${
+                  processingStep === 'done' ? 'text-green-500' : 'text-gray-300'
                 }`}>
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </div>
 
-                {/* Step 2: Editor */}
-                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
-                  processingStep === 'editor'
-                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
-                    : processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-500'
+                {/* Step 2: 완료 */}
+                <div className={`relative flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
+                  processingStep === 'done'
+                    ? 'bg-green-500 text-white scale-110 shadow-lg shadow-green-300'
+                    : 'bg-gray-200 text-gray-500'
                 }`}>
-                  {processingStep === 'editor' && (
-                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
-                  )}
-                  <span className="relative">2. 편집자</span>
-                </div>
-
-                {/* Arrow 2 - 데스크톱에서만 표시 */}
-                <div className={`hidden md:block transition-all duration-300 ${
-                  processingStep === 'columnist' || processingStep === 'saving' || processingStep === 'done'
-                    ? 'text-green-500' : 'text-gray-300'
-                }`}>
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-
-                {/* Step 3: Columnist */}
-                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
-                  processingStep === 'columnist'
-                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
-                    : processingStep === 'saving' || processingStep === 'done'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {processingStep === 'columnist' && (
-                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
-                  )}
-                  <span className="relative">3. 칼럼니스트</span>
-                </div>
-
-                {/* Arrow 3 - 데스크톱에서만 표시 */}
-                <div className={`hidden md:block transition-all duration-300 ${
-                  processingStep === 'saving' || processingStep === 'done'
-                    ? 'text-green-500' : 'text-gray-300'
-                }`}>
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-
-                {/* Step 4: Save */}
-                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
-                  processingStep === 'saving'
-                    ? 'bg-purple-600 text-white md:scale-110 shadow-lg shadow-purple-300'
-                    : processingStep === 'done'
-                      ? 'bg-green-500 text-white md:scale-110'
-                      : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {processingStep === 'saving' && (
-                    <span className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-50" />
-                  )}
                   {processingStep === 'done' && (
                     <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-50" />
                   )}
-                  <span className="relative">4. 저장</span>
+                  <span className="relative">✅ 1차 완료</span>
                 </div>
               </div>
 
@@ -599,10 +409,7 @@ export default function AdminNewsPage() {
                 <div
                   className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500 ease-out"
                   style={{
-                    width: processingStep === 'perplexity' ? '25%'
-                         : processingStep === 'editor' ? '50%'
-                         : processingStep === 'columnist' ? '75%'
-                         : processingStep === 'saving' ? '90%'
+                    width: processingStep === 'perplexity' ? '50%'
                          : processingStep === 'done' ? '100%' : '0%'
                   }}
                 />

@@ -13,6 +13,13 @@ import { supabase } from '@/lib/supabase'
 import { uploadThumbnail } from '@/lib/upload'
 import Image from 'next/image'
 
+interface Site {
+  id: string
+  domain: string
+  name: string
+  is_main: boolean
+}
+
 const Editor = dynamic(() => import('@/components/Editor'), {
   ssr: false,
   loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
@@ -36,6 +43,8 @@ function AdminEditorContent() {
   const [tags, setTags] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [published, setPublished] = useState(true)
+  const [sites, setSites] = useState<Site[]>([])
+  const [selectedSiteId, setSelectedSiteId] = useState<string>('')
 
   useEffect(() => {
     setMounted(true)
@@ -45,6 +54,9 @@ function AdminEditorContent() {
       router.push('/admin/login')
       return
     }
+
+    // 사이트 목록 로드
+    loadSites()
 
     // 초안에서 온 경우 데이터 로드
     const draftData = sessionStorage.getItem('draftToEdit')
@@ -58,6 +70,10 @@ function AdminEditorContent() {
         setCategory(parsed.category || '금융')
         setTags(Array.isArray(parsed.tags) ? parsed.tags.join(', ') : '')
         setThumbnailUrl(parsed.thumbnailUrl || '')
+        // 사이트 ID 설정 (초안에서 전달된 경우)
+        if (parsed.siteId) {
+          setSelectedSiteId(parsed.siteId)
+        }
         // 데이터 로드 후 세션 스토리지 비우기
         sessionStorage.removeItem('draftToEdit')
       } catch (e) {
@@ -70,6 +86,25 @@ function AdminEditorContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, postId])
+
+  const loadSites = async () => {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, domain, name, is_main')
+      .order('is_main', { ascending: false })
+      .order('name', { ascending: true })
+
+    if (!error && data) {
+      setSites(data)
+      // 기본값으로 메인 사이트 선택 (선택된 사이트가 없을 때만)
+      if (!selectedSiteId) {
+        const mainSite = data.find(s => s.is_main)
+        if (mainSite) {
+          setSelectedSiteId(mainSite.id)
+        }
+      }
+    }
+  }
 
   const loadPost = async (id: string) => {
     setLoading(true)
@@ -97,6 +132,10 @@ function AdminEditorContent() {
         setTags(Array.isArray(data.tags) ? data.tags.join(', ') : '')
         setThumbnailUrl(data.thumbnail_url || '')
         setPublished(data.published)
+        // 게시글의 site_id 로드
+        if (data.site_id) {
+          setSelectedSiteId(data.site_id)
+        }
       }
     } catch (err) {
       console.error('예상치 못한 오류:', err)
@@ -120,6 +159,12 @@ function AdminEditorContent() {
       return
     }
 
+    // 사이트 선택 필수
+    if (!selectedSiteId) {
+      alert('발행할 사이트를 선택해주세요.')
+      return
+    }
+
     try {
       const adminId = localStorage.getItem('adminId')
 
@@ -135,6 +180,7 @@ function AdminEditorContent() {
           thumbnail_url: thumbnailUrl || null,
           published,
           author_id: adminId,
+          site_id: selectedSiteId,
         }
 
         const { error } = await supabase
@@ -148,7 +194,8 @@ function AdminEditorContent() {
           return
         }
 
-        alert('게시글이 성공적으로 수정되었습니다!')
+        const selectedSite = sites.find(s => s.id === selectedSiteId)
+        alert(`게시글이 "${selectedSite?.name}" 사이트에 성공적으로 수정되었습니다!`)
       } else {
         // 새 글 작성 모드 - published_at 설정
         const insertData = {
@@ -162,6 +209,7 @@ function AdminEditorContent() {
           published,
           published_at: published ? new Date().toISOString() : null,
           author_id: adminId,
+          site_id: selectedSiteId,
         }
 
         const { error } = await supabase
@@ -175,7 +223,8 @@ function AdminEditorContent() {
           return
         }
 
-        alert('게시글이 성공적으로 저장되었습니다!')
+        const selectedSite = sites.find(s => s.id === selectedSiteId)
+        alert(`게시글이 "${selectedSite?.name}" 사이트에 성공적으로 저장되었습니다!`)
       }
 
       // 메인 페이지로 이동
@@ -317,6 +366,29 @@ function AdminEditorContent() {
               <CardTitle>발행 설정</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 사이트 선택 */}
+              <div className="space-y-2">
+                <label htmlFor="siteId" className="text-sm font-medium">
+                  발행 사이트 <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="siteId"
+                  value={selectedSiteId}
+                  onChange={(e) => setSelectedSiteId(e.target.value)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">사이트 선택</option>
+                  {sites.map(site => (
+                    <option key={site.id} value={site.id}>
+                      {site.name} ({site.domain})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  게시글이 표시될 사이트를 선택하세요
+                </p>
+              </div>
+
               <div className="flex items-center justify-between">
                 <label htmlFor="published" className="text-sm font-medium">
                   즉시 발행

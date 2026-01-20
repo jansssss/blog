@@ -164,7 +164,7 @@ export default function DraftEditPage() {
     // 마크다운을 HTML로 변환
     const htmlContent = await marked.parse(content)
 
-    // 초안 내용을 에디터로 전달
+    // 초안 내용을 에디터로 전달 (site_id 포함)
     const draftData = {
       title,
       slug,
@@ -172,7 +172,8 @@ export default function DraftEditPage() {
       content: htmlContent, // HTML로 변환된 콘텐츠
       category,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      thumbnailUrl
+      thumbnailUrl,
+      siteId: selectedSiteId // 선택된 사이트 ID 전달
     }
 
     // 세션 스토리지에 임시 저장

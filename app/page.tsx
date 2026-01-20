@@ -4,7 +4,8 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
-import { getCurrentSiteId } from '@/lib/site'
+import InterestRateWidget from '@/components/InterestRateWidget'
+import { getCurrentSite } from '@/lib/site'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -20,8 +21,10 @@ export default async function HomePage({
   const postsPerPage = 12
   const offset = (currentPage - 1) * postsPerPage
 
-  // 현재 사이트 ID 조회
-  const siteId = await getCurrentSiteId()
+  // 현재 사이트 정보 조회
+  const site = await getCurrentSite()
+  const siteId = site?.id
+  const isMainSite = site?.is_main ?? true
 
   // 카테고리별 쿼리 생성 (site_id 필터 강제)
   let postsQuery = supabase
@@ -103,8 +106,12 @@ export default async function HomePage({
 
   return (
     <>
-      {/* Info Widget - 날씨 & 코스피 */}
-      <InfoWidget />
+      {/* 사이트별 Info Widget */}
+      {isMainSite ? (
+        <InfoWidget />
+      ) : (
+        <InterestRateWidget />
+      )}
 
       <div className="container py-10 overflow-x-hidden">
         {/* Hero Section */}

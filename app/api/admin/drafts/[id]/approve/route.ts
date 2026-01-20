@@ -1,6 +1,8 @@
 /**
  * 초안 승인 및 게시글 발행 API
  * POST /api/admin/drafts/[id]/approve
+ *
+ * 요청 body: { site_id: string } - 필수
  */
 
 import { NextResponse } from 'next/server'
@@ -17,11 +19,42 @@ export async function POST(
   try {
     const { id: draftId } = await params
 
+    // 요청 body에서 site_id 추출 (필수)
+    let siteId: string | null = null
+    try {
+      const body = await request.json()
+      siteId = body.site_id
+    } catch {
+      // body가 없는 경우
+    }
+
+    // site_id 필수 검증
+    if (!siteId) {
+      return NextResponse.json(
+        { error: '발행할 사이트를 선택해주세요 (site_id 필수)' },
+        { status: 400 }
+      )
+    }
+
     // 로그인 확인 (클라이언트에서 보낸 요청)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // site_id 유효성 검증
+    const { data: site, error: siteError } = await supabaseAdmin
+      .from('sites')
+      .select('id, name')
+      .eq('id', siteId)
+      .single()
+
+    if (siteError || !site) {
+      return NextResponse.json(
+        { error: '유효하지 않은 사이트입니다' },
+        { status: 400 }
+      )
     }
 
     // 초안 가져오기
@@ -43,7 +76,7 @@ export async function POST(
       )
     }
 
-    // posts 테이블에 게시글 삽입
+    // posts 테이블에 게시글 삽입 (site_id 포함)
     const { data: post, error: postError } = await supabaseAdmin
       .from('posts')
       .insert({
@@ -56,7 +89,8 @@ export async function POST(
         thumbnail_url: draft.thumbnail_url,
         published: true,
         published_at: new Date().toISOString(),
-        author_id: user.id
+        author_id: user.id,
+        site_id: siteId  // 선택된 사이트 ID
       })
       .select()
       .single()
@@ -86,7 +120,7 @@ export async function POST(
       // 게시글은 이미 생성되었으므로 에러를 로그만 남기고 계속 진행
     }
 
-    console.log(`[APPROVE] Draft ${draftId} approved, published as post ${post.id}, and deleted`)
+    console.log(`[APPROVE] Draft ${draftId} approved, published as post ${post.id} to site ${site.name}, and deleted`)
 
     return NextResponse.json({
       success: true,

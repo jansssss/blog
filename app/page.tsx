@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
+import { getCurrentSiteId } from '@/lib/site'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -19,21 +20,30 @@ export default async function HomePage({
   const postsPerPage = 12
   const offset = (currentPage - 1) * postsPerPage
 
-  // 카테고리별 쿼리 생성
-  const postsQuery = supabase
+  // 현재 사이트 ID 조회
+  const siteId = await getCurrentSiteId()
+
+  // 카테고리별 쿼리 생성 (site_id 필터 강제)
+  let postsQuery = supabase
     .from('posts')
     .select('*')
     .eq('published', true)
 
-  const countQuery = supabase
+  let countQuery = supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })
     .eq('published', true)
 
+  // site_id 필터 적용 (필수)
+  if (siteId) {
+    postsQuery = postsQuery.eq('site_id', siteId)
+    countQuery = countQuery.eq('site_id', siteId)
+  }
+
   // 카테고리 필터 적용
   if (selectedCategory) {
-    postsQuery.eq('category', selectedCategory)
-    countQuery.eq('category', selectedCategory)
+    postsQuery = postsQuery.eq('category', selectedCategory)
+    countQuery = countQuery.eq('category', selectedCategory)
   }
 
   // 병렬로 데이터 가져오기 (성능 개선)

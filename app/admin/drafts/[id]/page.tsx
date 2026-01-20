@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
-import { ArrowLeft, Save, Trash2, Edit } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Edit, Send } from 'lucide-react'
 import { marked } from 'marked'
 
 interface Draft {
@@ -22,10 +22,18 @@ interface Draft {
   tags: string[]
   thumbnail_url: string | null
   status: string
+  site_id: string | null
   validation_passed: boolean | null
   validation_failures: string[] | null
   validation_warnings: string[] | null
   created_at: string
+}
+
+interface Site {
+  id: string
+  domain: string
+  name: string
+  is_main: boolean
 }
 
 export default function DraftEditPage() {
@@ -35,6 +43,7 @@ export default function DraftEditPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
@@ -43,6 +52,8 @@ export default function DraftEditPage() {
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [sites, setSites] = useState<Site[]>([])
+  const [selectedSiteId, setSelectedSiteId] = useState<string>('')
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin')
@@ -51,10 +62,28 @@ export default function DraftEditPage() {
       return
     }
 
+    loadSites()
     if (draftId) {
       loadDraft()
     }
   }, [router, draftId])
+
+  const loadSites = async () => {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, domain, name, is_main')
+      .order('is_main', { ascending: false })
+      .order('name', { ascending: true })
+
+    if (!error && data) {
+      setSites(data)
+      // 기본값으로 메인 사이트 선택
+      const mainSite = data.find(s => s.is_main)
+      if (mainSite) {
+        setSelectedSiteId(mainSite.id)
+      }
+    }
+  }
 
   const loadDraft = async () => {
     setLoading(true)
@@ -81,6 +110,10 @@ export default function DraftEditPage() {
         setCategory(data.category)
         setTags(Array.isArray(data.tags) ? data.tags.join(', ') : '')
         setThumbnailUrl(data.thumbnail_url || '')
+        // 저장된 site_id가 있으면 선택
+        if (data.site_id) {
+          setSelectedSiteId(data.site_id)
+        }
       }
     } catch (err) {
       console.error('예상치 못한 오류:', err)
@@ -177,6 +210,43 @@ export default function DraftEditPage() {
     }
   }
 
+  const handlePublish = async () => {
+    // site_id 필수 검증
+    if (!selectedSiteId) {
+      alert('발행할 사이트를 선택해주세요.')
+      return
+    }
+
+    const selectedSite = sites.find(s => s.id === selectedSiteId)
+    if (!confirm(`"${selectedSite?.name}" 사이트에 발행하시겠습니까?\n\n발행 후 초안은 삭제됩니다.`)) {
+      return
+    }
+
+    setPublishing(true)
+    try {
+      const response = await fetch(`/api/admin/drafts/${draftId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site_id: selectedSiteId })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        alert(`발행 실패: ${result.error}`)
+        return
+      }
+
+      alert(`게시글이 "${selectedSite?.name}" 사이트에 발행되었습니다!`)
+      router.push(`/blog/${result.slug}`)
+    } catch (err) {
+      console.error('발행 오류:', err)
+      alert('발행 중 오류가 발생했습니다.')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="container py-10">
@@ -205,7 +275,7 @@ export default function DraftEditPage() {
           </Link>
           <h1 className="text-3xl font-bold">초안 편집</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button onClick={handleEditInEditor} variant="outline">
             <Edit className="mr-2 h-4 w-4" />
             에디터로 편집
@@ -218,6 +288,28 @@ export default function DraftEditPage() {
             <Trash2 className="mr-2 h-4 w-4" />
             삭제
           </Button>
+          <div className="border-l pl-2 ml-2 flex items-center gap-2">
+            <select
+              value={selectedSiteId}
+              onChange={(e) => setSelectedSiteId(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+            >
+              <option value="">사이트 선택</option>
+              {sites.map(site => (
+                <option key={site.id} value={site.id}>
+                  {site.name} ({site.domain})
+                </option>
+              ))}
+            </select>
+            <Button
+              onClick={handlePublish}
+              disabled={publishing || !selectedSiteId}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              {publishing ? '발행 중...' : '발행'}
+            </Button>
+          </div>
         </div>
       </div>
 

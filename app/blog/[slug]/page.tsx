@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import EditButton from '@/components/EditButton'
 import DeleteButton from '@/components/DeleteButton'
+import { getCurrentSiteId } from '@/lib/site'
 
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
@@ -17,13 +18,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug: encodedSlug } = await params
   // URL 디코딩 (한글 slug 지원)
   const slug = decodeURIComponent(encodedSlug)
+  const siteId = await getCurrentSiteId()
 
-  const { data: post } = await supabase
+  let query = supabase
     .from('posts')
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
-    .single()
+
+  if (siteId) {
+    query = query.eq('site_id', siteId)
+  }
+
+  const { data: post } = await query.single()
 
   if (!post) {
     return {
@@ -51,37 +58,54 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const { slug: encodedSlug } = await params
   // URL 디코딩 (한글 slug 지원)
   const slug = decodeURIComponent(encodedSlug)
+  const siteId = await getCurrentSiteId()
 
-  const { data: post } = await supabase
+  // 현재 글 조회 (site_id 필터 적용)
+  let postQuery = supabase
     .from('posts')
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
-    .single()
+
+  if (siteId) {
+    postQuery = postQuery.eq('site_id', siteId)
+  }
+
+  const { data: post } = await postQuery.single()
 
   if (!post) {
     notFound()
   }
 
-  // 이전 글 (현재 글보다 이전에 발행된 글 중 가장 최근 글)
-  const { data: prevPost } = await supabase
+  // 이전 글 (현재 글보다 이전에 발행된 글 중 가장 최근 글, 같은 사이트)
+  let prevQuery = supabase
     .from('posts')
     .select('id, title, slug')
     .eq('published', true)
     .lt('published_at', post.published_at)
     .order('published_at', { ascending: false })
     .limit(1)
-    .single()
 
-  // 다음 글 (현재 글보다 이후에 발행된 글 중 가장 오래된 글)
-  const { data: nextPost } = await supabase
+  if (siteId) {
+    prevQuery = prevQuery.eq('site_id', siteId)
+  }
+
+  const { data: prevPost } = await prevQuery.single()
+
+  // 다음 글 (현재 글보다 이후에 발행된 글 중 가장 오래된 글, 같은 사이트)
+  let nextQuery = supabase
     .from('posts')
     .select('id, title, slug')
     .eq('published', true)
     .gt('published_at', post.published_at)
     .order('published_at', { ascending: true })
     .limit(1)
-    .single()
+
+  if (siteId) {
+    nextQuery = nextQuery.eq('site_id', siteId)
+  }
+
+  const { data: nextPost } = await nextQuery.single()
 
   return (
     <article className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">

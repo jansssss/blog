@@ -5,7 +5,7 @@ import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
-import { getCurrentSite } from '@/lib/site'
+import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -25,6 +25,13 @@ export default async function HomePage({
   const site = await getCurrentSite()
   const siteId = site?.id
   const isMainSite = site?.is_main ?? true
+
+  // 위젯 스타일 (사이트 테마에서 가져오거나 기본값 사용)
+  const widgetStyle = {
+    gradient: site?.theme_json?.widget?.gradient || DEFAULT_WIDGET_STYLE.gradient,
+    borderColor: site?.theme_json?.widget?.borderColor || DEFAULT_WIDGET_STYLE.borderColor,
+  }
+  const widgetType = site?.theme_json?.widget?.type || (isMainSite ? 'weather-stock' : 'interest-rate')
 
   // 카테고리별 쿼리 생성 (site_id 필터 강제)
   let postsQuery = supabase
@@ -106,11 +113,11 @@ export default async function HomePage({
 
   return (
     <>
-      {/* 사이트별 Info Widget */}
-      {isMainSite ? (
-        <InfoWidget />
+      {/* 사이트별 Info Widget (기본: 밝은 파스텔 테마) */}
+      {widgetType === 'weather-stock' ? (
+        <InfoWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       ) : (
-        <InterestRateWidget />
+        <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       )}
 
       <div className="container py-10 overflow-x-hidden">

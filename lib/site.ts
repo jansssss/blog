@@ -52,6 +52,20 @@ export interface SiteTheme {
     ogImage?: string
     keywords?: string[]
   }
+  widget?: {
+    // 위젯 타입: 'weather-stock' (날씨+코스피), 'interest-rate' (금리정보), 'custom'
+    type?: 'weather-stock' | 'interest-rate' | 'custom'
+    // 배경 그라데이션 (기본: 밝은 파스텔)
+    gradient?: string
+    // 테두리 색상
+    borderColor?: string
+  }
+}
+
+// 기본 위젯 스타일 (밝은 파스텔 테마)
+export const DEFAULT_WIDGET_STYLE = {
+  gradient: 'from-blue-50 via-purple-50 to-pink-50',
+  borderColor: 'border-gray-200',
 }
 
 // Supabase 클라이언트 (서버용)

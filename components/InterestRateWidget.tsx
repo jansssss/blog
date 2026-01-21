@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Percent, Building2, Home, MapPin, ChevronDown } from 'lucide-react'
 
+// 기본 스타일 (밝은 파스텔 테마)
+const DEFAULT_GRADIENT = 'from-slate-50 via-blue-50 to-indigo-50'
+const DEFAULT_BORDER = 'border-gray-200'
+
+interface InterestRateWidgetProps {
+  gradient?: string
+  borderColor?: string
+}
+
 interface RateData {
   baseRate: number        // 기준금리
   basePrev: number        // 이전 기준금리
@@ -45,7 +54,10 @@ function getWeatherIcon(weatherId: number): string {
   return '🌤️'
 }
 
-export default function InterestRateWidget() {
+export default function InterestRateWidget({
+  gradient = DEFAULT_GRADIENT,
+  borderColor = DEFAULT_BORDER
+}: InterestRateWidgetProps) {
   const [rates, setRates] = useState<RateData | null>(null)
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [selectedCity, setSelectedCity] = useState(CITIES[0])
@@ -142,9 +154,9 @@ export default function InterestRateWidget() {
 
   if (loading) {
     return (
-      <div className="w-full bg-gradient-to-r from-slate-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 py-3">
+      <div className={`w-full bg-gradient-to-r ${gradient} py-3`}>
         <div className="container">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          <div className="h-8 bg-gray-200 rounded-lg animate-pulse" />
         </div>
       </div>
     )
@@ -156,30 +168,30 @@ export default function InterestRateWidget() {
   const jeonseChange = rates ? getRateChange(rates.jeonseRate, rates.jeonseRatePrev) : null
 
   return (
-    <div className="w-full bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div className={`w-full bg-gradient-to-r ${gradient} border-b ${borderColor}`}>
       <div className="container py-2 px-3">
         {/* 데스크톱: 4개 모두 표시 */}
         <div className="hidden sm:flex items-center justify-between gap-2">
           {/* 날씨 정보 */}
-          <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+          <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
             <button
               onClick={() => setShowCitySelector(!showCitySelector)}
-              className="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-primary transition-colors"
             >
               <MapPin className="w-3 h-3" />
               <span>{selectedCity.name}</span>
               <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showCitySelector ? 'rotate-180' : ''}`} />
             </button>
 
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300" />
 
             <div className="flex items-center gap-1.5">
               <span className="text-xl">{weather?.icon}</span>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                <span className="text-sm font-bold text-gray-900 leading-tight">
                   {weather?.temp}°C
                 </span>
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+                <span className="text-[10px] text-gray-500 leading-tight">
                   습도 {weather?.humidity}%
                 </span>
               </div>
@@ -187,13 +199,13 @@ export default function InterestRateWidget() {
 
             {/* 드롭다운 메뉴 */}
             {showCitySelector && (
-              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[100] min-w-[120px]">
+              <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-[100] min-w-[120px]">
                 {CITIES.map((city) => (
                   <button
                     key={city.name}
                     onClick={() => handleCityChange(city)}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                      city.name === selectedCity.name ? 'bg-gray-100 dark:bg-gray-700 font-medium text-primary' : 'text-gray-700 dark:text-gray-200'
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                      city.name === selectedCity.name ? 'bg-gray-100 font-medium text-primary' : 'text-gray-700'
                     }`}
                   >
                     {city.name}
@@ -204,14 +216,14 @@ export default function InterestRateWidget() {
           </div>
 
           {/* 기준금리 */}
-          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
               <Building2 className="w-3 h-3" />
               <span>기준금리</span>
             </div>
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300" />
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
+              <span className="text-sm font-bold text-gray-900">
                 {rates?.baseRate.toFixed(2)}%
               </span>
               {baseChange && baseChange.direction !== 'same' && (
@@ -224,14 +236,14 @@ export default function InterestRateWidget() {
           </div>
 
           {/* 주택담보대출 금리 */}
-          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
               <Home className="w-3 h-3" />
               <span>주담대</span>
             </div>
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300" />
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
+              <span className="text-sm font-bold text-gray-900">
                 {rates?.mortgageRate.toFixed(2)}%
               </span>
               {mortgageChange && mortgageChange.direction !== 'same' && (
@@ -244,13 +256,13 @@ export default function InterestRateWidget() {
           </div>
 
           {/* 전세대출 금리 */}
-          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+            <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
               <Percent className="w-3 h-3" />
               <span>전세대출</span>
             </div>
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
+            <div className="h-3 w-px bg-gray-300" />
+            <span className="text-sm font-bold text-gray-900">
               {rates?.jeonseRate.toFixed(2)}%
             </span>
           </div>
@@ -265,28 +277,28 @@ export default function InterestRateWidget() {
             {/* 슬라이드 1: 날씨 + 기준금리 */}
             <div className="flex items-center justify-between gap-2 min-w-full px-1">
               {/* 날씨 */}
-              <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm">
+              <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
                 <button
                   onClick={() => setShowCitySelector(!showCitySelector)}
-                  className="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-200"
+                  className="flex items-center gap-1 text-xs font-medium text-gray-700"
                 >
                   <MapPin className="w-3 h-3" />
                   <span>{selectedCity.name}</span>
                   <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showCitySelector ? 'rotate-180' : ''}`} />
                 </button>
-                <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+                <div className="h-3 w-px bg-gray-300" />
                 <div className="flex items-center gap-1.5">
                   <span className="text-lg">{weather?.icon}</span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{weather?.temp}°C</span>
+                  <span className="text-sm font-bold text-gray-900">{weather?.temp}°C</span>
                 </div>
                 {showCitySelector && (
-                  <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[100] min-w-[120px]">
+                  <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-[100] min-w-[120px]">
                     {CITIES.map((city) => (
                       <button
                         key={city.name}
                         onClick={() => handleCityChange(city)}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                          city.name === selectedCity.name ? 'bg-gray-100 dark:bg-gray-700 font-medium text-primary' : 'text-gray-700 dark:text-gray-200'
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                          city.name === selectedCity.name ? 'bg-gray-100 font-medium text-primary' : 'text-gray-700'
                         }`}
                       >
                         {city.name}
@@ -296,14 +308,14 @@ export default function InterestRateWidget() {
                 )}
               </div>
               {/* 기준금리 */}
-              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm">
-                <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
                   <Building2 className="w-3 h-3" />
                   <span>기준금리</span>
                 </div>
-                <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+                <div className="h-3 w-px bg-gray-300" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{rates?.baseRate.toFixed(2)}%</span>
+                  <span className="text-sm font-bold text-gray-900">{rates?.baseRate.toFixed(2)}%</span>
                   {baseChange && baseChange.direction !== 'same' && (
                     <div className={`flex items-center gap-0.5 ${baseChange.direction === 'up' ? 'text-red-600' : 'text-blue-600'}`}>
                       {baseChange.direction === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -316,14 +328,14 @@ export default function InterestRateWidget() {
             {/* 슬라이드 2: 주담대 + 전세대출 */}
             <div className="flex items-center justify-between gap-2 min-w-full px-1">
               {/* 주담대 */}
-              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm">
-                <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
                   <Home className="w-3 h-3" />
                   <span>주담대</span>
                 </div>
-                <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+                <div className="h-3 w-px bg-gray-300" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{rates?.mortgageRate.toFixed(2)}%</span>
+                  <span className="text-sm font-bold text-gray-900">{rates?.mortgageRate.toFixed(2)}%</span>
                   {mortgageChange && mortgageChange.direction !== 'same' && (
                     <div className={`flex items-center gap-0.5 ${mortgageChange.direction === 'up' ? 'text-red-600' : 'text-blue-600'}`}>
                       {mortgageChange.direction === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -332,14 +344,14 @@ export default function InterestRateWidget() {
                 </div>
               </div>
               {/* 전세대출 */}
-              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm">
-                <div className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300">
+              <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
                   <Percent className="w-3 h-3" />
                   <span>전세대출</span>
                 </div>
-                <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+                <div className="h-3 w-px bg-gray-300" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{rates?.jeonseRate.toFixed(2)}%</span>
+                  <span className="text-sm font-bold text-gray-900">{rates?.jeonseRate.toFixed(2)}%</span>
                   {jeonseChange && jeonseChange.direction !== 'same' && (
                     <div className={`flex items-center gap-0.5 ${jeonseChange.direction === 'up' ? 'text-red-600' : 'text-blue-600'}`}>
                       {jeonseChange.direction === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}

@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { MapPin, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react'
 
+// 기본 스타일 (밝은 파스텔 테마)
+const DEFAULT_GRADIENT = 'from-blue-50 via-purple-50 to-pink-50'
+const DEFAULT_BORDER = 'border-gray-200'
+
+interface InfoWidgetProps {
+  gradient?: string
+  borderColor?: string
+}
+
 interface WeatherData {
   temp: number
   humidity: number
@@ -41,7 +50,10 @@ function getWeatherIcon(weatherId: number): string {
   return '🌤️'
 }
 
-export default function InfoWidget() {
+export default function InfoWidget({
+  gradient = DEFAULT_GRADIENT,
+  borderColor = DEFAULT_BORDER
+}: InfoWidgetProps) {
   const [selectedCity, setSelectedCity] = useState(CITIES[0])
   const [showCitySelector, setShowCitySelector] = useState(false)
   const [weather, setWeather] = useState<WeatherData | null>(null)
@@ -193,7 +205,7 @@ export default function InfoWidget() {
 
   if (loading) {
     return (
-      <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 py-3">
+      <div className={`w-full bg-gradient-to-r ${gradient} py-3`}>
         <div className="container">
           <div className="h-8 bg-gray-200 rounded-lg animate-pulse" />
         </div>
@@ -202,7 +214,7 @@ export default function InfoWidget() {
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-b border-gray-200">
+    <div className={`w-full bg-gradient-to-r ${gradient} border-b ${borderColor}`}>
       <div className="container py-2 px-3">
         <div className="flex items-center justify-between gap-2">
           {/* 날씨 정보 */}

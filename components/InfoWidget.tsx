@@ -193,38 +193,38 @@ export default function InfoWidget() {
 
   if (loading) {
     return (
-      <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 py-3">
+      <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 py-3">
         <div className="container">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          <div className="h-8 bg-gray-200 rounded-lg animate-pulse" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-b border-gray-200">
       <div className="container py-2 px-3">
         <div className="flex items-center justify-between gap-2">
           {/* 날씨 정보 */}
-          <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+          <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
             <button
               onClick={() => setShowCitySelector(!showCitySelector)}
-              className="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-primary transition-colors"
             >
               <MapPin className="w-3 h-3" />
               <span>{selectedCity.name}</span>
               <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showCitySelector ? 'rotate-180' : ''}`} />
             </button>
 
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block" />
+            <div className="h-3 w-px bg-gray-300 hidden sm:block" />
 
             <div className="flex items-center gap-1.5">
               <span className="text-xl">{weather?.icon}</span>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                <span className="text-sm font-bold text-gray-900 leading-tight">
                   {weather?.temp}°C
                 </span>
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+                <span className="text-[10px] text-gray-500 leading-tight">
                   습도 {weather?.humidity}%
                 </span>
               </div>
@@ -232,13 +232,13 @@ export default function InfoWidget() {
 
             {/* 드롭다운 메뉴 */}
             {showCitySelector && (
-              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[100] min-w-[120px]">
+              <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-[100] min-w-[120px]">
                 {CITIES.map((city) => (
                   <button
                     key={city.name}
                     onClick={() => handleCityChange(city)}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                      city.name === selectedCity.name ? 'bg-gray-100 dark:bg-gray-700 font-medium text-primary' : 'text-gray-700 dark:text-gray-200'
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                      city.name === selectedCity.name ? 'bg-gray-100 font-medium text-primary' : 'text-gray-700'
                     }`}
                   >
                     {city.name}
@@ -249,15 +249,15 @@ export default function InfoWidget() {
           </div>
 
           {/* 코스피 정보 */}
-          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+            <span className="text-xs font-medium text-gray-600">
               코스피
             </span>
 
-            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600" />
+            <div className="h-3 w-px bg-gray-300" />
 
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
+              <span className="text-sm font-bold text-gray-900">
                 {stock?.value.toLocaleString()}
               </span>
               {stock && stock.change > 0 ? (

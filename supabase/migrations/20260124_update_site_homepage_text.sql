@@ -19,7 +19,7 @@ SET theme_json = jsonb_set(
   '{widget}',
   jsonb_build_object(
     'type', 'interest-rate',
-    'gradient', 'from-slate-50 via-blue-50 to-indigo-50',
+    'gradient', 'from-purple-50 via-pink-50 to-blue-50',
     'borderColor', 'border-gray-200'
   )
 )
@@ -40,7 +40,7 @@ SET theme_json = jsonb_set(
   '{widget}',
   jsonb_build_object(
     'type', 'insurance',
-    'gradient', 'from-slate-50 via-blue-50 to-indigo-50',
+    'gradient', 'from-purple-50 via-pink-50 to-blue-50',
     'borderColor', 'border-gray-200'
   )
 )

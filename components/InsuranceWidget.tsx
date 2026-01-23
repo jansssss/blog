@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Heart, Car, MapPin, ChevronDown } from 'lucide-react'
 
 // 기본 스타일 (밝은 파스텔 테마)
-const DEFAULT_GRADIENT = 'from-slate-50 via-blue-50 to-indigo-50'
+const DEFAULT_GRADIENT = 'from-purple-50 via-pink-50 to-blue-50'
 const DEFAULT_BORDER = 'border-gray-200'
 
 interface InsuranceWidgetProps {

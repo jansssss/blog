@@ -55,10 +55,10 @@ export default async function GuidePage({ searchParams }: PageProps) {
       {/* Hero Section */}
       <div className="mb-12 text-center">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          금융 가이드
+          관련글
         </h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          상황별 금융 설명과 실전 체크리스트
+          금융, 대출, 보험 관련 정보와 가이드
         </p>
       </div>
 

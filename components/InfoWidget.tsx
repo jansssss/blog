@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { MapPin, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react'
 
 // 기본 스타일 (밝은 파스텔 테마)
-const DEFAULT_GRADIENT = 'from-blue-50 via-purple-50 to-pink-50'
+const DEFAULT_GRADIENT = 'from-slate-50 via-blue-50 to-indigo-50'
 const DEFAULT_BORDER = 'border-gray-200'
 
 interface InfoWidgetProps {

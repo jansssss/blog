@@ -64,7 +64,7 @@ export interface SiteTheme {
 
 // 기본 위젯 스타일 (밝은 파스텔 테마)
 export const DEFAULT_WIDGET_STYLE = {
-  gradient: 'from-blue-50 via-purple-50 to-pink-50',
+  gradient: 'from-slate-50 via-blue-50 to-indigo-50',
   borderColor: 'border-gray-200',
 }
 

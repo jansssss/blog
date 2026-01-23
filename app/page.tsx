@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
+import InsuranceWidget from '@/components/InsuranceWidget'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
 
 // ISR 설정 (60초마다 재검증)
@@ -120,6 +121,10 @@ export default async function HomePage({
       {/* 사이트별 Info Widget (기본: 밝은 파스텔 테마) */}
       {widgetType === 'weather-stock' ? (
         <InfoWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
+      ) : widgetType === 'interest-rate' ? (
+        <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
+      ) : widgetType === 'insurance' ? (
+        <InsuranceWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       ) : (
         <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       )}

@@ -53,8 +53,8 @@ export interface SiteTheme {
     keywords?: string[]
   }
   widget?: {
-    // 위젯 타입: 'weather-stock' (날씨+코스피), 'interest-rate' (금리정보), 'custom'
-    type?: 'weather-stock' | 'interest-rate' | 'custom'
+    // 위젯 타입: 'weather-stock' (날씨+코스피), 'interest-rate' (금리정보), 'insurance' (보험정보), 'custom'
+    type?: 'weather-stock' | 'interest-rate' | 'insurance' | 'custom'
     // 배경 그라데이션 (기본: 밝은 파스텔)
     gradient?: string
     // 테두리 색상

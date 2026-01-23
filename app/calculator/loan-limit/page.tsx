@@ -110,6 +110,32 @@ export default function LoanLimitSimulatorPage() {
     }
   }
 
+  const loadPreset = (preset: 'young-worker' | 'family' | 'high-income') => {
+    switch (preset) {
+      case 'young-worker':
+        setAnnualIncome(formatNumber(40000000))
+        setCurrentDebtPayment(formatNumber(500000))
+        setInterestRate('4.5')
+        setLoanPeriod('360')
+        setDsrLimit('40')
+        break
+      case 'family':
+        setAnnualIncome(formatNumber(80000000))
+        setCurrentDebtPayment(formatNumber(1000000))
+        setInterestRate('4.2')
+        setLoanPeriod('300')
+        setDsrLimit('40')
+        break
+      case 'high-income':
+        setAnnualIncome(formatNumber(150000000))
+        setCurrentDebtPayment(formatNumber(2000000))
+        setInterestRate('4.0')
+        setLoanPeriod('240')
+        setDsrLimit('40')
+        break
+    }
+  }
+
   return (
     <div className="container py-8 max-w-4xl">
       {/* Hero Section */}
@@ -134,6 +160,42 @@ export default function LoanLimitSimulatorPage() {
               <p className="font-semibold mb-1">DSR(총부채원리금상환비율) 기반 계산</p>
               <p>본 계산기는 DSR 규제를 기반으로 예상 대출 한도를 계산합니다. 실제 한도는 신용등급, 담보 가치, 소득 증빙, 금융기관 정책 등에 따라 달라질 수 있습니다.</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 예시 시나리오 */}
+      <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-3 text-gray-900 flex items-center gap-2">
+            <span>✨</span>
+            <span>빠른 시작: 예시 시나리오</span>
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button
+              onClick={() => loadPreset('young-worker')}
+              variant="outline"
+              className="bg-white hover:bg-blue-50 border-blue-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">👤 청년 직장인</span>
+              <span className="text-xs text-gray-500">연 4천만원 / 기존 대출 50만원</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('family')}
+              variant="outline"
+              className="bg-white hover:bg-green-50 border-green-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">👨‍👩‍👧 맞벌이 부부</span>
+              <span className="text-xs text-gray-500">연 8천만원 / 기존 대출 100만원</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('high-income')}
+              variant="outline"
+              className="bg-white hover:bg-purple-50 border-purple-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">💼 고소득자</span>
+              <span className="text-xs text-gray-500">연 1.5억원 / 기존 대출 200만원</span>
+            </Button>
           </div>
         </CardContent>
       </Card>

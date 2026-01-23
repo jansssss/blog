@@ -98,6 +98,32 @@ export default function PrepaymentFeeCalculatorPage() {
     }
   }
 
+  const loadPreset = (preset: 'partial-repay' | 'refinance' | 'windfall') => {
+    switch (preset) {
+      case 'partial-repay':
+        setLoanBalance(formatNumber(50000000))
+        setPrepaymentAmount(formatNumber(10000000))
+        setFeeRate('1.5')
+        setRemainingMonths('120')
+        setInterestRate('4.5')
+        break
+      case 'refinance':
+        setLoanBalance(formatNumber(200000000))
+        setPrepaymentAmount(formatNumber(200000000))
+        setFeeRate('1.2')
+        setRemainingMonths('180')
+        setInterestRate('5.0')
+        break
+      case 'windfall':
+        setLoanBalance(formatNumber(30000000))
+        setPrepaymentAmount(formatNumber(15000000))
+        setFeeRate('2.0')
+        setRemainingMonths('24')
+        setInterestRate('7.5')
+        break
+    }
+  }
+
   return (
     <div className="container py-8 max-w-4xl">
       {/* Hero Section */}
@@ -112,6 +138,42 @@ export default function PrepaymentFeeCalculatorPage() {
           조기 상환 시 발생하는 수수료와 실제 절감액을 계산해보세요
         </p>
       </div>
+
+      {/* 예시 시나리오 */}
+      <Card className="mb-6 bg-gradient-to-r from-green-50 to-teal-50 border-green-200">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-3 text-gray-900 flex items-center gap-2">
+            <span>✨</span>
+            <span>빠른 시작: 예시 시나리오</span>
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button
+              onClick={() => loadPreset('partial-repay')}
+              variant="outline"
+              className="bg-white hover:bg-green-50 border-green-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">💰 일부 상환</span>
+              <span className="text-xs text-gray-500">5천만원 중 1천만원 상환</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('refinance')}
+              variant="outline"
+              className="bg-white hover:bg-blue-50 border-blue-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">🔄 갈아타기</span>
+              <span className="text-xs text-gray-500">2억 대출 전액 상환</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('windfall')}
+              variant="outline"
+              className="bg-white hover:bg-yellow-50 border-yellow-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">🎁 목돈 생김</span>
+              <span className="text-xs text-gray-500">3천만원 중 1.5천만원 상환</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 입력 카드 */}
       <Card className="mb-6">

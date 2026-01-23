@@ -21,72 +21,63 @@ export interface TrendKeyword {
 
 /**
  * 네이버 뉴스 인기순 스크래핑
- * 금융/경제, 보험/세금 관련 인기 뉴스 가져오기
+ * 금융/대출 관련 인기 뉴스 가져오기
  */
-export async function fetchNaverPopularNews(category: '금융/경제' | '보험/세금'): Promise<TrendingNewsItem[]> {
+export async function fetchNaverPopularNews(category: string = '금융/대출'): Promise<TrendingNewsItem[]> {
   const items: TrendingNewsItem[] = []
 
   try {
-    // 카테고리별 네이버 뉴스 섹션 URL
-    const sectionUrls: Record<string, string[]> = {
-      '금융/경제': [
-        'https://news.naver.com/main/ranking/popularDay.naver?mid=etc&sid1=101', // 경제
-      ],
-      '보험/세금': [
-        'https://news.naver.com/main/ranking/popularDay.naver?mid=etc&sid1=101', // 경제 (보험/세금 포함)
-      ]
-    }
+    // 네이버 경제 섹션 URL
+    const url = 'https://news.naver.com/main/ranking/popularDay.naver?mid=etc&sid1=101'
 
-    const urls = sectionUrls[category] || []
-
-    for (const url of urls) {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        }
-      })
-
-      if (!response.ok) {
-        console.error(`[TRENDING] Naver fetch failed: ${response.status}`)
-        continue
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
       }
+    })
 
-      const html = await response.text()
-      const $ = load(html)
-
-      // 랭킹 뉴스 아이템 파싱
-      $('.rankingnews_list li, .ranking_list li').each((index, element) => {
-        if (items.length >= 10) return false
-
-        const $item = $(element)
-        const $link = $item.find('a').first()
-        const title = $link.text().trim() || $item.find('.list_title, .ranking_title').text().trim()
-        const link = $link.attr('href')
-
-        if (title && link) {
-          // 카테고리별 키워드 필터링
-          const categoryKeywords: Record<string, string[]> = {
-            '금융/경제': ['금융', '경제', '주식', '투자', '금리', '환율', '코스피', '코스닥', '은행', '증권', '펀드', '부동산'],
-            '보험/세금': ['보험', '세금', '연금', '국세', '지방세', '소득세', '부가세', '종합소득', '연말정산', '건강보험', '자동차보험', '생명보험']
-          }
-
-          const keywords = categoryKeywords[category] || []
-          const isRelevant = keywords.some(kw => title.includes(kw))
-
-          if (isRelevant || keywords.length === 0) {
-            items.push({
-              title,
-              link: link.startsWith('http') ? link : `https://news.naver.com${link}`,
-              source: 'NAVER',
-              category,
-              rank: index + 1
-            })
-          }
-        }
-      })
+    if (!response.ok) {
+      console.error(`[TRENDING] Naver fetch failed: ${response.status}`)
+      return items
     }
+
+    const html = await response.text()
+    const $ = load(html)
+
+    // 금융/대출 관련 통합 키워드 (대출, 금리, 보험, 세금 등 모두 포함)
+    const financialKeywords = [
+      '금융', '경제', '대출', '금리', '주택담보대출', 'DSR', 'LTV',
+      '보험', '세금', '연금', '국세', '지방세', '소득세', '부가세', '종합소득', '연말정산',
+      '건강보험', '자동차보험', '생명보험', '은행', '저축', '예금',
+      '주식', '투자', '환율', '코스피', '코스닥', '증권', '펀드', '부동산'
+    ]
+
+    // 랭킹 뉴스 아이템 파싱
+    $('.rankingnews_list li, .ranking_list li').each((index, element) => {
+      if (items.length >= 10) return false
+
+      const $item = $(element)
+      const $link = $item.find('a').first()
+      const title = $link.text().trim() || $item.find('.list_title, .ranking_title').text().trim()
+      const link = $link.attr('href')
+
+      if (title && link) {
+        // 키워드 필터링
+        const isRelevant = financialKeywords.some(kw => title.includes(kw))
+
+        if (isRelevant) {
+          items.push({
+            title,
+            link: link.startsWith('http') ? link : `https://news.naver.com${link}`,
+            source: 'NAVER',
+            category,
+            rank: index + 1
+          })
+        }
+      }
+    })
 
     console.log(`[TRENDING] Naver ${category}: ${items.length} items`)
     return items

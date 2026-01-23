@@ -90,51 +90,49 @@ export async function GET(request: Request) {
       console.log(`[NEWS-FETCH] Processing category: ${category} (${categorySources.length} sources)`)
       let categoryItemCount = 0
 
-      // 2. 네이버 인기 뉴스 먼저 수집 (카테고리별 최대 5개)
-      if (category === '금융/경제' || category === '보험/세금') {
-        console.log(`[NEWS-FETCH] Fetching Naver popular news for ${category}...`)
-        const naverNews = await fetchNaverPopularNews(category as '금융/경제' | '보험/세금')
+      // 2. 네이버 인기 뉴스 먼저 수집 (최대 5개)
+      console.log(`[NEWS-FETCH] Fetching Naver popular news for ${category}...`)
+      const naverNews = await fetchNaverPopularNews(category)
 
-        for (const naverItem of naverNews) {
-          if (categoryItemCount >= 5) break // 네이버 뉴스는 최대 5개
+      for (const naverItem of naverNews) {
+        if (categoryItemCount >= 5) break // 네이버 뉴스는 최대 5개
 
-          totalItems++
-          trendingItems++
+        totalItems++
+        trendingItems++
 
-          const hash = generateHash(naverItem.title, naverItem.link)
+        const hash = generateHash(naverItem.title, naverItem.link)
 
-          const { data, error } = await supabaseAdmin
-            .from('news_items')
-            .upsert(
-              {
-                source_id: null, // 네이버 인기뉴스는 source_id 없음
-                title: naverItem.title,
-                link: naverItem.link,
-                pub_date: new Date().toISOString(),
-                category: category,
-                hash: hash,
-                is_trending: true // 트렌딩 플래그
-              },
-              {
-                onConflict: 'hash',
-                ignoreDuplicates: true
-              }
-            )
-            .select()
-
-          if (error) {
-            if (error.code === '23505') {
-              duplicateItems++
-            } else {
-              console.error('[NEWS-FETCH] Naver insert error:', error)
+        const { data, error } = await supabaseAdmin
+          .from('news_items')
+          .upsert(
+            {
+              source_id: null, // 네이버 인기뉴스는 source_id 없음
+              title: naverItem.title,
+              link: naverItem.link,
+              pub_date: new Date().toISOString(),
+              category: category,
+              hash: hash,
+              is_trending: true // 트렌딩 플래그
+            },
+            {
+              onConflict: 'hash',
+              ignoreDuplicates: true
             }
-          } else if (data && data.length > 0) {
-            newItems++
-            categoryItemCount++
-            console.log(`[NEWS-FETCH] Trending: ${naverItem.title}`)
-          } else {
+          )
+          .select()
+
+        if (error) {
+          if (error.code === '23505') {
             duplicateItems++
+          } else {
+            console.error('[NEWS-FETCH] Naver insert error:', error)
           }
+        } else if (data && data.length > 0) {
+          newItems++
+          categoryItemCount++
+          console.log(`[NEWS-FETCH] Trending: ${naverItem.title}`)
+        } else {
+          duplicateItems++
         }
       }
 

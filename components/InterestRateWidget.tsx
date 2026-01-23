@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Percent, Building2, Home, MapPin, ChevronDown } from 'lucide-react'
+import { TrendingUp, TrendingDown, Percent, Home, MapPin, ChevronDown, BarChart3 } from 'lucide-react'
 
 // 기본 스타일 (밝은 파스텔 테마)
 const DEFAULT_GRADIENT = 'from-slate-50 via-blue-50 to-indigo-50'
@@ -13,8 +13,6 @@ interface InterestRateWidgetProps {
 }
 
 interface RateData {
-  baseRate: number        // 기준금리
-  basePrev: number        // 이전 기준금리
   mortgageRate: number    // 주담대 평균금리
   mortgagePrev: number    // 이전 주담대 금리
   jeonseRate: number      // 전세대출 평균금리
@@ -27,6 +25,12 @@ interface WeatherData {
   humidity: number
   icon: string
   description: string
+}
+
+interface StockData {
+  value: number
+  change: number
+  changePercent: number
 }
 
 const CITIES = [
@@ -60,10 +64,11 @@ export default function InterestRateWidget({
 }: InterestRateWidgetProps) {
   const [rates, setRates] = useState<RateData | null>(null)
   const [weather, setWeather] = useState<WeatherData | null>(null)
+  const [stock, setStock] = useState<StockData | null>(null)
   const [selectedCity, setSelectedCity] = useState(CITIES[0])
   const [showCitySelector, setShowCitySelector] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [mobileSlide, setMobileSlide] = useState(0) // 0: 날씨+기준금리, 1: 주담대+전세대출
+  const [mobileSlide, setMobileSlide] = useState(0) // 0: 날씨+코스피, 1: 주담대+전세대출
 
   useEffect(() => {
     // localStorage에서 저장된 도시 불러오기
@@ -81,11 +86,14 @@ export default function InterestRateWidget({
     }
 
     fetchRates()
+    fetchStock()
 
     // 금리: 1시간마다 갱신
     const rateInterval = setInterval(fetchRates, 60 * 60 * 1000)
     // 날씨: 5분마다 갱신
     const weatherInterval = setInterval(() => fetchWeather(selectedCity), 5 * 60 * 1000)
+    // 코스피: 5분마다 갱신 (장 시간에만)
+    const stockInterval = setInterval(fetchStock, 5 * 60 * 1000)
     // 모바일 슬라이드: 4초마다 전환
     const slideInterval = setInterval(() => {
       setMobileSlide(prev => (prev + 1) % 2)
@@ -94,6 +102,7 @@ export default function InterestRateWidget({
     return () => {
       clearInterval(rateInterval)
       clearInterval(weatherInterval)
+      clearInterval(stockInterval)
       clearInterval(slideInterval)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,6 +146,25 @@ export default function InterestRateWidget({
     }
   }
 
+  const fetchStock = async () => {
+    try {
+      const response = await fetch('/api/stock/kospi')
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        setStock({
+          value: result.data.value,
+          change: result.data.change,
+          changePercent: result.data.changePercent
+        })
+      }
+      setLoading(false)
+    } catch (error) {
+      console.error('Stock fetch error:', error)
+      setLoading(false)
+    }
+  }
+
   const handleCityChange = (city: typeof CITIES[0]) => {
     setSelectedCity(city)
     setShowCitySelector(false)
@@ -162,9 +190,7 @@ export default function InterestRateWidget({
     )
   }
 
-  const baseChange = rates ? getRateChange(rates.baseRate, rates.basePrev) : null
   const mortgageChange = rates ? getRateChange(rates.mortgageRate, rates.mortgagePrev) : null
-
   const jeonseChange = rates ? getRateChange(rates.jeonseRate, rates.jeonseRatePrev) : null
 
   return (
@@ -215,21 +241,21 @@ export default function InterestRateWidget({
             )}
           </div>
 
-          {/* 기준금리 */}
+          {/* 코스피 */}
           <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
             <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
-              <Building2 className="w-3 h-3" />
-              <span>기준금리</span>
+              <BarChart3 className="w-3 h-3" />
+              <span>코스피</span>
             </div>
             <div className="h-3 w-px bg-gray-300" />
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-bold text-gray-900">
-                {rates?.baseRate.toFixed(2)}%
+                {stock?.value.toFixed(2)}
               </span>
-              {baseChange && baseChange.direction !== 'same' && (
-                <div className={`flex items-center gap-0.5 ${baseChange.direction === 'up' ? 'text-red-600' : 'text-blue-600'}`}>
-                  {baseChange.direction === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  <span className="text-[10px] font-medium">{baseChange.direction === 'up' ? '+' : '-'}{baseChange.diff}%p</span>
+              {stock && stock.change !== 0 && (
+                <div className={`flex items-center gap-0.5 ${stock.change > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                  {stock.change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  <span className="text-[10px] font-medium">{stock.change > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%</span>
                 </div>
               )}
             </div>
@@ -274,7 +300,7 @@ export default function InterestRateWidget({
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${mobileSlide * 100}%)` }}
           >
-            {/* 슬라이드 1: 날씨 + 기준금리 */}
+            {/* 슬라이드 1: 날씨 + 코스피 */}
             <div className="flex items-center justify-between gap-2 min-w-full px-1">
               {/* 날씨 */}
               <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
@@ -307,18 +333,18 @@ export default function InterestRateWidget({
                   </div>
                 )}
               </div>
-              {/* 기준금리 */}
+              {/* 코스피 */}
               <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm">
                 <div className="flex items-center gap-1 text-xs font-medium text-gray-600">
-                  <Building2 className="w-3 h-3" />
-                  <span>기준금리</span>
+                  <BarChart3 className="w-3 h-3" />
+                  <span>코스피</span>
                 </div>
                 <div className="h-3 w-px bg-gray-300" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-gray-900">{rates?.baseRate.toFixed(2)}%</span>
-                  {baseChange && baseChange.direction !== 'same' && (
-                    <div className={`flex items-center gap-0.5 ${baseChange.direction === 'up' ? 'text-red-600' : 'text-blue-600'}`}>
-                      {baseChange.direction === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  <span className="text-sm font-bold text-gray-900">{stock?.value.toFixed(2)}</span>
+                  {stock && stock.change !== 0 && (
+                    <div className={`flex items-center gap-0.5 ${stock.change > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                      {stock.change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                     </div>
                   )}
                 </div>

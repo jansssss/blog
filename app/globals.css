@@ -144,8 +144,6 @@
 /* 블로그 콘텐츠 렌더링 스타일 */
 .prose {
   max-width: 65ch;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .prose h1 {

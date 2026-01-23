@@ -171,6 +171,26 @@ export default function RepaymentComparePage() {
     }
   }
 
+  const loadPreset = (preset: 'apartment' | 'villa' | 'business') => {
+    switch (preset) {
+      case 'apartment':
+        setLoanAmount(formatNumber(500000000))
+        setInterestRate('4.5')
+        setLoanPeriod('360')
+        break
+      case 'villa':
+        setLoanAmount(formatNumber(200000000))
+        setInterestRate('4.8')
+        setLoanPeriod('240')
+        break
+      case 'business':
+        setLoanAmount(formatNumber(150000000))
+        setInterestRate('5.5')
+        setLoanPeriod('180')
+        break
+    }
+  }
+
   return (
     <div className="container py-8 max-w-6xl">
       {/* Hero Section */}
@@ -185,6 +205,42 @@ export default function RepaymentComparePage() {
           두 가지 상환 방식의 차이를 한눈에 비교하세요
         </p>
       </div>
+
+      {/* 예시 시나리오 */}
+      <Card className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-3 text-gray-900 flex items-center gap-2">
+            <span>✨</span>
+            <span>빠른 시작: 예시 시나리오</span>
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button
+              onClick={() => loadPreset('apartment')}
+              variant="outline"
+              className="bg-white hover:bg-purple-50 border-purple-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">🏢 아파트 담보대출</span>
+              <span className="text-xs text-gray-500">5억원 / 4.5% / 30년</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('villa')}
+              variant="outline"
+              className="bg-white hover:bg-blue-50 border-blue-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">🏠 빌라 담보대출</span>
+              <span className="text-xs text-gray-500">2억원 / 4.8% / 20년</span>
+            </Button>
+            <Button
+              onClick={() => loadPreset('business')}
+              variant="outline"
+              className="bg-white hover:bg-green-50 border-green-200 h-auto py-3 flex flex-col items-start gap-1"
+            >
+              <span className="font-semibold text-sm">💼 사업자 담보대출</span>
+              <span className="text-xs text-gray-500">1.5억원 / 5.5% / 15년</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 입력 카드 */}
       <Card className="mb-6">
@@ -331,6 +387,132 @@ export default function RepaymentComparePage() {
             </Card>
           </div>
 
+          {/* 시각적 비교 차트 */}
+          <Card className="mb-6 bg-gradient-to-br from-gray-50 to-gray-100">
+            <CardHeader>
+              <CardTitle>📊 월 상환액 비교 차트</CardTitle>
+              <CardDescription>
+                시간에 따른 월 상환액 변화를 시각적으로 비교하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* 첫 달 비교 */}
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-3">첫 달 상환액</p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-blue-600 font-medium">원리금균등</span>
+                        <span className="text-sm font-bold text-blue-900">
+                          {formatNumber(result.equalPrincipalInterest.monthlyPayment)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-blue-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.monthlyPayment / result.equalPrincipal.firstPayment) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-green-600 font-medium">원금균등</span>
+                        <span className="text-sm font-bold text-green-900">
+                          {formatNumber(result.equalPrincipal.firstPayment)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-green-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 마지막 달 비교 */}
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-3">마지막 달 상환액</p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-blue-600 font-medium">원리금균등</span>
+                        <span className="text-sm font-bold text-blue-900">
+                          {formatNumber(result.equalPrincipalInterest.monthlyPayment)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-blue-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.monthlyPayment / result.equalPrincipal.firstPayment) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-green-600 font-medium">원금균등</span>
+                        <span className="text-sm font-bold text-green-900">
+                          {formatNumber(result.equalPrincipal.lastPayment)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-green-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${(result.equalPrincipal.lastPayment / result.equalPrincipal.firstPayment) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 총 이자 비교 */}
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-3">총 이자 비교</p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-blue-600 font-medium">원리금균등</span>
+                        <span className="text-sm font-bold text-blue-900">
+                          {formatNumber(result.equalPrincipalInterest.totalInterest)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-blue-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-green-600 font-medium">원금균등</span>
+                        <span className="text-sm font-bold text-green-900">
+                          {formatNumber(result.equalPrincipal.totalInterest)}원
+                        </span>
+                      </div>
+                      <div className="h-8 bg-green-200 rounded-lg relative overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-lg transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${(result.equalPrincipal.totalInterest / result.equalPrincipalInterest.totalInterest) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* 차이 분석 */}
           <Card className="mb-6 border-primary">
             <CardHeader>
@@ -382,6 +564,124 @@ export default function RepaymentComparePage() {
                     </span>
                   </p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 원금 vs 이자 비율 비교 */}
+          <Card className="mb-6 border-purple-200 bg-purple-50">
+            <CardHeader>
+              <CardTitle className="text-purple-900">원금·이자 구성 비교</CardTitle>
+              <CardDescription className="text-purple-700">
+                첫 달과 마지막 달의 원금·이자 비율을 비교합니다
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* 원리금균등 */}
+                <div>
+                  <p className="font-semibold mb-3 text-blue-900">원리금균등</p>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2">첫 달 구성</p>
+                      <div className="h-10 flex rounded-lg overflow-hidden border border-blue-200">
+                        <div
+                          className="bg-gradient-to-r from-blue-400 to-blue-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.schedule[0].principal / result.equalPrincipalInterest.monthlyPayment) * 100}%`
+                          }}
+                        >
+                          원금 {Math.round((result.equalPrincipalInterest.schedule[0].principal / result.equalPrincipalInterest.monthlyPayment) * 100)}%
+                        </div>
+                        <div
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.schedule[0].interest / result.equalPrincipalInterest.monthlyPayment) * 100}%`
+                          }}
+                        >
+                          이자 {Math.round((result.equalPrincipalInterest.schedule[0].interest / result.equalPrincipalInterest.monthlyPayment) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2">마지막 달 구성</p>
+                      <div className="h-10 flex rounded-lg overflow-hidden border border-blue-200">
+                        <div
+                          className="bg-gradient-to-r from-blue-400 to-blue-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.schedule[result.equalPrincipalInterest.schedule.length - 1].principal / result.equalPrincipalInterest.monthlyPayment) * 100}%`
+                          }}
+                        >
+                          원금 {Math.round((result.equalPrincipalInterest.schedule[result.equalPrincipalInterest.schedule.length - 1].principal / result.equalPrincipalInterest.monthlyPayment) * 100)}%
+                        </div>
+                        <div
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipalInterest.schedule[result.equalPrincipalInterest.schedule.length - 1].interest / result.equalPrincipalInterest.monthlyPayment) * 100}%`
+                          }}
+                        >
+                          이자 {Math.round((result.equalPrincipalInterest.schedule[result.equalPrincipalInterest.schedule.length - 1].interest / result.equalPrincipalInterest.monthlyPayment) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 원금균등 */}
+                <div>
+                  <p className="font-semibold mb-3 text-green-900">원금균등</p>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2">첫 달 구성</p>
+                      <div className="h-10 flex rounded-lg overflow-hidden border border-green-200">
+                        <div
+                          className="bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipal.schedule[0].principal / result.equalPrincipal.schedule[0].totalPayment) * 100}%`
+                          }}
+                        >
+                          원금 {Math.round((result.equalPrincipal.schedule[0].principal / result.equalPrincipal.schedule[0].totalPayment) * 100)}%
+                        </div>
+                        <div
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipal.schedule[0].interest / result.equalPrincipal.schedule[0].totalPayment) * 100}%`
+                          }}
+                        >
+                          이자 {Math.round((result.equalPrincipal.schedule[0].interest / result.equalPrincipal.schedule[0].totalPayment) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2">마지막 달 구성</p>
+                      <div className="h-10 flex rounded-lg overflow-hidden border border-green-200">
+                        <div
+                          className="bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].principal / result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].totalPayment) * 100}%`
+                          }}
+                        >
+                          원금 {Math.round((result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].principal / result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].totalPayment) * 100)}%
+                        </div>
+                        <div
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                          style={{
+                            width: `${(result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].interest / result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].totalPayment) * 100}%`
+                          }}
+                        >
+                          이자 {Math.round((result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].interest / result.equalPrincipal.schedule[result.equalPrincipal.schedule.length - 1].totalPayment) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-white rounded-lg border border-purple-200">
+                <p className="text-xs text-purple-800">
+                  💡 <strong>원리금균등</strong>은 초기에 이자 비중이 높고 후반으로 갈수록 원금 비중이 높아집니다.
+                  <strong className="ml-1">원금균등</strong>은 처음부터 끝까지 원금이 일정하며, 이자만 점차 감소합니다.
+                </p>
               </div>
             </CardContent>
           </Card>

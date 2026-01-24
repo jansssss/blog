@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 interface ToolCardProps {
   icon: React.ReactNode
@@ -11,19 +10,20 @@ interface ToolCardProps {
 
 export default function ToolCard({ icon, title, description, href }: ToolCardProps) {
   return (
-    <Link href={href}>
-      <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer group">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="rounded-lg bg-primary/10 p-3 text-primary mb-3">
-              {icon}
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+    <Link href={href} className="block">
+      <div className="h-full p-4 bg-background border rounded-xl transition-all duration-200 hover:shadow-md hover:border-primary/50 cursor-pointer group">
+        <div className="flex items-start justify-between mb-2">
+          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+            {icon}
           </div>
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <CardDescription className="text-sm">{description}</CardDescription>
-        </CardHeader>
-      </Card>
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-sm mb-1 line-clamp-1">{title}</h3>
+        <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">{description}</p>
+        <p className="text-xs text-primary mt-2 font-medium group-hover:underline">
+          바로 계산하기
+        </p>
+      </div>
     </Link>
   )
 }

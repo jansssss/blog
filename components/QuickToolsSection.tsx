@@ -32,9 +32,9 @@ const QUICK_TOOLS = [
 
 export default function QuickToolsSection() {
   return (
-    <section className="mb-12">
-      <h2 className="text-2xl font-bold mb-6">컨텐츠 바로가기</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="mb-10">
+      <h2 className="text-xl font-bold mb-4">계산기 도구</h2>
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {QUICK_TOOLS.map((tool) => (
           <ToolCard
             key={tool.href}

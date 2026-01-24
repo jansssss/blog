@@ -8,6 +8,7 @@ import InterestRateWidget from '@/components/InterestRateWidget'
 import InsuranceWidget from '@/components/InsuranceWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
+import { Calculator, ArrowLeftRight } from 'lucide-react'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -20,7 +21,7 @@ export default async function HomePage({
   const params = await searchParams
   const currentPage = Number(params.page) || 1
   const selectedCategory = params.category || null
-  const postsPerPage = 6  // Phase 1: 홈페이지에서는 6개만 표시
+  const postsPerPage = 3  // 홈페이지에서는 3개만 표시
   const offset = (currentPage - 1) * postsPerPage
 
   // 현재 사이트 정보 조회
@@ -89,24 +90,42 @@ export default async function HomePage({
         <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       )}
 
-      <div className="container py-10 overflow-x-hidden">
-        {/* Hero Section */}
-        <section className="mb-12 text-center overflow-visible">
-        <h1 className="mb-6 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl" style={{ lineHeight: '1.6' }} dangerouslySetInnerHTML={{ __html: heroTitle }} />
-        <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground mt-6">
-          {heroSubtitle}
-        </p>
+      <div className="container py-6 overflow-x-hidden">
+        {/* Hero Section - Compact */}
+        <section className="mb-6 text-center overflow-visible">
+          <h1 className="mb-3 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl" style={{ lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: heroTitle }} />
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground">
+            {heroSubtitle}
+          </p>
+          <SearchBar />
+        </section>
 
-        {/* AI-Style Search Bar */}
-        <SearchBar />
-      </section>
+        {/* 즉시 실행 CTA 버튼 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && (
+          <section className="mb-8">
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/calculator/loan-interest" className="block">
+                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors">
+                  <Calculator className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">대출 이자 계산</span>
+                </div>
+              </Link>
+              <Link href="/calculator/repayment-compare" className="block">
+                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
+                  <ArrowLeftRight className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">상환방식 비교</span>
+                </div>
+              </Link>
+            </div>
+          </section>
+        )}
 
-      {/* 빠른 도구 바로가기 (ohyess.kr 전용 - Phase 1) */}
-      {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
+        {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
 
-      {/* Blog Posts Grid */}
-      <section>
-        <h2 className="mb-6 text-2xl font-bold">{sectionTitleLatest}</h2>
+        {/* Blog Posts Grid - 관련 가이드 */}
+        <section>
+          <h2 className="mb-6 text-xl font-bold">관련 가이드</h2>
         {posts && posts.length > 0 ? (
           <>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -116,10 +135,10 @@ export default async function HomePage({
             </div>
 
             {/* 더보기 버튼 */}
-            <div className="mt-12 flex justify-center">
+            <div className="mt-8 flex justify-center">
               <Link href="/guide">
-                <Button variant="outline" size="lg">
-                  더보기
+                <Button variant="outline">
+                  더 많은 가이드 보기
                 </Button>
               </Link>
             </div>

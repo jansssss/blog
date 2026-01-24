@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Trash2, RefreshCw, Sparkles } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Trash2, RefreshCw, Sparkles, Download } from 'lucide-react'
 
 interface NewsItem {
   id: string
@@ -31,6 +31,7 @@ export default function AdminNewsPage() {
   const [generating, setGenerating] = useState(false)
   const [processingStep, setProcessingStep] = useState<ProcessingStep>('idle')
   const [currentItemIndex, setCurrentItemIndex] = useState(0)
+  const [fetching, setFetching] = useState(false)
 
   useEffect(() => {
     // 로그인 체크
@@ -273,6 +274,35 @@ export default function AdminNewsPage() {
     })
   }
 
+  // 뉴스 수집 실행
+  const handleFetchNews = async () => {
+    if (!confirm('RSS 뉴스를 수집하시겠습니까?\n\n네이버 인기뉴스 + 구글 트렌드 기반 뉴스가 수집됩니다.')) {
+      return
+    }
+
+    setFetching(true)
+    try {
+      const response = await fetch('/api/admin/news/fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '뉴스 수집 실패')
+      }
+
+      alert(`뉴스 수집 완료!\n\n새로 수집: ${data.stats?.new || 0}개\n중복: ${data.stats?.duplicate || 0}개\n트렌딩: ${data.stats?.trending || 0}개`)
+      loadNewsItems()
+    } catch (err) {
+      console.error('뉴스 수집 오류:', err)
+      alert(`뉴스 수집 중 오류가 발생했습니다.\n${err instanceof Error ? err.message : '알 수 없는 오류'}`)
+    } finally {
+      setFetching(false)
+    }
+  }
+
   // 진행 상태 메시지 (Perplexity만)
   const getProcessingMessage = () => {
     switch (processingStep) {
@@ -331,6 +361,17 @@ export default function AdminNewsPage() {
               <span className="ml-1">({selectedItems.length})</span>
             </Button>
           )}
+          <Button
+            onClick={handleFetchNews}
+            disabled={fetching}
+            variant="outline"
+            size="sm"
+            className="shrink-0 bg-green-50 border-green-300 hover:bg-green-100"
+          >
+            <Download className={`h-4 w-4 md:mr-2 ${fetching ? 'animate-bounce' : ''}`} />
+            <span className="hidden sm:inline">{fetching ? '수집 중...' : '뉴스 수집'}</span>
+            <span className="sm:hidden">{fetching ? '수집중' : '수집'}</span>
+          </Button>
           <Button onClick={loadNewsItems} variant="outline" size="sm" className="shrink-0">
             <RefreshCw className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">새로고침</span>

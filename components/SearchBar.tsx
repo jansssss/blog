@@ -17,7 +17,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-12 mt-8 px-4">
+    <div className="w-full max-w-3xl mx-auto mb-6 mt-4 px-4">
       <form onSubmit={handleSubmit} className="relative group overflow-visible">
         {/* Gradient Background Effect */}
         <div
@@ -51,7 +51,7 @@ export default function SearchBar() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="궁금한 내용을 검색해보세요... (예: 프리랜서 신용대출, AI, 세금)"
+              placeholder="궁금한 내용을 검색해보세요... (예: 프리랜서 신용대출, 세금)"
               className="flex-1 bg-transparent py-4 pr-4 text-base outline-none placeholder:text-muted-foreground"
             />
 
@@ -78,10 +78,10 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {/* Popular searches suggestion */}
-      <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
+      {/* Popular searches suggestion - hidden on mobile */}
+      <div className="mt-3 hidden sm:flex items-center justify-center gap-2 flex-wrap">
         <span className="text-xs text-muted-foreground">인기 검색어:</span>
-        {['신용대출', '프리랜서', '세금', 'AI'].map((keyword) => (
+        {['신용대출', '프리랜서', '세금', '대출계산기'].map((keyword) => (
           <button
             key={keyword}
             onClick={() => {

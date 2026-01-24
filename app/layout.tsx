@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/Breadcrumb'
 import { getCurrentSite } from '@/lib/site'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -68,6 +69,7 @@ export default async function RootLayout({
             siteName={site?.name}
             isMainSite={site?.is_main ?? true}
           />
+          <Breadcrumb />
           <main className="flex-1">{children}</main>
           <Footer
             siteTheme={site?.theme_json}

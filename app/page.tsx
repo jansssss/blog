@@ -7,8 +7,9 @@ import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
 import InsuranceWidget from '@/components/InsuranceWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
+import InsuranceToolsSection from '@/components/InsuranceToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { Calculator, ArrowLeftRight } from 'lucide-react'
+import { Calculator, ArrowLeftRight, Car, Shield, ClipboardCheck } from 'lucide-react'
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -122,6 +123,35 @@ export default async function HomePage({
 
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
+
+        {/* 즉시 실행 CTA 버튼 (sureline.kr 전용) */}
+        {site?.domain === 'sureline.kr' && (
+          <section className="mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link href="/tools/auto-discount-check" className="block">
+                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors">
+                  <Car className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">자동차보험 할인 진단</span>
+                </div>
+              </Link>
+              <Link href="/tools/health-overlap-check" className="block">
+                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
+                  <Shield className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">실손/건강 중복 점검</span>
+                </div>
+              </Link>
+              <Link href="/tools/insurance-remodel" className="block">
+                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
+                  <ClipboardCheck className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">보험 리모델링 체크</span>
+                </div>
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* 보험 점검 도구 (sureline.kr 전용) */}
+        {site?.domain === 'sureline.kr' && <InsuranceToolsSection />}
 
         {/* Blog Posts Grid - 관련 가이드 */}
         <section>

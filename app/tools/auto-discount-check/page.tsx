@@ -416,6 +416,66 @@ export default function AutoDiscountCheckPage() {
           </div>
         </div>
       )}
+
+      {/* 자동차보험 할인 가이드 */}
+      <Card className="mt-6 bg-blue-50 border-blue-200">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-4 text-gray-900">자동차보험 할인, 이것만 알아두세요</h3>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-blue-800 mb-2">마일리지 특약이란?</p>
+              <p className="text-gray-600">
+                연간 주행거리에 따라 보험료를 할인받는 특약입니다.
+                주행거리가 적을수록 사고 확률이 낮다는 통계를 기반으로 합니다.
+                보험사 앱을 설치하거나 OBD 장치를 연결하여 주행거리를 측정합니다.
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-green-800 mb-2">운전자 한정 특약</p>
+              <p className="text-gray-600">
+                운전자를 본인만 또는 부부로 한정하면 보험료를 크게 절약할 수 있습니다.
+                단, 다른 사람이 운전하다 사고가 나면 보장이 제한될 수 있으니 주의하세요.
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-purple-800 mb-2">할인 중복 적용</p>
+              <p className="text-gray-600">
+                대부분의 할인은 중복 적용이 가능하지만, 일부 보험사에서는 할인 한도가 있습니다.
+                갱신 시 현재 적용된 할인과 추가 가능한 할인을 꼭 확인하세요.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 갱신 시 체크리스트 */}
+      <Card className="mt-6 border-amber-200 bg-amber-50">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-3 text-gray-900">보험 갱신 시 체크리스트</h3>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex items-start gap-2">
+              <span className="text-amber-600 font-bold">1.</span>
+              <span>현재 적용 중인 할인 항목 확인하기</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-amber-600 font-bold">2.</span>
+              <span>새로 적용 가능한 할인 항목 체크 (블랙박스 설치, 자녀 출생 등)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-amber-600 font-bold">3.</span>
+              <span>운전자 범위 재검토 (가족 구성원 변화 반영)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-amber-600 font-bold">4.</span>
+              <span>주행거리 줄었다면 마일리지 특약 가입 검토</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-amber-600 font-bold">5.</span>
+              <span>다이렉트(온라인) 가입으로 추가 할인 받기</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   )
 }

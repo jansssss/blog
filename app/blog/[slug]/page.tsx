@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import EditButton from '@/components/EditButton'
 import DeleteButton from '@/components/DeleteButton'
-import { getCurrentSiteId } from '@/lib/site'
+import { getCurrentSiteId, getCurrentSite } from '@/lib/site'
 
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug: encodedSlug } = await params
   // URL 디코딩 (한글 slug 지원)
   const slug = decodeURIComponent(encodedSlug)
-  const siteId = await getCurrentSiteId()
+  const site = await getCurrentSite()
+  const siteId = site?.id
+
+  // 사이트 이름 (메타데이터용)
+  const siteName = site?.name || '오예스'
 
   let query = supabase
     .from('posts')
@@ -34,21 +38,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!post) {
     return {
-      title: 'Post Not Found',
+      title: '페이지를 찾을 수 없습니다',
+      description: '요청하신 게시글이 존재하지 않습니다.',
     }
   }
 
   return {
-    title: `${post.title} - CMS Blog`,
+    title: `${post.title} | ${siteName}`,
     description: post.summary,
-    keywords: post.tags.join(', '),
+    keywords: post.tags,
+    authors: [{ name: siteName }],
     openGraph: {
       title: post.title,
       description: post.summary,
       type: 'article',
+      siteName: siteName,
       publishedTime: post.published_at,
-      authors: ['CMS Blog'],
+      modifiedTime: post.updated_at || post.published_at,
+      authors: [siteName],
       tags: post.tags,
+      locale: 'ko_KR',
+      images: post.thumbnail_url ? [post.thumbnail_url] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.summary,
       images: post.thumbnail_url ? [post.thumbnail_url] : [],
     },
   }

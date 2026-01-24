@@ -472,6 +472,107 @@ export default function InsuranceRemodelPage() {
         </div>
       )}
 
+      {/* 가이드 콘텐츠 */}
+      <section className="mt-12 border-t pt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">
+          보험 리모델링, 이것만 알아두세요
+        </h2>
+
+        <div className="space-y-6">
+          {/* 리모델링 vs 해지 */}
+          <div className="bg-white border rounded-lg p-5">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">1</span>
+              리모델링 ≠ 해지
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              보험 리모델링은 기존 보험을 해지하고 새로 가입하는 것이 아닙니다.
+              <strong className="text-gray-900"> 현재 보험의 보장을 유지하면서 부족한 부분을 보강하거나, 중복을 정리하는 것</strong>이 핵심입니다.
+              오래된 보험은 해지 시 불이익이 크고, 나이가 들어 재가입하면 보험료가 급격히 올라갑니다.
+            </p>
+          </div>
+
+          {/* 리모델링 시기 */}
+          <div className="bg-white border rounded-lg p-5">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">2</span>
+              리모델링 검토 시기
+            </h3>
+            <ul className="text-gray-600 text-sm space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span><strong className="text-gray-900">생애주기 변화:</strong> 결혼, 출산, 자녀 독립, 은퇴 등 생활 환경이 바뀔 때</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span><strong className="text-gray-900">보험료 부담 증가:</strong> 갱신형 보험료가 크게 올라 부담될 때</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span><strong className="text-gray-900">보장 공백 발견:</strong> 필요한 보장이 없거나 부족하다고 느낄 때</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span><strong className="text-gray-900">10년 이상 경과:</strong> 오래된 상품은 보장 내용이 현재 기준과 다를 수 있음</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* 리모델링 원칙 */}
+          <div className="bg-white border rounded-lg p-5">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">3</span>
+              리모델링 3대 원칙
+            </h3>
+            <div className="grid gap-3">
+              <div className="p-3 bg-green-50 rounded-lg">
+                <p className="font-medium text-green-800 text-sm">✓ 기존 보험 유지가 우선</p>
+                <p className="text-green-700 text-xs mt-1">해지 환급금이 적고, 재가입 시 보험료가 높아질 수 있습니다</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="font-medium text-blue-800 text-sm">✓ 보장 먼저, 저축 나중에</p>
+                <p className="text-blue-700 text-xs mt-1">보장성 보험을 충분히 갖춘 후 저축/연금을 고려하세요</p>
+              </div>
+              <div className="p-3 bg-amber-50 rounded-lg">
+                <p className="font-medium text-amber-800 text-sm">✓ 중복 정리로 효율화</p>
+                <p className="text-amber-700 text-xs mt-1">실손보험 중복, 유사 특약 중복을 정리하면 보험료를 줄일 수 있습니다</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 체크리스트 */}
+      <section className="mt-8 mb-8">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">
+          리모델링 전 체크리스트
+        </h2>
+        <div className="bg-gray-50 border rounded-lg p-5">
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">모든 보험 증권을 모아 현재 보장 내용을 한눈에 정리했는지 확인</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">해지 시 불이익(환급금 손실, 재가입 보험료 상승)을 확인했는지</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">현재 건강 상태로 새 보험 가입이 가능한지 확인했는지</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">실손보험, 암보험 등 핵심 보장의 보장 기간과 갱신 조건을 파악했는지</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">월 보험료가 소득의 5~10% 이내인지 점검했는지</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       {/* 관련 도구 */}
       <div className="bg-gray-50 rounded-lg p-4 border mt-6">
         <p className="text-sm font-medium text-gray-700 mb-3">관련 점검 도구</p>

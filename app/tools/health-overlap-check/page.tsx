@@ -453,6 +453,68 @@ export default function HealthOverlapCheckPage() {
           </Link>
         </div>
       </div>
+
+      {/* 보험 중복 가이드 */}
+      <Card className="mt-6 bg-emerald-50 border-emerald-200">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-4 text-gray-900">보험 중복, 이것만 알아두세요</h3>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-red-800 mb-2">실손보험 중복의 문제점</p>
+              <p className="text-gray-600">
+                실손의료보험은 <strong>비례보상 원칙</strong>이 적용됩니다.
+                2개 이상 가입해도 실제 발생한 의료비만 보상받으며,
+                보험료만 이중으로 납부하게 됩니다.
+                실손보험은 1개만 유지하는 것이 효율적입니다.
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-green-800 mb-2">중복 청구 가능한 보험</p>
+              <p className="text-gray-600">
+                암진단비, 수술비, 입원일당 같은 <strong>정액형 보험</strong>은
+                여러 개 가입해도 각각 보험금을 받을 수 있습니다.
+                단, 보험료 부담을 고려하여 적정 수준으로 가입하세요.
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg">
+              <p className="font-semibold text-blue-800 mb-2">실손 vs 정액의 차이</p>
+              <ul className="text-gray-600 space-y-1 mt-2">
+                <li>• <strong>실손형:</strong> 실제 쓴 의료비만큼 보상 (중복 시 나눠서 보상)</li>
+                <li>• <strong>정액형:</strong> 약관에 정해진 금액 지급 (중복 시 각각 지급)</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 보험 정리 팁 */}
+      <Card className="mt-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <h3 className="font-semibold mb-3 text-gray-900">보험 정리 전 확인할 것</h3>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 font-bold">1.</span>
+              <span>기존 보험의 보장 내용을 정확히 파악하세요</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 font-bold">2.</span>
+              <span>가입 시기가 오래된 보험은 보장 조건이 유리할 수 있으니 신중하게 판단하세요</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 font-bold">3.</span>
+              <span>해지 전 새 보험 가입이 완료되었는지 확인하세요 (공백 기간 주의)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 font-bold">4.</span>
+              <span>건강 상태가 변했다면 새 보험 가입이 어려울 수 있습니다</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 font-bold">5.</span>
+              <span>중요한 결정은 보험 전문가와 상담 후 진행하세요</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   )
 }

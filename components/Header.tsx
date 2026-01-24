@@ -20,8 +20,24 @@ export default function Header({ siteTheme, siteName, isMainSite = true }: Heade
   const headerTitle = siteTheme?.header?.title || siteName || 'ohyess'
   const primaryColor = siteTheme?.brand?.primaryColor || '#111827'
   const accentColor = siteTheme?.brand?.accentColor || '#2563EB'
-  const topLinks = siteTheme?.header?.topLinks || []
   const adminEnabled = siteTheme?.features?.adminEnabled ?? isMainSite
+
+  // 사이트별 기본 네비게이션 링크
+  const defaultLinks: Array<{ label: string; href: string; requiresAdmin?: boolean }> = siteName?.toLowerCase() === 'sureline'
+    ? [
+        { label: '보험 도구', href: '/tools/auto-discount-check' },
+        { label: '가이드', href: '/guide' },
+        { label: '소개', href: '/about' },
+      ]
+    : [
+        { label: '계산기', href: '/calculator' },
+        { label: '가이드', href: '/guide' },
+        { label: '소개', href: '/about' },
+      ]
+
+  const topLinks = siteTheme?.header?.topLinks?.length
+    ? siteTheme.header.topLinks
+    : defaultLinks
 
   useEffect(() => {
     const adminStatus = localStorage.getItem('isAdmin')

@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import LogoutButton from './LogoutButton'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { SiteTheme } from '@/lib/site'
 
@@ -15,7 +14,6 @@ interface SubMenuItem {
 interface NavItem {
   label: string
   href: string
-  requiresAdmin?: boolean
   subItems?: SubMenuItem[]
 }
 
@@ -76,8 +74,7 @@ const SURELINE_NAV: NavItem[] = [
   { label: '소개', href: '/about' },
 ]
 
-export default function Header({ siteTheme, siteName, isMainSite = true }: HeaderProps) {
-  const [isAdmin, setIsAdmin] = useState(false)
+export default function Header({ siteTheme, siteName }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null)
@@ -86,33 +83,9 @@ export default function Header({ siteTheme, siteName, isMainSite = true }: Heade
   const headerTitle = siteTheme?.header?.title || siteName || 'ohyess'
   const primaryColor = siteTheme?.brand?.primaryColor || '#111827'
   const accentColor = siteTheme?.brand?.accentColor || '#2563EB'
-  const adminEnabled = siteTheme?.features?.adminEnabled ?? isMainSite
 
   // 사이트별 네비게이션 선택
   const navItems: NavItem[] = siteName?.toLowerCase() === 'sureline' ? SURELINE_NAV : OHYESS_NAV
-
-  useEffect(() => {
-    const adminStatus = localStorage.getItem('isAdmin')
-    setIsAdmin(adminStatus === 'true')
-
-    const handleStorageChange = () => {
-      const adminStatus = localStorage.getItem('isAdmin')
-      setIsAdmin(adminStatus === 'true')
-    }
-
-    const handleLoginStateChange = () => {
-      const adminStatus = localStorage.getItem('isAdmin')
-      setIsAdmin(adminStatus === 'true')
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('loginStateChange', handleLoginStateChange)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('loginStateChange', handleLoginStateChange)
-    }
-  }, [])
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
@@ -192,42 +165,6 @@ export default function Header({ siteTheme, siteName, isMainSite = true }: Heade
               )}
             </div>
           ))}
-
-          {/* 관리자 기능 (adminEnabled + 로그인 상태) */}
-          {adminEnabled && (
-            <>
-              {!isAdmin ? (
-                <Link
-                  href="/admin/login"
-                  className="px-3 py-2 text-sm font-medium transition-colors hover:text-primary rounded-md hover:bg-accent"
-                >
-                  관리자
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/admin/editor"
-                    className="px-3 py-2 text-sm font-medium transition-colors hover:text-primary rounded-md hover:bg-accent"
-                  >
-                    새 글쓰기
-                  </Link>
-                  <Link
-                    href="/admin/news"
-                    className="px-3 py-2 text-sm font-medium transition-colors hover:text-primary rounded-md hover:bg-accent"
-                  >
-                    뉴스 관리
-                  </Link>
-                  <Link
-                    href="/admin/drafts"
-                    className="px-3 py-2 text-sm font-medium transition-colors hover:text-primary rounded-md hover:bg-accent"
-                  >
-                    초안 관리
-                  </Link>
-                  <LogoutButton />
-                </>
-              )}
-            </>
-          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -292,48 +229,6 @@ export default function Header({ siteTheme, siteName, isMainSite = true }: Heade
                 )}
               </div>
             ))}
-
-            {/* 관리자 기능 (모바일) */}
-            {adminEnabled && (
-              <div className="border-t mt-2 pt-2">
-                {!isAdmin ? (
-                  <Link
-                    href="/admin/login"
-                    className="block text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
-                    onClick={closeMobileMenu}
-                  >
-                    관리자
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      href="/admin/editor"
-                      className="block text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
-                      onClick={closeMobileMenu}
-                    >
-                      새 글쓰기
-                    </Link>
-                    <Link
-                      href="/admin/news"
-                      className="block text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
-                      onClick={closeMobileMenu}
-                    >
-                      뉴스 관리
-                    </Link>
-                    <Link
-                      href="/admin/drafts"
-                      className="block text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
-                      onClick={closeMobileMenu}
-                    >
-                      초안 관리
-                    </Link>
-                    <div onClick={closeMobileMenu} className="px-2">
-                      <LogoutButton />
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
           </nav>
         </div>
       )}

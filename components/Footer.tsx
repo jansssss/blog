@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { SiteTheme } from '@/lib/site'
 
@@ -7,6 +10,8 @@ interface FooterProps {
 }
 
 export default function Footer({ siteTheme, siteName }: FooterProps) {
+  const [isAdmin, setIsAdmin] = useState(false)
+
   // 테마에서 값 추출
   const footerLinks = siteTheme?.footer?.links || [
     { label: '사이트 소개', href: '/about' },
@@ -17,6 +22,36 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
   const disclaimer = siteTheme?.footer?.disclaimer || '⚠️ 본 사이트는 금융 상품 판매를 하지 않으며, 일반 정보 제공을 목적으로 운영됩니다.'
   const copyright = siteTheme?.footer?.copyright || `© 2026 ${siteName?.toUpperCase() || 'OHYESS'}. All rights reserved.`
   const builtWith = siteTheme?.footer?.builtWith || 'Built with Next.js & Supabase'
+  const adminEnabled = siteTheme?.features?.adminEnabled ?? true
+
+  useEffect(() => {
+    const adminStatus = localStorage.getItem('isAdmin')
+    setIsAdmin(adminStatus === 'true')
+
+    const handleStorageChange = () => {
+      const adminStatus = localStorage.getItem('isAdmin')
+      setIsAdmin(adminStatus === 'true')
+    }
+
+    const handleLoginStateChange = () => {
+      const adminStatus = localStorage.getItem('isAdmin')
+      setIsAdmin(adminStatus === 'true')
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('loginStateChange', handleLoginStateChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('loginStateChange', handleLoginStateChange)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin')
+    window.dispatchEvent(new Event('loginStateChange'))
+    window.location.href = '/'
+  }
 
   return (
     <footer className="border-t bg-gray-50">
@@ -35,6 +70,63 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
                 </Link>
               </span>
             ))}
+
+            {/* 관리자 메뉴 */}
+            {adminEnabled && (
+              <>
+                <span className="flex items-center gap-4">
+                  <span className="text-gray-300">|</span>
+                  {!isAdmin ? (
+                    <Link
+                      href="/admin/login"
+                      className="text-gray-500 hover:text-gray-900 transition-colors text-xs"
+                    >
+                      관리자
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/admin/editor"
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        새 글쓰기
+                      </Link>
+                    </>
+                  )}
+                </span>
+                {isAdmin && (
+                  <>
+                    <span className="flex items-center gap-4">
+                      <span className="text-gray-300">|</span>
+                      <Link
+                        href="/admin/news"
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        뉴스 관리
+                      </Link>
+                    </span>
+                    <span className="flex items-center gap-4">
+                      <span className="text-gray-300">|</span>
+                      <Link
+                        href="/admin/drafts"
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        초안 관리
+                      </Link>
+                    </span>
+                    <span className="flex items-center gap-4">
+                      <span className="text-gray-300">|</span>
+                      <button
+                        onClick={handleLogout}
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        로그아웃
+                      </button>
+                    </span>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           {/* 고지사항 */}

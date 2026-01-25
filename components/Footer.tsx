@@ -14,7 +14,6 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
 
   // 테마에서 값 추출
   const footerLinks = siteTheme?.footer?.links || [
-    { label: '사이트 소개', href: '/about' },
     { label: '문의하기', href: '/contact' },
     { label: '개인정보처리방침', href: '/privacy' },
     { label: '이용약관', href: '/terms' }

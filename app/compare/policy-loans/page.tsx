@@ -1,172 +1,95 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Landmark, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Users, Home, Briefcase, GraduationCap } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Landmark, ArrowLeft, ExternalLink, CheckCircle2, Info, Users, Briefcase, Home, Search } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 
-// 정책자금 데이터
-interface PolicyLoan {
-  id: string
-  category: 'housing' | 'business' | 'education' | 'living'
-  name: string
-  provider: string
-  description: string
-  interestRate: string
-  maxAmount: string
-  term: string
-  eligibility: string[]
-  features: string[]
-  caution: string[]
-  link?: string
-}
-
-const POLICY_LOANS: PolicyLoan[] = [
-  // 주거
+// 정책자금 대출 종류
+const POLICY_CATEGORIES = [
   {
-    id: 'special-bogeumjari',
-    category: 'housing',
-    name: '특례보금자리론',
-    provider: '한국주택금융공사',
-    description: '무주택 실수요자를 위한 고정금리 장기 모기지',
-    interestRate: '연 3.3~4.3%',
-    maxAmount: '최대 5억원',
-    term: '최대 50년',
-    eligibility: ['무주택자 또는 1주택자 (처분 조건)', '주택가격 9억원 이하', '부부합산 연소득 1억원 이하'],
-    features: ['고정금리로 안정적', '최대 50년 초장기', '중도상환수수료 면제'],
-    caution: ['소득/주택가격 제한', '실거주 의무', '대출 한도 제한']
+    id: 'youth',
+    icon: <Users className="w-6 h-6" />,
+    name: '청년 지원',
+    description: '만 19~39세 청년을 위한 금융 지원',
+    examples: ['청년전용 버팀목 전세대출', '청년 창업 지원', '햇살론 Youth'],
+    link: '/policy/youth'
   },
   {
-    id: 'youth-jeonse',
-    category: 'housing',
-    name: '청년전용 버팀목전세대출',
-    provider: '주택도시기금',
-    description: '청년층을 위한 저금리 전세자금 대출',
-    interestRate: '연 1.5~2.9%',
-    maxAmount: '최대 2억원 (수도권)',
-    term: '2년 (최대 4회 연장, 10년)',
-    eligibility: ['만 19~34세', '무주택 세대주', '연소득 5천만원 이하', '순자산 3.45억원 이하'],
-    features: ['매우 낮은 금리', '장기 연장 가능', '보증료 지원'],
-    caution: ['소득/나이 제한', '전세금 제한', '서류 준비 필요']
+    id: 'small-business',
+    icon: <Briefcase className="w-6 h-6" />,
+    name: '소상공인·자영업자',
+    description: '소규모 사업자를 위한 운영자금 지원',
+    examples: ['소상공인 정책자금', '소공인 특화자금', '긴급경영안정자금'],
+    link: '/policy/small-business'
   },
   {
-    id: 'newlywed-jeonse',
-    category: 'housing',
-    name: '신혼부부 전용 전세대출',
-    provider: '주택도시기금',
-    description: '신혼부부를 위한 우대금리 전세대출',
-    interestRate: '연 1.5~2.7%',
-    maxAmount: '최대 3억원 (수도권)',
-    term: '2년 (최대 4회 연장, 10년)',
-    eligibility: ['혼인 7년 이내 또는 예비 신혼부부', '무주택 세대주', '부부합산 연소득 6천만원 이하'],
-    features: ['청년 대출보다 높은 한도', '다자녀 추가 우대', '출산 시 금리 인하'],
-    caution: ['혼인 기간 제한', '소득 제한', '주택 규모 제한']
-  },
-  // 사업자
-  {
-    id: 'startup-guarantee',
-    category: 'business',
-    name: '창업기업 보증부 대출',
-    provider: '신용보증기금/기술보증기금',
-    description: '창업 초기 기업을 위한 정책 보증 대출',
-    interestRate: '연 3~5%대',
-    maxAmount: '최대 10억원',
-    term: '최대 10년',
-    eligibility: ['창업 7년 이내 기업', '사업자등록증', '사업계획서'],
-    features: ['담보 없이 신용 대출', '정부 보증', '저금리'],
-    caution: ['심사 기간 소요', '사업성 평가', '보증료 발생']
+    id: 'sme',
+    icon: <Briefcase className="w-6 h-6" />,
+    name: '중소기업',
+    description: '중소·중견기업 성장 지원',
+    examples: ['정책자금 융자', '기술보증기금', '신용보증기금'],
+    link: '/policy/sme'
   },
   {
-    id: 'small-biz-loan',
-    category: 'business',
-    name: '소상공인 정책자금',
-    provider: '소상공인시장진흥공단',
-    description: '소상공인을 위한 운전/시설 자금',
-    interestRate: '연 2~3%대 (정책금리)',
-    maxAmount: '업종별 1~2억원',
-    term: '5~8년',
-    eligibility: ['소상공인 기준 충족', '신용등급 7등급 이상', '업력 제한 없음'],
-    features: ['초저금리', '거치 기간 제공', '다양한 자금 용도'],
-    caution: ['예산 소진 시 조기 마감', '심사 까다로움', '필수 교육 이수']
-  },
-  // 교육
-  {
-    id: 'student-loan',
-    category: 'education',
-    name: '취업 후 상환 학자금대출 (ICL)',
-    provider: '한국장학재단',
-    description: '졸업 후 소득 발생 시 상환하는 학자금 대출',
-    interestRate: '연 1.7% (2024년 기준)',
-    maxAmount: '등록금 + 생활비 (연 400만원)',
-    term: '졸업 후 소득 발생 시까지',
-    eligibility: ['대학생/대학원생', '학자금지원 8구간 이하', '만 35세 이하'],
-    features: ['취업 후 상환', '소득 연계 상환', '초저금리'],
-    caution: ['소득구간 제한', '상환 기간 무기한', '상환 부담']
-  },
-  {
-    id: 'general-student-loan',
-    category: 'education',
-    name: '일반 상환 학자금대출',
-    provider: '한국장학재단',
-    description: '재학 중 또는 졸업 후 일정 기간 상환하는 학자금 대출',
-    interestRate: '연 2.7% (2024년 기준)',
-    maxAmount: '등록금 전액 + 생활비',
-    term: '최대 10~20년',
-    eligibility: ['대학생/대학원생', '소득구간 제한 완화', '신용요건 충족'],
-    features: ['높은 한도', '다양한 상환 방식', 'ICL보다 유연'],
-    caution: ['ICL보다 높은 금리', '재학 중 이자 발생 가능', '신용 영향']
-  },
-  // 생활
-  {
-    id: 'sunflower-loan',
-    category: 'living',
-    name: '햇살론15',
-    provider: '서민금융진흥원',
-    description: '저소득 서민을 위한 소액 생활안정 대출',
-    interestRate: '연 15.9% 이내',
-    maxAmount: '최대 700만원',
-    term: '최대 5년',
-    eligibility: ['연소득 3,500만원 이하', '신용점수 하위 20%', '근로/사업소득자'],
-    features: ['신용점수 낮아도 가능', '빠른 심사', '대안 금융'],
-    caution: ['금리가 높은 편', '한도 제한', '상환 부담']
-  },
-  {
-    id: 'miso-finance',
-    category: 'living',
-    name: '미소금융',
-    provider: '미소금융중앙재단',
-    description: '저소득/저신용자를 위한 창업/운영 자금',
-    interestRate: '연 2~4.5%',
-    maxAmount: '최대 7천만원',
-    term: '최대 6년',
-    eligibility: ['기초생활수급자', '차상위계층', '저신용자 등'],
-    features: ['초저금리', '담보 불필요', '창업 지원'],
-    caution: ['대상 제한', '심사 기간', '사후 관리']
+    id: 'housing',
+    icon: <Home className="w-6 h-6" />,
+    name: '주거 지원',
+    description: '무주택자·신혼부부 주거 안정',
+    examples: ['디딤돌 대출', '보금자리론', '신혼부부 전세대출'],
+    link: '/policy/housing'
   }
 ]
 
-type CategoryType = 'all' | 'housing' | 'business' | 'education' | 'living'
-
-const CATEGORY_LABELS: Record<CategoryType, { label: string; icon: React.ReactNode; description: string }> = {
-  all: { label: '전체', icon: <Landmark className="w-4 h-4" />, description: '모든 정책자금' },
-  housing: { label: '주거', icon: <Home className="w-4 h-4" />, description: '전세, 주택구입' },
-  business: { label: '사업', icon: <Briefcase className="w-4 h-4" />, description: '창업, 운영자금' },
-  education: { label: '교육', icon: <GraduationCap className="w-4 h-4" />, description: '학자금' },
-  living: { label: '생활', icon: <Users className="w-4 h-4" />, description: '생활안정 자금' }
-}
+// 주요 정책자금 기관
+const POLICY_INSTITUTIONS = [
+  {
+    name: '주택도시기금',
+    url: 'https://nhuf.molit.go.kr',
+    description: '전세자금, 주거안정 대출',
+    official: true
+  },
+  {
+    name: '주택금융공사',
+    url: 'https://www.hf.go.kr',
+    description: '보금자리론, 디딤돌대출',
+    official: true
+  },
+  {
+    name: '중소벤처기업진흥공단',
+    url: 'https://www.kosmes.or.kr',
+    description: '중소기업 정책자금',
+    official: true
+  },
+  {
+    name: '소상공인시장진흥공단',
+    url: 'https://www.semas.or.kr',
+    description: '소상공인 정책자금',
+    official: true
+  },
+  {
+    name: '서민금융진흥원',
+    url: 'https://www.kinfa.or.kr',
+    description: '서민·저소득층 금융지원',
+    official: true
+  },
+  {
+    name: '신용보증기금',
+    url: 'https://www.kodit.co.kr',
+    description: '중소기업 신용보증',
+    official: true
+  },
+  {
+    name: '기술보증기금',
+    url: 'https://www.kibo.or.kr',
+    description: '기술기업 보증지원',
+    official: true
+  }
+]
 
 export default function PolicyLoansPage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all')
-  const [expandedLoan, setExpandedLoan] = useState<string | null>(null)
-
-  const filteredLoans = selectedCategory === 'all'
-    ? POLICY_LOANS
-    : POLICY_LOANS.filter(l => l.category === selectedCategory)
-
   return (
-    <div className="container py-8 max-w-5xl">
+    <div className="container py-8 max-w-4xl">
       {/* 뒤로가기 */}
       <div className="mb-6">
         <Link href="/compare" className="inline-flex items-center text-sm text-gray-600 hover:text-primary">
@@ -181,155 +104,140 @@ export default function PolicyLoansPage() {
           <Landmark className="w-7 h-7 text-primary" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900">
-          정책자금 비교
+          정책자금 찾는 방법
         </h1>
         <p className="text-gray-600">
-          정부 및 공공기관의 저금리 정책자금을 한눈에 비교해보세요
+          정부 지원 대출을 찾고 신청하는 방법을 안내합니다
         </p>
       </div>
 
-      {/* 카테고리 선택 */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
-        {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((cat) => (
-          <Button
-            key={cat}
-            variant={selectedCategory === cat ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory(cat)}
-            size="sm"
-            className="flex items-center gap-1.5"
-          >
-            {CATEGORY_LABELS[cat].icon}
-            {CATEGORY_LABELS[cat].label}
-          </Button>
-        ))}
-      </div>
+      {/* 핵심 안내 */}
+      <Card className="mb-8 border-primary/30 bg-primary/5">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-gray-900 mb-2">정책자금이란?</p>
+              <p className="text-sm text-gray-600">
+                정부와 공공기관이 <strong className="text-gray-900">특정 대상</strong>을 위해
+                <strong className="text-gray-900"> 낮은 금리</strong>로 지원하는 대출입니다.
+                일반 은행 대출보다 1~3%p 낮은 금리로 이용할 수 있으며, 자격 조건에 해당하면 반드시 확인해보세요.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* 상품 목록 */}
-      <div className="space-y-4 mb-8">
-        {filteredLoans.map((loan) => (
-          <Card
-            key={loan.id}
-            className={`transition-all ${expandedLoan === loan.id ? 'border-primary shadow-md' : ''}`}
-          >
-            <CardHeader
-              className="cursor-pointer"
-              onClick={() => setExpandedLoan(expandedLoan === loan.id ? null : loan.id)}
+      {/* 대상별 정책자금 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Search className="w-5 h-5 text-primary" />
+          나에게 맞는 정책자금 찾기
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {POLICY_CATEGORIES.map((category) => (
+            <Link
+              key={category.id}
+              href={category.link}
+              className="bg-white rounded-lg border p-5 hover:shadow-md hover:border-primary/50 transition-all group"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">
-                      {CATEGORY_LABELS[loan.category].label}
-                    </span>
-                    <span className="text-xs text-gray-500">{loan.provider}</span>
-                  </div>
-                  <CardTitle className="text-lg">{loan.name}</CardTitle>
-                  <p className="text-sm text-gray-500 mt-1">{loan.description}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  {category.icon}
                 </div>
-                <div className="text-right ml-4">
-                  <p className="text-sm font-bold text-primary">{loan.interestRate}</p>
-                  <p className="text-xs text-gray-500">{loan.maxAmount}</p>
+                <div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-primary">{category.name}</h3>
+                  <p className="text-xs text-gray-500">{category.description}</p>
                 </div>
               </div>
-            </CardHeader>
+              <div className="mb-2">
+                <p className="text-xs font-medium text-gray-700 mb-1">대표 상품:</p>
+                <ul className="text-xs text-gray-600 space-y-0.5">
+                  {category.examples.map((example, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <span className="text-primary">•</span>
+                      {example}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex items-center text-sm text-primary mt-3">
+                자세히 보기
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-            {expandedLoan === loan.id && (
-              <CardContent className="pt-0 border-t">
-                <div className="grid gap-4 mt-4">
-                  {/* 기본 정보 */}
-                  <div className="grid sm:grid-cols-3 gap-3 text-sm">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-gray-500 text-xs mb-1">금리</p>
-                      <p className="font-medium text-gray-900">{loan.interestRate}</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-gray-500 text-xs mb-1">한도</p>
-                      <p className="font-medium text-gray-900">{loan.maxAmount}</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-gray-500 text-xs mb-1">기간</p>
-                      <p className="font-medium text-gray-900">{loan.term}</p>
-                    </div>
+      {/* 주요 정책자금 기관 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Landmark className="w-5 h-5 text-primary" />
+          정책자금 신청 기관
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          대상별로 담당 기관이 다릅니다. 아래 기관 홈페이지에서 자세한 조건과 신청 방법을 확인하세요.
+        </p>
+        <div className="space-y-3">
+          {POLICY_INSTITUTIONS.map((inst) => (
+            <a
+              key={inst.name}
+              href={inst.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-4 bg-white rounded-lg border hover:border-primary/50 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-gray-900 group-hover:text-primary">
+                      {inst.name}
+                    </span>
+                    {inst.official && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        공식
+                      </span>
+                    )}
                   </div>
-
-                  {/* 자격 요건 */}
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <Users className="w-4 h-4 text-gray-500" />
-                      자격 요건
-                    </h4>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {loan.eligibility.map((req, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full bg-gray-400" />
-                          {req}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* 특징 */}
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4" />
-                        주요 특징
-                      </h4>
-                      <ul className="text-sm text-green-700 space-y-1">
-                        {loan.features.map((f, i) => (
-                          <li key={i}>• {f}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* 유의사항 */}
-                    <div className="p-3 bg-amber-50 rounded-lg">
-                      <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        유의사항
-                      </h4>
-                      <ul className="text-sm text-amber-700 space-y-1">
-                        {loan.caution.map((c, i) => (
-                          <li key={i}>• {c}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                  <p className="text-sm text-gray-600">{inst.description}</p>
+                  <p className="text-xs text-gray-400 mt-1">{inst.url}</p>
                 </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary flex-shrink-0" />
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
 
-      {/* 가이드 콘텐츠 */}
-      <section className="border-t pt-8">
+      {/* 신청 가이드 */}
+      <section className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-6">
-          정책자금, 이것만 알아두세요
+          정책자금 신청 가이드
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">1</span>
-              정책자금의 장점
+              자격 조건 확인
             </h3>
             <ul className="text-gray-600 text-sm space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">•</span>
-                <span><strong className="text-gray-900">저금리:</strong> 시중 금리보다 1~3%p 낮은 금리</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">나이:</strong> 청년 지원은 만 19~39세 등 연령 제한 확인</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">•</span>
-                <span><strong className="text-gray-900">장기 상환:</strong> 최대 50년까지 장기 상환 가능</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">소득:</strong> 연 소득 기준 (예: 5천만원 이하)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">•</span>
-                <span><strong className="text-gray-900">정부 보증:</strong> 담보 부족해도 정부 보증으로 대출 가능</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">자산:</strong> 무주택자, 1주택자 등 주택 보유 여부</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">•</span>
-                <span><strong className="text-gray-900">수수료 면제:</strong> 중도상환수수료 등 각종 수수료 면제</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">업종:</strong> 사업자의 경우 업종 제한 확인</span>
               </li>
             </ul>
           </div>
@@ -337,127 +245,71 @@ export default function PolicyLoansPage() {
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">2</span>
-              신청 전 확인사항
+              필요 서류 준비
             </h3>
-            <ul className="text-gray-600 text-sm space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">자격 요건:</strong> 소득, 나이, 재산 등 자격 조건을 꼼꼼히 확인</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">예산 확인:</strong> 정책자금은 예산 소진 시 조기 마감될 수 있음</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">필요 서류:</strong> 소득증명, 재직증명 등 서류 미리 준비</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">심사 기간:</strong> 시중 대출보다 심사 기간이 길 수 있음</span>
-              </li>
+            <p className="text-gray-600 text-sm mb-2">일반적으로 필요한 서류:</p>
+            <ul className="text-gray-600 text-sm space-y-1">
+              <li>• 신분증, 주민등록등본</li>
+              <li>• 소득 증빙 (재직증명서, 소득금액증명원 등)</li>
+              <li>• 주택: 임대차계약서, 등기부등본</li>
+              <li>• 사업자: 사업자등록증, 부가세 신고서 등</li>
             </ul>
           </div>
 
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">3</span>
-              주요 신청처
+              신청 및 심사
             </h3>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="font-medium text-blue-800 text-sm">주거 관련</p>
-                <p className="text-blue-700 text-xs mt-1">한국주택금융공사, 주택도시기금</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="font-medium text-green-800 text-sm">창업/사업 관련</p>
-                <p className="text-green-700 text-xs mt-1">신용보증기금, 소상공인시장진흥공단</p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-lg">
-                <p className="font-medium text-purple-800 text-sm">학자금 관련</p>
-                <p className="text-purple-700 text-xs mt-1">한국장학재단</p>
-              </div>
-              <div className="p-3 bg-amber-50 rounded-lg">
-                <p className="font-medium text-amber-800 text-sm">생활안정 관련</p>
-                <p className="text-amber-700 text-xs mt-1">서민금융진흥원, 미소금융</p>
-              </div>
-            </div>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              각 기관 홈페이지 또는 <strong className="text-gray-900">취급 은행</strong>에서 신청합니다.
+              정책자금은 일반 대출보다 <strong className="text-gray-900">심사 기간이 1~2주</strong> 소요될 수 있으니
+              여유있게 신청하세요.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 체크리스트 */}
-      <section className="mt-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
-          정책자금 신청 전 체크리스트
-        </h2>
-        <div className="bg-gray-50 border rounded-lg p-5">
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">자격 요건 (소득, 나이, 재산)을 모두 충족하는지 확인했는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">필요한 서류를 미리 준비했는지 (소득증명, 주민등록등본 등)</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">시중 대출과 금리/조건을 비교해봤는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">예산 잔액 및 신청 마감일을 확인했는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">상환 계획을 세웠는지 (거치 기간, 분할 상환 등)</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
       {/* 주의사항 */}
-      <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-8">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">정책자금 활용 팁</p>
-            <ul className="text-blue-700 space-y-1">
-              <li>• 연초 또는 예산 배정 직후에 신청하면 승인 가능성이 높습니다</li>
-              <li>• 여러 정책자금을 중복으로 신청할 수 있는지 확인하세요</li>
-              <li>• 자격이 안 되면 시중 대출과 비교하여 유리한 조건을 찾으세요</li>
+          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-800">
+            <p className="font-semibold mb-2">정책자금 신청 시 주의사항</p>
+            <ul className="text-amber-700 space-y-1">
+              <li>• 정책자금은 <strong>예산 소진 시 조기 마감</strong>될 수 있습니다</li>
+              <li>• 동일한 목적으로 <strong>중복 지원이 불가능</strong>한 경우가 많습니다</li>
+              <li>• 허위 서류 제출 시 <strong>형사 처벌</strong> 대상이 될 수 있습니다</li>
+              <li>• 정책자금은 <strong>용도가 지정</strong>되어 있어 다른 용도로 사용 불가</li>
             </ul>
           </div>
         </div>
       </div>
 
       {/* 면책 */}
-      <div className="mt-6">
-        <DisclaimerNotice message="정책자금 정보는 변경될 수 있습니다. 정확한 자격 요건과 신청 방법은 각 기관에 직접 문의하세요." />
-      </div>
+      <DisclaimerNotice message="본 페이지는 정책자금 안내를 위한 것으로, 정확한 자격 조건과 금리는 각 기관 홈페이지에서 확인하세요. 정책은 수시로 변경될 수 있습니다." />
 
-      {/* 관련 도구 */}
+      {/* 관련 링크 */}
       <div className="bg-gray-50 rounded-lg p-4 border mt-6">
-        <p className="text-sm font-medium text-gray-700 mb-3">관련 도구</p>
+        <p className="text-sm font-medium text-gray-700 mb-3">대상별 정책 안내</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Link
-            href="/compare/loan-products"
+            href="/policy/youth"
             className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
           >
             <div>
-              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">대출 상품 비교</p>
-              <p className="text-xs text-gray-500 mt-0.5">시중 대출과 비교</p>
+              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">청년 금융 지원</p>
+              <p className="text-xs text-gray-500 mt-0.5">만 19~39세 청년 대상</p>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
           </Link>
           <Link
-            href="/calculator/loan-limit"
+            href="/policy/small-business"
             className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
           >
             <div>
-              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">대출 한도 시뮬레이터</p>
-              <p className="text-xs text-gray-500 mt-0.5">예상 한도 확인</p>
+              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">소상공인 지원</p>
+              <p className="text-xs text-gray-500 mt-0.5">자영업자·소상공인 대상</p>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
           </Link>

@@ -1,154 +1,89 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { FileText, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Users, Home, Briefcase, Car } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { FileText, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Users, Home, Briefcase, Car, Search, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 
-// 대출 상품 데이터
-interface LoanProduct {
-  id: string
-  category: 'credit' | 'jeonse' | 'mortgage' | 'auto'
-  name: string
-  description: string
-  interestRate: { min: number; max: number }
-  maxAmount: string
-  term: string
-  requirements: string[]
-  pros: string[]
-  cons: string[]
-  suitable: string[]
-}
-
-const LOAN_PRODUCTS: LoanProduct[] = [
+// 대출 유형별 안내
+const LOAN_TYPES = [
   {
-    id: 'credit-worker',
-    category: 'credit',
-    name: '직장인 신용대출',
-    description: '재직 중인 직장인을 위한 무담보 대출',
-    interestRate: { min: 4.0, max: 8.0 },
-    maxAmount: '최대 1억원',
-    term: '1~10년',
-    requirements: ['4대보험 가입', '재직 6개월 이상', '연소득 2,400만원 이상'],
-    pros: ['담보 불필요', '빠른 심사', '자금 용도 제한 없음'],
-    cons: ['금리가 높음', '한도 제한', '신용점수 영향'],
-    suitable: ['긴급 자금 필요', '소액 단기 대출', '담보 없는 경우']
+    id: 'credit',
+    icon: <Users className="w-6 h-6" />,
+    name: '신용대출',
+    description: '담보 없이 신용으로 받는 대출',
+    suitable: ['긴급 자금 필요', '소액 단기 대출', '담보 없는 경우'],
+    checkPoints: ['금리가 상대적으로 높음', '신용점수에 영향', '한도 제한 있음'],
+    color: 'blue'
   },
   {
-    id: 'credit-freelance',
-    category: 'credit',
-    name: '프리랜서/자영업자 신용대출',
-    description: '소득 증빙이 가능한 개인사업자를 위한 대출',
-    interestRate: { min: 5.0, max: 10.0 },
-    maxAmount: '최대 5,000만원',
-    term: '1~5년',
-    requirements: ['사업자등록 1년 이상', '소득금액증명원', '부가세 신고 실적'],
-    pros: ['4대보험 없이도 가능', '사업 자금 활용'],
-    cons: ['직장인 대비 높은 금리', '서류 준비 번거로움'],
-    suitable: ['자영업자', '프리랜서', '1인 사업자']
+    id: 'jeonse',
+    icon: <Home className="w-6 h-6" />,
+    name: '전세자금대출',
+    description: '전세보증금 마련을 위한 대출',
+    suitable: ['전세 계약 예정', '무주택 세대주', '청년·신혼부부'],
+    checkPoints: ['정부 지원 상품 확인', '보증료 발생', '무주택 조건 확인'],
+    color: 'green'
   },
   {
-    id: 'jeonse-general',
-    category: 'jeonse',
-    name: '전세자금대출 (일반)',
-    description: '전세보증금을 위한 주택금융공사 보증 대출',
-    interestRate: { min: 3.5, max: 5.0 },
-    maxAmount: '수도권 3억, 지방 2억',
-    term: '2년 (연장 가능)',
-    requirements: ['무주택세대주', '주택 시세의 80% 이내', '임대차계약서'],
-    pros: ['상대적으로 낮은 금리', '장기 이용 가능'],
-    cons: ['무주택 조건', '보증료 발생', '심사 기간 소요'],
-    suitable: ['신혼부부', '사회초년생', '무주택 세대주']
+    id: 'mortgage',
+    icon: <Briefcase className="w-6 h-6" />,
+    name: '주택담보대출',
+    description: '주택을 담보로 하는 장기 대출',
+    suitable: ['주택 구입', '대환대출', '목돈 마련'],
+    checkPoints: ['LTV·DTI·DSR 규제 확인', '장기 상환 계획', '고정/변동금리 선택'],
+    color: 'purple'
   },
   {
-    id: 'jeonse-youth',
-    category: 'jeonse',
-    name: '청년전세대출 (버팀목)',
-    description: '청년층을 위한 정부 지원 전세대출',
-    interestRate: { min: 1.5, max: 2.9 },
-    maxAmount: '최대 2억원',
-    term: '2년 (4회 연장, 최대 10년)',
-    requirements: ['만 19~34세', '연소득 5천만원 이하', '무주택자'],
-    pros: ['매우 낮은 금리', '정부 지원', '장기 이용'],
-    cons: ['소득/나이 제한', '대기 시간', '보증금 한도'],
-    suitable: ['사회초년생', '저소득 청년', '대학원생']
-  },
-  {
-    id: 'mortgage-ltv',
-    category: 'mortgage',
-    name: '주택담보대출 (일반)',
-    description: '주택을 담보로 한 장기 대출',
-    interestRate: { min: 3.3, max: 5.0 },
-    maxAmount: 'LTV 70% 이내',
-    term: '10~40년',
-    requirements: ['담보 주택', '소득 증빙', 'LTV/DTI 규제 충족'],
-    pros: ['높은 한도', '장기 상환', '낮은 금리'],
-    cons: ['주택 필요', '심사 복잡', '규제 영향'],
-    suitable: ['주택 구입', '대환대출', '목돈 마련']
-  },
-  {
-    id: 'mortgage-special',
-    category: 'mortgage',
-    name: '특례보금자리론',
-    description: '무주택 실수요자를 위한 정책 대출',
-    interestRate: { min: 3.3, max: 4.3 },
-    maxAmount: '최대 5억원',
-    term: '10~50년',
-    requirements: ['무주택자 또는 1주택자', '주택가격 9억 이하', '소득 제한'],
-    pros: ['낮은 고정금리', '장기 상환', '정부 보증'],
-    cons: ['대상 제한', '주택가격 제한', '심사 기간'],
-    suitable: ['생애최초 주택구입', '실거주 목적', '장기 안정 원하는 경우']
-  },
-  {
-    id: 'auto-new',
-    category: 'auto',
-    name: '신차 할부/대출',
-    description: '신차 구입을 위한 할부 금융',
-    interestRate: { min: 4.0, max: 8.0 },
-    maxAmount: '차량가의 100%',
-    term: '12~72개월',
-    requirements: ['운전면허', '소득 증빙', '신용평가'],
-    pros: ['빠른 심사', '100% 할부 가능', '다양한 조건'],
-    cons: ['차량 담보', '중도상환수수료', '보험 필수'],
-    suitable: ['신차 구입', '법인/개인', '리스 비선호']
-  },
-  {
-    id: 'auto-used',
-    category: 'auto',
-    name: '중고차 대출',
-    description: '중고차 구입을 위한 대출',
-    interestRate: { min: 5.0, max: 12.0 },
-    maxAmount: '차량 시세의 80%',
-    term: '12~60개월',
-    requirements: ['운전면허', '차량 시세 확인', '소득 증빙'],
-    pros: ['비교적 간편한 심사', '다양한 상품'],
-    cons: ['신차 대비 높은 금리', '한도 제한'],
-    suitable: ['중고차 구입', '저예산 차량 구입']
+    id: 'auto',
+    icon: <Car className="w-6 h-6" />,
+    name: '자동차대출',
+    description: '차량 구입을 위한 할부/대출',
+    suitable: ['신차·중고차 구입', '법인·개인'],
+    checkPoints: ['할부/리스/렌트 비교', '중도상환수수료', '보험 필수 여부'],
+    color: 'orange'
   }
 ]
 
-type CategoryType = 'all' | 'credit' | 'jeonse' | 'mortgage' | 'auto'
+// 정부 지원 대출 안내
+const GOVERNMENT_LOANS = [
+  { name: '청년전용 버팀목전세대출', target: '만 19~34세 무주택 청년', site: 'https://nhuf.molit.go.kr' },
+  { name: '신혼부부 전세대출', target: '혼인 7년 이내 신혼부부', site: 'https://nhuf.molit.go.kr' },
+  { name: '특례보금자리론', target: '무주택 또는 1주택 실수요자', site: 'https://www.hf.go.kr' },
+  { name: '디딤돌대출', target: '무주택 서민·실수요자', site: 'https://www.hf.go.kr' },
+]
 
-const CATEGORY_LABELS: Record<CategoryType, { label: string; icon: React.ReactNode }> = {
-  all: { label: '전체', icon: <FileText className="w-4 h-4" /> },
-  credit: { label: '신용대출', icon: <Users className="w-4 h-4" /> },
-  jeonse: { label: '전세대출', icon: <Home className="w-4 h-4" /> },
-  mortgage: { label: '주택담보', icon: <Briefcase className="w-4 h-4" /> },
-  auto: { label: '자동차', icon: <Car className="w-4 h-4" /> }
-}
+// 공식 대출 비교 사이트
+const COMPARISON_SITES = [
+  {
+    name: '금융감독원 금융상품 한눈에',
+    url: 'https://finlife.fss.or.kr',
+    description: '예금·적금·대출 상품 공식 비교',
+    official: true
+  },
+  {
+    name: '주택금융공사',
+    url: 'https://www.hf.go.kr',
+    description: '보금자리론, 디딤돌대출 등 주택금융',
+    official: true
+  },
+  {
+    name: '주택도시기금',
+    url: 'https://nhuf.molit.go.kr',
+    description: '전세자금, 주거안정 대출',
+    official: true
+  },
+  {
+    name: '서민금융진흥원',
+    url: 'https://www.kinfa.or.kr',
+    description: '서민·저소득층 금융지원',
+    official: true
+  }
+]
 
 export default function LoanProductsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all')
-  const [expandedProduct, setExpandedProduct] = useState<string | null>(null)
-
-  const filteredProducts = selectedCategory === 'all'
-    ? LOAN_PRODUCTS
-    : LOAN_PRODUCTS.filter(p => p.category === selectedCategory)
-
   return (
-    <div className="container py-8 max-w-5xl">
+    <div className="container py-8 max-w-4xl">
       {/* 뒤로가기 */}
       <div className="mb-6">
         <Link href="/compare" className="inline-flex items-center text-sm text-gray-600 hover:text-primary">
@@ -163,132 +98,152 @@ export default function LoanProductsPage() {
           <FileText className="w-7 h-7 text-primary" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900">
-          대출 상품 비교
+          대출 상품 선택 가이드
         </h1>
         <p className="text-gray-600">
-          용도별 대출 상품의 조건과 특징을 비교해보세요
+          용도에 맞는 대출을 선택하는 방법을 안내합니다
         </p>
       </div>
 
-      {/* 카테고리 선택 */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
-        {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((cat) => (
-          <Button
-            key={cat}
-            variant={selectedCategory === cat ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory(cat)}
-            size="sm"
-            className="flex items-center gap-1.5"
-          >
-            {CATEGORY_LABELS[cat].icon}
-            {CATEGORY_LABELS[cat].label}
-          </Button>
-        ))}
-      </div>
+      {/* 핵심 안내 */}
+      <Card className="mb-8 border-primary/30 bg-primary/5">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-gray-900 mb-2">대출 선택의 핵심</p>
+              <p className="text-sm text-gray-600">
+                대출은 <strong className="text-gray-900">용도, 금리, 상환능력</strong>을 고려해 선택해야 합니다.
+                특히 <strong className="text-gray-900">정부 지원 대출</strong>은 일반 대출보다 금리가 낮으니
+                자격 조건을 먼저 확인하세요.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* 상품 목록 */}
-      <div className="space-y-4 mb-8">
-        {filteredProducts.map((product) => (
-          <Card
-            key={product.id}
-            className={`transition-all ${expandedProduct === product.id ? 'border-primary shadow-md' : ''}`}
-          >
-            <CardHeader
-              className="cursor-pointer"
-              onClick={() => setExpandedProduct(expandedProduct === product.id ? null : product.id)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                      {CATEGORY_LABELS[product.category].label}
-                    </span>
-                    <span className="text-xs text-primary font-medium">
-                      {product.interestRate.min}~{product.interestRate.max}%
-                    </span>
-                  </div>
-                  <CardTitle className="text-lg">{product.name}</CardTitle>
-                  <p className="text-sm text-gray-500 mt-1">{product.description}</p>
+      {/* 대출 유형별 안내 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-primary" />
+          어떤 대출이 필요하신가요?
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {LOAN_TYPES.map((type) => (
+            <div key={type.id} className="bg-white rounded-lg border p-5 hover:shadow-sm transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-full bg-${type.color}-100 flex items-center justify-center text-${type.color}-600`}>
+                  {type.icon}
                 </div>
-                <div className="text-right ml-4">
-                  <p className="text-sm font-medium text-gray-900">{product.maxAmount}</p>
-                  <p className="text-xs text-gray-500">{product.term}</p>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{type.name}</h3>
+                  <p className="text-xs text-gray-500">{type.description}</p>
                 </div>
               </div>
-            </CardHeader>
 
-            {expandedProduct === product.id && (
-              <CardContent className="pt-0 border-t">
-                <div className="grid gap-4 mt-4">
-                  {/* 자격 요건 */}
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <Info className="w-4 h-4 text-gray-500" />
-                      자격 요건
-                    </h4>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {product.requirements.map((req, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full bg-gray-400" />
-                          {req}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* 장점 */}
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4" />
-                        장점
-                      </h4>
-                      <ul className="text-sm text-green-700 space-y-1">
-                        {product.pros.map((pro, i) => (
-                          <li key={i}>• {pro}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* 단점 */}
-                    <div className="p-3 bg-amber-50 rounded-lg">
-                      <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        단점
-                      </h4>
-                      <ul className="text-sm text-amber-700 space-y-1">
-                        {product.cons.map((con, i) => (
-                          <li key={i}>• {con}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* 추천 대상 */}
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-blue-800 mb-2">추천 대상</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {product.suitable.map((s, i) => (
-                        <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+              <div className="mb-3">
+                <p className="text-xs font-medium text-gray-700 mb-1">이런 분께 적합:</p>
+                <div className="flex flex-wrap gap-1">
+                  {type.suitable.map((s, i) => (
+                    <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                      {s}
+                    </span>
+                  ))}
                 </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
+              </div>
 
-      {/* 가이드 콘텐츠 */}
-      <section className="border-t pt-8">
+              <div>
+                <p className="text-xs font-medium text-gray-700 mb-1">체크 포인트:</p>
+                <ul className="text-xs text-gray-600 space-y-0.5">
+                  {type.checkPoints.map((point, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <span className="text-primary">•</span>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 정부 지원 대출 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 text-green-600" />
+          정부 지원 대출 먼저 확인하세요
+        </h2>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-5 mb-4">
+          <p className="text-sm text-green-800 mb-4">
+            정부 지원 대출은 일반 대출보다 <strong>1~3%p 낮은 금리</strong>가 적용됩니다.
+            자격 조건에 해당하는지 먼저 확인하세요.
+          </p>
+          <div className="space-y-3">
+            {GOVERNMENT_LOANS.map((loan, index) => (
+              <a
+                key={index}
+                href={loan.site}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 hover:border-green-400 transition-colors group"
+              >
+                <div>
+                  <p className="font-medium text-sm text-gray-900 group-hover:text-green-700">
+                    {loan.name}
+                  </p>
+                  <p className="text-xs text-gray-500">{loan.target}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-600" />
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 공식 비교 사이트 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Search className="w-5 h-5 text-primary" />
+          대출 상품 비교 사이트
+        </h2>
+        <div className="space-y-3">
+          {COMPARISON_SITES.map((site) => (
+            <a
+              key={site.name}
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-4 bg-white rounded-lg border hover:border-primary/50 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-gray-900 group-hover:text-primary">
+                      {site.name}
+                    </span>
+                    {site.official && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        공식
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">{site.description}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary flex-shrink-0" />
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* 대출 선택 가이드 */}
+      <section className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-6">
           대출 상품 선택 가이드
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">1</span>
@@ -305,77 +260,67 @@ export default function LoanProductsPage() {
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">2</span>
-              정부 지원 대출 우선 확인
+              총비용으로 비교하기
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              청년, 신혼부부, 저소득층 등 대상별로 <strong className="text-gray-900">정부 지원 대출</strong>이 있습니다.
-              일반 대출보다 금리가 1~3%p 낮을 수 있으니 자격 조건을 먼저 확인하세요.
-              주택금융공사, 한국주택금융공사, 서민금융진흥원 등에서 운영합니다.
-            </p>
+            <ul className="text-gray-600 text-sm space-y-2">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">금리:</strong> 표면금리뿐 아니라 실제 적용금리 확인</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">수수료:</strong> 대출 실행 수수료, 인지세, 보증료 등</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">중도상환:</strong> 조기 상환 시 수수료 발생 여부</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-gray-900">연장 비용:</strong> 만기 연장 시 추가 비용</span>
+              </li>
+            </ul>
           </div>
 
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">3</span>
-              총비용으로 비교하기
+              상환 능력 확인
             </h3>
-            <ul className="text-gray-600 text-sm space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">금리:</strong> 표면금리뿐 아니라 실제 적용금리 확인</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">수수료:</strong> 대출 실행 수수료, 인지세, 보증료 등</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">중도상환:</strong> 조기 상환 시 수수료 발생 여부</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong className="text-gray-900">연장 비용:</strong> 만기 연장 시 추가 비용</span>
-              </li>
-            </ul>
+            <p className="text-gray-600 text-sm leading-relaxed mb-3">
+              월 상환액이 <strong className="text-gray-900">월 소득의 30~40%</strong>를 넘지 않도록 계획하세요.
+              DSR(총부채원리금상환비율) 규제로 인해 대출 한도가 제한될 수 있습니다.
+            </p>
+            <Link
+              href="/calculator/loan-interest"
+              className="inline-flex items-center text-sm text-primary hover:underline"
+            >
+              대출 이자 계산기로 확인하기
+              <ExternalLink className="w-3 h-3 ml-1" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 체크리스트 */}
-      <section className="mt-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
-          대출 신청 전 체크리스트
-        </h2>
-        <div className="bg-gray-50 border rounded-lg p-5">
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">내 신용점수를 미리 확인했는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">DTI/DSR 등 대출 규제를 확인했는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">여러 은행의 조건을 비교했는지</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">상환 계획을 세웠는지 (월 상환액 적정 여부)</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">필요 서류를 미리 준비했는지</span>
-            </li>
-          </ul>
+      {/* 주의사항 */}
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-8">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-800">
+            <p className="font-semibold mb-2">대출 신청 전 체크리스트</p>
+            <ul className="text-amber-700 space-y-1">
+              <li>• 내 <strong>신용점수</strong>를 미리 확인했는지</li>
+              <li>• <strong>DTI/DSR</strong> 등 대출 규제를 확인했는지</li>
+              <li>• 여러 은행의 <strong>조건을 비교</strong>했는지</li>
+              <li>• <strong>상환 계획</strong>을 세웠는지 (월 상환액 적정 여부)</li>
+              <li>• <strong>필요 서류</strong>를 미리 준비했는지</li>
+            </ul>
+          </div>
         </div>
-      </section>
+      </div>
 
       {/* 면책 */}
-      <div className="mt-8">
-        <DisclaimerNotice message="상품 정보는 일반적인 기준이며, 실제 조건은 금융기관마다 다릅니다. 정확한 내용은 각 금융기관에 문의하세요." />
-      </div>
+      <DisclaimerNotice message="본 페이지는 대출 선택 방법을 안내하며, 특정 금융상품을 추천하지 않습니다. 정확한 조건은 각 금융기관에 직접 확인하세요." />
 
       {/* 관련 도구 */}
       <div className="bg-gray-50 rounded-lg p-4 border mt-6">
@@ -397,7 +342,7 @@ export default function LoanProductsPage() {
           >
             <div>
               <p className="font-medium text-sm text-gray-900 group-hover:text-primary">은행별 금리 비교</p>
-              <p className="text-xs text-gray-500 mt-0.5">금리 한눈에 보기</p>
+              <p className="text-xs text-gray-500 mt-0.5">금리 비교 방법 안내</p>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
           </Link>

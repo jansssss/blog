@@ -1,106 +1,47 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { TrendingUp, TrendingDown, Minus, Building2, Info, ArrowLeft, ExternalLink } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { TrendingUp, Building2, Info, ArrowLeft, ExternalLink, CheckCircle2, AlertTriangle, Search } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 
-// 은행별 금리 데이터 (2026년 1월 기준 예시)
-interface BankRate {
-  bank: string
-  logo?: string
-  creditLoan: { min: number; max: number }
-  jeonse: { min: number; max: number }
-  mortgage: { min: number; max: number }
-  note?: string
-}
-
-const BANK_RATES: BankRate[] = [
+// 금리 비교 사이트 목록
+const COMPARISON_SITES = [
   {
-    bank: 'KB국민은행',
-    creditLoan: { min: 4.5, max: 7.8 },
-    jeonse: { min: 3.8, max: 5.2 },
-    mortgage: { min: 3.5, max: 4.8 },
-    note: '급여이체 시 0.1%p 우대'
+    name: '금융감독원 금융상품 한눈에',
+    url: 'https://finlife.fss.or.kr',
+    description: '공식 금융상품 비교 사이트 (예금, 적금, 대출 금리 비교)',
+    official: true
   },
   {
-    bank: '신한은행',
-    creditLoan: { min: 4.3, max: 7.5 },
-    jeonse: { min: 3.7, max: 5.0 },
-    mortgage: { min: 3.4, max: 4.6 },
-    note: '신한쏠 이용 시 0.2%p 우대'
+    name: '은행연합회 소비자포털',
+    url: 'https://portal.kfb.or.kr',
+    description: '은행별 금리, 수수료 비교 정보',
+    official: true
   },
   {
-    bank: '하나은행',
-    creditLoan: { min: 4.4, max: 7.6 },
-    jeonse: { min: 3.9, max: 5.3 },
-    mortgage: { min: 3.6, max: 4.9 },
-    note: '하나멤버스 포인트 우대'
-  },
-  {
-    bank: '우리은행',
-    creditLoan: { min: 4.6, max: 7.9 },
-    jeonse: { min: 4.0, max: 5.4 },
-    mortgage: { min: 3.7, max: 5.0 },
-    note: '우리WON뱅킹 우대'
-  },
-  {
-    bank: 'NH농협은행',
-    creditLoan: { min: 4.7, max: 8.0 },
-    jeonse: { min: 3.8, max: 5.1 },
-    mortgage: { min: 3.5, max: 4.7 },
-    note: '조합원 우대금리 적용'
-  },
-  {
-    bank: '카카오뱅크',
-    creditLoan: { min: 4.0, max: 7.2 },
-    jeonse: { min: 3.5, max: 4.8 },
-    mortgage: { min: 3.3, max: 4.5 },
-    note: '비대면 간편 심사'
-  },
-  {
-    bank: '토스뱅크',
-    creditLoan: { min: 3.9, max: 7.0 },
-    jeonse: { min: 3.6, max: 4.9 },
-    mortgage: { min: 3.4, max: 4.6 },
-    note: '실시간 금리 비교'
-  },
-  {
-    bank: 'K뱅크',
-    creditLoan: { min: 4.1, max: 7.3 },
-    jeonse: { min: 3.7, max: 5.0 },
-    mortgage: { min: 3.5, max: 4.7 },
-    note: '비대면 신청 가능'
+    name: '네이버 금융',
+    url: 'https://finance.naver.com',
+    description: '대출 금리 비교, 금융 뉴스',
+    official: false
   }
 ]
 
-type LoanType = 'creditLoan' | 'jeonse' | 'mortgage'
-
-const LOAN_TYPE_LABELS: Record<LoanType, string> = {
-  creditLoan: '신용대출',
-  jeonse: '전세자금대출',
-  mortgage: '주택담보대출'
-}
+// 주요 은행 공식 사이트
+const BANK_SITES = [
+  { name: 'KB국민은행', url: 'https://www.kbstar.com' },
+  { name: '신한은행', url: 'https://www.shinhan.com' },
+  { name: '하나은행', url: 'https://www.kebhana.com' },
+  { name: '우리은행', url: 'https://www.wooribank.com' },
+  { name: 'NH농협은행', url: 'https://www.nonghyup.com' },
+  { name: '카카오뱅크', url: 'https://www.kakaobank.com' },
+  { name: '토스뱅크', url: 'https://www.tossbank.com' },
+  { name: 'K뱅크', url: 'https://www.kbanknow.com' },
+]
 
 export default function BankRatesPage() {
-  const [selectedLoanType, setSelectedLoanType] = useState<LoanType>('creditLoan')
-  const [sortBy, setSortBy] = useState<'min' | 'max'>('min')
-
-  // 정렬된 데이터
-  const sortedRates = [...BANK_RATES].sort((a, b) => {
-    const aRate = a[selectedLoanType][sortBy]
-    const bRate = b[selectedLoanType][sortBy]
-    return aRate - bRate
-  })
-
-  // 최저/최고 금리 은행
-  const lowestRate = sortedRates[0]
-  const highestRate = sortedRates[sortedRates.length - 1]
-
   return (
-    <div className="container py-8 max-w-5xl">
+    <div className="container py-8 max-w-4xl">
       {/* 뒤로가기 */}
       <div className="mb-6">
         <Link href="/compare" className="inline-flex items-center text-sm text-gray-600 hover:text-primary">
@@ -115,135 +56,98 @@ export default function BankRatesPage() {
           <TrendingUp className="w-7 h-7 text-primary" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900">
-          은행별 금리 비교
+          은행별 금리 비교하는 방법
         </h1>
         <p className="text-gray-600">
-          주요 은행들의 대출 금리를 한눈에 비교해보세요
-        </p>
-        <p className="text-xs text-gray-400 mt-2">
-          2026년 1월 기준 · 실제 금리는 개인 신용도에 따라 달라집니다
+          정확한 금리 정보를 확인하는 방법과 비교 시 주의사항을 안내합니다
         </p>
       </div>
 
-      {/* 대출 유형 선택 */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6">
-        {(Object.keys(LOAN_TYPE_LABELS) as LoanType[]).map((type) => (
-          <Button
-            key={type}
-            variant={selectedLoanType === type ? 'default' : 'outline'}
-            onClick={() => setSelectedLoanType(type)}
-            size="sm"
-          >
-            {LOAN_TYPE_LABELS[type]}
-          </Button>
-        ))}
-      </div>
-
-      {/* 정렬 옵션 */}
-      <div className="flex justify-end gap-2 mb-4">
-        <span className="text-sm text-gray-500 self-center">정렬:</span>
-        <Button
-          variant={sortBy === 'min' ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={() => setSortBy('min')}
-        >
-          최저금리순
-        </Button>
-        <Button
-          variant={sortBy === 'max' ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={() => setSortBy('max')}
-        >
-          최고금리순
-        </Button>
-      </div>
-
-      {/* 요약 카드 */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-green-700 mb-1">
-              <TrendingDown className="w-4 h-4" />
-              <span className="text-sm font-medium">최저 금리</span>
+      {/* 핵심 안내 */}
+      <Card className="mb-8 border-primary/30 bg-primary/5">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-gray-900 mb-2">금리는 매일 변동됩니다</p>
+              <p className="text-sm text-gray-600">
+                은행 대출 금리는 기준금리, 시장 상황, 은행 정책에 따라 수시로 변경됩니다.
+                정확한 금리는 <strong className="text-gray-900">금융감독원 공식 사이트</strong>나
+                <strong className="text-gray-900"> 각 은행 홈페이지</strong>에서 실시간으로 확인하세요.
+              </p>
             </div>
-            <p className="text-xl font-bold text-green-800">
-              {lowestRate[selectedLoanType].min}%
-            </p>
-            <p className="text-sm text-green-600">{lowestRate.bank}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-amber-700 mb-1">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-sm font-medium">최고 금리</span>
-            </div>
-            <p className="text-xl font-bold text-amber-800">
-              {highestRate[selectedLoanType].max}%
-            </p>
-            <p className="text-sm text-amber-600">{highestRate.bank}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 금리 테이블 */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            {LOAN_TYPE_LABELS[selectedLoanType]} 금리 비교
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-2 font-medium text-gray-600">은행</th>
-                  <th className="text-center py-3 px-2 font-medium text-gray-600">최저금리</th>
-                  <th className="text-center py-3 px-2 font-medium text-gray-600">최고금리</th>
-                  <th className="text-left py-3 px-2 font-medium text-gray-600 hidden sm:table-cell">비고</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedRates.map((rate, index) => (
-                  <tr key={rate.bank} className={`border-b ${index === 0 ? 'bg-green-50' : ''}`}>
-                    <td className="py-3 px-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{rate.bank}</span>
-                        {index === 0 && (
-                          <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
-                            최저
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      <span className={`font-semibold ${index === 0 ? 'text-green-600' : ''}`}>
-                        {rate[selectedLoanType].min}%
-                      </span>
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      {rate[selectedLoanType].max}%
-                    </td>
-                    <td className="py-3 px-2 text-gray-500 text-xs hidden sm:table-cell">
-                      {rate.note}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </CardContent>
       </Card>
 
-      {/* 가이드 콘텐츠 */}
-      <section className="border-t pt-8">
+      {/* 공식 금리 비교 사이트 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Search className="w-5 h-5 text-primary" />
+          금리 비교 사이트
+        </h2>
+        <div className="space-y-3">
+          {COMPARISON_SITES.map((site) => (
+            <a
+              key={site.name}
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-4 bg-white rounded-lg border hover:border-primary/50 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-gray-900 group-hover:text-primary">
+                      {site.name}
+                    </span>
+                    {site.official && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        공식
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">{site.description}</p>
+                  <p className="text-xs text-primary mt-1">{site.url}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary flex-shrink-0" />
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* 주요 은행 바로가기 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-primary" />
+          주요 은행 공식 사이트
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {BANK_SITES.map((bank) => (
+            <a
+              key={bank.name}
+              href={bank.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 bg-white rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center group"
+            >
+              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">
+                {bank.name}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">바로가기</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* 금리 비교 가이드 */}
+      <section className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-6">
           금리 비교, 이것만 알아두세요
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white border rounded-lg p-5">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">1</span>
@@ -263,19 +167,19 @@ export default function BankRatesPage() {
             </h3>
             <ul className="text-gray-600 text-sm space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                 <span><strong className="text-gray-900">급여이체:</strong> 해당 은행으로 급여를 받으면 0.1~0.3%p 우대</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                 <span><strong className="text-gray-900">자동이체:</strong> 공과금, 카드 결제 자동이체 시 추가 우대</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                 <span><strong className="text-gray-900">모바일뱅킹:</strong> 앱 설치 및 이용 시 우대금리 적용</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                 <span><strong className="text-gray-900">기존 거래:</strong> 예적금 보유, 카드 사용 실적 등</span>
               </li>
             </ul>
@@ -288,19 +192,23 @@ export default function BankRatesPage() {
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="font-medium text-blue-800 text-sm mb-1">인터넷은행 (카카오뱅크, 토스뱅크 등)</p>
+                <p className="font-medium text-blue-800 text-sm mb-2">인터넷은행</p>
+                <p className="text-xs text-blue-600 mb-2">카카오뱅크, 토스뱅크, K뱅크</p>
                 <ul className="text-blue-700 text-xs space-y-1">
-                  <li>✓ 비대면 심사로 빠른 승인</li>
-                  <li>✓ 상대적으로 낮은 금리</li>
-                  <li>✓ 24시간 신청 가능</li>
+                  <li>+ 비대면 심사로 빠른 승인</li>
+                  <li>+ 상대적으로 낮은 금리</li>
+                  <li>+ 24시간 신청 가능</li>
+                  <li>- 대면 상담 불가</li>
                 </ul>
               </div>
               <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="font-medium text-gray-800 text-sm mb-1">시중은행 (KB, 신한, 하나 등)</p>
+                <p className="font-medium text-gray-800 text-sm mb-2">시중은행</p>
+                <p className="text-xs text-gray-600 mb-2">KB, 신한, 하나, 우리, NH</p>
                 <ul className="text-gray-700 text-xs space-y-1">
-                  <li>✓ 대면 상담 가능</li>
-                  <li>✓ 더 높은 한도 가능</li>
-                  <li>✓ 다양한 상품 선택</li>
+                  <li>+ 대면 상담 가능</li>
+                  <li>+ 더 높은 한도 가능</li>
+                  <li>+ 다양한 상품 선택</li>
+                  <li>- 영업시간 내 방문 필요</li>
                 </ul>
               </div>
             </div>
@@ -309,24 +217,23 @@ export default function BankRatesPage() {
       </section>
 
       {/* 주의사항 */}
-      <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-8">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-amber-800">
-            <p className="font-medium mb-1">금리 비교 시 주의사항</p>
+            <p className="font-semibold mb-2">금리 비교 시 주의사항</p>
             <ul className="text-amber-700 space-y-1">
-              <li>• 금리만 보지 말고 중도상환수수료, 부대비용도 확인하세요</li>
-              <li>• 여러 은행에 동시에 대출 조회하면 신용점수에 영향이 있을 수 있습니다</li>
-              <li>• 우대금리 조건을 꼼꼼히 확인하세요 (유지 조건 포함)</li>
+              <li>• 금리만 보지 말고 <strong>중도상환수수료, 부대비용</strong>도 확인하세요</li>
+              <li>• 여러 은행에 동시에 대출 조회하면 <strong>신용점수에 영향</strong>이 있을 수 있습니다</li>
+              <li>• 우대금리 <strong>유지 조건</strong>을 꼼꼼히 확인하세요</li>
+              <li>• 변동금리는 향후 <strong>금리 인상 위험</strong>이 있습니다</li>
             </ul>
           </div>
         </div>
       </div>
 
       {/* 면책 */}
-      <div className="mt-6">
-        <DisclaimerNotice message="본 금리 정보는 참고용이며, 실제 금리는 은행 및 개인 신용도에 따라 달라집니다. 정확한 금리는 각 은행에 직접 문의하세요." />
-      </div>
+      <DisclaimerNotice message="본 페이지는 금리 비교 방법을 안내하며, 특정 금융상품을 추천하지 않습니다. 정확한 금리와 조건은 각 금융기관에 직접 확인하세요." />
 
       {/* 관련 도구 */}
       <div className="bg-gray-50 rounded-lg p-4 border mt-6">
@@ -348,7 +255,7 @@ export default function BankRatesPage() {
           >
             <div>
               <p className="font-medium text-sm text-gray-900 group-hover:text-primary">고정 vs 변동금리</p>
-              <p className="text-xs text-gray-500 mt-0.5">금리 유형 비교</p>
+              <p className="text-xs text-gray-500 mt-0.5">금리 유형 선택 가이드</p>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
           </Link>

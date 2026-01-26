@@ -14,10 +14,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const dynamicParams = true
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug: encodedSlug } = await params
-  // URL 디코딩 (한글 slug 지원)
-  const slug = decodeURIComponent(encodedSlug)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const site = await getCurrentSite()
   const siteId = site?.id
 
@@ -27,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   let query = supabase
     .from('posts')
     .select('*')
-    .eq('slug', slug)
+    .eq('id', id)
     .eq('published', true)
 
   if (siteId) {
@@ -69,17 +67,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug: encodedSlug } = await params
-  // URL 디코딩 (한글 slug 지원)
-  const slug = decodeURIComponent(encodedSlug)
+export default async function BlogPostPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const siteId = await getCurrentSiteId()
 
   // 현재 글 조회 (site_id 필터 적용)
   let postQuery = supabase
     .from('posts')
     .select('*')
-    .eq('slug', slug)
+    .eq('id', id)
     .eq('published', true)
 
   if (siteId) {
@@ -95,7 +91,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   // 이전 글 (현재 글보다 이전에 발행된 글 중 가장 최근 글, 같은 사이트)
   let prevQuery = supabase
     .from('posts')
-    .select('id, title, slug')
+    .select('id, title')
     .eq('published', true)
     .lt('published_at', post.published_at)
     .order('published_at', { ascending: false })
@@ -110,7 +106,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   // 다음 글 (현재 글보다 이후에 발행된 글 중 가장 오래된 글, 같은 사이트)
   let nextQuery = supabase
     .from('posts')
-    .select('id, title, slug')
+    .select('id, title')
     .eq('published', true)
     .gt('published_at', post.published_at)
     .order('published_at', { ascending: true })
@@ -195,7 +191,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {/* Previous Post */}
           {prevPost ? (
             <Link
-              href={`/blog/${encodeURIComponent(prevPost.slug)}`}
+              href={`/blog/${prevPost.id}`}
               className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -215,7 +211,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {/* Next Post */}
           {nextPost ? (
             <Link
-              href={`/blog/${encodeURIComponent(nextPost.slug)}`}
+              href={`/blog/${nextPost.id}`}
               className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">

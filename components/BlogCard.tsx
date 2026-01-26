@@ -12,7 +12,7 @@ interface BlogCardProps {
 export default function BlogCard({ post }: BlogCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg">
-      <Link href={`/blog/${post.slug}`}>
+      <Link href={`/blog/${post.id}`}>
         {post.thumbnail_url && (
           <div className="relative h-48 w-full overflow-hidden">
             <Image

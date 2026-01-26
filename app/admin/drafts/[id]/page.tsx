@@ -239,7 +239,7 @@ export default function DraftEditPage() {
       }
 
       alert(`게시글이 "${selectedSite?.name}" 사이트에 발행되었습니다!`)
-      router.push(`/blog/${result.slug}`)
+      router.push(`/blog/${result.id}`)
     } catch (err) {
       console.error('발행 오류:', err)
       alert('발행 중 오류가 발생했습니다.')

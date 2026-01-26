@@ -10,7 +10,8 @@ const PATH_LABELS: Record<string, string> = {
   'calculator': '계산기',
   'compare': '금융 비교',
   'policy': '정책 지원',
-  'guide': '가이드',
+  'guide': '관련글',
+  'blog': '관련글',
   'tools': '보험 도구',
   'about': '소개',
 
@@ -53,7 +54,17 @@ export default function Breadcrumb() {
   // 브레드크럼 아이템 생성
   const breadcrumbs = segments.map((segment, index) => {
     const href = '/' + segments.slice(0, index + 1).join('/')
-    const label = PATH_LABELS[segment] || segment
+    // URL 디코딩 시도 (한글 slug 지원)
+    let decodedSegment = segment
+    try {
+      decodedSegment = decodeURIComponent(segment)
+    } catch (e) {
+      // 디코딩 실패 시 원본 사용
+      decodedSegment = segment
+    }
+
+    // PATH_LABELS에 있으면 해당 레이블 사용, 없으면 디코딩된 값 사용
+    const label = PATH_LABELS[segment] || decodedSegment
     const isLast = index === segments.length - 1
 
     return {

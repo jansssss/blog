@@ -48,6 +48,9 @@ export default function Breadcrumb() {
   // 관리자 페이지는 표시하지 않음
   if (pathname.startsWith('/admin')) return null
 
+  // 블로그 상세 페이지는 표시하지 않음 (UUID가 표시되는 것을 방지)
+  if (pathname.match(/^\/blog\/[a-f0-9-]{36}$/)) return null
+
   // 경로를 세그먼트로 분리
   const segments = pathname.split('/').filter(Boolean)
 

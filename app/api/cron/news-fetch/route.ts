@@ -83,19 +83,19 @@ export async function GET(request: Request) {
     }
 
     // 테마별 최대 수집 개수
-    const maxItemsPerCategory = 10
+    const maxItemsPerCategory = 20
 
     // 각 테마별로 처리
     for (const [category, categorySources] of Object.entries(sourcesByCategory)) {
       console.log(`[NEWS-FETCH] Processing category: ${category} (${categorySources.length} sources)`)
       let categoryItemCount = 0
 
-      // 2. 네이버 인기 뉴스 먼저 수집 (최대 5개)
+      // 2. 네이버 인기 뉴스 먼저 수집 (최대 10개)
       console.log(`[NEWS-FETCH] Fetching Naver popular news for ${category}...`)
       const naverNews = await fetchNaverPopularNews(category)
 
       for (const naverItem of naverNews) {
-        if (categoryItemCount >= 5) break // 네이버 뉴스는 최대 5개
+        if (categoryItemCount >= 10) break // 네이버 뉴스는 최대 10개
 
         totalItems++
         trendingItems++

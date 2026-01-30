@@ -68,18 +68,18 @@ export async function POST() {
       sourcesByCategory[category].push(source)
     }
 
-    const maxItemsPerCategory = 10
+    const maxItemsPerCategory = 20
 
     // 각 테마별로 처리
     for (const [category, categorySources] of Object.entries(sourcesByCategory)) {
       console.log(`[ADMIN-NEWS-FETCH] Processing category: ${category}`)
       let categoryItemCount = 0
 
-      // 네이버 인기 뉴스 수집 (최대 5개)
+      // 네이버 인기 뉴스 수집 (최대 10개)
       const naverNews = await fetchNaverPopularNews(category)
 
       for (const naverItem of naverNews) {
-        if (categoryItemCount >= 5) break
+        if (categoryItemCount >= 10) break
 
         totalItems++
         trendingItems++

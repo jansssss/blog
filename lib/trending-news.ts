@@ -59,7 +59,7 @@ export async function fetchNaverPopularNews(category: string = '금융/대출'):
 
     // 랭킹 뉴스 아이템 파싱
     $('.rankingnews_list li, .ranking_list li').each((index, element) => {
-      if (items.length >= 10) return false
+      if (items.length >= 20) return false
 
       const $item = $(element)
       const $link = $item.find('a').first()

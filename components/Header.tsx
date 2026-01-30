@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { SiteTheme } from '@/lib/site'
@@ -107,30 +106,20 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-32 sm:h-40 items-center">
+      <div className="container flex h-16 items-center">
         <Link href="/" className="group flex items-center" onClick={closeMobileMenu}>
-          {(siteName?.includes('슈어라인') || siteName?.toLowerCase().includes('sureline')) ? (
-            <Image
-              src="/sureling-logo.png"
-              alt="Sureline"
-              width={960}
-              height={256}
-              className="h-28 sm:h-36 w-auto transition-all duration-300 group-hover:scale-105"
-              priority
-            />
-          ) : (
-            <span
-              className="text-xl sm:text-2xl font-bold tracking-tight transition-all duration-300 group-hover:scale-105"
-              style={{
-                background: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              {headerTitle}
-            </span>
-          )}
+          <span
+            className="text-xl sm:text-2xl font-bold tracking-tight transition-all duration-300 group-hover:scale-105"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'brightness(1.1) saturate(0.9)'
+            }}
+          >
+            {headerTitle}
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

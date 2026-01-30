@@ -21,9 +21,9 @@ export interface TrendKeyword {
 
 /**
  * 네이버 뉴스 인기순 스크래핑
- * 카테고리별로 다른 키워드 필터 적용
+ * 금융/대출 관련 인기 뉴스 가져오기
  */
-export async function fetchNaverPopularNews(category: string = '금융'): Promise<TrendingNewsItem[]> {
+export async function fetchNaverPopularNews(category: string = '금융/대출'): Promise<TrendingNewsItem[]> {
   const items: TrendingNewsItem[] = []
 
   try {
@@ -46,33 +46,13 @@ export async function fetchNaverPopularNews(category: string = '금융'): Promis
     const html = await response.text()
     const $ = load(html)
 
-    // 카테고리별 키워드 필터
-    let keywords: string[] = []
-
-    if (category === '금융' || category === '금융/대출') {
-      // 금융 카테고리: 대출, 금리, 은행, 투자 등 (보험 제외)
-      keywords = [
-        '금융', '경제', '대출', '금리', '주택담보대출', 'DSR', 'LTV',
-        '은행', '저축', '예금', '주식', '투자', '환율', '코스피', '코스닥',
-        '증권', '펀드', '부동산', '세금', '연금', '국세', '지방세',
-        '소득세', '부가세', '종합소득', '연말정산'
-      ]
-    } else if (category === '보험') {
-      // 보험 카테고리: 보험 관련만
-      keywords = [
-        '보험', '건강보험', '자동차보험', '생명보험', '손해보험', '화재보험',
-        '실손보험', '암보험', '연금보험', '보험료', '보험금', '보험사',
-        '국민건강보험', '건보', '의료보험', '보험업', '보험상품'
-      ]
-    } else {
-      // 기타 카테고리: 통합 키워드
-      keywords = [
-        '금융', '경제', '대출', '금리', '주택담보대출', 'DSR', 'LTV',
-        '보험', '세금', '연금', '국세', '지방세', '소득세', '부가세', '종합소득', '연말정산',
-        '건강보험', '자동차보험', '생명보험', '은행', '저축', '예금',
-        '주식', '투자', '환율', '코스피', '코스닥', '증권', '펀드', '부동산'
-      ]
-    }
+    // 금융/대출 관련 통합 키워드 (대출, 금리, 보험, 세금 등 모두 포함)
+    const financialKeywords = [
+      '금융', '경제', '대출', '금리', '주택담보대출', 'DSR', 'LTV',
+      '보험', '세금', '연금', '국세', '지방세', '소득세', '부가세', '종합소득', '연말정산',
+      '건강보험', '자동차보험', '생명보험', '은행', '저축', '예금',
+      '주식', '투자', '환율', '코스피', '코스닥', '증권', '펀드', '부동산'
+    ]
 
     // 랭킹 뉴스 아이템 파싱
     $('.rankingnews_list li, .ranking_list li').each((index, element) => {
@@ -84,8 +64,8 @@ export async function fetchNaverPopularNews(category: string = '금융'): Promis
       const link = $link.attr('href')
 
       if (title && link) {
-        // 카테고리별 키워드 필터링
-        const isRelevant = keywords.some(kw => title.includes(kw))
+        // 키워드 필터링
+        const isRelevant = financialKeywords.some(kw => title.includes(kw))
 
         if (isRelevant) {
           items.push({
@@ -99,7 +79,7 @@ export async function fetchNaverPopularNews(category: string = '금융'): Promis
       }
     })
 
-    console.log(`[TRENDING] Naver ${category}: ${items.length} items (keywords: ${keywords.length})`)
+    console.log(`[TRENDING] Naver ${category}: ${items.length} items`)
     return items
 
   } catch (error) {

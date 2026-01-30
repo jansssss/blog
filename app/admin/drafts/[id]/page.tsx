@@ -387,11 +387,15 @@ export default function DraftEditPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">카테고리</label>
-                <Input
+                <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  placeholder="금융"
-                />
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">선택</option>
+                  <option value="금융">금융</option>
+                  <option value="보험">보험</option>
+                </select>
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">태그 (쉼표 구분)</label>

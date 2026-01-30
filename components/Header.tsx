@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { SiteTheme } from '@/lib/site'
@@ -108,17 +109,28 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="group flex items-center" onClick={closeMobileMenu}>
-          <span
-            className="text-xl sm:text-2xl font-bold tracking-tight transition-all duration-300 group-hover:scale-105"
-            style={{
-              background: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}
-          >
-            {headerTitle}
-          </span>
+          {siteName?.toLowerCase() === 'sureline' ? (
+            <Image
+              src="/sureling-logo.png"
+              alt="Sureline"
+              width={120}
+              height={32}
+              className="h-7 sm:h-8 w-auto transition-all duration-300 group-hover:scale-105"
+              priority
+            />
+          ) : (
+            <span
+              className="text-xl sm:text-2xl font-bold tracking-tight transition-all duration-300 group-hover:scale-105"
+              style={{
+                background: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              {headerTitle}
+            </span>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

@@ -107,15 +107,15 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+      <div className="container flex h-32 sm:h-40 items-center">
         <Link href="/" className="group flex items-center" onClick={closeMobileMenu}>
           {(siteName?.includes('슈어라인') || siteName?.toLowerCase().includes('sureline')) ? (
             <Image
               src="/sureling-logo.png"
               alt="Sureline"
-              width={240}
-              height={64}
-              className="h-14 sm:h-16 w-auto transition-all duration-300 group-hover:scale-105"
+              width={960}
+              height={256}
+              className="h-28 sm:h-36 w-auto transition-all duration-300 group-hover:scale-105"
               priority
             />
           ) : (

@@ -113,9 +113,9 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
             <Image
               src="/sureling-logo.png"
               alt="Sureline"
-              width={160}
-              height={48}
-              className="h-10 sm:h-12 w-auto transition-all duration-300 group-hover:scale-105"
+              width={240}
+              height={64}
+              className="h-14 sm:h-16 w-auto transition-all duration-300 group-hover:scale-105"
               priority
             />
           ) : (

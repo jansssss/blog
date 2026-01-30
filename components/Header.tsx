@@ -109,7 +109,7 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="group flex items-center" onClick={closeMobileMenu}>
-          {siteName?.toLowerCase() === 'sureline' ? (
+          {(siteName?.includes('슈어라인') || siteName?.toLowerCase().includes('sureline')) ? (
             <Image
               src="/sureling-logo.png"
               alt="Sureline"

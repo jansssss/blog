@@ -49,8 +49,8 @@ export async function fetchNaverPopularNews(category: string = '금융'): Promis
     // 카테고리별 키워드 필터
     let keywords: string[] = []
 
-    if (category === '금융') {
-      // 금융 카테고리: 대출, 금리, 은행, 투자 등
+    if (category === '금융' || category === '금융/대출') {
+      // 금융 카테고리: 대출, 금리, 은행, 투자 등 (보험 제외)
       keywords = [
         '금융', '경제', '대출', '금리', '주택담보대출', 'DSR', 'LTV',
         '은행', '저축', '예금', '주식', '투자', '환율', '코스피', '코스닥',

@@ -6,7 +6,7 @@ export default function ContactPage() {
       <div className="prose prose-gray max-w-none">
         <section className="mb-10">
           <p className="text-gray-700 leading-relaxed text-lg mb-6">
-            블로그 운영, 협업 제안, 광고 문의, 기타 궁금한 사항이 있으시면
+            사이트 운영, 협업 제안, 광고 문의, 기타 궁금한 사항이 있으시면
             아래 이메일로 연락 주세요.
           </p>
 
@@ -64,7 +64,7 @@ export default function ContactPage() {
             <div className="p-5 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
               <h3 className="font-semibold text-gray-900 mb-2">❓ 일반 문의</h3>
               <p className="text-gray-600 text-sm">
-                블로그 운영 관련 질문
+                사이트 운영 관련 질문
               </p>
             </div>
             <div className="p-5 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">

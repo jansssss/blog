@@ -417,6 +417,136 @@ export default function PrepaymentFeeCalculatorPage() {
         </Card>
       )}
 
+      {/* 상세 가이드 */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">💡 언제 중도상환수수료 계산이 필요할까요?</h2>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">1. 대출 갈아타기 검토 시</h3>
+              <p>현재 대출 금리가 높아 다른 금융기관으로 대출을 옮기려고 할 때, 중도상환수수료를 내더라도 장기적으로 이득인지 계산할 수 있습니다. 예를 들어 연 6%에서 4%로 갈아타면 이자가 절감되지만, 중도상환수수료가 크면 오히려 손해일 수 있습니다.</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">2. 목돈이 생겨 조기 상환 고민 시</h3>
+              <p>상여금, 퇴직금, 부동산 매각 등으로 목돈이 생겼을 때, 대출을 미리 갚으면 이자를 절감할 수 있습니다. 하지만 중도상환수수료를 내야 한다면, 수수료 대비 실제 절감액을 계산하여 상환 여부를 결정해야 합니다.</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-900 mb-2">3. 금리 인하 시 대환 대출 고려</h3>
+              <p>시장 금리가 내려가면 기존 대출을 낮은 금리로 갈아탈 기회가 생깁니다. 이때 중도상환수수료와 신규 대출 취급 수수료, 그리고 향후 이자 절감액을 종합적으로 비교하여 대환 대출 실행 여부를 판단할 수 있습니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📐 중도상환수수료 계산 방식</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">계산 공식</h3>
+              <p className="mb-2">중도상환수수료는 일반적으로 다음과 같이 계산됩니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>중도상환수수료 = 조기상환 금액 × 수수료율</li>
+                <li>실제 상환 금액 = 조기상환 금액 + 중도상환수수료</li>
+                <li>순 절감액 = 향후 이자 절감액 - 중도상환수수료</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">수수료율 기준</h3>
+              <p className="mb-2">중도상환수수료율은 대출 종류와 시점에 따라 다릅니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li><strong>주택담보대출:</strong> 일반적으로 0.5~1.5% (대출 실행 후 3년 이내)</li>
+                <li><strong>신용대출:</strong> 1.0~2.0% (대출 실행 후 1~2년 이내)</li>
+                <li><strong>정책자금:</strong> 상품에 따라 수수료 면제 또는 낮은 수수료율 적용</li>
+                <li><strong>수수료 면제:</strong> 대부분 3년 또는 5년 후 면제</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">이자 절감액 계산</h3>
+              <p className="mb-2">조기 상환 시 절감되는 이자는 다음과 같이 계산됩니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>상환 전 월 이자 = 대출 잔액 × 월 금리</li>
+                <li>상환 후 월 이자 = (대출 잔액 - 상환 금액) × 월 금리</li>
+                <li>월 이자 절감액 = 상환 전 월 이자 - 상환 후 월 이자</li>
+                <li>총 이자 절감액 = 월 이자 절감액 × 남은 개월 수</li>
+              </ul>
+              <p className="mt-2 text-xs">※ 본 계산기는 단순 이자 기준이며, 실제로는 원리금균등 방식의 복리 효과를 고려해야 합니다.</p>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 법적 규제</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>2021년 7월부터 <strong>신규 주택담보대출</strong>은 중도상환수수료가 폐지되었습니다.</li>
+                <li>신용대출 등 일반 가계대출은 여전히 중도상환수수료가 적용됩니다.</li>
+                <li>수수료율 상한: 법적으로 연간 원금의 2% 이내로 제한됩니다.</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📊 중도상환, 언제 유리할까요?</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">중도상환이 유리한 경우</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li><strong>순 절감액이 플러스:</strong> 수수료를 내더라도 향후 이자 절감액이 더 큰 경우</li>
+                <li><strong>고금리 대출:</strong> 금리가 7% 이상인 고금리 대출은 조기 상환이 유리</li>
+                <li><strong>남은 기간이 긴 경우:</strong> 잔여 상환 기간이 3년 이상 남았다면 이자 절감 효과가 큼</li>
+                <li><strong>대환 대출 금리 차이가 큰 경우:</strong> 기존 금리보다 2%p 이상 낮은 대출로 갈아탈 수 있는 경우</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 신중해야 하는 경우</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li><strong>순 절감액이 마이너스:</strong> 수수료가 이자 절감액보다 큰 경우</li>
+                <li><strong>수수료 면제 기간이 임박:</strong> 3개월~6개월 후 수수료 면제라면 기다리는 것이 유리</li>
+                <li><strong>세제 혜택 상실:</strong> 주택담보대출 이자 소득공제를 받고 있다면 상환 후 혜택 상실 고려</li>
+                <li><strong>유동성 위험:</strong> 비상자금이 부족한 상태에서 목돈을 상환에 쓰면 위험</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">실제 사례</h3>
+              <p className="mb-2"><strong>사례: 5천만 원 잔액, 연 7% 금리, 잔여 10년</strong></p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>1천만 원 조기 상환 시 중도상환수수료(1.5%): 15만 원</li>
+                <li>향후 10년간 이자 절감액: 약 700만 원</li>
+                <li>순 절감액: 약 685만 원 (조기 상환 권장)</li>
+              </ul>
+              <p className="mt-2 text-xs">※ 위 사례는 단순 이자 기준이며, 실제로는 원리금균등 방식의 복리 효과로 절감액이 다를 수 있습니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">🔗 공식 출처 및 참고 자료</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">중도상환수수료 규제 및 정보</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://www.fsc.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융위원회</a> - 중도상환수수료 폐지 및 규제 정책</li>
+                <li>• <a href="https://www.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융감독원</a> - 금융소비자보호법 및 민원 상담</li>
+                <li>• <a href="https://www.law.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">국가법령정보센터</a> - 대부업법, 금융소비자보호법</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">대출 상환 및 대환 정보</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://finlife.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융상품통합비교공시</a> - 대출 상품 및 금리 비교</li>
+                <li>• <a href="https://www.hf.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">주택금융공사</a> - 주택담보대출 대환 안내</li>
+                <li>• <a href="https://www.kfb.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">은행연합회</a> - 대출 이용 가이드</li>
+              </ul>
+            </div>
+            <div className="bg-white p-3 rounded">
+              <p className="text-xs text-gray-600">※ 중도상환수수료는 대출 계약서에 명시되어 있으며, 금융기관별로 다를 수 있습니다. 반드시 본인의 대출 계약서를 확인하거나 금융기관에 직접 문의하세요.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 면책 문구 */}
       <DisclaimerNotice message="본 계산 결과는 단순 이자 기준 예상치이며, 실제 중도상환수수료는 대출 종류, 금융기관, 계약 조건에 따라 다를 수 있습니다. 정확한 수수료는 반드시 대출 계약서를 확인하거나 금융기관에 문의하세요." />
 

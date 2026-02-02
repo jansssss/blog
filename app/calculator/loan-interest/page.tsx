@@ -401,6 +401,109 @@ export default function LoanInterestCalculatorPage() {
         </Card>
       )}
 
+      {/* 상세 가이드 */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">💡 언제 대출 이자 계산이 필요할까요?</h2>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">1. 신용대출 갈아타기 검토 시</h3>
+              <p>기존 대출의 금리가 높아 다른 금융기관으로 갈아탈지 고민할 때, 현재 대출의 총 이자와 신규 대출의 예상 이자를 비교하여 실제 절감 효과를 확인할 수 있습니다. 단, 중도상환수수료와 신규 대출 취급 수수료를 함께 고려해야 정확한 비교가 가능합니다.</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">2. 주택담보대출 실행 전 예산 계획</h3>
+              <p>내 집 마련을 위해 주택담보대출을 받기 전, 월 이자 부담과 총 상환액을 미리 계산하여 가계 예산에 무리가 없는지 확인할 수 있습니다. 특히 원리금균등 상환과 원금균등 상환 방식 중 어떤 것을 선택할지 결정하는 데 도움이 됩니다.</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-900 mb-2">3. 거치기간 설정 여부 결정</h3>
+              <p>대출 초기 현금 흐름이 부족한 경우 거치기간을 설정하면 초기 부담을 줄일 수 있지만, 총 상환액이 증가합니다. 거치기간 사용 시와 미사용 시의 이자 차이를 계산하여 본인의 재무 상황에 맞는 선택을 할 수 있습니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📐 이 계산기의 계산 방식과 가정</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">계산 공식</h3>
+              <p className="mb-2">본 계산기는 <strong>단순 이자 방식</strong>을 사용합니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>월 이자 = 대출 원금 × (연 금리 ÷ 12 ÷ 100)</li>
+                <li>총 이자 = 월 이자 × 대출 기간(개월)</li>
+                <li>총 상환액 = 대출 원금 + 총 이자</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 계산에 포함되지 않는 요소</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li><strong>복리 이자:</strong> 실제 대출은 월복리가 적용되어 총 이자가 약간 더 높을 수 있습니다.</li>
+                <li><strong>원리금균등/원금균등 상환:</strong> 본 계산기는 이자만 계산하며, 실제 상환 방식에 따라 월 납입액이 달라집니다.</li>
+                <li><strong>중도상환수수료:</strong> 대출 기간 중 조기 상환 시 수수료가 발생할 수 있습니다.</li>
+                <li><strong>우대금리 및 할인:</strong> 급여이체, 자동이체 등 조건 충족 시 추가 할인이 있을 수 있습니다.</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">거치기간 계산 방식</h3>
+              <p>거치기간을 설정한 경우, 해당 기간 동안 원금 상환 없이 이자만 납부하고, 이후 남은 기간 동안 원금과 이자를 함께 상환합니다. 거치기간 동안 원금이 줄지 않으므로 총 이자 부담이 커집니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📊 결과를 어떻게 해석하나요?</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">월 이자 금액 해석</h3>
+              <p>월 이자는 매달 납부해야 하는 최소 금액입니다. 예를 들어 월 이자가 50만 원이면, 원리금균등 방식에서는 월 납입액이 약 50만 원 이상이 되며, 원금균등 방식에서는 초기에 원금 상환액이 추가되어 더 높아집니다. 월 소득 대비 20~30%를 넘지 않도록 설정하는 것이 안전합니다.</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">총 이자와 총 상환액 비교</h3>
+              <p>총 이자가 1,200만 원이고 대출 원금이 1억 원이라면, 총 상환액은 1억 1,200만 원입니다. 대출 기간이 길수록 총 이자가 증가하므로, 가능하면 대출 기간을 짧게 설정하거나 중도상환을 통해 이자 부담을 줄이는 것이 유리합니다.</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-900 mb-2">거치기간 사용 시 주의사항</h3>
+              <p>거치기간을 사용하면 초기 월 부담이 줄어들지만, 총 이자는 증가합니다. 계산 결과에서 "추가 비용"이 표시되면, 그만큼 더 많은 이자를 내야 한다는 의미입니다. 창업 초기나 소득이 불안정한 경우에는 유용하지만, 장기적으로는 비용 증가를 감수해야 합니다.</p>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 실제 대출과의 차이</h3>
+              <p>본 계산기는 단순 이자 기준이므로, 실제 은행의 상환 스케줄과 10~15% 정도 차이가 날 수 있습니다. 대출 실행 전 반드시 금융기관에서 제공하는 "대출 상환 계획서"를 확인하고, 정확한 월 납입액과 총 이자를 확인하세요.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">🔗 공식 출처 및 참고 자료</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">금융 당국 및 공공기관</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://www.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융감독원</a> - 대출 상품 비교 및 금리 정보</li>
+                <li>• <a href="https://www.bok.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">한국은행</a> - 기준금리 및 금융통계</li>
+                <li>• <a href="https://www.hf.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">주택금융공사</a> - 주택담보대출 안내</li>
+                <li>• <a href="https://finlife.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융상품통합비교공시</a> - 대출 금리 비교</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">시중 은행 대출 정보</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://www.kbanknow.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">KB국민은행</a> - 개인대출 상품 안내</li>
+                <li>• <a href="https://www.shinhan.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">신한은행</a> - 대출금리 및 한도 조회</li>
+                <li>• <a href="https://www.wooribank.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">우리은행</a> - 주택담보대출 안내</li>
+              </ul>
+            </div>
+            <div className="bg-white p-3 rounded">
+              <p className="text-xs text-gray-600">※ 위 링크는 참고용이며, 실제 대출 조건은 개인의 신용등급, 소득, 담보 가치 등에 따라 달라질 수 있습니다. 대출 실행 전 반드시 해당 금융기관에 직접 문의하시기 바랍니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 면책 문구 */}
       <DisclaimerNotice />
 

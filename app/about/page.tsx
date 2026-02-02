@@ -236,6 +236,124 @@ function OhyessAbout() {
         </div>
       </section>
 
+      {/* Operator Introduction Section */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              운영자 소개
+            </h2>
+            <p className="text-lg text-gray-600">
+              신뢰할 수 있는 금융 정보를 제공하기 위해 노력합니다
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">📌 오예스 운영 목적</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                오예스는 금융 정보의 접근성을 높이고, 대출·금리·재테크 등 복잡한 금융 개념을
+                누구나 쉽게 이해할 수 있도록 돕기 위해 만들어졌습니다.
+                특정 금융 상품을 판매하거나 중개하지 않으며, 오직 정확하고 유용한 정보 제공에만 집중합니다.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                금융감독원, 한국은행, 주택금융공사 등 공식 기관의 자료를 기반으로 콘텐츠를 작성하며,
+                금리 변동이나 제도 변경 시 신속하게 업데이트하여 항상 최신 정보를 제공하고자 합니다.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">👨‍💼 운영자 배경</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                오예스는 금융 서비스 분야에서 실무 경험을 쌓은 운영자가 직접 관리합니다.
+                대출 상담, 금융 상품 분석, 재무 설계 등 다양한 금융 업무 경험을 바탕으로
+                실생활에서 실제로 필요한 정보만을 엄선하여 제공합니다.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                사용자가 복잡한 금융 용어에 막히지 않고 자신에게 맞는 금융 의사결정을 내릴 수 있도록
+                명확하고 이해하기 쉬운 설명을 제공하는 것을 최우선 목표로 삼고 있습니다.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 border border-emerald-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">✅ 정보 검증 및 업데이트 정책</h3>
+              <div className="space-y-3 text-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">공식 출처 우선:</strong> 금융감독원, 한국은행, 각 금융기관의 공시자료를 우선적으로 참고하며,
+                    출처가 불분명한 정보는 게시하지 않습니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">정기 업데이트:</strong> 금리 변동, 정책 변경, 제도 개편 등 중요한 변화가 있을 때
+                    관련 콘텐츠를 신속하게 검토하고 업데이트합니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">계산 공식 투명 공개:</strong> 모든 계산기는 사용된 공식과 가정을 명확히 설명하며,
+                    결과는 참고용임을 명시합니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">오류 제보 환영:</strong> 잘못된 정보나 개선이 필요한 부분을 발견하시면
+                    언제든지 연락 주시기 바랍니다. 신속하게 확인하고 수정하겠습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">🎯 운영 원칙</h3>
+              <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">독립적 운영</h4>
+                    <p className="text-gray-600">특정 금융사와 제휴하지 않습니다</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">객관적 정보</h4>
+                    <p className="text-gray-600">사실 기반의 중립적 콘텐츠</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">사용자 우선</h4>
+                    <p className="text-gray-600">실제 도움이 되는 정보 제공</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">지속적 개선</h4>
+                    <p className="text-gray-600">피드백 반영 및 콘텐츠 보강</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section className="py-20 bg-gray-50">
         <div className="container max-w-2xl text-center">
@@ -427,6 +545,123 @@ function SurelineAbout() {
               </div>
               <p className="text-sm text-emerald-100 text-left">최적화 진단</p>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Operator Introduction Section */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              운영자 소개
+            </h2>
+            <p className="text-lg text-gray-600">
+              신뢰할 수 있는 보험 정보를 제공하기 위해 노력합니다
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 border border-emerald-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">📌 슈어라인 운영 목적</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                슈어라인은 복잡한 보험 정보를 쉽게 이해하고, 자신에게 맞는 보험 선택과 관리를 도와드리기 위해 만들어졌습니다.
+                특정 보험사나 상품을 추천하지 않으며, 소비자 관점에서 객관적인 정보만을 제공합니다.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                자동차보험 할인 항목, 실손보험 중복 보장, 보험 리모델링 등
+                실생활에서 꼭 필요한 정보를 간편하게 점검할 수 있도록 도구를 제공합니다.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">👨‍💼 운영자 배경</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                슈어라인은 보험 및 금융 분야에서 실무 경험을 쌓은 운영자가 직접 관리합니다.
+                보험 상품 분석, 소비자 상담 등의 경험을 바탕으로
+                실제로 도움이 되는 정보만을 선별하여 제공합니다.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                어려운 보험 용어와 복잡한 약관 때문에 올바른 선택을 하기 어려운 분들께
+                명확하고 실용적인 가이드를 제공하는 것을 목표로 합니다.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">✅ 정보 검증 및 업데이트 정책</h3>
+              <div className="space-y-3 text-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">공신력 있는 출처:</strong> 금융감독원, 보험개발원, 각 보험사의 공식 자료를 우선적으로 참고하며,
+                    검증되지 않은 정보는 게시하지 않습니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">정기 업데이트:</strong> 보험 상품 변경, 제도 개편 등이 있을 때
+                    관련 콘텐츠를 검토하고 업데이트합니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">점검 기준 명시:</strong> 모든 점검 도구는 사용된 기준과 전제를 명확히 설명하며,
+                    결과는 참고용임을 명시합니다.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 mt-2 flex-shrink-0"></div>
+                  <p className="leading-relaxed">
+                    <strong className="text-gray-900">피드백 반영:</strong> 잘못된 정보나 개선이 필요한 부분을 발견하시면
+                    언제든지 연락 주시기 바랍니다. 빠르게 확인하고 수정하겠습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">🎯 운영 원칙</h3>
+              <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">독립적 운영</h4>
+                    <p className="text-gray-600">특정 보험사와 제휴하지 않습니다</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">객관적 정보</h4>
+                    <p className="text-gray-600">소비자 관점의 중립적 콘텐츠</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">사용자 우선</h4>
+                    <p className="text-gray-600">실제 도움이 되는 정보 제공</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">지속적 개선</h4>
+                    <p className="text-gray-600">피드백 반영 및 콘텐츠 보강</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

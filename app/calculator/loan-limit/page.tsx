@@ -424,6 +424,144 @@ export default function LoanLimitSimulatorPage() {
         </Card>
       )}
 
+      {/* 상세 가이드 */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">💡 언제 DSR 한도 계산이 필요할까요?</h2>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">1. 주택 구매 전 대출 가능 금액 확인</h3>
+              <p>내 집 마련을 준비할 때 실제로 얼마까지 대출을 받을 수 있는지 미리 확인하여 예산을 계획할 수 있습니다. DSR 규제로 인해 소득 대비 일정 비율 이상은 대출받을 수 없으므로, 주택 가격대를 결정하기 전에 한도를 파악하는 것이 중요합니다.</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">2. 기존 대출이 있는 상태에서 추가 대출 검토</h3>
+              <p>이미 신용대출이나 자동차할부가 있는 경우, 추가로 주택담보대출이나 전세자금대출을 받을 수 있는 여력이 얼마나 되는지 확인할 수 있습니다. DSR은 모든 대출의 상환액을 합산하므로, 기존 부채가 많을수록 신규 대출 한도가 줄어듭니다.</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-900 mb-2">3. 대출 상환 계획 수립</h3>
+              <p>현재 소득 수준에서 안전하게 감당할 수 있는 대출 규모를 파악하여, 무리한 대출로 인한 재무 위험을 방지할 수 있습니다. 특히 맞벌이 부부의 경우 합산 소득으로 계산하면 한도가 늘어나지만, 한 사람의 소득이 줄어들 경우를 대비한 계획도 필요합니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📐 DSR 계산 방식과 가정</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">DSR 계산 공식</h3>
+              <p className="mb-2"><strong>DSR (Debt Service Ratio, 총부채원리금상환비율)</strong>은 다음과 같이 계산됩니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>DSR = (모든 대출의 연간 원리금 상환액) ÷ (연 소득) × 100</li>
+                <li>월 소득 = 연 소득 ÷ 12</li>
+                <li>최대 월 상환액 = 월 소득 × (DSR 한도 ÷ 100)</li>
+                <li>신규 대출 가능 월 상환액 = 최대 월 상환액 - 기존 대출 월 상환액</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">원리금균등 방식 역산</h3>
+              <p className="mb-2">본 계산기는 <strong>원리금균등 상환 방식</strong>을 기준으로 대출 가능 금액을 역산합니다:</p>
+              <p className="font-mono text-xs bg-white p-2 rounded">대출 가능 금액 = 월 상환액 × [(1+월금리)^개월수 - 1] ÷ [월금리 × (1+월금리)^개월수]</p>
+              <p className="mt-2">이 방식은 매월 동일한 금액을 상환하는 가장 일반적인 대출 방식입니다.</p>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 계산에 반영되지 않는 요소</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li><strong>LTV (주택담보인정비율):</strong> 주택 가격 대비 최대 대출 비율 (일반적으로 40~70%)</li>
+                <li><strong>DTI (총부채상환비율):</strong> 일부 대출 상품에 추가 적용되는 규제</li>
+                <li><strong>신용등급:</strong> 신용등급에 따라 금리 우대 및 한도가 달라질 수 있음</li>
+                <li><strong>담보 가치:</strong> 주택담보대출의 경우 담보 평가액에 따라 한도가 제한됨</li>
+                <li><strong>금융기관 내부 심사:</strong> 재직 기간, 업종, 연령 등 추가 심사 요소</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">DSR 규제 적용 기준</h3>
+              <p>2024년 기준 주요 DSR 한도는 다음과 같습니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>주택담보대출 (9억 원 이하): 40%</li>
+                <li>주택담보대출 (9억 원 초과): 규제 강화</li>
+                <li>기타 가계대출 (신용대출 등): 40~50%</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">📊 결과를 어떻게 해석하나요?</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">예상 대출 한도 해석</h3>
+              <p>계산 결과가 2억 원이라면, DSR 규제 기준으로 최대 2억 원까지 대출이 가능하다는 의미입니다. 다만 이는 <strong>이론적 최대치</strong>이며, 실제로는 다음 요소를 추가로 고려해야 합니다:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+                <li>주택담보대출의 경우 LTV 규제로 주택 가격의 40~70%까지만 가능</li>
+                <li>신용등급이 낮으면 한도가 줄어들거나 금리가 높아질 수 있음</li>
+                <li>소득 증빙이 어려운 경우 (프리랜서, 사업소득 등) 한도가 줄어들 수 있음</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">DSR 비율 해석</h3>
+              <p>계산 결과에서 DSR이 40%로 표시되면, 소득의 40%를 대출 상환에 사용한다는 뜻입니다. 예를 들어:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+                <li>월 소득 500만 원, DSR 40% → 월 상환액 최대 200만 원</li>
+                <li>DSR이 규제 한도에 근접할수록 추가 대출 여력이 줄어듦</li>
+                <li>안전한 재무 관리를 위해서는 DSR 30% 이하를 권장</li>
+              </ul>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-900 mb-2">기존 대출과의 관계</h3>
+              <p>기존 대출 월 상환액이 많을수록 신규 대출 한도가 줄어듭니다. 만약 추가 대출이 필요하다면:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+                <li>기존 대출 중 금리가 높은 것을 먼저 상환하여 DSR 여력 확보</li>
+                <li>소득을 높이거나 맞벌이 소득을 합산하여 한도 증가</li>
+                <li>대출 기간을 늘려 월 상환액을 줄이는 방법 고려 (단, 총 이자는 증가)</li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 실제 은행 심사와의 차이</h3>
+              <p>본 계산기는 DSR 규제만 반영한 예상치입니다. 실제 은행 심사에서는 추가로:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+                <li>신용등급별 차등 한도 적용 (1~3등급: 고한도, 4~6등급: 중한도, 7~10등급: 저한도)</li>
+                <li>담보 가치 평가 (주택담보대출 시 감정평가 필수)</li>
+                <li>재직 기간 및 소득 안정성 평가</li>
+                <li>기존 금융 거래 이력 및 연체 여부 확인</li>
+              </ul>
+              <p className="mt-2"><strong>정확한 한도는 반드시 금융기관에 직접 문의하여 확인하세요.</strong></p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">🔗 공식 출처 및 참고 자료</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">금융 당국 및 규제 정보</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://www.fsc.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융위원회</a> - DSR 규제 및 정책 발표</li>
+                <li>• <a href="https://www.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융감독원</a> - 대출 규제 안내 및 민원 상담</li>
+                <li>• <a href="https://www.bok.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">한국은행</a> - 금융안정 보고서 및 통계</li>
+                <li>• <a href="https://www.hf.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">주택금융공사</a> - 주택담보대출 상품 안내</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">대출 한도 및 금리 비교</h3>
+              <ul className="space-y-2 ml-4">
+                <li>• <a href="https://finlife.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융상품통합비교공시</a> - 은행별 대출 상품 비교</li>
+                <li>• <a href="https://www.kfb.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">은행연합회</a> - 대출 제도 및 이용 안내</li>
+                <li>• <a href="https://www.credit4u.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">신용회복위원회</a> - 신용 관리 및 채무 상담</li>
+              </ul>
+            </div>
+            <div className="bg-white p-3 rounded">
+              <p className="text-xs text-gray-600">※ DSR 규제는 정책에 따라 변경될 수 있으며, 금융기관별로 세부 기준이 다를 수 있습니다. 대출 신청 전 반드시 최신 정보를 확인하시기 바랍니다.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 면책 문구 */}
       <DisclaimerNotice message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요." />
 

@@ -85,7 +85,8 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
   const accentColor = siteTheme?.brand?.accentColor || '#2563EB'
 
   // 사이트별 네비게이션 선택
-  const navItems: NavItem[] = siteName?.toLowerCase() === 'sureline' ? SURELINE_NAV : OHYESS_NAV
+  const isSureline = siteName?.toLowerCase().includes('sureline') || siteName?.includes('슈어라인')
+  const navItems: NavItem[] = isSureline ? SURELINE_NAV : OHYESS_NAV
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)

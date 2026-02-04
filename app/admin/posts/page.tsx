@@ -390,19 +390,23 @@ export default function AdminPostsPage() {
                     {/* 액션 버튼 */}
                     <div className="flex flex-col gap-1.5 md:gap-2 shrink-0">
                       {/* 에디터에서 편집 */}
-                      <Link href={`/admin/editor?post_id=${post.id}`}>
+                      <Link href={`/admin/editor?id=${post.id}`}>
                         <Button size="sm" variant="outline" className="text-xs md:text-sm px-2 md:px-3 w-full">
                           <Edit className="h-3.5 w-3.5 md:h-4 md:w-4 md:mr-2" />
                           <span className="hidden md:inline">편집</span>
                         </Button>
                       </Link>
-                      {/* 보기 */}
-                      <Link href={`/blog/${post.id}`} target="_blank">
+                      {/* 보기 (해당 사이트 도메인으로 이동) */}
+                      <a
+                        href={`https://${getSiteDomain(post.site_id)}/blog/${post.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <Button size="sm" variant="ghost" className="text-xs md:text-sm px-2 md:px-3 w-full">
                           <Eye className="h-3.5 w-3.5 md:h-4 md:w-4 md:mr-2" />
                           <span className="hidden md:inline">보기</span>
                         </Button>
-                      </Link>
+                      </a>
                       {/* 공개/비공개 토글 */}
                       <Button
                         size="sm"

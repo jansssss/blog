@@ -158,7 +158,7 @@ export default async function HomePage({
           <h2 className="mb-6 text-xl font-bold">관련 가이드</h2>
         {posts && posts.length > 0 ? (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
               {posts.map((post) => (
                 <BlogCard key={post.id} post={post} />
               ))}

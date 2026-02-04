@@ -14,6 +14,7 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { HorizontalRule } from '@tiptap/extension-horizontal-rule'
 import { common, createLowlight } from 'lowlight'
 import { useEffect, useRef, useState } from 'react'
 import { uploadImage } from '@/lib/upload'
@@ -22,7 +23,8 @@ import {
   Heading1, Heading2, Heading3, List, ListOrdered,
   Quote, Code, Link as LinkIcon, Image as ImageIcon,
   Table as TableIcon, AlignLeft, AlignCenter, AlignRight,
-  Highlighter, Undo, Redo, Upload
+  Highlighter, Undo, Redo, Upload, Palette, Type,
+  Minus, IndentDecrease, IndentIncrease, TextQuote
 } from 'lucide-react'
 import './editor.css'
 
@@ -36,6 +38,10 @@ interface EditorProps {
 const Editor = ({ value, onChange }: EditorProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [showTextColorPicker, setShowTextColorPicker] = useState(false)
+  const [showHighlightColorPicker, setShowHighlightColorPicker] = useState(false)
+  const [charCount, setCharCount] = useState(0)
+  const [wordCount, setWordCount] = useState(0)
 
   const editor = useEditor({
     extensions: [
@@ -74,10 +80,15 @@ const Editor = ({ value, onChange }: EditorProps) => {
           class: 'code-block',
         },
       }),
+      HorizontalRule,
     ],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
+      // 글자 수 업데이트
+      const text = editor.getText()
+      setCharCount(text.length)
+      setWordCount(text.split(/\s+/).filter(Boolean).length)
     },
     editorProps: {
       attributes: {
@@ -116,6 +127,10 @@ const Editor = ({ value, onChange }: EditorProps) => {
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value)
+      // 초기 글자 수 계산
+      const text = editor.getText()
+      setCharCount(text.length)
+      setWordCount(text.split(/\s+/).filter(Boolean).length)
     }
   }, [value, editor])
 
@@ -173,6 +188,29 @@ const Editor = ({ value, onChange }: EditorProps) => {
     </button>
   )
 
+  const textColors = [
+    { name: '검정', value: '#000000' },
+    { name: '회색', value: '#6B7280' },
+    { name: '빨강', value: '#EF4444' },
+    { name: '주황', value: '#F97316' },
+    { name: '노랑', value: '#F59E0B' },
+    { name: '초록', value: '#10B981' },
+    { name: '파랑', value: '#3B82F6' },
+    { name: '남색', value: '#6366F1' },
+    { name: '보라', value: '#A855F7' },
+    { name: '분홍', value: '#EC4899' },
+  ]
+
+  const highlightColors = [
+    { name: '없음', value: '' },
+    { name: '노랑', value: '#FEF08A' },
+    { name: '초록', value: '#BBF7D0' },
+    { name: '파랑', value: '#BFDBFE' },
+    { name: '보라', value: '#DDD6FE' },
+    { name: '분홍', value: '#FBCFE8' },
+    { name: '주황', value: '#FED7AA' },
+  ]
+
   return (
     <div className="border rounded-lg shadow-sm bg-white flex flex-col max-h-[calc(100vh-200px)]">
       <div className="border-b bg-gray-50 p-3 sticky top-0 z-10 flex-shrink-0">
@@ -224,6 +262,83 @@ const Editor = ({ value, onChange }: EditorProps) => {
             >
               <Highlighter className="h-4 w-4" />
             </ToolbarButton>
+          </div>
+
+          {/* Text Color */}
+          <div className="flex gap-1 pr-2 border-r relative">
+            <div className="relative">
+              <ToolbarButton
+                onClick={() => {
+                  setShowTextColorPicker(!showTextColorPicker)
+                  setShowHighlightColorPicker(false)
+                }}
+                title="글씨 색"
+              >
+                <Type className="h-4 w-4" />
+              </ToolbarButton>
+              {showTextColorPicker && (
+                <div className="absolute top-full left-0 mt-1 p-2 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-5 gap-1">
+                  {textColors.map((color) => (
+                    <button
+                      key={color.value}
+                      onClick={() => {
+                        editor.chain().focus().setColor(color.value).run()
+                        setShowTextColorPicker(false)
+                      }}
+                      className="w-6 h-6 rounded border hover:scale-110 transition-transform"
+                      style={{ backgroundColor: color.value }}
+                      title={color.name}
+                      type="button"
+                    />
+                  ))}
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().unsetColor().run()
+                      setShowTextColorPicker(false)
+                    }}
+                    className="w-6 h-6 rounded border hover:scale-110 transition-transform bg-white"
+                    title="기본 색"
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <ToolbarButton
+                onClick={() => {
+                  setShowHighlightColorPicker(!showHighlightColorPicker)
+                  setShowTextColorPicker(false)
+                }}
+                title="배경 색"
+              >
+                <Palette className="h-4 w-4" />
+              </ToolbarButton>
+              {showHighlightColorPicker && (
+                <div className="absolute top-full left-0 mt-1 p-2 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-4 gap-1">
+                  {highlightColors.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => {
+                        if (color.value) {
+                          editor.chain().focus().setHighlight({ color: color.value }).run()
+                        } else {
+                          editor.chain().focus().unsetHighlight().run()
+                        }
+                        setShowHighlightColorPicker(false)
+                      }}
+                      className="w-6 h-6 rounded border hover:scale-110 transition-transform"
+                      style={{ backgroundColor: color.value || '#fff' }}
+                      title={color.name}
+                      type="button"
+                    >
+                      {!color.value && '✕'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Headings */}
@@ -324,6 +439,33 @@ const Editor = ({ value, onChange }: EditorProps) => {
             >
               <TableIcon className="h-4 w-4" />
             </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
+              title="수평선"
+            >
+              <Minus className="h-4 w-4" />
+            </ToolbarButton>
+          </div>
+
+          {/* Indent */}
+          <div className="flex gap-1 pr-2 border-r">
+            <ToolbarButton
+              onClick={() => {
+                const { state, dispatch } = editor.view
+                const { tr } = state
+                tr.setBlockType(state.selection.from, state.selection.to, state.schema.nodes.paragraph, { style: 'margin-left: 2rem' })
+                dispatch(tr)
+              }}
+              title="들여쓰기"
+            >
+              <IndentIncrease className="h-4 w-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().lift('paragraph').run()}
+              title="내어쓰기"
+            >
+              <IndentDecrease className="h-4 w-4" />
+            </ToolbarButton>
           </div>
 
           {/* Image Upload */}
@@ -355,6 +497,19 @@ const Editor = ({ value, onChange }: EditorProps) => {
 
       <div className="flex-1 overflow-y-auto">
         <EditorContent editor={editor} />
+      </div>
+
+      {/* Character/Word Count */}
+      <div className="border-t bg-gray-50 px-4 py-2 text-xs text-gray-600 flex items-center justify-between">
+        <div className="flex gap-4">
+          <span>글자 수: <strong>{charCount.toLocaleString()}</strong></span>
+          <span>단어 수: <strong>{wordCount.toLocaleString()}</strong></span>
+        </div>
+        <div className="text-gray-500">
+          {charCount >= 1500 && charCount <= 2500 && '✅ SEO 최적 길이'}
+          {charCount < 1500 && charCount > 0 && '⚠️ 콘텐츠가 짧습니다'}
+          {charCount > 2500 && '💡 충분한 콘텐츠'}
+        </div>
       </div>
     </div>
   )

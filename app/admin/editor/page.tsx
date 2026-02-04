@@ -314,9 +314,9 @@ function AdminEditorContent() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
           {/* Title */}
           <Card>
             <CardHeader>
@@ -423,7 +423,7 @@ function AdminEditorContent() {
                   <option value="금융">금융</option>
                   <option value="세금">세금</option>
                   <option value="대출">대출</option>
-                  <option value="AI">AI</option>
+                  <option value="보험">보험</option>
                 </select>
               </div>
 

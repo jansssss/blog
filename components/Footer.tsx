@@ -117,6 +117,15 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
                     </span>
                     <span className="flex items-center gap-4">
                       <span className="text-gray-300">|</span>
+                      <Link
+                        href="/admin/posts"
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        글 관리
+                      </Link>
+                    </span>
+                    <span className="flex items-center gap-4">
+                      <span className="text-gray-300">|</span>
                       <button
                         onClick={handleLogout}
                         className="text-gray-600 hover:text-gray-900 transition-colors"

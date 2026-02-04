@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Upload, X, Smartphone, Tablet, Monitor } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
@@ -33,6 +33,8 @@ function AdminEditorContent() {
 
   const [mounted, setMounted] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile')
   const [loading, setLoading] = useState(false)
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
   const [title, setTitle] = useState('')
@@ -270,8 +272,15 @@ function AdminEditorContent() {
   }
 
   const handlePreview = () => {
-    // 미리보기 모달을 띄우거나 새 탭에서 열기
-    console.log('미리보기 기능 (구현 예정)')
+    setShowPreview(true)
+  }
+
+  const getPreviewWidth = () => {
+    switch (previewDevice) {
+      case 'mobile': return '375px'
+      case 'tablet': return '768px'
+      case 'desktop': return '100%'
+    }
   }
 
   if (!mounted) {
@@ -519,6 +528,107 @@ function AdminEditorContent() {
           </Card>
         </div>
       </div>
+
+      {/* 반응형 미리보기 모달 */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex flex-col">
+          {/* 상단 툴바 */}
+          <div className="flex items-center justify-between px-4 py-3 bg-gray-900 text-white">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium mr-2">미리보기</span>
+              <div className="flex bg-gray-700 rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setPreviewDevice('mobile')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    previewDevice === 'mobile' ? 'bg-white text-gray-900' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <Smartphone className="h-4 w-4" />
+                  모바일
+                </button>
+                <button
+                  onClick={() => setPreviewDevice('tablet')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    previewDevice === 'tablet' ? 'bg-white text-gray-900' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <Tablet className="h-4 w-4" />
+                  태블릿
+                </button>
+                <button
+                  onClick={() => setPreviewDevice('desktop')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    previewDevice === 'desktop' ? 'bg-white text-gray-900' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <Monitor className="h-4 w-4" />
+                  데스크톱
+                </button>
+              </div>
+              <span className="ml-3 text-xs text-gray-400">
+                {previewDevice === 'mobile' ? '375px' : previewDevice === 'tablet' ? '768px' : '100%'}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowPreview(false)}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* 미리보기 콘텐츠 */}
+          <div className="flex-1 overflow-y-auto flex justify-center p-4 md:p-8 bg-gray-100">
+            <div
+              className="bg-white rounded-lg shadow-2xl overflow-y-auto transition-all duration-300"
+              style={{
+                width: getPreviewWidth(),
+                maxWidth: '100%',
+                minHeight: '100%',
+              }}
+            >
+              <div className="px-4 sm:px-6 lg:px-8 py-10">
+                {/* 카테고리 */}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="rounded-full bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
+                    {category}
+                  </span>
+                </div>
+
+                {/* 제목 */}
+                <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                  {title || '제목을 입력하세요'}
+                </h1>
+
+                {/* 요약 */}
+                {summary && (
+                  <p className="text-xl text-muted-foreground mb-8">{summary}</p>
+                )}
+
+                {/* 태그 */}
+                {tags && (
+                  <div className="mb-8 flex flex-wrap gap-2">
+                    {tags.split(',').map((tag, i) => (
+                      <span
+                        key={i}
+                        className="rounded-md bg-secondary px-3 py-1 text-sm"
+                      >
+                        {tag.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* 본문 */}
+                <div
+                  className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-base prose-p:leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: content || '<p class="text-gray-400">본문을 입력하세요</p>' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

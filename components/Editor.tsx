@@ -24,7 +24,7 @@ import {
   Quote, Code, Link as LinkIcon, Image as ImageIcon,
   Table as TableIcon, AlignLeft, AlignCenter, AlignRight,
   Highlighter, Undo, Redo, Upload, Palette, Type,
-  Minus, IndentDecrease, IndentIncrease, TextQuote
+  Minus, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import './editor.css'
 
@@ -458,13 +458,13 @@ const Editor = ({ value, onChange }: EditorProps) => {
               }}
               title="들여쓰기"
             >
-              <IndentIncrease className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => editor.chain().focus().lift('paragraph').run()}
               title="내어쓰기"
             >
-              <IndentDecrease className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </ToolbarButton>
           </div>
 

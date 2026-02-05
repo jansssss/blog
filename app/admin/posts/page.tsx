@@ -36,6 +36,10 @@ export default function AdminPostsPage() {
   const [loading, setLoading] = useState(true)
   const [siteFilter, setSiteFilter] = useState<string>('all')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [stats, setStats] = useState({ total: 0, ohyess: 0, sureline: 0, published: 0 })
+  const postsPerPage = 20
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin')
@@ -45,20 +49,43 @@ export default function AdminPostsPage() {
     }
 
     loadData()
-  }, [router])
+  }, [router, currentPage, siteFilter])
 
   const loadData = async () => {
     setLoading(true)
     try {
-      const [{ data: postsData, error: postsError }, { data: sitesData }] = await Promise.all([
-        supabase
-          .from('posts')
-          .select('id, title, slug, summary, category, published, published_at, created_at, updated_at, site_id, tags, thumbnail_url')
-          .order('published_at', { ascending: false }),
-        supabase
-          .from('sites')
-          .select('id, name, domain')
-      ])
+      // 사이트 필터 조건 준비
+      const from = (currentPage - 1) * postsPerPage
+      const to = from + postsPerPage - 1
+
+      // 사이트 데이터 먼저 로드 (필터링에 필요)
+      const { data: sitesData } = await supabase
+        .from('sites')
+        .select('id, name, domain')
+
+      setSites(sitesData || [])
+
+      // 사이트 필터에 맞는 site_id 찾기
+      let siteIds: string[] = []
+      if (siteFilter !== 'all' && sitesData) {
+        siteIds = sitesData
+          .filter(site => site.domain.includes(siteFilter))
+          .map(site => site.id)
+      }
+
+      // 쿼리 빌더 시작
+      let query = supabase
+        .from('posts')
+        .select('id, title, slug, summary, category, published, published_at, created_at, updated_at, site_id, tags, thumbnail_url', { count: 'exact' })
+        .order('published_at', { ascending: false })
+
+      // 필터 적용
+      if (siteFilter !== 'all' && siteIds.length > 0) {
+        query = query.in('site_id', siteIds)
+      }
+
+      // 페이지네이션 적용
+      const { data: postsData, error: postsError, count } = await query.range(from, to)
 
       if (postsError) {
         console.error('글 로드 오류:', postsError)
@@ -67,7 +94,30 @@ export default function AdminPostsPage() {
       }
 
       setPosts(postsData || [])
-      setSites(sitesData || [])
+      setTotalCount(count || 0)
+
+      // 통계 계산 (전체 데이터 기반)
+      const ohyessSiteIds = sitesData?.filter(s => s.domain.includes('ohyess')).map(s => s.id) || []
+      const surelineSiteIds = sitesData?.filter(s => s.domain.includes('sureline')).map(s => s.id) || []
+
+      const [
+        { count: totalCount },
+        { count: ohyessCount },
+        { count: surelineCount },
+        { count: publishedCount }
+      ] = await Promise.all([
+        supabase.from('posts').select('*', { count: 'exact', head: true }),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).in('site_id', ohyessSiteIds),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).in('site_id', surelineSiteIds),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('published', true)
+      ])
+
+      setStats({
+        total: totalCount || 0,
+        ohyess: ohyessCount || 0,
+        sureline: surelineCount || 0,
+        published: publishedCount || 0
+      })
     } catch (err) {
       console.error('예상치 못한 오류:', err)
     } finally {
@@ -96,12 +146,10 @@ export default function AdminPostsPage() {
     return { label: getSiteName(siteId), className: 'bg-gray-100 text-gray-600' }
   }
 
-  const filteredPosts = siteFilter === 'all'
-    ? posts
-    : posts.filter(post => {
-        const domain = getSiteDomain(post.site_id)
-        return domain.includes(siteFilter)
-      })
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(totalCount / postsPerPage)
+  const hasNextPage = currentPage < totalPages
+  const hasPrevPage = currentPage > 1
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-'
@@ -124,10 +172,10 @@ export default function AdminPostsPage() {
   }
 
   const handleSelectAll = () => {
-    if (selectedItems.length === filteredPosts.length) {
+    if (selectedItems.length === posts.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(filteredPosts.map(post => post.id))
+      setSelectedItems(posts.map(post => post.id))
     }
   }
 
@@ -216,11 +264,12 @@ export default function AdminPostsPage() {
     }
   }
 
-  // 통계
-  const totalPosts = posts.length
-  const ohyessPosts = posts.filter(p => getSiteDomain(p.site_id).includes('ohyess')).length
-  const surelinePosts = posts.filter(p => getSiteDomain(p.site_id).includes('sureline')).length
-  const publishedPosts = posts.filter(p => p.published).length
+  // 필터 변경 핸들러
+  const handleFilterChange = (filter: string) => {
+    setSiteFilter(filter)
+    setCurrentPage(1)
+    setSelectedItems([])
+  }
 
   return (
     <div className="container py-6 px-4 md:py-10 md:px-6">
@@ -257,25 +306,25 @@ export default function AdminPostsPage() {
         <Card>
           <CardContent className="p-3 md:p-6">
             <p className="text-xs md:text-sm text-muted-foreground">전체</p>
-            <p className="text-xl md:text-2xl font-bold">{totalPosts}</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-6">
             <p className="text-xs md:text-sm text-blue-600">오예스</p>
-            <p className="text-xl md:text-2xl font-bold text-blue-600">{ohyessPosts}</p>
+            <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.ohyess}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-6">
             <p className="text-xs md:text-sm text-green-600">슈어라인</p>
-            <p className="text-xl md:text-2xl font-bold text-green-600">{surelinePosts}</p>
+            <p className="text-xl md:text-2xl font-bold text-green-600">{stats.sureline}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-6">
             <p className="text-xs md:text-sm text-muted-foreground">공개</p>
-            <p className="text-xl md:text-2xl font-bold">{publishedPosts}</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.published}</p>
           </CardContent>
         </Card>
       </div>
@@ -285,38 +334,38 @@ export default function AdminPostsPage() {
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0">
           <Button
             variant={siteFilter === 'all' ? 'default' : 'outline'}
-            onClick={() => { setSiteFilter('all'); setSelectedItems([]) }}
+            onClick={() => handleFilterChange('all')}
             size="sm"
             className="shrink-0"
           >
-            전체 ({totalPosts})
+            전체 ({stats.total})
           </Button>
           <Button
             variant={siteFilter === 'ohyess' ? 'default' : 'outline'}
-            onClick={() => { setSiteFilter('ohyess'); setSelectedItems([]) }}
+            onClick={() => handleFilterChange('ohyess')}
             size="sm"
             className="shrink-0"
           >
-            오예스 ({ohyessPosts})
+            오예스 ({stats.ohyess})
           </Button>
           <Button
             variant={siteFilter === 'sureline' ? 'default' : 'outline'}
-            onClick={() => { setSiteFilter('sureline'); setSelectedItems([]) }}
+            onClick={() => handleFilterChange('sureline')}
             size="sm"
             className="shrink-0"
           >
-            슈어라인 ({surelinePosts})
+            슈어라인 ({stats.sureline})
           </Button>
         </div>
 
-        {filteredPosts.length > 0 && (
+        {posts.length > 0 && (
           <Button
             onClick={handleSelectAll}
             variant="ghost"
             size="sm"
             className="self-end md:self-auto"
           >
-            {selectedItems.length === filteredPosts.length ? '전체 해제' : '전체 선택'}
+            {selectedItems.length === posts.length ? '전체 해제' : '전체 선택'}
           </Button>
         )}
       </div>
@@ -326,7 +375,7 @@ export default function AdminPostsPage() {
         <div className="text-center py-10">
           <p className="text-muted-foreground">로딩 중...</p>
         </div>
-      ) : filteredPosts.length === 0 ? (
+      ) : posts.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
             <p className="text-muted-foreground">게시글이 없습니다.</p>
@@ -334,7 +383,7 @@ export default function AdminPostsPage() {
         </Card>
       ) : (
         <div className="space-y-3 md:space-y-4">
-          {filteredPosts.map((post) => {
+          {posts.map((post) => {
             const siteBadge = getSiteBadge(post.site_id)
             return (
               <Card key={post.id} className={!post.published ? 'opacity-60' : ''}>
@@ -431,6 +480,80 @@ export default function AdminPostsPage() {
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {/* 페이지네이션 */}
+      {!loading && posts.length > 0 && totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <Button
+            onClick={() => setCurrentPage(1)}
+            disabled={!hasPrevPage}
+            variant="outline"
+            size="sm"
+          >
+            처음
+          </Button>
+          <Button
+            onClick={() => setCurrentPage(prev => prev - 1)}
+            disabled={!hasPrevPage}
+            variant="outline"
+            size="sm"
+          >
+            이전
+          </Button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              // 현재 페이지 주변 페이지만 표시
+              let pageNum: number
+              if (totalPages <= 5) {
+                pageNum = i + 1
+              } else if (currentPage <= 3) {
+                pageNum = i + 1
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i
+              } else {
+                pageNum = currentPage - 2 + i
+              }
+
+              return (
+                <Button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  variant={currentPage === pageNum ? 'default' : 'outline'}
+                  size="sm"
+                  className="min-w-[2.5rem]"
+                >
+                  {pageNum}
+                </Button>
+              )
+            })}
+          </div>
+
+          <Button
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            disabled={!hasNextPage}
+            variant="outline"
+            size="sm"
+          >
+            다음
+          </Button>
+          <Button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={!hasNextPage}
+            variant="outline"
+            size="sm"
+          >
+            마지막
+          </Button>
+        </div>
+      )}
+
+      {/* 페이지 정보 */}
+      {!loading && posts.length > 0 && (
+        <div className="mt-4 text-center text-sm text-muted-foreground">
+          전체 {totalCount}개 중 {((currentPage - 1) * postsPerPage) + 1}-{Math.min(currentPage * postsPerPage, totalCount)}개 표시 (페이지 {currentPage}/{totalPages})
         </div>
       )}
 

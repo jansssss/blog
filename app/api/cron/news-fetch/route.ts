@@ -90,6 +90,69 @@ export async function GET(request: Request) {
       console.log(`[NEWS-FETCH] Processing category: ${category} (${categorySources.length} sources)`)
       let categoryItemCount = 0
 
+      // 1. 금융 카테고리인 경우 금융위원회에서 3~5개 먼저 수집
+      if (category === '금융') {
+        const fscSource = categorySources.find(s => s.name?.includes('금융위원회'))
+        if (fscSource) {
+          console.log('[NEWS-FETCH] Fetching from FSC (금융위원회)...')
+          try {
+            const feed = await parser.parseURL(fscSource.url)
+            const fscItemsToCollect = Math.min(5, feed.items?.length || 0)
+
+            for (let i = 0; i < fscItemsToCollect; i++) {
+              const item = feed.items[i]
+              if (!item.title || !item.link) continue
+
+              totalItems++
+              const hash = generateHash(item.title, item.link)
+              const pubDate = item.pubDate ? new Date(item.pubDate) : new Date()
+
+              const { data, error } = await supabaseAdmin
+                .from('news_items')
+                .upsert(
+                  {
+                    source_id: fscSource.id,
+                    title: item.title,
+                    link: item.link,
+                    pub_date: pubDate.toISOString(),
+                    category: fscSource.category,
+                    hash: hash,
+                    is_trending: true // 금융위원회 자료는 중요도 높음
+                  },
+                  {
+                    onConflict: 'hash',
+                    ignoreDuplicates: true
+                  }
+                )
+                .select()
+
+              if (error) {
+                if (error.code === '23505') {
+                  duplicateItems++
+                } else {
+                  console.error('[NEWS-FETCH] FSC Insert error:', error)
+                }
+              } else if (data && data.length > 0) {
+                newItems++
+                categoryItemCount++
+                console.log(`[NEWS-FETCH] FSC: ${item.title}`)
+              } else {
+                duplicateItems++
+              }
+            }
+
+            await supabaseAdmin
+              .from('news_sources')
+              .update({ last_fetched_at: new Date().toISOString() })
+              .eq('id', fscSource.id)
+
+            console.log(`[NEWS-FETCH] FSC: collected ${categoryItemCount} items`)
+          } catch (fscError) {
+            console.error('[NEWS-FETCH] FSC fetch error:', fscError)
+          }
+        }
+      }
+
       // 2. 네이버 인기 뉴스 먼저 수집 (최대 10개)
       console.log(`[NEWS-FETCH] Fetching Naver popular news for ${category}...`)
       const naverNews = await fetchNaverPopularNews(category)

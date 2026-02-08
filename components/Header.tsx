@@ -108,45 +108,49 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        {/* 기존 텍스트 로고 (주석처리 - 색감이 좋아서 나중에 다시 사용 가능) */}
-        {/* <Link href="/" className="group flex items-center" onClick={closeMobileMenu}>
-          <span
-            className="text-xl sm:text-2xl font-bold tracking-tight transition-all duration-300 group-hover:scale-105"
-            style={{
-              background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'brightness(1.1) saturate(0.9)'
-            }}
-          >
-            {headerTitle}
-          </span>
-        </Link> */}
-
-        {/* 새로운 픽셀 O 로고 */}
-        <Link href="/" className="ohyess-logo group" onClick={closeMobileMenu}>
-          <svg className="pixel-o w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect className="px" x="10" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.45"/>
-            <rect className="px" x="16" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.7"/>
-            <rect className="px" x="22" y="2"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.5"/>
-            <rect className="px" x="4"  y="8"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.8"/>
-            <rect className="px" x="28" y="8"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.85"/>
-            <rect className="px" x="4"  y="14" width="5" height="5" rx="1" fill="#8b7ad8" opacity="1"/>
-            <rect className="px" x="28" y="14" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.9"/>
-            <rect className="px" x="4"  y="20" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.75"/>
-            <rect className="px" x="28" y="20" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.65"/>
-            <rect className="px" x="10" y="26" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.5"/>
-            <rect className="px" x="16" y="26" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.6"/>
-            <rect className="px" x="22" y="26" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.4"/>
-            <rect className="gx" x="34" y="5"  width="3" height="3" rx="0.5" fill="#6cb4ee" opacity="0"/>
-            <rect className="gx" x="-1" y="22" width="3" height="3" rx="0.5" fill="#8b7ad8" opacity="0"/>
-            <rect className="gx" x="30" y="29" width="2.5" height="2.5" rx="0.5" fill="#6cb4ee" opacity="0"/>
-          </svg>
-          <span className="ohyess-wm text-lg sm:text-xl transition-all duration-300 group-hover:tracking-wide">
-            {headerTitle}
-          </span>
-        </Link>
+        {/* 오예스: 픽셀 O 로고, 슈어라인: 텍스트 로고 */}
+        {!isSureline ? (
+          // 오예스 - 픽셀 O 로고
+          <Link href="/" className="ohyess-logo group" onClick={closeMobileMenu}>
+            <svg className="pixel-o w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect className="px" x="10" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.45"/>
+              <rect className="px" x="16" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.7"/>
+              <rect className="px" x="22" y="2"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.5"/>
+              <rect className="px" x="4"  y="8"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.8"/>
+              <rect className="px" x="28" y="8"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.85"/>
+              <rect className="px" x="4"  y="14" width="5" height="5" rx="1" fill="#8b7ad8" opacity="1"/>
+              <rect className="px" x="28" y="14" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.9"/>
+              <rect className="px" x="4"  y="20" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.75"/>
+              <rect className="px" x="28" y="20" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.65"/>
+              <rect className="px" x="10" y="26" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.5"/>
+              <rect className="px" x="16" y="26" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.6"/>
+              <rect className="px" x="22" y="26" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.4"/>
+              <rect className="gx" x="34" y="5"  width="3" height="3" rx="0.5" fill="#6cb4ee" opacity="0"/>
+              <rect className="gx" x="-1" y="22" width="3" height="3" rx="0.5" fill="#8b7ad8" opacity="0"/>
+              <rect className="gx" x="30" y="29" width="2.5" height="2.5" rx="0.5" fill="#6cb4ee" opacity="0"/>
+            </svg>
+            <span className="ohyess-wm text-lg sm:text-xl transition-all duration-300 group-hover:tracking-wide">
+              {headerTitle}
+            </span>
+          </Link>
+        ) : (
+          // 슈어라인 - Sacramento 스크립트 + 픽셀 트레일 로고
+          <Link href="/" className="sureline-logo group" onClick={closeMobileMenu}>
+            <span className="sureline-wm transition-all duration-300 group-hover:tracking-widest">
+              {headerTitle}
+            </span>
+            <div className="sureline-trail">
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+              <div className="st-dot"></div>
+            </div>
+          </Link>
+        )}
 
         {/* Desktop Navigation */}
         <nav className="ml-auto hidden md:flex items-center space-x-1">

@@ -1,4 +1,4 @@
-import { Calculator, ArrowLeftRight, Target, RotateCcw, TrendingUp, FileText, Info, CheckCircle2 } from 'lucide-react'
+import { Calculator, ArrowLeftRight, Target, RotateCcw, TrendingUp, FileText, Info, CheckCircle2, DollarSign, Activity, Scale, Shield } from 'lucide-react'
 import Link from 'next/link'
 import ToolCard from '@/components/ToolCard'
 
@@ -26,6 +26,30 @@ const CALCULATORS = [
     title: '중도상환수수료 계산',
     description: '조기 상환 시 발생하는 수수료를 미리 계산하세요',
     href: '/calculator/prepayment-fee'
+  },
+  {
+    icon: <DollarSign className="w-6 h-6" />,
+    title: '월 상환 부담 체감 계산기',
+    description: '월 소득 대비 대출 상환액 비율을 확인하세요',
+    href: '/calculator/repayment-burden'
+  },
+  {
+    icon: <Activity className="w-6 h-6" />,
+    title: '금리 변동 영향 계산기',
+    description: '금리 변화에 따른 상환액 변화를 미리 확인하세요',
+    href: '/calculator/rate-change-impact'
+  },
+  {
+    icon: <Scale className="w-6 h-6" />,
+    title: '중도상환 vs 유지 비교',
+    description: '중도상환 시 이자 절감액과 수수료를 비교하세요',
+    href: '/calculator/prepayment-comparison'
+  },
+  {
+    icon: <Shield className="w-6 h-6" />,
+    title: '비상자금 필요 금액',
+    description: '3개월 / 6개월 권장 비상자금을 확인하세요',
+    href: '/calculator/emergency-fund'
   }
 ]
 

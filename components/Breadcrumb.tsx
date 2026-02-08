@@ -20,6 +20,10 @@ const PATH_LABELS: Record<string, string> = {
   'repayment-compare': '원리금 vs 원금균등 비교',
   'loan-limit': '대출 한도 시뮬레이터',
   'prepayment-fee': '중도상환수수료 계산',
+  'repayment-burden': '월 상환 부담 계산기',
+  'rate-change-impact': '금리 변동 영향 계산기',
+  'prepayment-comparison': '중도상환 vs 유지 비교',
+  'emergency-fund': '비상자금 계산기',
 
   // 비교 하위
   'bank-rates': '은행별 금리 비교',

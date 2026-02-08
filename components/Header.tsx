@@ -30,9 +30,10 @@ const OHYESS_NAV: NavItem[] = [
     href: '/calculator',
     subItems: [
       { label: '대출 이자 계산기', href: '/calculator/loan-interest', description: '예상 이자 계산' },
-      { label: '원리금 vs 원금균등', href: '/calculator/repayment-compare', description: '상환 방식 비교' },
-      { label: '대출 한도 시뮬레이터', href: '/calculator/loan-limit', description: '예상 한도 확인' },
-      { label: '중도상환수수료', href: '/calculator/prepayment-fee', description: '조기 상환 수수료' },
+      { label: '월 상환 부담 계산기', href: '/calculator/repayment-burden', description: '소득 대비 상환 부담' },
+      { label: '금리 변동 영향', href: '/calculator/rate-change-impact', description: '금리 변화 시뮬레이션' },
+      { label: '중도상환 vs 유지 비교', href: '/calculator/prepayment-comparison', description: '절감액과 수수료 비교' },
+      { label: '비상자금 계산기', href: '/calculator/emergency-fund', description: '권장 비상자금 확인' },
     ]
   },
   {
@@ -191,6 +192,19 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
                         )}
                       </Link>
                     ))}
+                    {item.label === '계산기' && (
+                      <>
+                        <div className="border-t my-1"></div>
+                        <Link
+                          href="/calculator"
+                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="block text-sm font-medium text-primary">
+                            전체 계산기 보기 →
+                          </span>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               )}

@@ -10,6 +10,7 @@ import QuickToolsSection from '@/components/QuickToolsSection'
 import InsuranceToolsSection from '@/components/InsuranceToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
 import { Calculator, ArrowLeftRight, Car, Shield, ClipboardCheck, BookOpen, ArrowRight } from 'lucide-react'
+import TrendingBanner from '@/components/TrendingBanner'
 
 const HOME_GUIDE_ITEMS = [
   { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
@@ -18,6 +19,12 @@ const HOME_GUIDE_ITEMS = [
   { title: '중도상환수수료 정리', href: '/guide/early-repayment-fee', desc: '수수료 계산·면제 조건·절약 전략' },
   { title: '신용점수 완전 정리', href: '/guide/credit-score', desc: '점수 올리는 방법·금리에 미치는 영향' },
   { title: '대출 전 체크리스트', href: '/guide/loan-checklist', desc: '놓치면 후회하는 10가지 확인 항목' },
+  { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', desc: '한도·금리·절차 한 번에 이해하기' },
+  { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', desc: '종류·보증·사기 예방까지 완전 가이드' },
+  { title: '금리 인상기 대출 전략', href: '/guide/rate-strategy', desc: '고정·변동 선택부터 갈아타기 타이밍' },
+  { title: '대출 종류 완전 가이드', href: '/guide/loan-types-complete', desc: '신용·주담대·정책금융 목적별 비교' },
+  { title: '대출 보증보험 정리', href: '/guide/loan-guarantee', desc: 'HUG·HF·SGI 비교와 전세 사기 방어' },
+  { title: '대출 거절 극복 전략', href: '/guide/loan-rejection', desc: '거절 이유 파악부터 재신청 성공까지' },
 ]
 
 // ISR 설정 (60초마다 재검증)
@@ -110,6 +117,9 @@ export default async function HomePage({
           <SearchBar />
         </section>
 
+        {/* 지금 핫한 이슈 배너 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && <TrendingBanner />}
+
         {/* 즉시 실행 CTA 버튼 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (
           <section className="mb-8">
@@ -156,7 +166,7 @@ export default async function HomePage({
                 </Link>
               </div>
               {/* 가이드 카드 그리드 */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                 {HOME_GUIDE_ITEMS.map((g) => (
                   <Link
                     key={g.href}

@@ -61,14 +61,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 계산기 페이지 URL (ohyess.kr 전용)
   const calculatorPages: MetadataRoute.Sitemap = []
 
-  // ohyess.kr인 경우에만 계산기 페이지 추가
+  // 가이드 페이지 URL (ohyess.kr 전용)
+  const guidePages: MetadataRoute.Sitemap = []
+
+  // ohyess.kr인 경우에만 계산기·가이드 페이지 추가
   if (host.includes('ohyess')) {
     calculatorPages.push(
       {
         url: `${baseUrl}/calculator/loan-interest`,
         lastModified: new Date(),
         changeFrequency: 'monthly',
-        priority: 0.7,
+        priority: 0.8,
       },
       {
         url: `${baseUrl}/calculator/loan-limit`,
@@ -87,10 +90,79 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: 'monthly',
         priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/calculator/repayment-burden`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/calculator/rate-change-impact`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/calculator/prepayment-comparison`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/calculator/emergency-fund`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      }
+    )
+
+    guidePages.push(
+      {
+        url: `${baseUrl}/guide`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/guide/loan-interest`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/dsr-dti-ltv`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/repayment-types`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/early-repayment-fee`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/credit-score`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/loan-checklist`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
       }
     )
   }
 
   // 모든 URL 합치기
-  return [...staticPages, ...calculatorPages, ...blogUrls]
+  return [...staticPages, ...guidePages, ...calculatorPages, ...blogUrls]
 }

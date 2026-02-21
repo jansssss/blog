@@ -37,6 +37,13 @@ const PATH_LABELS: Record<string, string> = {
   'sme': '중소기업 정책자금',
   'housing': '주거 지원',
 
+  // 가이드 하위 (loan-interest는 계산기 섹션과 공유)
+  'dsr-dti-ltv': 'DSR·DTI·LTV 완전 정리',
+  'repayment-types': '상환방식 완전 비교',
+  'early-repayment-fee': '중도상환수수료 완전 정리',
+  'credit-score': '신용점수 완전 정리',
+  'loan-checklist': '대출 전 필수 체크리스트',
+
   // 보험 도구 하위
   'auto-discount-check': '자동차보험 할인 체크',
   'health-overlap-check': '실비보험 중복 체크',

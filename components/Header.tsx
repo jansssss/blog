@@ -56,7 +56,18 @@ const OHYESS_NAV: NavItem[] = [
       { label: '주거 지원', href: '/policy/housing', description: '전세·월세 지원' },
     ]
   },
-  { label: '가이드', href: '/guide' },
+  {
+    label: '가이드',
+    href: '/guide',
+    subItems: [
+      { label: '대출이자 계산법', href: '/guide/loan-interest', description: '이자 계산 공식 · 상환방식별 차이' },
+      { label: 'DSR·DTI·LTV 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 지표' },
+      { label: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등 vs 원금균등 vs 만기일시' },
+      { label: '중도상환수수료', href: '/guide/early-repayment-fee', description: '수수료 계산 · 면제 조건' },
+      { label: '신용점수 관리', href: '/guide/credit-score', description: '점수 올리는 방법 · 금리 영향' },
+      { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
+    ],
+  },
   { label: '소개', href: '/about' },
 ]
 
@@ -71,7 +82,18 @@ const SURELINE_NAV: NavItem[] = [
       { label: '보험 리모델링 체크', href: '/tools/insurance-remodel', description: '보험 점검' },
     ]
   },
-  { label: '가이드', href: '/guide' },
+  {
+    label: '가이드',
+    href: '/guide',
+    subItems: [
+      { label: '대출이자 계산법', href: '/guide/loan-interest', description: '이자 계산 공식 · 상환방식별 차이' },
+      { label: 'DSR·DTI·LTV 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 지표' },
+      { label: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등 vs 원금균등' },
+      { label: '중도상환수수료', href: '/guide/early-repayment-fee', description: '수수료 계산 · 면제 조건' },
+      { label: '신용점수 관리', href: '/guide/credit-score', description: '점수 올리는 방법 · 금리 영향' },
+      { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
+    ],
+  },
   { label: '소개', href: '/about' },
 ]
 
@@ -192,15 +214,15 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
                         )}
                       </Link>
                     ))}
-                    {item.label === '계산기' && (
+                    {(item.label === '계산기' || item.label === '가이드') && (
                       <>
                         <div className="border-t my-1"></div>
                         <Link
-                          href="/calculator"
+                          href={item.href}
                           className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
                         >
                           <span className="block text-sm font-medium text-primary">
-                            전체 계산기 보기 →
+                            전체 {item.label} 보기 →
                           </span>
                         </Link>
                       </>

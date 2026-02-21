@@ -9,7 +9,16 @@ import InsuranceWidget from '@/components/InsuranceWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import InsuranceToolsSection from '@/components/InsuranceToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { Calculator, ArrowLeftRight, Car, Shield, ClipboardCheck } from 'lucide-react'
+import { Calculator, ArrowLeftRight, Car, Shield, ClipboardCheck, BookOpen, ArrowRight } from 'lucide-react'
+
+const HOME_GUIDE_ITEMS = [
+  { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
+  { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', desc: '대출 한도 결정 3가지 핵심 지표' },
+  { title: '상환방식 완전 비교', href: '/guide/repayment-types', desc: '원리금균등 vs 원금균등 총이자 차이' },
+  { title: '중도상환수수료 정리', href: '/guide/early-repayment-fee', desc: '수수료 계산·면제 조건·절약 전략' },
+  { title: '신용점수 완전 정리', href: '/guide/credit-score', desc: '점수 올리는 방법·금리에 미치는 영향' },
+  { title: '대출 전 체크리스트', href: '/guide/loan-checklist', desc: '놓치면 후회하는 10가지 확인 항목' },
+]
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -123,6 +132,35 @@ export default async function HomePage({
 
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
+
+        {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-blue-600" />
+                <h2 className="text-base font-bold text-gray-900">핵심 금융 가이드</h2>
+              </div>
+              <Link href="/guide" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                전체 보기 <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {HOME_GUIDE_ITEMS.map((g) => (
+                <Link
+                  key={g.href}
+                  href={g.href}
+                  className="group block p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all"
+                >
+                  <p className="text-xs font-semibold text-gray-900 group-hover:text-blue-700 transition-colors leading-snug mb-1">
+                    {g.title}
+                  </p>
+                  <p className="text-[11px] text-gray-400 leading-tight">{g.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 즉시 실행 CTA 버튼 (sureline.kr 전용) */}
         {site?.domain === 'sureline.kr' && (

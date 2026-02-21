@@ -270,7 +270,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
       {/* 블로그 글 목록 */}
       <section className="mb-12">
         {posts && posts.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="blog-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}

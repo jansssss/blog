@@ -136,28 +136,40 @@ export default async function HomePage({
         {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (
           <section className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-blue-600" />
-                <h2 className="text-base font-bold text-gray-900">핵심 금융 가이드</h2>
-              </div>
-              <Link href="/guide" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                전체 보기 <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {HOME_GUIDE_ITEMS.map((g) => (
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg">
+              {/* 섹션 헤더 */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white leading-tight">핵심 금융 가이드</h2>
+                    <p className="text-[11px] text-blue-200 leading-tight">전문가 수준의 대출·신용 완전 정리</p>
+                  </div>
+                </div>
                 <Link
-                  key={g.href}
-                  href={g.href}
-                  className="group block p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all"
+                  href="/guide"
+                  className="text-[11px] text-blue-200 hover:text-white transition-colors flex items-center gap-1 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg"
                 >
-                  <p className="text-xs font-semibold text-gray-900 group-hover:text-blue-700 transition-colors leading-snug mb-1">
-                    {g.title}
-                  </p>
-                  <p className="text-[11px] text-gray-400 leading-tight">{g.desc}</p>
+                  전체 보기 <ArrowRight className="w-3 h-3" />
                 </Link>
-              ))}
+              </div>
+              {/* 가이드 카드 그리드 */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {HOME_GUIDE_ITEMS.map((g) => (
+                  <Link
+                    key={g.href}
+                    href={g.href}
+                    className="group block p-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all"
+                  >
+                    <p className="text-xs font-semibold text-white leading-snug mb-1">
+                      {g.title}
+                    </p>
+                    <p className="text-[11px] text-blue-200 leading-tight">{g.desc}</p>
+                  </Link>
+                ))}
+              </div>
             </div>
           </section>
         )}

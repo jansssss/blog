@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       style: 'natural'
     })
 
-    const dalleUrl = imageResponse.data[0]?.url
+    const dalleUrl = imageResponse.data?.[0]?.url
     if (!dalleUrl) {
       return NextResponse.json(
         { success: false, error: '이미지 URL을 가져오지 못했습니다.' },

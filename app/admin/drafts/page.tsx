@@ -181,7 +181,7 @@ export default function AdminDraftsPage() {
   const router = useRouter()
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [resumingId, setResumingId] = useState<string | null>(null)
-  const [resumingStep, setResumingStep] = useState<'idle' | 'editor' | 'columnist' | 'saving' | 'done'>('idle')
+  const [resumingStep, setResumingStep] = useState<'idle' | 'editor' | 'columnist' | 'image' | 'saving' | 'done'>('idle')
   const [loading, setLoading] = useState(true)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
 
@@ -437,6 +437,43 @@ export default function AdminDraftsPage() {
 
       console.log('[RESUME] 칼럼니스트 완료!')
 
+      // 이미지 생성 단계
+      setResumingStep('image')
+      console.log('[RESUME] 이미지 생성 단계 시작...')
+
+      let generatedImageUrl: string | null = null
+      let finalMarkdown = columnistData.markdown
+      try {
+        const imageResponse = await fetch('/api/image/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: columnistData.title,
+            tags: columnistData.tags || [],
+            slug: draft.slug
+          })
+        })
+        const imageData = await imageResponse.json()
+        if (imageResponse.ok && imageData.success) {
+          generatedImageUrl = imageData.imageUrl
+          console.log('[RESUME] 이미지 생성 완료:', generatedImageUrl)
+
+          // 마크다운 본문에 이미지 삽입 (H1 제목 바로 아래)
+          const lines = finalMarkdown.split('\n')
+          const h1Index = lines.findIndex((line: string) => line.startsWith('# '))
+          if (h1Index !== -1) {
+            lines.splice(h1Index + 1, 0, '', `![${columnistData.title}](${generatedImageUrl})`, '')
+          } else {
+            lines.unshift(`![${columnistData.title}](${generatedImageUrl})`, '')
+          }
+          finalMarkdown = lines.join('\n')
+        } else {
+          console.warn('[RESUME] 이미지 생성 실패 (글 저장은 계속):', imageData.error)
+        }
+      } catch (imageError) {
+        console.warn('[RESUME] 이미지 생성 오류 (글 저장은 계속):', imageError)
+      }
+
       // 최종 저장
       setResumingStep('saving')
       console.log('[RESUME] 최종 저장...')
@@ -446,11 +483,12 @@ export default function AdminDraftsPage() {
         .update({
           title: columnistData.title,
           summary: columnistData.metaDescription,
-          content: columnistData.markdown,
+          content: finalMarkdown,
           tags: columnistData.tags,
+          thumbnail_url: generatedImageUrl,
           stage: 'SAVED',
           editor_content: cleanDraft,
-          columnist_content: columnistData.markdown,
+          columnist_content: finalMarkdown,
           error_stage: null,
           error_code: null,
           error_message: null,
@@ -513,10 +551,12 @@ export default function AdminDraftsPage() {
         return '📝 편집자가 팩트체크 및 교정 중...'
       case 'columnist':
         return '✍️ 칼럼니스트가 최종 글 작성 중...'
+      case 'image':
+        return '🎨 DALL-E 3가 대표 이미지 생성 중...'
       case 'saving':
         return '💾 최종 저장 중...'
       case 'done':
-        return '✅ 글작성 완료!'
+        return '✅ 글작성 및 이미지 생성 완료!'
       default:
         return '준비 중...'
     }
@@ -590,13 +630,13 @@ export default function AdminDraftsPage() {
                 </p>
               </div>
 
-              {/* 진행 단계 표시 - 모바일에서 그리드, 데스크톱에서 가로 */}
-              <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:gap-3 mt-2 w-full md:w-auto px-4 md:px-0">
+              {/* 진행 단계 표시 - 모바일에서 2x2 그리드, 데스크톱에서 가로 */}
+              <div className="grid grid-cols-2 gap-2 md:flex md:items-center md:gap-3 mt-2 w-full md:w-auto px-4 md:px-0">
                 {/* Step 1: Editor */}
                 <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'editor'
                     ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
-                    : resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
+                    : resumingStep === 'columnist' || resumingStep === 'image' || resumingStep === 'saving' || resumingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
                 }`}>
@@ -608,7 +648,7 @@ export default function AdminDraftsPage() {
 
                 {/* Arrow 1 - 데스크톱에서만 표시 */}
                 <div className={`hidden md:block transition-all duration-300 ${
-                  resumingStep === 'columnist' || resumingStep === 'saving' || resumingStep === 'done'
+                  resumingStep === 'columnist' || resumingStep === 'image' || resumingStep === 'saving' || resumingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -620,7 +660,7 @@ export default function AdminDraftsPage() {
                 <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'columnist'
                     ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
-                    : resumingStep === 'saving' || resumingStep === 'done'
+                    : resumingStep === 'image' || resumingStep === 'saving' || resumingStep === 'done'
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-500'
                 }`}>
@@ -632,6 +672,30 @@ export default function AdminDraftsPage() {
 
                 {/* Arrow 2 - 데스크톱에서만 표시 */}
                 <div className={`hidden md:block transition-all duration-300 ${
+                  resumingStep === 'image' || resumingStep === 'saving' || resumingStep === 'done'
+                    ? 'text-green-500' : 'text-gray-300'
+                }`}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Step 3: Image */}
+                <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
+                  resumingStep === 'image'
+                    ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
+                    : resumingStep === 'saving' || resumingStep === 'done'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {resumingStep === 'image' && (
+                    <span className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-50" />
+                  )}
+                  <span className="relative">3. 이미지</span>
+                </div>
+
+                {/* Arrow 3 - 데스크톱에서만 표시 */}
+                <div className={`hidden md:block transition-all duration-300 ${
                   resumingStep === 'saving' || resumingStep === 'done'
                     ? 'text-green-500' : 'text-gray-300'
                 }`}>
@@ -640,7 +704,7 @@ export default function AdminDraftsPage() {
                   </svg>
                 </div>
 
-                {/* Step 3: Save */}
+                {/* Step 4: Save */}
                 <div className={`relative flex items-center justify-center px-3 py-2 md:px-4 rounded-full text-xs md:text-sm font-medium transition-all duration-500 ${
                   resumingStep === 'saving'
                     ? 'bg-orange-600 text-white md:scale-110 shadow-lg shadow-orange-300'
@@ -654,7 +718,7 @@ export default function AdminDraftsPage() {
                   {resumingStep === 'done' && (
                     <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-50" />
                   )}
-                  <span className="relative">3. 저장</span>
+                  <span className="relative">4. 저장</span>
                 </div>
               </div>
 
@@ -663,8 +727,9 @@ export default function AdminDraftsPage() {
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all duration-500 ease-out"
                   style={{
-                    width: resumingStep === 'editor' ? '33%'
-                         : resumingStep === 'columnist' ? '66%'
+                    width: resumingStep === 'editor' ? '25%'
+                         : resumingStep === 'columnist' ? '50%'
+                         : resumingStep === 'image' ? '75%'
                          : resumingStep === 'saving' ? '90%'
                          : resumingStep === 'done' ? '100%' : '10%'
                   }}

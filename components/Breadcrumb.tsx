@@ -43,6 +43,18 @@ const PATH_LABELS: Record<string, string> = {
   'early-repayment-fee': '중도상환수수료 완전 정리',
   'credit-score': '신용점수 완전 정리',
   'loan-checklist': '대출 전 필수 체크리스트',
+  'jeonse-loan': '전세대출 완전 정리',
+  'mortgage-loan': '주택담보대출 완전 정리',
+  'loan-rejection': '대출 거절 극복 전략',
+  'loan-guarantee': '대출 보증보험 완전 정리',
+  'loan-types-complete': '대출 종류 완전 가이드',
+  'rate-strategy': '금리 인상기 대출 전략',
+
+  // 트렌드 하위
+  'trend': '핫이슈',
+  'capital-gains-tax': '양도세 완전 정리',
+  'multi-home-loan': '다주택자 대출 규제',
+  'capital-market-shift': '자본시장 정상화 분석',
 
   // 보험 도구 하위
   'auto-discount-check': '자동차보험 할인 체크',

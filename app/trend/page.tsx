@@ -38,6 +38,8 @@ const TREND_ITEMS = [
 ]
 
 export default function TrendHubPage() {
+  const sortedTrendItems = [...TREND_ITEMS].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+
   return (
     <div className="min-h-screen bg-white">
       <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 py-12 px-4">
@@ -58,7 +60,7 @@ export default function TrendHubPage() {
 
       <section className="container max-w-4xl mx-auto px-4 py-10">
         <div className="grid gap-4 sm:grid-cols-2">
-          {TREND_ITEMS.map((item) => (
+          {sortedTrendItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}

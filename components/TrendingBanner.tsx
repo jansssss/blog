@@ -3,6 +3,15 @@ import { TrendingUp, ArrowRight, Flame } from 'lucide-react'
 
 const TRENDING_ITEMS = [
   {
+    href: '/trend/capital-market-shift',
+    badge: '핵심분석',
+    badgeColor: 'bg-slate-700',
+    title: '자본시장 정상화, 부동산 공화국 해체: 돈의 흐름은 어디로 가나',
+    desc: '대출 규제와 양도세 이슈를 연결해 2026년 자산배분의 변화 방향을 분석',
+    tag: '자산배분 전략',
+    gradient: 'from-slate-800 to-blue-700',
+  },
+  {
     href: '/trend/capital-gains-tax',
     badge: '양도세',
     badgeColor: 'bg-red-500',
@@ -33,7 +42,7 @@ export default function TrendingBanner() {
       </div>
 
       {/* 배너 그리드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {TRENDING_ITEMS.map((item) => (
           <Link
             key={item.href}

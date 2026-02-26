@@ -33,6 +33,7 @@ export default function CapitalGainsTaxPage() {
       publishedAt="2026년 2월"
       updatedAt="2026년 2월 21일"
       relatedTrends={[
+        { title: '자본시장 정상화 분석 2026', href: '/trend/capital-market-shift', desc: '부동산-금융 자금 이동과 가구별 전략' },
         { title: '다주택자 대출 규제 현황 2026', href: '/trend/multi-home-loan', desc: '스트레스 DSR·2주택 대출 제한 완전 분석' },
         { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', desc: '대출 한도 3가지 핵심 지표' },
         { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', desc: '주담대 한도·금리·절차 가이드' },

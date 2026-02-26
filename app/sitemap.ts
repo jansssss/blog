@@ -3,13 +3,11 @@ import { supabase } from '@/lib/supabase'
 import { getCurrentSiteId, getHostFromRequest } from '@/lib/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 현재 도메인 및 사이트 ID 가져오기
   const host = await getHostFromRequest()
   const siteId = await getCurrentSiteId()
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   const baseUrl = `${protocol}://${host}`
 
-  // 블로그 글 목록 가져오기 (현재 사이트만)
   let postsQuery = supabase
     .from('posts')
     .select('id, updated_at, published_at')
@@ -22,7 +20,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: posts } = await postsQuery
 
-  // 블로그 글 URL 생성
   const blogUrls: MetadataRoute.Sitemap = (posts || []).map((post) => ({
     url: `${baseUrl}/blog/${post.id}`,
     lastModified: new Date(post.updated_at || post.published_at),
@@ -30,7 +27,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  // 정적 페이지 URL (모든 사이트 공통)
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -58,13 +54,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // 계산기 페이지 URL (ohyess.kr 전용)
   const calculatorPages: MetadataRoute.Sitemap = []
-
-  // 가이드 페이지 URL (ohyess.kr 전용)
   const guidePages: MetadataRoute.Sitemap = []
+  const trendPages: MetadataRoute.Sitemap = []
 
-  // ohyess.kr인 경우에만 계산기·가이드 페이지 추가
   if (host.includes('ohyess')) {
     calculatorPages.push(
       {
@@ -161,8 +154,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       }
     )
+
+    trendPages.push(
+      {
+        url: `${baseUrl}/trend`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/trend/capital-market-shift`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/trend/multi-home-loan`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/trend/capital-gains-tax`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      }
+    )
   }
 
-  // 모든 URL 합치기
-  return [...staticPages, ...guidePages, ...calculatorPages, ...blogUrls]
+  return [...staticPages, ...guidePages, ...calculatorPages, ...trendPages, ...blogUrls]
 }

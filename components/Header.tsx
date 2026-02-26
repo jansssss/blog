@@ -68,6 +68,15 @@ const OHYESS_NAV: NavItem[] = [
       { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
     ],
   },
+  {
+    label: '핫이슈',
+    href: '/trend',
+    subItems: [
+      { label: '자본시장 정상화 2026', href: '/trend/capital-market-shift', description: '부동산-금융 자금 이동 분석' },
+      { label: '다주택자 대출 규제 2026', href: '/trend/multi-home-loan', description: '스트레스 DSR, 주택 수별 규제 분석' },
+      { label: '1가구 2주택 양도세 2026', href: '/trend/capital-gains-tax', description: '비과세·중과세·절세 포인트 정리' },
+    ],
+  },
   { label: '소개', href: '/about' },
 ]
 
@@ -92,6 +101,15 @@ const SURELINE_NAV: NavItem[] = [
       { label: '중도상환수수료', href: '/guide/early-repayment-fee', description: '수수료 계산 · 면제 조건' },
       { label: '신용점수 관리', href: '/guide/credit-score', description: '점수 올리는 방법 · 금리 영향' },
       { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
+    ],
+  },
+  {
+    label: '핫이슈',
+    href: '/trend',
+    subItems: [
+      { label: '자본시장 정상화 2026', href: '/trend/capital-market-shift', description: '부동산-금융 자금 이동 분석' },
+      { label: '다주택자 대출 규제 2026', href: '/trend/multi-home-loan', description: '스트레스 DSR, 주택 수별 규제 분석' },
+      { label: '1가구 2주택 양도세 2026', href: '/trend/capital-gains-tax', description: '비과세·중과세·절세 포인트 정리' },
     ],
   },
   { label: '소개', href: '/about' },

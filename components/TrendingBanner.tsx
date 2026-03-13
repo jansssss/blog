@@ -3,6 +3,16 @@ import { TrendingUp, ArrowRight, Flame } from 'lucide-react'
 
 const TRENDING_ITEMS = [
   {
+    href: '/trend/us-iran-oil',
+    badge: '지정학',
+    badgeColor: 'bg-orange-600',
+    title: '미국·이란 전쟁과 유가 급등: 한국 경제는 어떻게 흔들리나',
+    desc: '호르무즈 봉쇄 시나리오·역사적 오일쇼크 사례·산업별 영향 완전 분석',
+    tag: '유가·지정학 리스크',
+    gradient: 'from-orange-700 to-red-900',
+    updatedAt: '2026.03.13',
+  },
+  {
     href: '/trend/capital-market-shift',
     badge: '핵심분석',
     badgeColor: 'bg-slate-700',

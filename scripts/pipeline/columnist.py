@@ -169,85 +169,46 @@ class ColumnistWriter:
 
 
 # ───────────────────────────────────────────
-# HTML 렌더러 (Blogger 스타일)
+# HTML 렌더러 (Tailwind prose 호환 시멘틱 HTML)
 # ───────────────────────────────────────────
-FONT = "'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif"
-
 
 def render_html(article: Article) -> str:
-    """Article → Blogger 스타일 HTML"""
+    """Article → 인라인 스타일 없는 시멘틱 HTML (Tailwind prose 클래스로 렌더링)"""
 
-    # 핵심 요약 박스
-    summary_items = "".join(
-        f'<li style="font-family:{FONT};font-size:15px;color:#2a3a5c;'
-        f'line-height:1.75;margin-bottom:8px;word-break:keep-all;">{_esc(p)}</li>'
-        for p in article.summary_points
-    )
+    # 핵심 요약
+    summary_items = "".join(f"<li>{_esc(p)}</li>" for p in article.summary_points)
     summary_html = (
-        f'<div style="background:#f0f4ff;border-radius:12px;padding:20px 24px;margin:0 0 32px;">'
-        f'<div style="font-family:{FONT};font-size:13px;font-weight:700;color:#3268ff;'
-        f'margin-bottom:10px;letter-spacing:0.04em;">✅ 핵심 요약</div>'
-        f'<ul style="margin:0;padding-left:20px;">{summary_items}</ul>'
-        f'</div>'
+        f"<h3>✅ 핵심 요약</h3>"
+        f"<ul>{summary_items}</ul>"
     ) if summary_items else ""
 
     # 본문 섹션
     sections_html = ""
     for section in article.sections:
-        paragraphs_html = "".join(
-            f'<p style="font-family:{FONT};font-size:16px;color:#3a4a62;'
-            f'margin:0 0 14px;line-height:1.9;word-break:keep-all;">{_esc(p)}</p>'
-            for p in section.paragraphs
-        )
-        insight_html = ""
-        if section.expert_insight:
-            insight_html = (
-                f'<div style="background:#f0f4ff;border-left:4px solid #3268ff;'
-                f'border-radius:0 8px 8px 0;padding:14px 18px;margin:4px 0 20px;">'
-                f'<div style="font-family:{FONT};font-size:12px;font-weight:700;color:#3268ff;'
-                f'margin-bottom:6px;letter-spacing:0.04em;">💡 핵심 포인트</div>'
-                f'<p style="font-family:{FONT};font-size:15px;color:#2a3a5c;margin:0;'
-                f'line-height:1.75;word-break:keep-all;">{_esc(section.expert_insight)}</p>'
-                f'</div>'
-            )
+        paragraphs_html = "".join(f"<p>{_esc(p)}</p>" for p in section.paragraphs)
+        insight_html = (
+            f"<blockquote><p>💡 {_esc(section.expert_insight)}</p></blockquote>"
+        ) if section.expert_insight else ""
         sections_html += (
-            f'<section>'
-            f'<h2 style="font-family:{FONT};font-size:22px;font-weight:800;color:#1c2741;'
-            f'margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid #eef2f7;'
-            f'letter-spacing:-0.02em;line-height:1.4;word-break:keep-all;">'
-            f'{_esc(section.heading)}</h2>'
-            f'{paragraphs_html}{insight_html}'
-            f'</section>'
+            f"<h2>{_esc(section.heading)}</h2>"
+            f"{paragraphs_html}"
+            f"{insight_html}"
         )
 
     # 실천 팁
-    tips_html = "".join(
-        f'<span style="display:inline-block;padding:6px 14px;border-radius:999px;'
-        f'background:#fff;border:1.5px solid #ffcfc9;color:#cc3a28;font-size:13px;'
-        f'font-weight:600;line-height:1.5;margin:0 4px 6px 0;">{_esc(tip)}</span>'
-        for tip in article.action_tips
-    )
+    tips_html = "".join(f"<li>{_esc(tip)}</li>" for tip in article.action_tips)
     action_html = (
-        f'<div style="background:#fff8f6;border-radius:12px;padding:20px 24px;margin:36px 0 28px;">'
-        f'<div style="font-family:{FONT};font-size:13px;font-weight:700;color:#cc3a28;'
-        f'margin-bottom:12px;letter-spacing:0.04em;">🎯 지금 바로 확인할 것</div>'
-        f'<div>{tips_html}</div>'
-        f'</div>'
+        f"<h3>🎯 지금 바로 확인할 것</h3>"
+        f"<ul>{tips_html}</ul>"
     )
 
     # 출처
     if article.sources:
-        sources_items = "".join(
-            f'<li style="font-family:{FONT};font-size:13px;color:#6b7280;'
-            f'line-height:1.6;margin-bottom:4px;">{_esc(s)}</li>'
-            for s in article.sources
-        )
+        sources_items = "".join(f"<li>{_esc(s)}</li>" for s in article.sources)
         sources_html = (
-            f'<div style="border-top:1px solid #eef2f7;margin-top:40px;padding-top:20px;">'
-            f'<div style="font-family:{FONT};font-size:12px;font-weight:700;color:#9ca3af;'
-            f'margin-bottom:8px;letter-spacing:0.04em;">참고 자료</div>'
-            f'<ul style="margin:0;padding-left:18px;">{sources_items}</ul>'
-            f'</div>'
+            f"<hr>"
+            f"<h3>참고 자료</h3>"
+            f"<ul>{sources_items}</ul>"
         )
     else:
         sources_html = ""

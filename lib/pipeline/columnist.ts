@@ -1,36 +1,36 @@
 /**
  * Columnist AI 함수 (최종 글 작성)
- * gpt-4o로 사람다운 블로그 글 완성
+ * claude-sonnet-4-6으로 사람다운 블로그 글 완성
  */
 
-import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
 import { pickHumanPhrases } from '@/lib/ohyess/humanPhrases.v1'
 import { buildColumnistPrompt, validateColumnistOutput } from '@/lib/prompts/columnist'
 import type { PipelineResult, ColumnistResult } from './types'
 
-// OpenAI 클라이언트
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-  timeout: 55000,  // 55초 (Vercel 60초 제한에 여유 5초 확보)
-  maxRetries: 0    // 재시도 없음 - Vercel 60초 내 완료 보장
+// Anthropic 클라이언트
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
+  timeout: 55000,
+  maxRetries: 0
 })
 
 // 에러 코드
 const ERROR_CODES = {
-  QUOTA_EXCEEDED: 'OPENAI_QUOTA_EXCEEDED',
-  RATE_LIMIT: 'OPENAI_RATE_LIMIT',
-  API_ERROR: 'OPENAI_API_ERROR',
-  PARSE_ERROR: 'OPENAI_PARSE_ERROR',
+  QUOTA_EXCEEDED: 'ANTHROPIC_QUOTA_EXCEEDED',
+  RATE_LIMIT: 'ANTHROPIC_RATE_LIMIT',
+  API_ERROR: 'ANTHROPIC_API_ERROR',
+  PARSE_ERROR: 'ANTHROPIC_PARSE_ERROR',
   UNKNOWN: 'COLUMNIST_UNKNOWN_ERROR'
 }
 
 /**
- * OpenAI 에러 분석
+ * Anthropic 에러 분석
  */
-function analyzeOpenAIError(error: unknown): { code: string; message: string } {
-  if (error instanceof OpenAI.APIError) {
+function analyzeAnthropicError(error: unknown): { code: string; message: string } {
+  if (error instanceof Anthropic.APIError) {
     const status = error.status
-    const message = error.message || 'OpenAI API 오류'
+    const message = error.message || 'Anthropic API 오류'
 
     if (status === 429) {
       const isQuotaExceeded = message.toLowerCase().includes('quota') ||
@@ -44,7 +44,7 @@ function analyzeOpenAIError(error: unknown): { code: string; message: string } {
 
     return {
       code: ERROR_CODES.API_ERROR,
-      message: `OpenAI API 오류 (${status})`
+      message: `Anthropic API 오류 (${status})`
     }
   }
 
@@ -78,18 +78,17 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
     })
     console.log(`[COLUMNIST] 변주: 아웃라인=${variationMeta.outlineId}, 도입부=${variationMeta.introId}`)
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      system: systemPrompt,
       messages: [
-        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.5,
       max_tokens: 4000,
-      response_format: { type: 'json_object' }
     })
 
-    const content = response.choices[0]?.message?.content || '{}'
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '{}'
     console.log('[COLUMNIST] 응답 길이:', content.length, '자')
 
     let parsed
@@ -141,7 +140,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
 
   } catch (error) {
     console.error('[COLUMNIST] 오류:', error)
-    const errorInfo = analyzeOpenAIError(error)
+    const errorInfo = analyzeAnthropicError(error)
 
     return {
       success: false,

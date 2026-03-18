@@ -57,9 +57,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const calculatorPages: MetadataRoute.Sitemap = []
   const guidePages: MetadataRoute.Sitemap = []
   const trendPages: MetadataRoute.Sitemap = []
+  const comparePages: MetadataRoute.Sitemap = []
+  const policyPages: MetadataRoute.Sitemap = []
+  const toolPages: MetadataRoute.Sitemap = []
 
   if (host.includes('ohyess')) {
     calculatorPages.push(
+      {
+        url: `${baseUrl}/calculator`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      },
       {
         url: `${baseUrl}/calculator/loan-interest`,
         lastModified: new Date(),
@@ -152,6 +161,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: 'monthly',
         priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/jeonse-loan`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/loan-guarantee`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/loan-rejection`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/loan-types-complete`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/mortgage-loan`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/guide/rate-strategy`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
       }
     )
 
@@ -187,7 +232,94 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       }
     )
+
+    comparePages.push(
+      {
+        url: `${baseUrl}/compare`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/compare/bank-rates`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/compare/fixed-vs-variable`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/compare/loan-products`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/compare/policy-loans`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      }
+    )
+
+    policyPages.push(
+      {
+        url: `${baseUrl}/policy`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/policy/housing`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/policy/youth`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/policy/small-business`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/policy/sme`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      }
+    )
+
+    toolPages.push(
+      {
+        url: `${baseUrl}/tools/auto-discount-check`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/tools/health-overlap-check`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/tools/insurance-remodel`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      }
+    )
   }
 
-  return [...staticPages, ...guidePages, ...calculatorPages, ...trendPages, ...blogUrls]
+  return [...staticPages, ...guidePages, ...calculatorPages, ...trendPages, ...comparePages, ...policyPages, ...toolPages, ...blogUrls]
 }

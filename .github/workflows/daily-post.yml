@@ -23,8 +23,8 @@ on:
         type: boolean
 
   schedule:
-    # 매일 KST 07:00 = UTC 22:00 (전날)
-    - cron: "0 22 * * *"
+    # 매일 KST 05:00 트리거 후 최대 3시간 랜덤 딜레이 → 실제 실행 05:00~08:00
+    - cron: "0 20 * * *"
 
 jobs:
   publish:
@@ -33,6 +33,13 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      - name: Random delay (KST 05:00~08:00 사이 랜덤 실행)
+        if: github.event_name == 'schedule'
+        run: |
+          DELAY=$((RANDOM % 10800))
+          echo "대기 시간: ${DELAY}초 ($(( DELAY / 60 ))분)"
+          sleep $DELAY
+
       - name: Checkout
         uses: actions/checkout@v4
 

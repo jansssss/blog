@@ -34,6 +34,7 @@ class Article:
     action_tips: list[str]
     tags: list[str]
     sources: list[str] = field(default_factory=list)
+    faqs: list[dict] = field(default_factory=list)
 
     @property
     def slug(self) -> str:
@@ -100,7 +101,14 @@ class ColumnistWriter:
             '    ... (섹션 5개)\n'
             '  ],\n'
             '  "action_tips": ["구체적 행동 팁1", "팁2", "팁3", "팁4", "팁5", "팁6"],\n'
-            '  "sources": ["한국은행, 2024", "금융위원회, 2025", ...]\n'
+            '  "sources": ["한국은행, 2024", "금융위원회, 2025", ...],\n'
+            '  "faqs": [\n'
+            '    {"question": "독자가 실제로 검색할 법한 질문1?", "answer": "명확하고 구체적인 답변 (2~3문장, 수치 포함)"},\n'
+            '    {"question": "질문2?", "answer": "답변2"},\n'
+            '    {"question": "질문3?", "answer": "답변3"},\n'
+            '    {"question": "질문4?", "answer": "답변4"},\n'
+            '    {"question": "질문5?", "answer": "답변5"}\n'
+            '  ]\n'
             '}'
         )
 
@@ -165,6 +173,7 @@ class ColumnistWriter:
             action_tips=data.get("action_tips", []),
             tags=data.get("tags", []),
             sources=data.get("sources", []),
+            faqs=data.get("faqs", []),
         )
 
 
@@ -202,6 +211,38 @@ def render_html(article: Article) -> str:
         f"<ul>{tips_html}</ul>"
     )
 
+    # FAQ 섹션 (시멘틱 HTML + JSON-LD 구조화 데이터)
+    faq_html = ""
+    if article.faqs:
+        faq_items_html = "".join(
+            f"<dt><strong>{_esc(faq['question'])}</strong></dt>"
+            f"<dd>{_esc(faq['answer'])}</dd>"
+            for faq in article.faqs
+        )
+        faq_schema = json.dumps(
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": faq["question"],
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": faq["answer"],
+                        },
+                    }
+                    for faq in article.faqs
+                ],
+            },
+            ensure_ascii=False,
+        )
+        faq_html = (
+            f'<script type="application/ld+json">{faq_schema}</script>'
+            f"<h3>자주 묻는 질문 (FAQ)</h3>"
+            f"<dl>{faq_items_html}</dl>"
+        )
+
     # 출처
     if article.sources:
         sources_items = "".join(f"<li>{_esc(s)}</li>" for s in article.sources)
@@ -213,7 +254,7 @@ def render_html(article: Article) -> str:
     else:
         sources_html = ""
 
-    return summary_html + sections_html + action_html + sources_html
+    return summary_html + sections_html + action_html + faq_html + sources_html
 
 
 def _extract_json(text: str) -> str:

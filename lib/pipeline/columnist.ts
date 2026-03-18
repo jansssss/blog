@@ -49,19 +49,19 @@ function buildHtml(data: StructuredArticle): string {
   const font = "'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif"
 
   // 핵심 요약 박스
-  const summaryItems = data.summary_points
+  const summaryItems = (data.summary_points ?? [])
     .map(p => `<li style="font-family:${font};font-size:15px;color:#2a3a5c;line-height:1.75;margin-bottom:8px;word-break:keep-all;">${esc(p)}</li>`)
     .join('\n')
 
-  const summaryHtml = `
+  const summaryHtml = summaryItems ? `
 <div style="background:#f0f4ff;border-radius:12px;padding:20px 24px;margin:0 0 32px;">
   <div style="font-family:${font};font-size:13px;font-weight:700;color:#3268ff;margin-bottom:10px;letter-spacing:0.04em;">✅ 핵심 요약</div>
   <ul style="margin:0;padding-left:20px;">${summaryItems}</ul>
-</div>`
+</div>` : ''
 
   // 본문 섹션들
-  const sectionsHtml = data.sections.map(section => {
-    const paragraphsHtml = section.paragraphs
+  const sectionsHtml = (data.sections ?? []).map(section => {
+    const paragraphsHtml = (section.paragraphs ?? [])
       .map(p => `<p style="font-family:${font};font-size:16px;color:#3a4a62;margin:0 0 14px;line-height:1.9;word-break:keep-all;">${esc(p)}</p>`)
       .join('\n')
 
@@ -73,12 +73,12 @@ function buildHtml(data: StructuredArticle): string {
       : ''
 
     return `<section>
-<h2 style="font-family:${font};font-size:22px;font-weight:800;color:#1c2741;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid #eef2f7;letter-spacing:-0.02em;line-height:1.4;word-break:keep-all;">${esc(section.heading)}</h2>
+<h2 style="font-family:${font};font-size:22px;font-weight:800;color:#1c2741;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid #eef2f7;letter-spacing:-0.02em;line-height:1.4;word-break:keep-all;">${esc(section.heading ?? '')}</h2>
 ${paragraphsHtml}${insightHtml}</section>`
   }).join('\n')
 
   // 지금 바로 할 수 있는 것 (action tips)
-  const tipsHtml = data.action_tips
+  const tipsHtml = (data.action_tips ?? [])
     .map(tip => `<span style="display:inline-block;padding:6px 14px;border-radius:999px;background:#fff;border:1.5px solid #ffcfc9;color:#cc3a28;font-size:13px;font-weight:600;line-height:1.5;margin:0 4px 6px 0;">${esc(tip)}</span>`)
     .join('\n')
 

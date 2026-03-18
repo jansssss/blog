@@ -11,7 +11,7 @@ import type { PipelineResult, ColumnistResult } from './types'
 // Anthropic 클라이언트
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
-  timeout: 55000,
+  timeout: 50000,
   maxRetries: 0
 })
 
@@ -32,6 +32,13 @@ function analyzeAnthropicError(error: unknown): { code: string; message: string 
     const status = error.status
     const message = error.message || 'Anthropic API 오류'
 
+    if (status === 401) {
+      return {
+        code: ERROR_CODES.API_ERROR,
+        message: 'Anthropic API 키가 유효하지 않습니다 (401)'
+      }
+    }
+
     if (status === 429) {
       const isQuotaExceeded = message.toLowerCase().includes('quota') ||
                               message.toLowerCase().includes('exceeded') ||
@@ -42,9 +49,16 @@ function analyzeAnthropicError(error: unknown): { code: string; message: string 
       }
     }
 
+    if (status === undefined || status === null) {
+      return {
+        code: ERROR_CODES.API_ERROR,
+        message: `Anthropic 연결 오류: ${message}`
+      }
+    }
+
     return {
       code: ERROR_CODES.API_ERROR,
-      message: `Anthropic API 오류 (${status})`
+      message: `Anthropic API 오류 (${status}): ${message}`
     }
   }
 
@@ -85,7 +99,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.5,
-      max_tokens: 4000,
+      max_tokens: 3000,
     })
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '{}'

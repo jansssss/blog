@@ -105,9 +105,15 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '{}'
     console.log('[COLUMNIST] 응답 길이:', content.length, '자')
 
+    // 마크다운 코드 펜스 제거 (```json ... ``` 또는 ``` ... ```)
+    const cleanContent = content
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/, '')
+      .trim()
+
     let parsed
     try {
-      parsed = JSON.parse(content)
+      parsed = JSON.parse(cleanContent)
     } catch {
       console.error('[COLUMNIST] JSON 파싱 실패:', content.slice(0, 200))
       return {

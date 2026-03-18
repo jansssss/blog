@@ -134,7 +134,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
     const parsed = toolUse.input as Record<string, unknown>
     console.log('[COLUMNIST] Tool Use 응답 수신, title:', parsed.title)
 
-    const markdown = parsed.markdown || cleanDraft
+    const markdown = (parsed.markdown as string) || cleanDraft
 
     // 품질 검증 (실패 + 경고 분리)
     const validation = validateColumnistOutput(markdown)
@@ -153,9 +153,9 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
     return {
       success: true,
       data: {
-        title: parsed.title || '제목 없음',
-        metaDescription: parsed.meta_description || '',
-        tags: parsed.tags || [],
+        title: (parsed.title as string) || '제목 없음',
+        metaDescription: (parsed.meta_description as string) || '',
+        tags: (parsed.tags as string[]) || [],
         markdown: markdown,
         usedPhrases,
         phraseSeed,

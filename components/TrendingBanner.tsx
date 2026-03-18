@@ -19,16 +19,18 @@ export default function TrendingBanner() {
             key={item.href}
             href={item.href}
             className="group relative overflow-hidden rounded-2xl block"
+            style={{ background: item.gradient }}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-90`} />
-
             <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full" />
             <div className="absolute -right-2 -bottom-4 w-16 h-16 bg-white/5 rounded-full" />
 
             <div className="relative z-10 p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 ${item.badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded-full`}>
+                  <span
+                    className="inline-flex items-center gap-1 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: item.badgeColor }}
+                  >
                     <TrendingUp className="w-2.5 h-2.5" />
                     HOT
                   </span>

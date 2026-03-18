@@ -1,51 +1,9 @@
 import Link from 'next/link'
 import { TrendingUp, ArrowRight, Flame } from 'lucide-react'
-
-const TRENDING_ITEMS = [
-  {
-    href: '/trend/us-iran-oil',
-    badge: '지정학',
-    badgeColor: 'bg-orange-600',
-    title: '미국·이란 전쟁과 유가 급등: 한국 경제는 어떻게 흔들리나',
-    desc: '호르무즈 봉쇄 시나리오·역사적 오일쇼크 사례·산업별 영향 완전 분석',
-    tag: '유가·지정학 리스크',
-    gradient: 'from-orange-700 to-red-900',
-    updatedAt: '2026.03.13',
-  },
-  {
-    href: '/trend/capital-market-shift',
-    badge: '핵심분석',
-    badgeColor: 'bg-slate-700',
-    title: '자본시장 정상화, 부동산 공화국 해체: 돈의 흐름은 어디로 가나',
-    desc: '대출 규제와 양도세 이슈를 연결해 2026년 자산배분의 변화 방향을 분석',
-    tag: '자산배분 전략',
-    gradient: 'from-slate-800 to-blue-700',
-    updatedAt: '2026.02.26',
-  },
-  {
-    href: '/trend/capital-gains-tax',
-    badge: '양도세',
-    badgeColor: 'bg-red-500',
-    title: '1가구 2주택 양도세, 지금 팔면 얼마?',
-    desc: '비과세 요건·일시적 2주택 특례·중과세율 완전 분석',
-    tag: '부동산 세금',
-    gradient: 'from-red-600 to-orange-500',
-    updatedAt: '2026.02.21',
-  },
-  {
-    href: '/trend/multi-home-loan',
-    badge: '대출규제',
-    badgeColor: 'bg-blue-600',
-    title: '다주택자 대출, 지금 어디까지 막혔나?',
-    desc: '스트레스 DSR 2단계·2주택 주담대 금지·갭투자 차단 현황',
-    tag: '대출 정책',
-    gradient: 'from-blue-700 to-indigo-600',
-    updatedAt: '2026.02.21',
-  },
-]
+import { getLatestTrends } from '@/lib/trendData'
 
 export default function TrendingBanner() {
-  const sortedTrendingItems = [...TRENDING_ITEMS].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  const items = getLatestTrends(4)
 
   return (
     <section className="mb-6">
@@ -56,7 +14,7 @@ export default function TrendingBanner() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {sortedTrendingItems.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -84,7 +42,7 @@ export default function TrendingBanner() {
               </p>
 
               <p className="text-white/75 text-[11px] leading-relaxed line-clamp-2">
-                {item.desc}
+                {item.description}
               </p>
 
               <div className="mt-3 inline-flex items-center gap-1 text-[11px] text-white/80 group-hover:text-white transition-colors">

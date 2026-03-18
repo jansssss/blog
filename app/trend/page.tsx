@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Clock, TrendingUp } from 'lucide-react'
+import { getSortedTrends } from '@/lib/trendData'
 
 export const metadata: Metadata = {
   title: '지금 핫한 이슈 전문가 분석 | 자본시장 정상화, 부동산 공화국 해체',
@@ -13,32 +14,8 @@ export const metadata: Metadata = {
   },
 }
 
-const TREND_ITEMS = [
-  {
-    href: '/trend/capital-market-shift',
-    title: '자본시장 정상화, 부동산 공화국 해체: 돈의 흐름은 어디로 가나',
-    description: '대출 규제와 양도세 이슈를 연결해 2026년 자산배분의 큰 축 변화를 분석합니다.',
-    tag: '자산배분 전략',
-    updatedAt: '2026.02.26',
-  },
-  {
-    href: '/trend/multi-home-loan',
-    title: '다주택자 대출 규제, 지금 어디까지 왔나',
-    description: '스트레스 DSR, 주택 수별 대출 제한, 전세대출 규제를 한 번에 정리합니다.',
-    tag: '대출 규제',
-    updatedAt: '2026.02.21',
-  },
-  {
-    href: '/trend/capital-gains-tax',
-    title: '1가구 2주택 양도세, 지금 팔면 얼마를 내나',
-    description: '비과세 요건, 중과세 기준, 실제 절세 전략을 케이스 중심으로 설명합니다.',
-    tag: '부동산 세금',
-    updatedAt: '2026.02.21',
-  },
-]
-
 export default function TrendHubPage() {
-  const sortedTrendItems = [...TREND_ITEMS].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  const sortedTrendItems = getSortedTrends()
 
   return (
     <div className="min-h-screen bg-white">

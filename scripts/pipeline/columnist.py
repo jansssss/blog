@@ -130,17 +130,14 @@ class ColumnistWriter:
         )
 
         content_text = payload["content"][0]["text"]
-        # JSON 코드펜스 제거
-        if content_text.startswith("```"):
-            content_text = content_text.split("```")[1]
-            if content_text.startswith("json"):
-                content_text = content_text[4:]
-        # JSON 블록 추출
-        json_match = re.search(r"\{.*\}", content_text, re.DOTALL)
-        if json_match:
-            content_text = json_match.group(0)
-
-        data = json.loads(content_text.strip())
+        try:
+            data = json.loads(_extract_json(content_text))
+        except json.JSONDecodeError as e:
+            # 디버그: 실패한 원본 응답 일부 출력
+            snippet = content_text[:500].replace("\n", "\\n")
+            print(f"[COLUMNIST] JSON 파싱 실패: {e}", flush=True)
+            print(f"[COLUMNIST] 응답 앞 500자: {snippet}", flush=True)
+            raise RuntimeError(f"Claude JSON 파싱 실패: {e}") from e
 
         input_tokens = payload.get("usage", {}).get("input_tokens", 0)
         output_tokens = payload.get("usage", {}).get("output_tokens", 0)
@@ -256,6 +253,27 @@ def render_html(article: Article) -> str:
         sources_html = ""
 
     return summary_html + sections_html + action_html + sources_html
+
+
+def _extract_json(text: str) -> str:
+    """코드펜스 제거 후 중첩 괄호 매칭으로 JSON 블록 추출"""
+    # 코드펜스 제거
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip())
+    text = re.sub(r"\s*```$", "", text.strip())
+    # 첫 { 찾기
+    start = text.find("{")
+    if start == -1:
+        return text
+    # 중첩 카운팅으로 닫는 } 찾기
+    depth = 0
+    for i, ch in enumerate(text[start:], start):
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : i + 1]
+    return text[start:]
 
 
 def _esc(text: str) -> str:

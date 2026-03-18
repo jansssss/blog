@@ -24,9 +24,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { success: false, error: 'OpenAI API 키가 설정되지 않았습니다.' },
+        { success: false, error: 'Anthropic API 키가 설정되지 않았습니다.' },
         { status: 500 }
       )
     }

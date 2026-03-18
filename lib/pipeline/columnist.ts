@@ -100,31 +100,39 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
       ],
       temperature: 0.5,
       max_tokens: 2000,
+      tools: [{
+        name: 'write_blog_post',
+        description: '최종 블로그 글을 구조화된 형식으로 작성합니다',
+        input_schema: {
+          type: 'object' as const,
+          properties: {
+            title: { type: 'string', description: 'SEO H1 제목' },
+            meta_description: { type: 'string', description: '150~170자 메타 설명' },
+            tags: { type: 'array', items: { type: 'string' }, description: 'SEO 태그 3개' },
+            markdown: { type: 'string', description: '최종 본문 마크다운' }
+          },
+          required: ['title', 'meta_description', 'tags', 'markdown']
+        }
+      }],
+      tool_choice: { type: 'any' as const }
     })
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '{}'
-    console.log('[COLUMNIST] 응답 길이:', content.length, '자')
-
-    // 마크다운 코드 펜스 제거 (```json ... ``` 또는 ``` ... ```)
-    const cleanContent = content
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/\s*```\s*$/, '')
-      .trim()
-
-    let parsed
-    try {
-      parsed = JSON.parse(cleanContent)
-    } catch {
-      console.error('[COLUMNIST] JSON 파싱 실패:', content.slice(0, 200))
+    // Tool Use 응답에서 구조화된 데이터 추출
+    const toolUse = response.content.find(c => c.type === 'tool_use')
+    if (!toolUse || toolUse.type !== 'tool_use') {
+      console.error('[COLUMNIST] Tool Use 응답 없음:', JSON.stringify(response.content).slice(0, 200))
       return {
         success: false,
         error: {
           code: ERROR_CODES.PARSE_ERROR,
-          message: 'AI 응답 JSON 파싱 실패',
+          message: 'AI가 구조화된 응답을 반환하지 않았습니다',
           stage: 'COLUMNIST'
         }
       }
     }
+
+    const parsed = toolUse.input as Record<string, unknown>
+    console.log('[COLUMNIST] Tool Use 응답 수신, title:', parsed.title)
 
     const markdown = parsed.markdown || cleanDraft
 

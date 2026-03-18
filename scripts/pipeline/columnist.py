@@ -123,7 +123,7 @@ class ColumnistWriter:
             },
             payload={
                 "model": self.model,
-                "max_tokens": 7000,
+                "max_tokens": 8000,
                 "messages": [{"role": "user", "content": instructions}],
             },
             timeout=300,
@@ -272,8 +272,36 @@ def _extract_json(text: str) -> str:
         elif ch == "}":
             depth -= 1
             if depth == 0:
-                return text[start : i + 1]
-    return text[start:]
+                return _fix_json_strings(text[start : i + 1])
+    return _fix_json_strings(text[start:])
+
+
+def _fix_json_strings(text: str) -> str:
+    """JSON 문자열 값 내부의 literal 개행/탭을 이스케이프 시퀀스로 치환"""
+    result: list[str] = []
+    in_string = False
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and in_string:
+            # 이미 이스케이프된 문자 — 다음 한 글자와 함께 그대로 유지
+            result.append(ch)
+            i += 1
+            if i < len(text):
+                result.append(text[i])
+        elif ch == '"':
+            in_string = not in_string
+            result.append(ch)
+        elif in_string and ch == "\n":
+            result.append("\\n")
+        elif in_string and ch == "\r":
+            result.append("\\r")
+        elif in_string and ch == "\t":
+            result.append("\\t")
+        else:
+            result.append(ch)
+        i += 1
+    return "".join(result)
 
 
 def _esc(text: str) -> str:

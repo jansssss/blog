@@ -1,0 +1,77 @@
+name: Daily Auto Post (ohyess.kr)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "발행 모드"
+        required: false
+        default: publish
+        type: choice
+        options:
+          - publish
+          - draft
+      count:
+        description: "생성할 글 수 (1~3)"
+        required: false
+        default: "1"
+        type: string
+      dry_run:
+        description: "Dry-run (Supabase 저장 안 함)"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    # 매일 KST 07:00 = UTC 22:00 (전날)
+    - cron: "0 22 * * *"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write .env.local
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'publish' }}
+          POSTS_PER_RUN: ${{ inputs.count || '1' }}
+        run: |
+          printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY" >> .env.local
+          printf 'ANTHROPIC_MODEL=%s\n' "$ANTHROPIC_MODEL" >> .env.local
+          printf 'PERPLEXITY_API_KEY=%s\n' "$PERPLEXITY_API_KEY" >> .env.local
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL" >> .env.local
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY" >> .env.local
+          printf 'PUBLISH_MODE=%s\n' "$PUBLISH_MODE" >> .env.local
+          printf 'POSTS_PER_RUN=%s\n' "$POSTS_PER_RUN" >> .env.local
+
+      - name: Run pipeline
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python -m scripts.main --dry-run
+          elif [ -n "${{ inputs.mode }}" ]; then
+            python -m scripts.main --mode "${{ inputs.mode }}" --count "${{ inputs.count || '1' }}"
+          else
+            python -m scripts.main
+          fi
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f .env.local

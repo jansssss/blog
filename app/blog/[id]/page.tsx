@@ -118,8 +118,43 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
 
   const { data: nextPost } = await nextQuery.single()
 
+  const site = await getCurrentSite()
+  const siteName = site?.name || '오예스'
+  const protocol = 'https'
+  const host = site?.domain || 'ohyess.kr'
+  const baseUrl = `${protocol}://${host}`
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.summary,
+    datePublished: post.published_at,
+    dateModified: post.updated_at || post.published_at,
+    author: {
+      '@type': 'Organization',
+      name: siteName,
+      url: baseUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      url: baseUrl,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${baseUrl}/blog/${post.id}`,
+    },
+    ...(post.thumbnail_url && { image: post.thumbnail_url }),
+    ...(post.tags?.length && { keywords: post.tags.join(', ') }),
+  }
+
   return (
     <article className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">

@@ -99,7 +99,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.5,
-      max_tokens: 3000,
+      max_tokens: 2000,
     })
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '{}'

@@ -39,7 +39,7 @@ def load_config() -> AppConfig:
         project_root=project_root,
         prompt_path=scripts_root / "prompts" / "financial_columnist.txt",
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
-        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+        anthropic_model=os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6",
         perplexity_api_key=os.getenv("PERPLEXITY_API_KEY") or None,
         supabase_url=os.getenv("NEXT_PUBLIC_SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,

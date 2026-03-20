@@ -147,7 +147,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
       temperature: 0.5,
-      max_tokens: 2000,
+      max_tokens: 3000,
       tools: [{
         name: 'write_blog_post',
         description: '블로그 글을 구조화된 형식으로 작성합니다',
@@ -161,21 +161,21 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
             summary_points: {
               type: 'array',
               items: { type: 'string' },
-              description: '핵심 요약 3~4가지 (각 50자 이상, 수치 포함 권장)'
+              description: '핵심 요약 3가지 (각 40~60자, 수치 포함)'
             },
             sections: {
               type: 'array',
-              description: '본문 섹션 3~4개',
+              description: '본문 섹션 3개',
               items: {
                 type: 'object',
                 properties: {
-                  heading: { type: 'string', description: 'H2 섹션 제목' },
+                  heading: { type: 'string', description: 'H2 섹션 제목 (15자 이내)' },
                   paragraphs: {
                     type: 'array',
                     items: { type: 'string' },
-                    description: '문단 2~3개 (각 3~5문장, 수치+판단해석 포함)'
+                    description: '문단 2개 (각 3~4문장, 경험담+수치 포함)'
                   },
-                  expert_insight: { type: 'string', description: '핵심 포인트 1~2문장 (없으면 빈 문자열)' }
+                  expert_insight: { type: 'string', description: '핵심 포인트 1문장 (없으면 빈 문자열 "")' }
                 },
                 required: ['heading', 'paragraphs', 'expert_insight']
               }
@@ -183,7 +183,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
             action_tips: {
               type: 'array',
               items: { type: 'string' },
-              description: '지금 바로 확인할 것 3~5가지 (짧고 구체적으로)'
+              description: '지금 바로 확인할 것 3가지 (10~20자, 짧게)'
             }
           },
           required: ['title', 'meta_description', 'subtitle', 'tags', 'summary_points', 'sections', 'action_tips']

@@ -245,9 +245,14 @@ export default function AdminPostsPage() {
     }
 
     try {
+      const updateData: { published: boolean; published_at?: string | null } = { published: newStatus }
+      if (newStatus && !post.published_at) {
+        updateData.published_at = new Date().toISOString()
+      }
+
       const { error } = await supabase
         .from('posts')
-        .update({ published: newStatus })
+        .update(updateData)
         .eq('id', post.id)
 
       if (error) {
@@ -257,7 +262,7 @@ export default function AdminPostsPage() {
       }
 
       setPosts(prev =>
-        prev.map(p => p.id === post.id ? { ...p, published: newStatus } : p)
+        prev.map(p => p.id === post.id ? { ...p, published: newStatus, published_at: updateData.published_at ?? p.published_at } : p)
       )
     } catch (err) {
       console.error('예상치 못한 오류:', err)

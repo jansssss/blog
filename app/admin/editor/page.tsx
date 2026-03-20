@@ -45,6 +45,7 @@ function AdminEditorContent() {
   const [tags, setTags] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [published, setPublished] = useState(true)
+  const [publishedAt, setPublishedAt] = useState<string | null>(null)
   const [sites, setSites] = useState<Site[]>([])
   const [selectedSiteId, setSelectedSiteId] = useState<string>('')
 
@@ -134,6 +135,7 @@ function AdminEditorContent() {
         setTags(Array.isArray(data.tags) ? data.tags.join(', ') : '')
         setThumbnailUrl(data.thumbnail_url || '')
         setPublished(data.published)
+        setPublishedAt(data.published_at || null)
         // 게시글의 site_id 로드
         if (data.site_id) {
           setSelectedSiteId(data.site_id)
@@ -171,8 +173,8 @@ function AdminEditorContent() {
       const adminId = localStorage.getItem('adminId')
 
       if (isEditMode && postId) {
-        // 수정 모드 - published_at은 업데이트하지 않음
-        const updateData = {
+        // 수정 모드 - 비공개→공개 전환 시에만 published_at 설정
+        const updateData: Record<string, unknown> = {
           title,
           slug,
           summary,
@@ -183,6 +185,9 @@ function AdminEditorContent() {
           published,
           author_id: adminId,
           site_id: selectedSiteId,
+        }
+        if (published && !publishedAt) {
+          updateData.published_at = new Date().toISOString()
         }
 
         const { error } = await supabase

@@ -43,6 +43,22 @@ class SupabasePublisher:
             body = e.read().decode("utf-8")
             raise RuntimeError(f"Supabase sites 조회 실패 ({e.code}): {body}") from e
 
+    def get_recent_topics(self, limit: int = 30) -> list[str]:
+        """최근 발행된 포스트의 제목 목록 반환 (중복 방지용)"""
+        url = (
+            f"{self.base_url}/rest/v1/posts"
+            f"?select=title&order=published_at.desc&limit={limit}"
+        )
+        req = request.Request(url, headers=self._headers)
+        try:
+            with request.urlopen(req, timeout=10) as resp:
+                rows = json.loads(resp.read().decode("utf-8"))
+                return [row["title"] for row in rows if row.get("title")]
+        except HTTPError as e:
+            body = e.read().decode("utf-8")
+            print(f"[WARN] 최근 주제 조회 실패 ({e.code}): {body}", flush=True)
+            return []
+
     def _slug_is_unique(self, slug: str) -> bool:
         url = f"{self.base_url}/rest/v1/posts?slug=eq.{slug}&select=id&limit=1"
         req = request.Request(url, headers=self._headers)

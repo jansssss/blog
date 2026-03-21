@@ -66,6 +66,14 @@ def main() -> None:
         service_role_key=config.supabase_service_role_key,
     ) if not args.dry_run else None
 
+    # ── 최근 발행 주제 조회 (중복 방지) ────────────────
+    excluded_topics: list[str] = []
+    if publisher:
+        print("[INIT] 최근 발행 주제 조회 중...", flush=True)
+        excluded_topics = publisher.get_recent_topics(limit=30)
+        if excluded_topics:
+            print(f"[INIT] 제외할 주제 {len(excluded_topics)}개 로드 완료", flush=True)
+
     # ── 실행 ────────────────────────────────────────
     for i in range(count):
         print(f"\n{'='*50}", flush=True)
@@ -74,8 +82,9 @@ def main() -> None:
         # 1. Perplexity - 오늘의 이슈 리서치
         print("[STEP 1] Perplexity 리서치 중...", flush=True)
         try:
-            research = researcher.research_today()
+            research = researcher.research_today(excluded_topics=excluded_topics)
             print(f"[STEP 1] 완료 - 주제: {research['topic']}", flush=True)
+            excluded_topics.append(research["topic"])  # 같은 실행 내 중복 방지
         except Exception as exc:
             print(f"[STEP 1] 실패: {exc}", flush=True)
             sys.exit(1)

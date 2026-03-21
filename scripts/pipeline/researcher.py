@@ -16,12 +16,23 @@ class PerplexityResearcher:
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
 
-    def research_today(self) -> dict:
+    def research_today(self, excluded_topics: list[str] | None = None) -> dict:
         """
         오늘의 인기 금융/경제 이슈 1개 선정 + 심층 리서치
+        excluded_topics: 이미 발행된 주제 목록 (중복 방지)
         Returns: { topic, research_text }
         """
         today = date.today().strftime("%Y년 %m월 %d일")
+
+        exclusion_block = ""
+        if excluded_topics:
+            titles = "\n".join(f"- {t}" for t in excluded_topics)
+            exclusion_block = (
+                "\n\n[중복 금지] 아래 주제들은 이미 발행된 글입니다. "
+                "같거나 매우 유사한 주제는 절대 선택하지 마세요:\n"
+                + titles
+            )
+
         payload = {
             "model": "sonar-pro",
             "messages": [
@@ -38,7 +49,8 @@ class PerplexityResearcher:
                     "role": "user",
                     "content": (
                         f"오늘({today}) 대한민국에서 가장 화제가 되는 금융·경제 이슈를 1개 선정하고, "
-                        "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요.\n\n"
+                        "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요."
+                        + exclusion_block + "\n\n"
                         "{\n"
                         '  "topic": "이슈 제목 (한국어, 50자 이내)",\n'
                         '  "category": "금융 | 경제 | 대출 | 세금 | 부동산 중 1개",\n'

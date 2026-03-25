@@ -5,11 +5,9 @@ import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
-import InsuranceWidget from '@/components/InsuranceWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
-import InsuranceToolsSection from '@/components/InsuranceToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { Calculator, ArrowLeftRight, Car, Shield, ClipboardCheck, BookOpen, ArrowRight } from 'lucide-react'
+import { Calculator, ArrowLeftRight, BookOpen, ArrowRight } from 'lucide-react'
 import TrendingBanner from '@/components/TrendingBanner'
 
 const HOME_GUIDE_ITEMS = [
@@ -44,14 +42,13 @@ export default async function HomePage({
   // 현재 사이트 정보 조회
   const site = await getCurrentSite()
   const siteId = site?.id
-  const isMainSite = site?.is_main ?? true
 
   // 위젯 스타일 (사이트 테마에서 가져오거나 기본값 사용)
   const widgetStyle = {
     gradient: site?.theme_json?.widget?.gradient || DEFAULT_WIDGET_STYLE.gradient,
     borderColor: site?.theme_json?.widget?.borderColor || DEFAULT_WIDGET_STYLE.borderColor,
   }
-  const widgetType = site?.theme_json?.widget?.type || (isMainSite ? 'weather-stock' : 'interest-rate')
+  const widgetType = site?.theme_json?.widget?.type || 'weather-stock'
 
   // 카테고리별 쿼리 생성 (site_id 필터 강제)
   let postsQuery = supabase
@@ -96,13 +93,8 @@ export default async function HomePage({
 
   return (
     <>
-      {/* 사이트별 Info Widget (기본: 밝은 파스텔 테마) */}
       {widgetType === 'weather-stock' ? (
         <InfoWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
-      ) : widgetType === 'interest-rate' ? (
-        <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
-      ) : widgetType === 'insurance' ? (
-        <InsuranceWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       ) : (
         <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       )}
@@ -110,7 +102,7 @@ export default async function HomePage({
       <div className="container py-6 overflow-x-hidden">
         {/* Hero Section - Compact */}
         <section className="mb-6 text-center overflow-visible">
-          <h1 className="mb-3 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl" style={{ lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: heroTitle }} />
+          <h1 className="mb-3 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl" style={{ lineHeight: '1.5' }}>{heroTitle}</h1>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground">
             {heroSubtitle}
           </p>
@@ -183,35 +175,6 @@ export default async function HomePage({
             </div>
           </section>
         )}
-
-        {/* 즉시 실행 CTA 버튼 (sureline.kr 전용) */}
-        {site?.domain === 'sureline.kr' && (
-          <section className="mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link href="/tools/auto-discount-check" className="block">
-                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors">
-                  <Car className="w-5 h-5" />
-                  <span className="text-sm sm:text-base">자동차보험 할인 진단</span>
-                </div>
-              </Link>
-              <Link href="/tools/health-overlap-check" className="block">
-                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
-                  <Shield className="w-5 h-5" />
-                  <span className="text-sm sm:text-base">실손/건강 중복 점검</span>
-                </div>
-              </Link>
-              <Link href="/tools/insurance-remodel" className="block">
-                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
-                  <ClipboardCheck className="w-5 h-5" />
-                  <span className="text-sm sm:text-base">보험 리모델링 체크</span>
-                </div>
-              </Link>
-            </div>
-          </section>
-        )}
-
-        {/* 보험 점검 도구 (sureline.kr 전용) */}
-        {site?.domain === 'sureline.kr' && <InsuranceToolsSection />}
 
         {/* Blog Posts Grid - 관련 가이드 */}
         <section>

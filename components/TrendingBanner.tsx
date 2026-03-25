@@ -28,13 +28,13 @@ export default function TrendingBanner() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span
-                    className="inline-flex items-center gap-1 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    className="inline-flex items-center gap-1 text-white text-xs font-bold px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: item.badgeColor }}
                   >
                     <TrendingUp className="w-2.5 h-2.5" />
                     HOT
                   </span>
-                  <span className="text-white/70 text-[10px]">{item.tag}</span>
+                  <span className="text-white/70 text-xs">{item.tag}</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
               </div>
@@ -43,11 +43,11 @@ export default function TrendingBanner() {
                 {item.title}
               </p>
 
-              <p className="text-white/75 text-[11px] leading-relaxed line-clamp-2">
+              <p className="text-white/75 text-xs leading-relaxed line-clamp-2">
                 {item.description}
               </p>
 
-              <div className="mt-3 inline-flex items-center gap-1 text-[11px] text-white/80 group-hover:text-white transition-colors">
+              <div className="mt-3 inline-flex items-center gap-1 text-xs text-white/80 group-hover:text-white transition-colors">
                 <span>전문가 분석 읽기</span>
                 <ArrowRight className="w-3 h-3" />
               </div>

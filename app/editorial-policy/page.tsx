@@ -5,15 +5,13 @@ import { Shield, FileCheck, RefreshCw, Link2, AlertCircle, CheckCircle, Mail } f
 export default async function EditorialPolicyPage() {
   const site = await getCurrentSite()
   const siteName = site?.name || 'ohyess'
-  const isOhyess = siteName?.toLowerCase() !== 'sureline'
-
-  const primaryColor = isOhyess ? 'indigo' : 'emerald'
-  const siteType = isOhyess ? '금융 정보' : '보험 정보'
+  const primaryColor = 'indigo'
+  const siteType = '금융 정보'
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className={`relative overflow-hidden bg-gradient-to-br ${isOhyess ? 'from-blue-600 via-indigo-600 to-purple-700' : 'from-emerald-600 via-teal-600 to-cyan-700'} text-white py-20`}>
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-20">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
         <div className="container relative max-w-4xl">
           <div className="text-center">
@@ -50,7 +48,7 @@ export default async function EditorialPolicyPage() {
               </p>
               <p className="text-gray-700 leading-relaxed">
                 모든 콘텐츠는 공식 자료와 검증된 데이터를 기반으로 작성되며,
-                특정 {isOhyess ? '금융 상품' : '보험 상품'}을 판매하거나 중개하지 않는 독립적인 입장에서 제공됩니다.
+                특정 금융 상품을 판매하거나 중개하지 않는 독립적인 입장에서 제공됩니다.
               </p>
             </div>
           </div>
@@ -58,7 +56,7 @@ export default async function EditorialPolicyPage() {
           {/* 1. 정보 검증 방법 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4 mb-6">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${isOhyess ? 'from-blue-500 to-indigo-600' : 'from-emerald-500 to-teal-600'} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0`}>
                 <FileCheck className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -69,43 +67,37 @@ export default async function EditorialPolicyPage() {
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <CheckCircle className={`w-5 h-5 ${isOhyess ? 'text-indigo-600' : 'text-emerald-600'} mt-1 flex-shrink-0`} />
+                <CheckCircle className={`w-5 h-5 text-indigo-600 mt-1 flex-shrink-0`} />
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">공식 기관 자료 우선</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    {isOhyess
-                      ? '금융감독원, 한국은행, 금융위원회, 주택금융공사 등 정부 및 공공기관의 공식 발표 자료를 최우선으로 참고합니다.'
-                      : '금융감독원, 보험개발원, 금융위원회 등 정부 및 공공기관의 공식 발표 자료를 최우선으로 참고합니다.'
-                    }
+                    금융감독원, 한국은행, 금융위원회, 주택금융공사 등 정부 및 공공기관의 공식 발표 자료를 최우선으로 참고합니다.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle className={`w-5 h-5 ${isOhyess ? 'text-indigo-600' : 'text-emerald-600'} mt-1 flex-shrink-0`} />
+                <CheckCircle className={`w-5 h-5 text-indigo-600 mt-1 flex-shrink-0`} />
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">{isOhyess ? '금융기관' : '보험사'} 공시 정보 확인</h4>
+                  <h4 className="font-semibold text-gray-900 mb-1">금융기관 공시 정보 확인</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    각 {isOhyess ? '금융기관' : '보험사'}이 공식 홈페이지 및 금융상품 한눈에를 통해 공시한 정보를 교차 검증합니다.
+                    각 금융기관이 공식 홈페이지 및 금융상품 한눈에를 통해 공시한 정보를 교차 검증합니다.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle className={`w-5 h-5 ${isOhyess ? 'text-indigo-600' : 'text-emerald-600'} mt-1 flex-shrink-0`} />
+                <CheckCircle className={`w-5 h-5 text-indigo-600 mt-1 flex-shrink-0`} />
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">법령 및 규정 참조</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    {isOhyess
-                      ? '은행법, 여신전문금융업법, 대부업법 등 관련 법령과 금융위원회 규정을 참조합니다.'
-                      : '보험업법, 약관 심사 규정 등 관련 법령과 금융위원회 규정을 참조합니다.'
-                    }
+                    은행법, 여신전문금융업법, 대부업법 등 관련 법령과 금융위원회 규정을 참조합니다.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle className={`w-5 h-5 ${isOhyess ? 'text-indigo-600' : 'text-emerald-600'} mt-1 flex-shrink-0`} />
+                <CheckCircle className={`w-5 h-5 text-indigo-600 mt-1 flex-shrink-0`} />
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">검증되지 않은 정보 배제</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">
@@ -120,7 +112,7 @@ export default async function EditorialPolicyPage() {
           {/* 2. 업데이트 주기 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4 mb-6">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${isOhyess ? 'from-purple-500 to-pink-600' : 'from-blue-500 to-indigo-600'} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center flex-shrink-0`}>
                 <RefreshCw className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -149,7 +141,7 @@ export default async function EditorialPolicyPage() {
                 <ul className="space-y-2 text-sm text-gray-700">
                   <li className="flex items-start gap-2">
                     <span className="text-amber-600 mt-1">•</span>
-                    <span>{isOhyess ? '금리 변동' : '보험 상품 변경'}, 법령 개정, 제도 변경 시 즉시 관련 콘텐츠를 검토하고 업데이트합니다.</span>
+                    <span>금리 변동, 법령 개정, 제도 변경 시 즉시 관련 콘텐츠를 검토하고 업데이트합니다.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-amber-600 mt-1">•</span>
@@ -171,7 +163,7 @@ export default async function EditorialPolicyPage() {
           {/* 3. 출처 표기 정책 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4 mb-6">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${isOhyess ? 'from-emerald-500 to-teal-600' : 'from-purple-500 to-pink-600'} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0`}>
                 <Link2 className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -188,7 +180,7 @@ export default async function EditorialPolicyPage() {
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">공식 기관 링크 제공</h4>
                   <p className="leading-relaxed">
-                    주요 정보는 원본 자료를 확인할 수 있도록 금융감독원{isOhyess ? ', 한국은행' : ', 보험개발원'} 등
+                    주요 정보는 원본 자료를 확인할 수 있도록 금융감독원, 한국은행 등
                     공식 기관 페이지 링크를 함께 제공합니다.
                   </p>
                 </div>
@@ -237,14 +229,14 @@ export default async function EditorialPolicyPage() {
               <div className="space-y-3 text-sm text-amber-900">
                 <p className="leading-relaxed">
                   본 사이트에서 제공하는 모든 정보와 계산 결과는 <strong>참고용</strong>입니다.
-                  실제 {isOhyess ? '금융 상품의 조건' : '보험 상품의 보장 내용과 조건'}은
-                  개인의 {isOhyess ? '신용도, 소득, 담보' : '연령, 건강 상태, 가입 약관'} 등에 따라 상이할 수 있습니다.
+                  실제 금융 상품의 조건은
+                  개인의 신용도, 소득, 담보 등에 따라 상이할 수 있습니다.
                 </p>
                 <p className="leading-relaxed">
-                  정확한 정보는 반드시 해당 {isOhyess ? '금융기관' : '보험사'} 또는 전문가에게 직접 확인하시기 바랍니다.
+                  정확한 정보는 반드시 해당 금융기관 또는 전문가에게 직접 확인하시기 바랍니다.
                 </p>
                 <p className="leading-relaxed">
-                  본 사이트는 {isOhyess ? '금융 상품' : '보험 상품'} 판매 또는 중개를 하지 않으며,
+                  본 사이트는 금융 상품 판매 또는 중개를 하지 않으며,
                   사용자의 의사결정에 대한 법적 책임을 지지 않습니다.
                 </p>
               </div>
@@ -254,7 +246,7 @@ export default async function EditorialPolicyPage() {
           {/* 5. 콘텐츠 제작 과정 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4 mb-6">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${isOhyess ? 'from-blue-500 to-indigo-600' : 'from-emerald-500 to-teal-600'} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0`}>
                 <FileCheck className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -315,7 +307,7 @@ export default async function EditorialPolicyPage() {
           </div>
 
           {/* Contact for Corrections */}
-          <div className={`bg-gradient-to-br ${isOhyess ? 'from-blue-50 to-indigo-50' : 'from-emerald-50 to-teal-50'} rounded-2xl p-8 border ${isOhyess ? 'border-blue-100' : 'border-emerald-100'}`}>
+          <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100`}>
             <div className="flex items-start gap-4 mb-4">
               <div className={`w-12 h-12 rounded-xl bg-${primaryColor}-600 flex items-center justify-center flex-shrink-0`}>
                 <Mail className="w-6 h-6 text-white" />

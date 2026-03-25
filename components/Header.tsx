@@ -20,7 +20,6 @@ interface NavItem {
 interface HeaderProps {
   siteTheme?: SiteTheme
   siteName?: string
-  isMainSite?: boolean
 }
 
 // ohyess 사이트용 네비게이션 (하위 메뉴 포함)
@@ -80,41 +79,6 @@ const OHYESS_NAV: NavItem[] = [
   { label: '소개', href: '/about' },
 ]
 
-// sureline 사이트용 네비게이션
-const SURELINE_NAV: NavItem[] = [
-  {
-    label: '보험 도구',
-    href: '/tools/auto-discount-check',
-    subItems: [
-      { label: '자동차보험 할인 체크', href: '/tools/auto-discount-check', description: '할인 항목 확인' },
-      { label: '실비보험 중복 체크', href: '/tools/health-overlap-check', description: '중복 보장 확인' },
-      { label: '보험 리모델링 체크', href: '/tools/insurance-remodel', description: '보험 점검' },
-    ]
-  },
-  {
-    label: '가이드',
-    href: '/guide',
-    subItems: [
-      { label: '대출이자 계산법', href: '/guide/loan-interest', description: '이자 계산 공식 · 상환방식별 차이' },
-      { label: 'DSR·DTI·LTV 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 지표' },
-      { label: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등 vs 원금균등' },
-      { label: '중도상환수수료', href: '/guide/early-repayment-fee', description: '수수료 계산 · 면제 조건' },
-      { label: '신용점수 관리', href: '/guide/credit-score', description: '점수 올리는 방법 · 금리 영향' },
-      { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
-    ],
-  },
-  {
-    label: '핫이슈',
-    href: '/trend',
-    subItems: [
-      { label: '자본시장 정상화 2026', href: '/trend/capital-market-shift', description: '부동산-금융 자금 이동 분석' },
-      { label: '다주택자 대출 규제 2026', href: '/trend/multi-home-loan', description: '스트레스 DSR, 주택 수별 규제 분석' },
-      { label: '1가구 2주택 양도세 2026', href: '/trend/capital-gains-tax', description: '비과세·중과세·절세 포인트 정리' },
-    ],
-  },
-  { label: '소개', href: '/about' },
-]
-
 export default function Header({ siteTheme, siteName }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
@@ -125,9 +89,7 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
   const primaryColor = siteTheme?.brand?.primaryColor || '#111827'
   const accentColor = siteTheme?.brand?.accentColor || '#2563EB'
 
-  // 사이트별 네비게이션 선택
-  const isSureline = siteName?.toLowerCase().includes('sureline') || siteName?.includes('슈어라인')
-  const navItems: NavItem[] = isSureline ? SURELINE_NAV : OHYESS_NAV
+  const navItems: NavItem[] = OHYESS_NAV
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
@@ -149,49 +111,28 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        {/* 오예스: 픽셀 O 로고, 슈어라인: 텍스트 로고 */}
-        {!isSureline ? (
-          // 오예스 - 픽셀 O 로고
-          <Link href="/" className="ohyess-logo group" onClick={closeMobileMenu}>
-            <svg className="pixel-o w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect className="px" x="10" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.45"/>
-              <rect className="px" x="16" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.7"/>
-              <rect className="px" x="22" y="2"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.5"/>
-              <rect className="px" x="4"  y="8"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.8"/>
-              <rect className="px" x="28" y="8"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.85"/>
-              <rect className="px" x="4"  y="14" width="5" height="5" rx="1" fill="#8b7ad8" opacity="1"/>
-              <rect className="px" x="28" y="14" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.9"/>
-              <rect className="px" x="4"  y="20" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.75"/>
-              <rect className="px" x="28" y="20" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.65"/>
-              <rect className="px" x="10" y="26" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.5"/>
-              <rect className="px" x="16" y="26" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.6"/>
-              <rect className="px" x="22" y="26" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.4"/>
-              <rect className="gx" x="34" y="5"  width="3" height="3" rx="0.5" fill="#6cb4ee" opacity="0"/>
-              <rect className="gx" x="-1" y="22" width="3" height="3" rx="0.5" fill="#8b7ad8" opacity="0"/>
-              <rect className="gx" x="30" y="29" width="2.5" height="2.5" rx="0.5" fill="#6cb4ee" opacity="0"/>
-            </svg>
-            <span className="ohyess-wm text-lg sm:text-xl transition-all duration-300 group-hover:tracking-wide">
-              {headerTitle}
-            </span>
-          </Link>
-        ) : (
-          // 슈어라인 - Sacramento 스크립트 + 픽셀 트레일 로고
-          <Link href="/" className="sureline-logo group" onClick={closeMobileMenu}>
-            <span className="sureline-wm transition-all duration-300 group-hover:tracking-widest">
-              {headerTitle}
-            </span>
-            <div className="sureline-trail">
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-              <div className="st-dot"></div>
-            </div>
-          </Link>
-        )}
+        <Link href="/" className="ohyess-logo group" onClick={closeMobileMenu}>
+          <svg className="pixel-o w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect className="px" x="10" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.45"/>
+            <rect className="px" x="16" y="2"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.7"/>
+            <rect className="px" x="22" y="2"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.5"/>
+            <rect className="px" x="4"  y="8"  width="5" height="5" rx="1" fill="#8b7ad8" opacity="0.8"/>
+            <rect className="px" x="28" y="8"  width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.85"/>
+            <rect className="px" x="4"  y="14" width="5" height="5" rx="1" fill="#8b7ad8" opacity="1"/>
+            <rect className="px" x="28" y="14" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.9"/>
+            <rect className="px" x="4"  y="20" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.75"/>
+            <rect className="px" x="28" y="20" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.65"/>
+            <rect className="px" x="10" y="26" width="5" height="5" rx="1" fill="#9b8be0" opacity="0.5"/>
+            <rect className="px" x="16" y="26" width="5" height="5" rx="1" fill="#7c9ee8" opacity="0.6"/>
+            <rect className="px" x="22" y="26" width="5" height="5" rx="1" fill="#6cb4ee" opacity="0.4"/>
+            <rect className="gx" x="34" y="5"  width="3" height="3" rx="0.5" fill="#6cb4ee" opacity="0"/>
+            <rect className="gx" x="-1" y="22" width="3" height="3" rx="0.5" fill="#8b7ad8" opacity="0"/>
+            <rect className="gx" x="30" y="29" width="2.5" height="2.5" rx="0.5" fill="#6cb4ee" opacity="0"/>
+          </svg>
+          <span className="ohyess-wm text-lg sm:text-xl transition-all duration-300 group-hover:tracking-wide">
+            {headerTitle}
+          </span>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="ml-auto hidden md:flex items-center space-x-1">

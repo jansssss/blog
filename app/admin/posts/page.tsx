@@ -38,7 +38,7 @@ export default function AdminPostsPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-  const [stats, setStats] = useState({ total: 0, ohyess: 0, sureline: 0, published: 0 })
+  const [stats, setStats] = useState({ total: 0, published: 0 })
   const postsPerPage = 20
 
   useEffect(() => {
@@ -97,25 +97,16 @@ export default function AdminPostsPage() {
       setTotalCount(count || 0)
 
       // 통계 계산 (전체 데이터 기반)
-      const ohyessSiteIds = sitesData?.filter(s => s.domain.includes('ohyess')).map(s => s.id) || []
-      const surelineSiteIds = sitesData?.filter(s => s.domain.includes('sureline')).map(s => s.id) || []
-
       const [
         { count: totalCount },
-        { count: ohyessCount },
-        { count: surelineCount },
         { count: publishedCount }
       ] = await Promise.all([
         supabase.from('posts').select('*', { count: 'exact', head: true }),
-        supabase.from('posts').select('*', { count: 'exact', head: true }).in('site_id', ohyessSiteIds),
-        supabase.from('posts').select('*', { count: 'exact', head: true }).in('site_id', surelineSiteIds),
         supabase.from('posts').select('*', { count: 'exact', head: true }).eq('published', true)
       ])
 
       setStats({
         total: totalCount || 0,
-        ohyess: ohyessCount || 0,
-        sureline: surelineCount || 0,
         published: publishedCount || 0
       })
     } catch (err) {
@@ -137,13 +128,7 @@ export default function AdminPostsPage() {
 
   const getSiteBadge = (siteId: string) => {
     const domain = getSiteDomain(siteId)
-    if (domain.includes('ohyess')) {
-      return { label: '오예스', className: 'bg-blue-100 text-blue-800' }
-    }
-    if (domain.includes('sureline')) {
-      return { label: '슈어라인', className: 'bg-green-100 text-green-800' }
-    }
-    return { label: getSiteName(siteId), className: 'bg-gray-100 text-gray-600' }
+    return { label: getSiteName(siteId), className: 'bg-blue-100 text-blue-800' }
   }
 
   // 페이지네이션 계산
@@ -307,23 +292,11 @@ export default function AdminPostsPage() {
       </div>
 
       {/* 통계 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
         <Card>
           <CardContent className="p-3 md:p-6">
             <p className="text-xs md:text-sm text-muted-foreground">전체</p>
             <p className="text-xl md:text-2xl font-bold">{stats.total}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:p-6">
-            <p className="text-xs md:text-sm text-blue-600">오예스</p>
-            <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.ohyess}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:p-6">
-            <p className="text-xs md:text-sm text-green-600">슈어라인</p>
-            <p className="text-xl md:text-2xl font-bold text-green-600">{stats.sureline}</p>
           </CardContent>
         </Card>
         <Card>
@@ -344,22 +317,6 @@ export default function AdminPostsPage() {
             className="shrink-0"
           >
             전체 ({stats.total})
-          </Button>
-          <Button
-            variant={siteFilter === 'ohyess' ? 'default' : 'outline'}
-            onClick={() => handleFilterChange('ohyess')}
-            size="sm"
-            className="shrink-0"
-          >
-            오예스 ({stats.ohyess})
-          </Button>
-          <Button
-            variant={siteFilter === 'sureline' ? 'default' : 'outline'}
-            onClick={() => handleFilterChange('sureline')}
-            size="sm"
-            className="shrink-0"
-          >
-            슈어라인 ({stats.sureline})
           </Button>
         </div>
 

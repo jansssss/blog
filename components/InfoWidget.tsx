@@ -126,7 +126,7 @@ export default function InfoWidget({
 
   const fetchWeatherByCoords = async (lat: number, lon: number) => {
     try {
-      const API_KEY = '48d5ebc4a7208643947ff76715bbb880'
+      const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || ''
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=kr&appid=${API_KEY}`
       )
@@ -149,7 +149,7 @@ export default function InfoWidget({
 
   const fetchWeather = async (city: typeof CITIES[0]) => {
     try {
-      const API_KEY = '48d5ebc4a7208643947ff76715bbb880'
+      const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || ''
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&units=metric&lang=kr&appid=${API_KEY}`
       )

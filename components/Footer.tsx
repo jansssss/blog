@@ -65,7 +65,7 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
                 {idx > 0 && <span className="text-gray-300">|</span>}
                 <Link
                   href={link.href}
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  className="inline-block py-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {link.label}
                 </Link>

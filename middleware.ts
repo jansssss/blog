@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * 멀티사이트 접근 제어 미들웨어
+ * 접근 제어 미들웨어
  *
- * 원칙:
- * - 메인 사이트(ohyess.kr)에서만 /admin 라우트 접근 가능
- * - 서브사이트(sureline.kr 등)에서는 /admin 라우트 차단 (404)
+ * ohyess.kr 및 로컬 개발 환경에서만 /admin 라우트 접근 가능
  */
 
 // 메인 사이트 도메인 목록 (관리 기능 허용)

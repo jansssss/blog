@@ -102,7 +102,9 @@ export default async function HomePage({
       <div className="container py-6 overflow-x-hidden">
         {/* Hero Section - Compact */}
         <section className="mb-6 text-center overflow-visible">
-          <h1 className="mb-3 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl" style={{ lineHeight: '1.5' }}>{heroTitle}</h1>
+          {/* heroTitle은 관리자가 직접 설정하는 신뢰된 DB 값 */}
+          {/* eslint-disable-next-line react/no-danger */}
+          <h1 className="mb-3 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl" style={{ lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: heroTitle }} />
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground">
             {heroSubtitle}
           </p>

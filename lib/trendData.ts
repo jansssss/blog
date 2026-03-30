@@ -16,6 +16,16 @@ export interface TrendItem {
 
 export const TREND_DATA: TrendItem[] = [
   {
+    href: '/trend/israel-iran-war',
+    badge: '전쟁·지정학',
+    badgeColor: '#7c3aed',
+    title: '이스라엘·이란 전쟁 장기화: 세계 경제는 어디로 가나',
+    description: '네타냐후의 정치 위기 돌파·트럼프의 시선 돌리기·중동 전쟁이 한국 경제까지 흔드는 구조 완전 해부',
+    tag: '중동 전쟁·세계경제',
+    gradient: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #dc2626 100%)',
+    updatedAt: '2026.03.30',
+  },
+  {
     href: '/trend/us-iran-oil',
     badge: '지정학',
     badgeColor: '#c2410c',

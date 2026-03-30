@@ -3,7 +3,7 @@ import { TrendingUp, ArrowRight, Flame } from 'lucide-react'
 import { getLatestTrends } from '@/lib/trendData'
 
 export default function TrendingBanner() {
-  const items = getLatestTrends(4)
+  const items = getLatestTrends(3)
 
   return (
     <section className="mb-6">

@@ -11,7 +11,7 @@ class AppConfig:
     prompt_path: Path
     anthropic_api_key: str | None
     anthropic_model: str
-    perplexity_api_key: str | None
+    tavily_api_key: str | None
     supabase_url: str | None
     supabase_service_role_key: str | None
     publish_mode: str          # "publish" | "draft"
@@ -40,7 +40,7 @@ def load_config() -> AppConfig:
         prompt_path=scripts_root / "prompts" / "financial_columnist.txt",
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
         anthropic_model=os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6",
-        perplexity_api_key=os.getenv("PERPLEXITY_API_KEY") or None,
+        tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
         supabase_url=os.getenv("NEXT_PUBLIC_SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
         publish_mode=os.getenv("PUBLISH_MODE", "publish"),

@@ -55,7 +55,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'publish' }}
@@ -63,7 +63,7 @@ jobs:
         run: |
           printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY" >> .env.local
           printf 'ANTHROPIC_MODEL=%s\n' "$ANTHROPIC_MODEL" >> .env.local
-          printf 'PERPLEXITY_API_KEY=%s\n' "$PERPLEXITY_API_KEY" >> .env.local
+          printf 'TAVILY_API_KEY=%s\n' "$TAVILY_API_KEY" >> .env.local
           printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL" >> .env.local
           printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY" >> .env.local
           printf 'PUBLISH_MODE=%s\n' "$PUBLISH_MODE" >> .env.local

@@ -9,6 +9,7 @@ import EditButton from '@/components/EditButton'
 import DeleteButton from '@/components/DeleteButton'
 import { getCurrentSiteId, getCurrentSite } from '@/lib/site'
 import ArticleToc from '@/components/ArticleToc'
+import BithumbCTA from '@/components/guide/BithumbCTA'
 
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
@@ -242,6 +243,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
               prose-hr:border-gray-200"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+
+          <div className="mt-10">
+            <BithumbCTA />
+          </div>
         </article>
 
         {/* Sticky TOC Sidebar */}

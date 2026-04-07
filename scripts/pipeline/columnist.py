@@ -62,6 +62,7 @@ class ColumnistWriter:
         """Perplexity 리서치 결과를 받아 칼럼 Article 반환"""
         topic = research["topic"]
         category = research.get("category", "금융")
+        article_type = research.get("article_type", "경제이슈")
 
         # 리서치 데이터 포맷팅
         key_data_lines = "\n".join(
@@ -71,10 +72,11 @@ class ColumnistWriter:
         research_block = (
             f"━━━ 리서치 자료 (반드시 수치 인용) ━━━\n"
             f"주제: {topic}\n"
+            f"글 유형: {article_type}\n"
             f"카테고리: {category}\n"
             f"배경: {research.get('background', '')}\n"
             f"핵심 데이터:\n{key_data_lines}\n"
-            f"독자 영향: {research.get('impact_on_public', '')}\n"
+            f"독자 생활에 미치는 영향: {research.get('impact_on_public', '')}\n"
             f"관련 키워드: {', '.join(research.get('related_keywords', []))}\n"
         )
 

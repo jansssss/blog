@@ -1,77 +1,147 @@
-import { ExternalLink, Gift } from 'lucide-react'
+/**
+ * BithumbCTA — 빗썸 추천인 코드 CTA
+ * sureline PostCTA.js 스타일 기준 (인라인 스타일)
+ * 빗썸 브랜드 컬러: #F7A600 (골드 오렌지)
+ */
 
-const REFERRAL_CODE = '6KP1Q2TT27'
-const REFERRAL_URL = 'https://www.bithumb.com/react/referral'
+const REFERRAL_CODE = "6KP1Q2TT27";
+const REFERRAL_URL = "https://www.bithumb.com/react/referral";
 
 export default function BithumbCTA() {
   return (
-    <section className="mb-10">
-      <div
-        className="rounded-xl p-6 border"
+    <aside
+      style={{
+        marginTop: "48px",
+        marginBottom: "48px",
+        padding: "24px 22px 20px",
+        background: "linear-gradient(135deg, #FFF9E6 0%, #FFF3CC 100%)",
+        borderRadius: "20px",
+        border: "1.5px solid #F7A600",
+      }}
+    >
+      {/* 상단 레이블 */}
+      <p
         style={{
-          background: 'linear-gradient(135deg, #FFF9E6 0%, #FFF3CC 100%)',
-          borderColor: '#F7A600',
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+          fontSize: "11px",
+          fontWeight: 700,
+          color: "#B87800",
+          letterSpacing: "0.12em",
+          marginBottom: "6px",
         }}
       >
-        {/* 헤더 */}
-        <div className="flex items-center gap-2 mb-4">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ backgroundColor: '#F7A600' }}
+        BITHUMB BENEFIT
+      </p>
+
+      {/* 섹션 제목 */}
+      <p
+        style={{
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+          fontSize: "18px",
+          fontWeight: 800,
+          color: "#1c2741",
+          marginBottom: "6px",
+          letterSpacing: "-0.02em",
+          lineHeight: 1.4,
+          wordBreak: "keep-all",
+        }}
+      >
+        빗썸 신규 가입 시 최대 7만원 혜택
+      </p>
+
+      {/* 설명 */}
+      <p
+        style={{
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+          fontSize: "13px",
+          color: "#5a6a85",
+          lineHeight: 1.65,
+          wordBreak: "keep-all",
+          marginBottom: "18px",
+        }}
+      >
+        추천코드 입력 후 가입하면 <strong>가입 혜택 5만원 + 웰컴미션 완료 시 2만원</strong>, 총 최대 7만원을 받을 수 있습니다.
+      </p>
+
+      {/* 코드 + 버튼 */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+        {/* 추천코드 박스 */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "2px solid #F7A600",
+            borderRadius: "12px",
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flex: 1,
+            minWidth: "200px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "#B87800",
+              letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
+            }}
           >
-            <Gift className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold" style={{ color: '#7A5000' }}>
-              빗썸 신규 가입 혜택
-            </p>
-            <p className="text-xs" style={{ color: '#A06800' }}>
-              추천코드 입력 시 최대 7만원
-            </p>
-          </div>
+            추천코드
+          </span>
+          <span
+            style={{
+              fontFamily: "monospace",
+              fontSize: "18px",
+              fontWeight: 800,
+              color: "#7A5000",
+              letterSpacing: "0.2em",
+            }}
+          >
+            {REFERRAL_CODE}
+          </span>
         </div>
 
-        {/* 혜택 설명 */}
-        <p className="text-sm mb-4" style={{ color: '#5C3D00' }}>
-          빗썸 신규 회원 가입 후 추천코드를 입력하면{' '}
-          <strong>가입 혜택 5만원 + 웰컴미션 완료 시 2만원</strong>, 총 최대 7만원 혜택을 받을 수 있습니다.
-        </p>
-
-        {/* 추천코드 + 버튼 */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* 코드 박스 */}
-          <div
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border flex-1"
-            style={{ backgroundColor: '#FFFBF0', borderColor: '#F7A600' }}
-          >
-            <span className="text-xs font-medium" style={{ color: '#A06800' }}>
-              추천코드
-            </span>
-            <span
-              className="text-base font-bold tracking-widest"
-              style={{ color: '#7A5000' }}
-            >
-              {REFERRAL_CODE}
-            </span>
-          </div>
-
-          {/* 가입 버튼 */}
-          <a
-            href={REFERRAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-90 shrink-0"
-            style={{ backgroundColor: '#F7A600' }}
-          >
-            빗썸 가입하기
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </div>
-
-        <p className="text-xs mt-3" style={{ color: '#A06800' }}>
-          * 가입 후 7일 이내 원화 계좌 연결 및 추천코드 등록 필요. 이벤트 조건은 변경될 수 있습니다.
-        </p>
+        {/* 가입 버튼 */}
+        <a
+          href={REFERRAL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "block",
+            textAlign: "center",
+            background: "#F7A600",
+            color: "#ffffff",
+            fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+            fontSize: "14px",
+            fontWeight: 700,
+            padding: "13px 24px",
+            borderRadius: "10px",
+            textDecoration: "none",
+            letterSpacing: "0.01em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          빗썸 가입하기 →
+        </a>
       </div>
-    </section>
-  )
+
+      {/* 안내 문구 */}
+      <p
+        style={{
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif",
+          fontSize: "11px",
+          color: "#5a6a85",
+          margin: "14px 0 0",
+          lineHeight: 1.6,
+          paddingTop: "14px",
+          borderTop: "1px solid rgba(247,166,0,0.2)",
+        }}
+      >
+        ※ 가입 후 7일 이내 원화 계좌 연결 및 추천코드 등록 필요. 이벤트 조건은 변경될 수 있습니다.
+      </p>
+    </aside>
+  );
 }

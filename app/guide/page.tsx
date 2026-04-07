@@ -199,11 +199,14 @@ export default async function GuidePage({ searchParams }: PageProps) {
   const totalPages = count ? Math.ceil(count / postsPerPage) : 0
 
   return (
-    <div className="container py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Hero Section */}
-      <div className="mb-10 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">금융 가이드</h1>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+      <div className="rounded-3xl bg-gradient-to-b from-blue-50/60 to-white border border-blue-100/60 px-8 py-12 text-center mb-10">
+        <span className="inline-block px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full mb-5">
+          12가지 완전 정리 가이드
+        </span>
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">금융 가이드</h1>
+        <p className="text-gray-500 text-base max-w-md mx-auto">
           대출·이자·신용점수·상환 전략을 실전 사례와 계산 공식으로 완전히 정리합니다.
         </p>
       </div>

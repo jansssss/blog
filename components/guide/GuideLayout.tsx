@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import Toc from './Toc'
 import FAQ from './FAQ'
 import RelatedLinks from './RelatedLinks'
+import BithumbCTA from './BithumbCTA'
 
 interface TocItem {
   id: string
@@ -69,6 +70,9 @@ export default function GuideLayout({
       <article className="mb-10">{children}</article>
 
       <hr className="border-gray-200 mb-10" />
+
+      {/* 빗썸 CTA */}
+      <BithumbCTA />
 
       {/* 계산기 CTA */}
       <section className="mb-10">

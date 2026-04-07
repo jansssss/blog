@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import EditButton from '@/components/EditButton'
 import DeleteButton from '@/components/DeleteButton'
 import { getCurrentSiteId, getCurrentSite } from '@/lib/site'
+import ArticleToc from '@/components/ArticleToc'
 
 // 동적 렌더링 강제 (항상 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
@@ -150,11 +151,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <article className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">
+    <div className="container max-w-5xl py-10 px-4 sm:px-6 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">
@@ -171,7 +173,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
 
       {/* Thumbnail */}
       {post.thumbnail_url && (
-        <div className="relative mb-8 h-[400px] w-full overflow-hidden rounded-lg">
+        <div className="relative mb-8 h-[360px] w-full overflow-hidden rounded-xl">
           <Image
             src={post.thumbnail_url}
             alt={post.title}
@@ -182,59 +184,69 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
         </div>
       )}
 
-      {/* Post Header */}
-      <header className="mb-8">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
-            {post.category}
-          </span>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
-          </div>
-        </div>
-
-        <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
-          {post.title}
-        </h1>
-
-        <p className="text-xl text-muted-foreground">{post.summary}</p>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {post.tags.map((tag: string) => (
-            <div
-              key={tag}
-              className="flex items-center gap-1 rounded-md bg-secondary px-3 py-1 text-sm"
-            >
-              <Tag className="h-3 w-3" />
-              <span>{tag}</span>
+      {/* 2-column layout: article + sticky TOC */}
+      <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-12 lg:items-start">
+        {/* Main Article */}
+        <article>
+          {/* Post Header */}
+          <header className="mb-8">
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
+                {post.category}
+              </span>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
+              </div>
             </div>
-          ))}
-        </div>
-      </header>
 
-      {/* Post Content */}
-      <div
-        className="prose prose-lg max-w-none
-          prose-headings:font-bold prose-headings:text-gray-900
-          prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-          prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2 prose-h2:mt-10
-          prose-p:text-base prose-p:leading-relaxed prose-p:text-gray-700
-          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-          prose-strong:text-gray-900 prose-strong:font-semibold
-          prose-ol:my-4 prose-ol:pl-6
-          prose-ul:my-4 prose-ul:pl-6
-          prose-li:my-1 prose-li:text-gray-700 prose-li:leading-relaxed
-          prose-li:marker:text-blue-500 prose-li:marker:font-semibold
-          prose-blockquote:border-l-4 prose-blockquote:border-blue-400
-          prose-blockquote:bg-blue-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r
-          prose-blockquote:text-gray-600 prose-blockquote:not-italic
-          prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:text-pink-600
-          prose-pre:bg-gray-900 prose-pre:text-gray-100
-          prose-table:text-sm prose-th:bg-gray-100 prose-th:font-semibold
-          prose-hr:border-gray-200"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
+            <h1 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl leading-snug text-gray-900">
+              {post.title}
+            </h1>
+
+            <p className="text-lg text-muted-foreground leading-relaxed">{post.summary}</p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {post.tags.map((tag: string) => (
+                <div
+                  key={tag}
+                  className="flex items-center gap-1 rounded-md bg-secondary px-3 py-1 text-sm"
+                >
+                  <Tag className="h-3 w-3" />
+                  <span>{tag}</span>
+                </div>
+              ))}
+            </div>
+          </header>
+
+          {/* Post Content */}
+          <div
+            data-article-content
+            className="prose prose-base max-w-none
+              prose-headings:font-bold prose-headings:text-gray-900
+              prose-h2:text-xl prose-h3:text-lg
+              prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2 prose-h2:mt-10
+              prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-gray-700
+              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-gray-900 prose-strong:font-semibold
+              prose-ol:my-4 prose-ol:pl-6
+              prose-ul:my-4 prose-ul:pl-6
+              prose-li:my-1 prose-li:text-gray-700 prose-li:leading-relaxed
+              prose-li:marker:text-blue-500 prose-li:marker:font-semibold
+              prose-blockquote:border-l-4 prose-blockquote:border-blue-400
+              prose-blockquote:bg-blue-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r
+              prose-blockquote:text-gray-600 prose-blockquote:not-italic
+              prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:text-pink-600
+              prose-pre:bg-gray-900 prose-pre:text-gray-100
+              prose-table:text-sm prose-th:bg-gray-100 prose-th:font-semibold
+              prose-hr:border-gray-200"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </article>
+
+        {/* Sticky TOC Sidebar */}
+        <ArticleToc />
+      </div>
 
       {/* Previous/Next Post Navigation */}
       <div className="mt-16 mb-8">
@@ -291,6 +303,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           </Link>
         </div>
       </div>
-    </article>
+    </div>
   )
 }

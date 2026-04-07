@@ -99,7 +99,7 @@ export default async function HomePage({
         <InterestRateWidget gradient={widgetStyle.gradient} borderColor={widgetStyle.borderColor} />
       )}
 
-      <div className="container py-6 overflow-x-hidden">
+      <div className="container max-w-5xl py-6 overflow-x-hidden">
         {/* Hero Section - Compact */}
         <section className="mb-6 text-center overflow-visible">
           {/* heroTitle은 관리자가 직접 설정하는 신뢰된 DB 값 */}

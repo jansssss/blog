@@ -1,430 +1,347 @@
 'use client'
 
-import { useState } from 'react'
-import { Target, DollarSign, TrendingUp, AlertTriangle, Calculator } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { useState, useMemo } from 'react'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 
-interface LimitResult {
-  maxMonthlyPayment: number
-  estimatedLoanLimit: number
-  monthlyIncome: number
-  currentDebtPayment: number
-  availablePayment: number
-  dsrRatio: number
-  dsrLimit: number
+/* ─── 유틸 ─────────────────────────────────────────────────── */
+function fmt(v: number) {
+  if (v >= 100_000_000) return `${(v / 100_000_000).toFixed(1)}억`
+  if (v >= 10_000) return `${Math.round(v / 10_000)}만`
+  return v.toLocaleString()
+}
+function fmtWon(v: number) {
+  if (v >= 100_000_000) return `${(v / 100_000_000).toFixed(2)}억원`
+  if (v >= 10_000) return `${Math.round(v / 10_000).toLocaleString()}만원`
+  return `${Math.round(v).toLocaleString()}원`
 }
 
+/* ─── 슬라이더 컴포넌트 (라이트 버전) ─────────────────────── */
+function SliderInput({
+  label, value, min, max, step, onChange, displayValue,
+}: {
+  label: string; value: number; min: number; max: number; step: number;
+  onChange: (v: number) => void; displayValue: string;
+}) {
+  const pct = ((value - min) / (max - min)) * 100
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-gray-600">{label}</span>
+        <span className="text-indigo-700 font-bold text-base">{displayValue}</span>
+      </div>
+      <input
+        type="range"
+        min={min} max={max} step={step}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="slider-light w-full h-2 rounded-full cursor-pointer appearance-none"
+        style={{
+          background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${pct}%, #c7d2fe ${pct}%, #c7d2fe 100%)`,
+        }}
+      />
+      <div className="flex justify-between text-xs text-gray-400 mt-1">
+        <span>{fmt(min)}</span>
+        <span>{fmt(max)}</span>
+      </div>
+    </div>
+  )
+}
+
+/* ─── DSR 게이지 (반원 도넛) ────────────────────────────────── */
+function DSRGauge({ dsr, limit }: { dsr: number; limit: number }) {
+  const maxRange = Math.max(70, limit + 30)
+  const filled = Math.min(dsr, maxRange)
+  const empty = maxRange - filled
+  const color = dsr <= limit * 0.65 ? '#10b981' : dsr <= limit ? '#f59e0b' : '#ef4444'
+  const statusLabel = dsr <= limit * 0.65 ? '안전' : dsr <= limit ? '주의' : 'DSR 초과'
+
+  const gaugeData = [
+    { value: filled, fill: color },
+    { value: Math.max(0, empty), fill: '#e0e7ff' },
+  ]
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative" style={{ width: 200, height: 110 }}>
+        <PieChart width={200} height={110}>
+          <Pie
+            data={gaugeData}
+            cx={100} cy={105}
+            startAngle={180} endAngle={0}
+            innerRadius={60} outerRadius={92}
+            dataKey="value"
+            strokeWidth={0}
+          >
+            {gaugeData.map((entry, i) => (
+              <Cell key={i} fill={entry.fill} />
+            ))}
+          </Pie>
+        </PieChart>
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+          <div className="text-3xl font-bold leading-tight" style={{ color }}>
+            {dsr.toFixed(1)}%
+          </div>
+          <div className="text-xs font-semibold mt-0.5" style={{ color }}>
+            {statusLabel}
+          </div>
+        </div>
+      </div>
+      <p className="text-xs text-gray-400 mt-1">DSR 한도 {limit}% 기준</p>
+    </div>
+  )
+}
+
+/* ─── 월 소득 분배 바 ────────────────────────────────────────── */
+function BudgetBar({
+  monthlyIncome, existingDebt, available,
+}: {
+  monthlyIncome: number; existingDebt: number; available: number;
+}) {
+  const existPct = Math.min((existingDebt / monthlyIncome) * 100, 100)
+  const availPct = Math.min((available / monthlyIncome) * 100, 100 - existPct)
+  const restPct  = Math.max(0, 100 - existPct - availPct)
+
+  return (
+    <div className="w-full">
+      <div className="flex h-9 rounded-xl overflow-hidden mb-3 border border-gray-100">
+        {existingDebt > 0 && (
+          <div
+            className="flex items-center justify-center text-white text-[10px] font-semibold bg-amber-400"
+            style={{ width: `${existPct}%` }}
+          >
+            {existPct > 10 ? '기존' : ''}
+          </div>
+        )}
+        {available > 0 && (
+          <div
+            className="flex items-center justify-center text-white text-[10px] font-semibold bg-indigo-500"
+            style={{ width: `${availPct}%` }}
+          >
+            {availPct > 10 ? '신규' : ''}
+          </div>
+        )}
+        <div className="flex-1 bg-gray-100" />
+      </div>
+      {/* 범례 */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-600">
+        {existingDebt > 0 && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm bg-amber-400 flex-shrink-0" />
+            <span>기존 대출 {fmtWon(existingDebt)}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-indigo-500 flex-shrink-0" />
+          <span>신규 가능 {fmtWon(available)}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-gray-200 flex-shrink-0" />
+          <span>DSR 한도 밖 {fmtWon(Math.max(0, monthlyIncome - existingDebt - available))}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── 프리셋 ─────────────────────────────────────────────────── */
+const PRESETS = [
+  { label: '👤 청년 직장인',  income: 40_000_000, debt: 500_000,   rate: 4.5, period: 360, dsr: 40 },
+  { label: '👨‍👩‍👧 맞벌이 부부', income: 80_000_000, debt: 1_000_000, rate: 4.2, period: 300, dsr: 40 },
+  { label: '💼 고소득자',      income: 150_000_000,debt: 2_000_000, rate: 4.0, period: 240, dsr: 40 },
+]
+
+/* ─── 메인 컴포넌트 ──────────────────────────────────────────── */
 export default function LoanLimitSimulatorPage() {
-  const [annualIncome, setAnnualIncome] = useState<string>('')
-  const [currentDebtPayment, setCurrentDebtPayment] = useState<string>('')
-  const [interestRate, setInterestRate] = useState<string>('4.5')
-  const [loanPeriod, setLoanPeriod] = useState<string>('240')
-  const [dsrLimit, setDsrLimit] = useState<string>('40')
-  const [result, setResult] = useState<LimitResult | null>(null)
+  const [income,       setIncome]       = useState(60_000_000)
+  const [existingDebt, setExistingDebt] = useState(0)
+  const [dsrLimit,     setDsrLimit]     = useState(40)
+  const [rate,         setRate]         = useState(4.5)
+  const [period,       setPeriod]       = useState(240)
 
-  const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat('ko-KR').format(Math.round(num))
-  }
+  /* 실시간 계산 */
+  const result = useMemo(() => {
+    const monthlyIncome  = income / 12
+    const maxMonthly     = monthlyIncome * (dsrLimit / 100)
+    const available      = Math.max(0, maxMonthly - existingDebt)
+    const r = rate / 12 / 100
+    const loanLimit = r === 0
+      ? available * period
+      : available * (Math.pow(1 + r, period) - 1) / (r * Math.pow(1 + r, period))
+    const currentDSR = monthlyIncome > 0
+      ? ((existingDebt + available) / monthlyIncome) * 100
+      : 0
+    return { monthlyIncome, maxMonthly, available, loanLimit, currentDSR }
+  }, [income, existingDebt, dsrLimit, rate, period])
 
-  // 원리금균등 방식으로 대출 가능 금액 역산
-  const calculateLoanAmount = (monthlyPayment: number, annualRate: number, months: number): number => {
-    const monthlyRate = annualRate / 12 / 100
-    if (monthlyRate === 0) return monthlyPayment * months
-
-    // 원리금균등 공식을 역산
-    // monthlyPayment = principal * (r * (1+r)^n) / ((1+r)^n - 1)
-    // principal = monthlyPayment * ((1+r)^n - 1) / (r * (1+r)^n)
-    const principal = monthlyPayment * (Math.pow(1 + monthlyRate, months) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, months))
-    return principal
-  }
-
-  const handleCalculate = () => {
-    const income = parseFloat(annualIncome.replace(/,/g, ''))
-    const debtPayment = parseFloat(currentDebtPayment.replace(/,/g, '')) || 0
-    const rate = parseFloat(interestRate)
-    const period = parseFloat(loanPeriod)
-    const dsr = parseFloat(dsrLimit)
-
-    // 유효성 검증
-    if (!income || income <= 0) {
-      alert('연 소득을 올바르게 입력해주세요.')
-      return
-    }
-    if (debtPayment < 0) {
-      alert('기존 대출 월 상환액을 올바르게 입력해주세요.')
-      return
-    }
-    if (!rate || rate <= 0 || rate > 100) {
-      alert('금리를 올바르게 입력해주세요. (0 ~ 100% 사이)')
-      return
-    }
-    if (!period || period <= 0 || period > 600) {
-      alert('상환 기간을 올바르게 입력해주세요. (1 ~ 600개월 사이)')
-      return
-    }
-    if (!dsr || dsr <= 0 || dsr > 100) {
-      alert('DSR 한도를 올바르게 입력해주세요. (0 ~ 100% 사이)')
-      return
-    }
-
-    // 계산
-    const monthlyIncome = income / 12
-    const maxMonthlyPayment = monthlyIncome * (dsr / 100)
-    const availablePayment = Math.max(0, maxMonthlyPayment - debtPayment)
-
-    // 신규 대출 가능 금액 계산
-    const estimatedLoanLimit = calculateLoanAmount(availablePayment, rate, period)
-
-    // 실제 DSR 비율 (신규 대출 포함)
-    const actualDsrRatio = ((debtPayment + availablePayment) / monthlyIncome) * 100
-
-    setResult({
-      maxMonthlyPayment,
-      estimatedLoanLimit,
-      monthlyIncome,
-      currentDebtPayment: debtPayment,
-      availablePayment,
-      dsrRatio: actualDsrRatio,
-      dsrLimit: dsr
-    })
-  }
-
-  const handleReset = () => {
-    setAnnualIncome('')
-    setCurrentDebtPayment('')
-    setInterestRate('4.5')
-    setLoanPeriod('240')
-    setDsrLimit('40')
-    setResult(null)
-  }
-
-  const handleNumberInput = (value: string, setter: (val: string) => void) => {
-    const numValue = value.replace(/[^0-9]/g, '')
-    if (numValue) {
-      setter(formatNumber(parseFloat(numValue)))
-    } else {
-      setter('')
-    }
-  }
-
-  const loadPreset = (preset: 'young-worker' | 'family' | 'high-income') => {
-    switch (preset) {
-      case 'young-worker':
-        setAnnualIncome(formatNumber(40000000))
-        setCurrentDebtPayment(formatNumber(500000))
-        setInterestRate('4.5')
-        setLoanPeriod('360')
-        setDsrLimit('40')
-        break
-      case 'family':
-        setAnnualIncome(formatNumber(80000000))
-        setCurrentDebtPayment(formatNumber(1000000))
-        setInterestRate('4.2')
-        setLoanPeriod('300')
-        setDsrLimit('40')
-        break
-      case 'high-income':
-        setAnnualIncome(formatNumber(150000000))
-        setCurrentDebtPayment(formatNumber(2000000))
-        setInterestRate('4.0')
-        setLoanPeriod('240')
-        setDsrLimit('40')
-        break
-    }
+  const applyPreset = (p: typeof PRESETS[0]) => {
+    setIncome(p.income)
+    setExistingDebt(p.debt)
+    setRate(p.rate)
+    setPeriod(p.period)
+    setDsrLimit(p.dsr)
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
-      {/* Hero Section */}
+    <div className="container max-w-4xl py-8">
+      {/* ─── 헤더 ──────────────────────────────────────────────── */}
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Target className="w-8 h-8 text-primary" />
+        <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
+          ⚡ 슬라이더 조작 즉시 계산
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
-          대출 한도 시뮬레이터
-        </h1>
-        <p className="text-gray-600 text-lg">
-          소득과 조건을 입력하여 예상 대출 한도를 확인하세요
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">대출 한도 시뮬레이터</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          소득과 조건을 입력하면 DSR 기반 대출 한도를 즉시 확인합니다
         </p>
       </div>
 
-      {/* 안내 카드 */}
-      <Card className="mb-6 bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">DSR(총부채원리금상환비율) 기반 계산</p>
-              <p>본 계산기는 DSR 규제를 기반으로 예상 대출 한도를 계산합니다. 실제 한도는 신용등급, 담보 가치, 소득 증빙, 금융기관 정책 등에 따라 달라질 수 있습니다.</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 예시 시나리오 */}
-      <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
-        <CardContent className="pt-6">
-          <h3 className="font-semibold mb-3 text-gray-900 flex items-center gap-2">
-            <span>✨</span>
-            <span>빠른 시작: 예시 시나리오</span>
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Button
-              onClick={() => loadPreset('young-worker')}
-              variant="outline"
-              className="bg-white hover:bg-blue-50 border-blue-200 h-auto py-3 flex flex-col items-start gap-1"
+      {/* ─── 입력 패널 (라이트 그라디언트) ─────────────────────── */}
+      <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-3xl p-6 sm:p-8 mb-8">
+        {/* 프리셋 */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {PRESETS.map(p => (
+            <button
+              key={p.label}
+              onClick={() => applyPreset(p)}
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
             >
-              <span className="font-semibold text-sm">👤 청년 직장인</span>
-              <span className="text-xs text-gray-500">연 4천만원 / 기존 대출 50만원</span>
-            </Button>
-            <Button
-              onClick={() => loadPreset('family')}
-              variant="outline"
-              className="bg-white hover:bg-green-50 border-green-200 h-auto py-3 flex flex-col items-start gap-1"
-            >
-              <span className="font-semibold text-sm">👨‍👩‍👧 맞벌이 부부</span>
-              <span className="text-xs text-gray-500">연 8천만원 / 기존 대출 100만원</span>
-            </Button>
-            <Button
-              onClick={() => loadPreset('high-income')}
-              variant="outline"
-              className="bg-white hover:bg-purple-50 border-purple-200 h-auto py-3 flex flex-col items-start gap-1"
-            >
-              <span className="font-semibold text-sm">💼 고소득자</span>
-              <span className="text-xs text-gray-500">연 1.5억원 / 기존 대출 200만원</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              {p.label}
+            </button>
+          ))}
+        </div>
 
-      {/* 입력 카드 */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>소득 및 부채 정보 입력</CardTitle>
-          <CardDescription>
-            현재 소득과 부채 상황을 입력하세요
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* 연 소득 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              연 소득 (원)
-            </label>
-            <Input
-              type="text"
-              placeholder="예: 60,000,000"
-              value={annualIncome}
-              onChange={(e) => handleNumberInput(e.target.value, setAnnualIncome)}
-              className="text-lg"
-            />
-            <p className="text-xs text-gray-500">
-              세전 연 소득을 입력하세요 (근로소득, 사업소득 등)
-            </p>
-          </div>
+        {/* 슬라이더 */}
+        <div className="space-y-6">
+          <SliderInput
+            label="연 소득 (세전)"
+            value={income} min={10_000_000} max={300_000_000} step={1_000_000}
+            onChange={setIncome}
+            displayValue={`${fmt(income)}원`}
+          />
+          <SliderInput
+            label="기존 대출 월 상환액"
+            value={existingDebt} min={0} max={5_000_000} step={100_000}
+            onChange={setExistingDebt}
+            displayValue={existingDebt === 0 ? '없음' : `${fmt(existingDebt)}원`}
+          />
 
-          {/* 기존 대출 월 상환액 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              기존 대출 월 상환액 (원)
-            </label>
-            <Input
-              type="text"
-              placeholder="예: 1,000,000 (없으면 0)"
-              value={currentDebtPayment}
-              onChange={(e) => handleNumberInput(e.target.value, setCurrentDebtPayment)}
-              className="text-lg"
-            />
-            <p className="text-xs text-gray-500">
-              현재 갚고 있는 모든 대출의 월 상환액 합계 (없으면 0 입력)
-            </p>
-          </div>
-
-          {/* DSR 한도 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              DSR 한도 (%)
-            </label>
-            <Input
-              type="number"
-              placeholder="예: 40"
-              value={dsrLimit}
-              onChange={(e) => setDsrLimit(e.target.value)}
-              step="1"
-              min="0"
-              max="100"
-              className="text-lg"
-            />
-            <p className="text-xs text-gray-500">
-              일반적으로 40% (9억 이하 주담대) 또는 50% (기타 대출) 적용
-            </p>
-          </div>
-
-          {/* 연 금리 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              예상 연 금리 (%)
-            </label>
-            <Input
-              type="number"
-              placeholder="예: 4.5"
-              value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
-              step="0.01"
-              min="0"
-              max="100"
-              className="text-lg"
-            />
-            <p className="text-xs text-gray-500">
-              대출받을 예상 금리를 입력하세요
-            </p>
-          </div>
-
-          {/* 상환 기간 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              상환 기간 (개월)
-            </label>
-            <Input
-              type="number"
-              placeholder="예: 240"
-              value={loanPeriod}
-              onChange={(e) => setLoanPeriod(e.target.value)}
-              min="1"
-              max="600"
-              className="text-lg"
-            />
-            <p className="text-xs text-gray-500">
-              대출 상환 기간을 개월 단위로 입력하세요 (예: 20년 = 240개월)
-            </p>
-          </div>
-
-          {/* 버튼 */}
-          <div className="flex gap-3 pt-4">
-            <Button onClick={handleCalculate} className="flex-1" size="lg">
-              <Calculator className="w-4 h-4 mr-2" />
-              한도 계산하기
-            </Button>
-            <Button onClick={handleReset} variant="outline" size="lg">
-              초기화
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 결과 카드 */}
-      {result && (
-        <Card className="mb-6 border-primary">
-          <CardHeader>
-            <CardTitle className="text-primary">예상 대출 한도</CardTitle>
-            <CardDescription>
-              입력하신 조건으로 계산한 예상 대출 가능 금액입니다
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* 예상 대출 한도 */}
-              <div className="p-6 bg-primary/5 rounded-lg border-2 border-primary">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Target className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">예상 대출 가능 금액</p>
-                    <p className="text-3xl font-bold text-primary">
-                      {formatNumber(result.estimatedLoanLimit)}원
-                    </p>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 mt-3">
-                  * 원리금균등 상환 방식 기준
-                </p>
-              </div>
-
-              {/* DSR 비율 */}
-              <div className={`p-4 rounded-lg border ${
-                result.dsrRatio <= result.dsrLimit
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">DSR (총부채원리금상환비율)</p>
-                    <p className={`text-2xl font-bold ${
-                      result.dsrRatio <= result.dsrLimit ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {result.dsrRatio.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">DSR 한도</p>
-                    <p className="text-lg font-semibold text-gray-700">{result.dsrLimit}%</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 상세 정보 */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="w-4 h-4 text-gray-600" />
-                    <p className="text-sm text-gray-600">월 소득</p>
-                  </div>
-                  <p className="text-xl font-bold text-gray-900">
-                    {formatNumber(result.monthlyIncome)}원
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-gray-600" />
-                    <p className="text-sm text-gray-600">최대 월 상환 가능액</p>
-                  </div>
-                  <p className="text-xl font-bold text-gray-900">
-                    {formatNumber(result.maxMonthlyPayment)}원
-                  </p>
-                </div>
-
-                <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    <p className="text-sm text-amber-700">기존 대출 월 상환액</p>
-                  </div>
-                  <p className="text-xl font-bold text-amber-900">
-                    {formatNumber(result.currentDebtPayment)}원
-                  </p>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calculator className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm text-blue-700">신규 대출 가능 월 상환액</p>
-                  </div>
-                  <p className="text-xl font-bold text-blue-900">
-                    {formatNumber(result.availablePayment)}원
-                  </p>
-                </div>
-              </div>
-
-              {/* 계산 공식 설명 */}
-              <div className="pt-4 border-t">
-                <p className="text-xs text-gray-500 mb-2">📌 계산 방식</p>
-                <div className="space-y-1 text-sm text-gray-600 bg-gray-50 p-3 rounded">
-                  <p>• DSR = (모든 대출 월 상환액) / (월 소득) × 100</p>
-                  <p>• 최대 월 상환액 = 월 소득 × (DSR 한도 / 100)</p>
-                  <p>• 신규 대출 가능 월 상환액 = 최대 월 상환액 - 기존 대출 월 상환액</p>
-                  <p>• 대출 가능 금액 = 원리금균등 공식으로 역산</p>
-                </div>
+          {/* DSR 한도 토글 */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-600">DSR 한도</span>
+              <div className="flex gap-1.5">
+                {[30, 40, 50].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setDsrLimit(d)}
+                    className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all ${
+                      dsrLimit === d
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50'
+                    }`}
+                  >
+                    {d}%
+                  </button>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <p className="text-xs text-gray-400">
+              주담대 9억 이하 → 40% / 기타 대출 → 40~50%
+            </p>
+          </div>
 
-      {/* 상세 가이드 */}
+          <SliderInput
+            label="예상 연 금리"
+            value={rate} min={1} max={20} step={0.1}
+            onChange={setRate}
+            displayValue={`${rate.toFixed(1)}%`}
+          />
+          <SliderInput
+            label="상환 기간"
+            value={period} min={12} max={480} step={12}
+            onChange={setPeriod}
+            displayValue={`${period / 12}년 (${period}개월)`}
+          />
+        </div>
+      </div>
+
+      {/* ─── 결과 영역 ──────────────────────────────────────────── */}
+
+      {/* 대출 한도 히어로 카드 */}
+      <div
+        className="rounded-2xl p-6 sm:p-8 mb-5 text-white"
+        style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)' }}
+      >
+        <p className="text-indigo-200 text-sm mb-1">예상 대출 가능 금액 (DSR 기준)</p>
+        <p className="text-4xl sm:text-5xl font-bold mb-1 tracking-tight">
+          {fmtWon(result.loanLimit)}
+        </p>
+        <p className="text-indigo-300 text-xs mt-3">
+          원리금균등 상환 기준 &nbsp;·&nbsp; 금리 {rate.toFixed(1)}% &nbsp;·&nbsp; {period / 12}년
+        </p>
+      </div>
+
+      {/* DSR 게이지 + 월 소득 분배 */}
+      <div className="grid sm:grid-cols-2 gap-4 mb-5">
+        {/* DSR 게이지 */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <h3 className="font-bold text-sm text-gray-700 mb-4">DSR 현황</h3>
+          <DSRGauge dsr={result.currentDSR} limit={dsrLimit} />
+        </div>
+
+        {/* 월 소득 분배 바 */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <h3 className="font-bold text-sm text-gray-700 mb-1">월 소득 활용 현황</h3>
+          <p className="text-xs text-gray-400 mb-4">
+            월 소득 <span className="font-semibold text-gray-600">{fmtWon(result.monthlyIncome)}</span>의 분배
+          </p>
+          <BudgetBar
+            monthlyIncome={result.monthlyIncome}
+            existingDebt={existingDebt}
+            available={result.available}
+          />
+        </div>
+      </div>
+
+      {/* KPI 4개 카드 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        <div className="rounded-xl p-4 bg-emerald-50 border border-emerald-100">
+          <p className="text-xs text-emerald-600 mb-1">월 소득</p>
+          <p className="text-base font-bold text-emerald-800 leading-tight">
+            {fmtWon(result.monthlyIncome)}
+          </p>
+        </div>
+        <div className="rounded-xl p-4 bg-indigo-50 border border-indigo-100">
+          <p className="text-xs text-indigo-600 mb-1">최대 월 상환 가능</p>
+          <p className="text-base font-bold text-indigo-800 leading-tight">
+            {fmtWon(result.maxMonthly)}
+          </p>
+        </div>
+        <div className="rounded-xl p-4 bg-amber-50 border border-amber-100">
+          <p className="text-xs text-amber-600 mb-1">기존 대출 상환액</p>
+          <p className="text-base font-bold text-amber-800 leading-tight">
+            {existingDebt === 0 ? '없음' : fmtWon(existingDebt)}
+          </p>
+        </div>
+        <div className="rounded-xl p-4 bg-blue-50 border border-blue-100">
+          <p className="text-xs text-blue-600 mb-1">신규 월 납입 가능</p>
+          <p className="text-base font-bold text-blue-800 leading-tight">
+            {fmtWon(result.available)}
+          </p>
+        </div>
+      </div>
+
+      {/* ─── 계산 공식 요약 ──────────────────────────────────────── */}
+      <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 mb-8 text-sm text-gray-600 space-y-1">
+        <p className="font-semibold text-gray-700 mb-2 text-xs">📌 계산 방식</p>
+        <p>• DSR = (모든 대출 월 상환액) ÷ 월 소득 × 100</p>
+        <p>• 최대 월 상환액 = 월 소득 × (DSR 한도 ÷ 100)</p>
+        <p>• 신규 월 상환 가능액 = 최대 월 상환액 − 기존 대출 월 상환액</p>
+        <p>• 대출 가능 금액 = 원리금균등 공식 역산</p>
+      </div>
+
+      {/* ─── 하단 가이드 카드 (원본 유지) ───────────────────────── */}
       <Card className="mt-6">
         <CardContent className="pt-6">
           <h2 className="text-xl font-bold mb-4 text-gray-900">💡 언제 DSR 한도 계산이 필요할까요?</h2>
@@ -562,10 +479,8 @@ export default function LoanLimitSimulatorPage() {
         </CardContent>
       </Card>
 
-      {/* 면책 문구 */}
       <DisclaimerNotice message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요." />
 
-      {/* 추가 안내 */}
       <Card className="mt-6 bg-gray-50">
         <CardContent className="pt-6">
           <h3 className="font-semibold mb-3 text-gray-900">💡 DSR 규제 안내</h3>
@@ -603,6 +518,37 @@ export default function LoanLimitSimulatorPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ─── 슬라이더 스타일 ─────────────────────────────────────── */}
+      <style jsx>{`
+        .slider-light {
+          -webkit-appearance: none;
+          appearance: none;
+          outline: none;
+        }
+        .slider-light::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #6366f1;
+          cursor: pointer;
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+          transition: box-shadow 0.15s;
+        }
+        .slider-light::-webkit-slider-thumb:hover {
+          box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.3);
+        }
+        .slider-light::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #6366f1;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+      `}</style>
     </div>
   )
 }

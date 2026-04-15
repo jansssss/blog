@@ -16,6 +16,16 @@ export interface TrendItem {
 
 export const TREND_DATA: TrendItem[] = [
   {
+    href: '/trend/oil-shock-korea-strategy',
+    badge: '긴급분석',
+    badgeColor: '#b45309',
+    title: '이란-이스라엘-미국 확전: 유가·인플레이션 속 한국 생존 전략',
+    description: '유가 폭등·글로벌 인플레이션 재점화가 내 가계를 흔드는 구조, 일본·중국 변수, 대출·자산·생활비 실전 대비 완전 분석',
+    tag: '지정학·유가·가계경제',
+    gradient: 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #dc2626 100%)',
+    updatedAt: '2026.04.15',
+  },
+  {
     href: '/trend/israel-iran-war',
     badge: '전쟁·지정학',
     badgeColor: '#7c3aed',

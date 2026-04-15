@@ -93,24 +93,22 @@ function SliderInput({
 }) {
   const pct = ((value - min) / (max - min)) * 100
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-slate-400">{label}</span>
-        <span className="text-white font-bold text-base sm:text-lg">{displayValue}</span>
+    <div className="space-y-2.5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-semibold text-white/70">{label}</span>
+        <span className="text-2xl font-extrabold text-white">{displayValue}</span>
       </div>
-      <div className="relative">
-        <input
-          type="range"
-          min={min} max={max} step={step}
-          value={value}
-          onChange={e => onChange(Number(e.target.value))}
-          className="slider-rc w-full h-2 rounded-full cursor-pointer appearance-none"
-          style={{
-            background: `linear-gradient(to right, #818cf8 0%, #818cf8 ${pct}%, #334155 ${pct}%, #334155 100%)`,
-          }}
-        />
-      </div>
-      <div className="flex justify-between text-xs text-slate-600 mt-1">
+      <input
+        type="range"
+        min={min} max={max} step={step}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="slider-rc w-full h-1.5 rounded-full cursor-pointer appearance-none"
+        style={{
+          background: `linear-gradient(90deg, #818cf8 ${pct}%, rgba(255,255,255,0.15) ${pct}%)`,
+        }}
+      />
+      <div className="flex justify-between text-xs text-white/35">
         <span>{fmt(min)}</span>
         <span>{fmt(max)}</span>
       </div>
@@ -153,8 +151,8 @@ export default function RepaymentComparePage() {
   const barData = useMemo(() => {
     if (!epi || !ep) return []
     return [
-      { name: '원리금균등', value: Math.round(epi.totalInterest), fill: '#60a5fa' },
-      { name: '원금균등',   value: Math.round(ep.totalInterest),  fill: '#34d399' },
+      { name: '원리금균등', value: Math.round(epi.totalInterest), fill: '#6366f1' },
+      { name: '원금균등',   value: Math.round(ep.totalInterest),  fill: '#10b981' },
     ]
   }, [epi, ep])
 
@@ -175,20 +173,17 @@ export default function RepaymentComparePage() {
       </div>
 
       {/* ─── 다크 슬라이더 패널 ─────────────────────────────────── */}
-      <div
-        className="rounded-3xl p-6 sm:p-8 mb-8"
-        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)' }}
-      >
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 mb-8">
         {/* 프리셋 */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {PRESETS.map(p => (
             <button
               key={p.label}
               onClick={() => { setAmount(p.amount); setRate(p.rate); setPeriod(p.period) }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-indigo-500 hover:text-white transition-all border border-white/10"
             >
               {p.label}
-              <span className="text-slate-500 ml-1">{fmt(p.amount)} / {p.rate}% / {p.period/12}년</span>
+              <span className="text-white/40 ml-1">{fmt(p.amount)} / {p.rate}% / {p.period/12}년</span>
             </button>
           ))}
         </div>
@@ -292,54 +287,50 @@ export default function RepaymentComparePage() {
           </div>
 
           {/* ─── 월 납입액 변화 (Line Chart) ─────────────────────── */}
-          <div className="rounded-2xl p-5 sm:p-6 mb-5 bg-slate-900 border border-slate-700">
-            <h3 className="text-white font-bold mb-0.5">월 납입액 변화</h3>
-            <p className="text-slate-400 text-xs mb-5">
+          <div className="rounded-3xl p-5 sm:p-6 mb-5 bg-white shadow-sm border border-gray-100">
+            <p className="text-sm font-bold text-gray-700 mb-0.5">월 납입액 변화</p>
+            <p className="text-xs text-gray-400 mb-5">
               기간별 월 납입액 — 원리금균등(파란선)은 수평, 원금균등(초록선)은 우하향
             </p>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={lineData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
                   dataKey="month"
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: '#9ca3af', fontSize: 11 }}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: '#9ca3af', fontSize: 11 }}
                   tickFormatter={v => `${Math.round(v / 10_000)}만`}
                   width={50}
                 />
-                <Tooltip
-                  contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 10 }}
-                  labelStyle={{ color: '#e2e8f0', fontSize: 12, marginBottom: 4 }}
-                  formatter={(v: unknown) => `${fmtWon(Number(v))}`}
-                />
-                <Legend wrapperStyle={{ color: '#94a3b8', fontSize: 12, paddingTop: 8 }} />
+                <Tooltip formatter={(v: unknown) => `${fmtWon(Number(v))}`} />
+                <Legend wrapperStyle={{ color: '#6b7280', fontSize: 12, paddingTop: 8 }} />
                 <Line
                   type="monotone" dataKey="원리금균등"
-                  stroke="#60a5fa" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }}
+                  stroke="#6366f1" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }}
                 />
                 <Line
                   type="monotone" dataKey="원금균등"
-                  stroke="#34d399" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }}
+                  stroke="#10b981" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
           {/* ─── 총 이자 비교 (Bar Chart) ─────────────────────────── */}
-          <div className="rounded-2xl p-5 sm:p-6 mb-8 bg-slate-900 border border-slate-700">
-            <h3 className="text-white font-bold mb-0.5">총 이자 비교</h3>
-            <p className="text-slate-400 text-xs mb-5">
+          <div className="rounded-3xl p-5 sm:p-6 mb-8 bg-white shadow-sm border border-gray-100">
+            <p className="text-sm font-bold text-gray-700 mb-0.5">총 이자 비교</p>
+            <p className="text-xs text-gray-400 mb-5">
               두 방식의 총 이자 차이 — 낮을수록 유리
             </p>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 13 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 13 }} />
                 <YAxis
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: '#9ca3af', fontSize: 11 }}
                   tickFormatter={v =>
                     v >= 100_000_000
                       ? `${(v / 100_000_000).toFixed(1)}억`
@@ -347,11 +338,7 @@ export default function RepaymentComparePage() {
                   }
                   width={55}
                 />
-                <Tooltip
-                  contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 10 }}
-                  labelStyle={{ color: '#e2e8f0', fontSize: 12, marginBottom: 4 }}
-                  formatter={(v: unknown) => `${fmtWon(Number(v))}`}
-                />
+                <Tooltip formatter={(v: unknown) => `${fmtWon(Number(v))}`} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                   {barData.map((entry, i) => (
                     <Cell key={i} fill={entry.fill} />

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 
@@ -49,46 +48,69 @@ function SliderInput({
   )
 }
 
-/* ─── DSR 게이지 (반원 도넛) ────────────────────────────────── */
+/* ─── DSR 게이지 (그라디언트 반원 SVG) ──────────────────────── */
 function DSRGauge({ dsr, limit }: { dsr: number; limit: number }) {
   const maxRange = Math.max(70, limit + 30)
-  const filled = Math.min(dsr, maxRange)
-  const empty = maxRange - filled
-  const color = dsr <= limit * 0.65 ? '#10b981' : dsr <= limit ? '#f59e0b' : '#ef4444'
-  const statusLabel = dsr <= limit * 0.65 ? '안전' : dsr <= limit ? '주의' : 'DSR 초과'
+  const pct = Math.min(dsr / maxRange, 1)
 
-  const gaugeData = [
-    { value: filled, fill: color },
-    { value: Math.max(0, empty), fill: '#e0e7ff' },
-  ]
+  const statusLabel = dsr <= limit * 0.65 ? '안전' : dsr <= limit ? '주의' : 'DSR 초과'
+  const statusColor = dsr <= limit * 0.65 ? '#10b981' : dsr <= limit ? '#f59e0b' : '#ef4444'
+
+  const W = 200, H = 108
+  const cx = 100, cy = 106
+  const ro = 86, ri = 58
+
+  // SVG 좌표: x=cx+r·cos(θ), y=cy-r·sin(θ) (y축 반전)
+  const pt = (deg: number, r: number) => ({
+    x: +(cx + r * Math.cos((deg * Math.PI) / 180)).toFixed(2),
+    y: +(cy - r * Math.sin((deg * Math.PI) / 180)).toFixed(2),
+  })
+
+  // 배경 반원 도넛 (180°→0°, 시계방향)
+  const bgPath = (() => {
+    const so = pt(180, ro), eo = pt(0, ro)
+    const si = pt(180, ri), ei = pt(0, ri)
+    return `M ${so.x} ${so.y} A ${ro} ${ro} 0 1 1 ${eo.x} ${eo.y} L ${ei.x} ${ei.y} A ${ri} ${ri} 0 1 0 ${si.x} ${si.y} Z`
+  })()
+
+  // 채움 도넛 (180°→fillEnd°, pct 비율)
+  const fillEnd = 180 - pct * 180
+  const large = pct >= 1 ? 1 : 0
+  const fillPath = pct > 0.005 ? (() => {
+    const so = pt(180, ro), eo = pt(fillEnd, ro)
+    const si = pt(180, ri), ei = pt(fillEnd, ri)
+    return `M ${so.x} ${so.y} A ${ro} ${ro} 0 ${large} 1 ${eo.x} ${eo.y} L ${ei.x} ${ei.y} A ${ri} ${ri} 0 ${large} 0 ${si.x} ${si.y} Z`
+  })() : null
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: 200, height: 110 }}>
-        <PieChart width={200} height={110}>
-          <Pie
-            data={gaugeData}
-            cx={100} cy={105}
-            startAngle={180} endAngle={0}
-            innerRadius={60} outerRadius={92}
-            dataKey="value"
-            strokeWidth={0}
-          >
-            {gaugeData.map((entry, i) => (
-              <Cell key={i} fill={entry.fill} />
-            ))}
-          </Pie>
-        </PieChart>
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-          <div className="text-3xl font-bold leading-tight text-gray-900">
-            {dsr.toFixed(1)}%
-          </div>
-          <div className="text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full text-white" style={{ background: color }}>
-            {statusLabel}
-          </div>
-        </div>
+      {/* 숫자 + 상태 뱃지 — 게이지 위 */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-2xl font-extrabold text-gray-900">{dsr.toFixed(1)}%</span>
+        <span
+          className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white leading-none"
+          style={{ background: statusColor }}
+        >
+          {statusLabel}
+        </span>
       </div>
-      <p className="text-xs text-gray-400 mt-1">DSR 한도 {limit}% 기준</p>
+
+      {/* 그라디언트 게이지 */}
+      <svg width={W} height={H} style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id="dsrGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#10b981" />
+            <stop offset="48%"  stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#ef4444" />
+          </linearGradient>
+        </defs>
+        {/* 배경 */}
+        <path d={bgPath} fill="#e0e7ff" />
+        {/* 채움 */}
+        {fillPath && <path d={fillPath} fill="url(#dsrGrad)" />}
+      </svg>
+
+      <p className="text-xs text-gray-400 -mt-1">DSR 한도 {limit}% 기준</p>
     </div>
   )
 }

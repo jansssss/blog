@@ -71,21 +71,21 @@ function SliderInput({
 }) {
   const pct = ((value - min) / (max - min)) * 100
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-baseline justify-between">
-        <label className="text-sm font-semibold text-white/70">{label}</label>
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-gray-600">{label}</label>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-extrabold text-white">{displayValue}</span>
-          <span className="text-sm text-white/50">{unit}</span>
+          <span className="text-indigo-700 font-bold text-base">{displayValue}</span>
+          {unit && <span className="text-sm text-gray-500">{unit}</span>}
         </div>
       </div>
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-        style={{ background: `linear-gradient(90deg, #818cf8 ${pct}%, rgba(255,255,255,0.15) ${pct}%)` }}
+        className="w-full h-2 rounded-full appearance-none cursor-pointer"
+        style={{ background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${pct}%, #c7d2fe ${pct}%, #c7d2fe 100%)` }}
       />
-      {hint && <p className="text-xs text-white/35">{hint}</p>}
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   )
 }
@@ -175,33 +175,35 @@ export default function LoanInterestCalculatorPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="container max-w-2xl py-8">
 
-      {/* ── 다크 입력 영역 ── */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 pt-10 pb-12">
-        <div className="max-w-2xl mx-auto space-y-8">
+      {/* ── 헤더 ── */}
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
+          ⚡ 슬라이더 조작 즉시 계산
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">대출 이자 계산기</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">슬라이더를 움직이면 바로 계산됩니다</p>
+      </div>
 
-          <div className="text-center space-y-1">
-            <p className="text-[11px] font-bold tracking-[0.25em] text-indigo-400 uppercase">Loan Calculator</p>
-            <h1 className="text-3xl font-extrabold text-white">대출 이자 계산기</h1>
-            <p className="text-sm text-white/40">슬라이더를 움직이면 바로 계산됩니다</p>
-          </div>
+      {/* ── 라이트 입력 영역 ── */}
+      <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-3xl p-6 sm:p-8 mb-8">
 
-          {/* 프리셋 칩 */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {presets.map(p => (
-              <button
-                key={p.label}
-                onClick={() => { setAmount(p.amt); setRate(p.r); setPeriod(p.p); setGrace(p.g) }}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-indigo-500 hover:text-white transition-all border border-white/10"
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+        {/* 프리셋 칩 */}
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+          {presets.map(p => (
+            <button
+              key={p.label}
+              onClick={() => { setAmount(p.amt); setRate(p.r); setPeriod(p.p); setGrace(p.g) }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
 
-          {/* 슬라이더 4개 */}
-          <div className="space-y-7">
+        {/* 슬라이더 4개 */}
+        <div className="space-y-7">
             <SliderInput
               label="대출 금액" unit="" value={amount}
               min={5_000_000} max={1_500_000_000} step={5_000_000}
@@ -226,12 +228,11 @@ export default function LoanInterestCalculatorPage() {
               onChange={v => setGrace(Math.min(v, period - 1))}
               hint={grace === 0 ? '거치기간 없음 — 처음부터 원금+이자 상환' : `${grace}개월 이자만 납부 후 원금 상환 시작`}
             />
-          </div>
         </div>
       </div>
 
       {/* ── 결과 영역 ── */}
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <div className="space-y-6">
 
         {/* KPI 3개 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -509,10 +510,10 @@ export default function LoanInterestCalculatorPage() {
 
       {/* 슬라이더 스타일 */}
       <style>{`
-        input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:6px}
-        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:white;border:3px solid #818cf8;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);transition:border-color .15s}
-        input[type=range]::-webkit-slider-thumb:hover{border-color:#6366f1}
-        input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:white;border:3px solid #818cf8;cursor:pointer}
+        input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:8px}
+        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#6366f1;cursor:pointer;box-shadow:0 0 0 4px rgba(99,102,241,0.2);transition:box-shadow .15s}
+        input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px rgba(99,102,241,0.3)}
+        input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#6366f1;cursor:pointer;border:none;box-shadow:0 0 0 4px rgba(99,102,241,0.2)}
       `}</style>
     </div>
   )

@@ -93,22 +93,22 @@ function SliderInput({
 }) {
   const pct = ((value - min) / (max - min)) * 100
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold text-white/70">{label}</span>
-        <span className="text-2xl font-extrabold text-white">{displayValue}</span>
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-gray-600">{label}</span>
+        <span className="text-indigo-700 font-bold text-base">{displayValue}</span>
       </div>
       <input
         type="range"
         min={min} max={max} step={step}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="slider-rc w-full h-1.5 rounded-full cursor-pointer appearance-none"
+        className="slider-rc w-full h-2 rounded-full cursor-pointer appearance-none"
         style={{
-          background: `linear-gradient(90deg, #818cf8 ${pct}%, rgba(255,255,255,0.15) ${pct}%)`,
+          background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${pct}%, #c7d2fe ${pct}%, #c7d2fe 100%)`,
         }}
       />
-      <div className="flex justify-between text-xs text-white/35">
+      <div className="flex justify-between text-xs text-gray-400 mt-1">
         <span>{fmt(min)}</span>
         <span>{fmt(max)}</span>
       </div>
@@ -163,7 +163,7 @@ export default function RepaymentComparePage() {
     <div className="container max-w-5xl py-8">
       {/* ─── 헤더 ──────────────────────────────────────────────── */}
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center gap-2 bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1 rounded-full text-xs font-semibold text-indigo-600 dark:text-indigo-300 mb-3">
+        <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
           ⚡ 슬라이더 조작 즉시 비교
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">상환 방식 비교 계산기</h1>
@@ -173,17 +173,17 @@ export default function RepaymentComparePage() {
       </div>
 
       {/* ─── 다크 슬라이더 패널 ─────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 mb-8">
+      <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-3xl p-6 sm:p-8 mb-8">
         {/* 프리셋 */}
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {PRESETS.map(p => (
             <button
               key={p.label}
               onClick={() => { setAmount(p.amount); setRate(p.rate); setPeriod(p.period) }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white/60 hover:bg-indigo-500 hover:text-white transition-all border border-white/10"
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
             >
               {p.label}
-              <span className="text-white/40 ml-1">{fmt(p.amount)} / {p.rate}% / {p.period/12}년</span>
+              <span className="text-indigo-400 ml-1">{fmt(p.amount)} / {p.rate}% / {p.period/12}년</span>
             </button>
           ))}
         </div>
@@ -565,22 +565,22 @@ export default function RepaymentComparePage() {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #818cf8;
+          background: #6366f1;
           cursor: pointer;
-          box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.25);
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
           transition: box-shadow 0.15s;
         }
         .slider-rc::-webkit-slider-thumb:hover {
-          box-shadow: 0 0 0 6px rgba(129, 140, 248, 0.35);
+          box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.3);
         }
         .slider-rc::-moz-range-thumb {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #818cf8;
+          background: #6366f1;
           cursor: pointer;
           border: none;
-          box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.25);
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
       `}</style>
     </div>

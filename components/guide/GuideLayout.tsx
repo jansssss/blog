@@ -50,7 +50,7 @@ export default function GuideLayout({
   children,
 }: GuideLayoutProps) {
   return (
-    <div className="container py-8 max-w-3xl mx-auto">
+    <div className="container py-8 max-w-4xl mx-auto">
       {/* 헤더 */}
       <header className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">

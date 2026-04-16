@@ -152,7 +152,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="container max-w-5xl py-10 px-4 sm:px-6 lg:px-8">
+    <div className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -186,7 +186,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
       )}
 
       {/* 2-column layout: article + sticky TOC */}
-      <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-12 lg:items-start">
+      <div className="lg:grid lg:grid-cols-[1fr_260px] lg:gap-14 lg:items-start">
         {/* Main Article */}
         <article>
           {/* Post Header */}

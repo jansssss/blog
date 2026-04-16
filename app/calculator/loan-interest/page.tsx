@@ -175,7 +175,7 @@ export default function LoanInterestCalculatorPage() {
   ]
 
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container max-w-6xl py-8">
 
       {/* ── 헤더 ── */}
       <div className="mb-8 text-center">
@@ -186,53 +186,58 @@ export default function LoanInterestCalculatorPage() {
         <p className="text-muted-foreground text-sm sm:text-base">슬라이더를 움직이면 바로 계산됩니다</p>
       </div>
 
-      {/* ── 라이트 입력 영역 ── */}
-      <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-3xl p-6 sm:p-8 mb-8">
+      {/* ── 메인 2컬럼 레이아웃 (데스크탑) ── */}
+      <div className="lg:grid lg:grid-cols-[2fr_3fr] lg:gap-8 lg:items-start">
 
-        {/* 프리셋 칩 */}
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
-          {presets.map(p => (
-            <button
-              key={p.label}
-              onClick={() => { setAmount(p.amt); setRate(p.r); setPeriod(p.p); setGrace(p.g) }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
-            >
-              {p.label}
-            </button>
-          ))}
+        {/* ── 입력 패널 (데스크탑에서 sticky) ── */}
+        <div className="lg:sticky lg:top-8">
+          <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-3xl p-6 sm:p-8 mb-8 lg:mb-0">
+
+            {/* 프리셋 칩 */}
+            <div className="flex flex-wrap gap-2 mb-6 justify-center">
+              {presets.map(p => (
+                <button
+                  key={p.label}
+                  onClick={() => { setAmount(p.amt); setRate(p.r); setPeriod(p.p); setGrace(p.g) }}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 슬라이더 4개 */}
+            <div className="space-y-7">
+              <SliderInput
+                label="대출 금액" unit="" value={amount}
+                min={5_000_000} max={1_500_000_000} step={5_000_000}
+                displayValue={fmtShort(amount)} onChange={setAmount}
+                hint={`${fmt(amount)}원`}
+              />
+              <SliderInput
+                label="연 금리" unit="%" value={rate}
+                min={10} max={200} step={1}
+                displayValue={rateReal.toFixed(1)} onChange={setRate}
+              />
+              <SliderInput
+                label="대출 기간" unit="개월" value={period}
+                min={6} max={360} step={6}
+                displayValue={`${period}`} onChange={setPeriod}
+                hint={`${Math.floor(period / 12)}년 ${period % 12 > 0 ? `${period % 12}개월` : ''}`}
+              />
+              <SliderInput
+                label="거치기간 (선택)" unit="개월" value={grace}
+                min={0} max={Math.max(0, period - 6)} step={1}
+                displayValue={`${grace}`}
+                onChange={v => setGrace(Math.min(v, period - 1))}
+                hint={grace === 0 ? '거치기간 없음 — 처음부터 원금+이자 상환' : `${grace}개월 이자만 납부 후 원금 상환 시작`}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 슬라이더 4개 */}
-        <div className="space-y-7">
-            <SliderInput
-              label="대출 금액" unit="" value={amount}
-              min={5_000_000} max={1_500_000_000} step={5_000_000}
-              displayValue={fmtShort(amount)} onChange={setAmount}
-              hint={`${fmt(amount)}원`}
-            />
-            <SliderInput
-              label="연 금리" unit="%" value={rate}
-              min={10} max={200} step={1}
-              displayValue={rateReal.toFixed(1)} onChange={setRate}
-            />
-            <SliderInput
-              label="대출 기간" unit="개월" value={period}
-              min={6} max={360} step={6}
-              displayValue={`${period}`} onChange={setPeriod}
-              hint={`${Math.floor(period / 12)}년 ${period % 12 > 0 ? `${period % 12}개월` : ''}`}
-            />
-            <SliderInput
-              label="거치기간 (선택)" unit="개월" value={grace}
-              min={0} max={Math.max(0, period - 6)} step={1}
-              displayValue={`${grace}`}
-              onChange={v => setGrace(Math.min(v, period - 1))}
-              hint={grace === 0 ? '거치기간 없음 — 처음부터 원금+이자 상환' : `${grace}개월 이자만 납부 후 원금 상환 시작`}
-            />
-        </div>
-      </div>
-
-      {/* ── 결과 영역 ── */}
-      <div className="space-y-6">
+        {/* ── 결과 영역 ── */}
+        <div className="space-y-6 mt-8 lg:mt-0">
 
         {/* KPI 3개 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -392,8 +397,11 @@ export default function LoanInterestCalculatorPage() {
           </p>
         </div>
 
-        {/* ─── 하단 안내 콘텐츠 (SEO + 가이드) ─── */}
-        <div className="space-y-6 mt-4">
+      </div>{/* 결과 영역 끝 */}
+      </div>{/* 2컬럼 그리드 끝 */}
+
+      {/* ─── 하단 안내 콘텐츠 (SEO + 가이드, 풀 width) ─── */}
+      <div className="space-y-6 mt-8">
 
           <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
             <h2 className="text-lg font-bold mb-4 text-gray-900">언제 대출 이자 계산이 필요할까요?</h2>
@@ -503,10 +511,9 @@ export default function LoanInterestCalculatorPage() {
             </div>
           </div>
 
-        </div>
-
-        <DisclaimerNotice />
       </div>
+
+      <DisclaimerNotice />
 
       {/* 슬라이더 스타일 */}
       <style>{`

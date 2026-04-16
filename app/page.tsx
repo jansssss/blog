@@ -140,21 +140,21 @@ export default async function HomePage({
         {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (
           <section className="mb-8">
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg">
+            <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-2xl p-5">
               {/* 섹션 헤더 */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-4 h-4 text-white" />
+                  <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-indigo-600" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-white leading-tight">핵심 금융 가이드</h2>
-                    <p className="text-[11px] text-blue-200 leading-tight">전문가 수준의 대출·신용 완전 정리</p>
+                    <h2 className="text-sm font-bold text-gray-900 leading-tight">핵심 금융 가이드</h2>
+                    <p className="text-[11px] text-gray-500 leading-tight">전문가 수준의 대출·신용 완전 정리</p>
                   </div>
                 </div>
                 <Link
                   href="/guide"
-                  className="text-[11px] text-blue-200 hover:text-white transition-colors flex items-center gap-1 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg"
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg"
                 >
                   전체 보기 <ArrowRight className="w-3 h-3" />
                 </Link>
@@ -165,12 +165,12 @@ export default async function HomePage({
                   <Link
                     key={g.href}
                     href={g.href}
-                    className="group block p-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl transition-all"
+                    className="group block p-3 bg-white hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-200 rounded-xl transition-all shadow-sm"
                   >
-                    <p className="text-xs font-semibold text-white leading-snug mb-1">
+                    <p className="text-xs font-semibold text-gray-800 leading-snug mb-1 group-hover:text-indigo-700 transition-colors">
                       {g.title}
                     </p>
-                    <p className="text-[11px] text-blue-200 leading-tight">{g.desc}</p>
+                    <p className="text-[11px] text-gray-400 leading-tight">{g.desc}</p>
                   </Link>
                 ))}
               </div>

@@ -80,10 +80,10 @@ function DSRGauge({ dsr, limit }: { dsr: number; limit: number }) {
           </Pie>
         </PieChart>
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-          <div className="text-3xl font-bold leading-tight" style={{ color }}>
+          <div className="text-3xl font-bold leading-tight text-gray-900">
             {dsr.toFixed(1)}%
           </div>
-          <div className="text-xs font-semibold mt-0.5" style={{ color }}>
+          <div className="text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full text-white" style={{ background: color }}>
             {statusLabel}
           </div>
         </div>

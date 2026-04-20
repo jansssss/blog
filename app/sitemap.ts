@@ -2,8 +2,6 @@ import { MetadataRoute } from 'next'
 import { supabase } from '@/lib/supabase'
 import { getCurrentSiteId, getHostFromRequest } from '@/lib/site'
 
-export const revalidate = 3600 // 1시간마다 재생성 — 새 포스트 sitemap 반영
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const host = await getHostFromRequest()
   const siteId = await getCurrentSiteId()

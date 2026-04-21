@@ -3,12 +3,6 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.ohyess.kr' }],
-        destination: 'https://ohyess.kr/:path*',
-        permanent: true,
-      },
-      {
         source: '/blog/자영업자-신용대출-조건-총정리-가능-기준한도승인-포인트-2026년',
         destination: '/guide/loan-types-complete',
         permanent: true,

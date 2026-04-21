@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '수수료 계산 공식·면제 조건·중도상환 vs 유지 판단 기준 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/early-repayment-fee',
+  },
 }
 
 const tocItems = [

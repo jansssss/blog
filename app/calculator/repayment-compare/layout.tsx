@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
   },
+  alternates: {
+    canonical: '/calculator/repayment-compare',
+  },
 }
 
 export default function RepaymentCompareLayout({

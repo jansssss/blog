@@ -1,5 +1,20 @@
 import Link from 'next/link'
 import { Calculator, TrendingUp, Shield, Sparkles, CheckCircle, ExternalLink, Mail } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'ohyess 소개 | 누구나 쉽게 이해하는 금융 정보 플랫폼',
+  description: 'ohyess는 대출, 금리, 재테크 정보를 누구나 이해할 수 있도록 제공하는 금융 정보 플랫폼입니다. 계산기, 가이드, 금리 비교까지 한 곳에서 확인하세요.',
+  openGraph: {
+    title: 'ohyess 소개 — 누구나 쉽게 이해하는 금융 정보',
+    description: '대출·금리·재테크 정보를 쉽고 정확하게 제공하는 금융 정보 플랫폼 ohyess를 소개합니다.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  alternates: {
+    canonical: '/about',
+  },
+}
 
 export default function AboutPage() {
   return <OhyessAbout />

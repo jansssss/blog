@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '보증 기관 비교·보증료 계산·활용 전략 완전 가이드',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/loan-guarantee',
+  },
 }
 
 const tocItems = [

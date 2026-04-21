@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '부동산에서 금융투자로 이동하는 자금 흐름과 정책 변화 분석',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/capital-market-shift',
+  },
 }
 
 export default function CapitalMarketShiftPage() {

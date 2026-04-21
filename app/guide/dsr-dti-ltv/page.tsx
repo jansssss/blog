@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '대출 한도를 결정하는 3가지 핵심 지표를 실전 사례로 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/dsr-dti-ltv',
+  },
 }
 
 const tocItems = [

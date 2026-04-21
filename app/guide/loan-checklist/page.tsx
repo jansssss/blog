@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '놓치면 후회하는 대출 전 10가지 확인사항을 실전 사례로 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/loan-checklist',
+  },
 }
 
 const tocItems = [

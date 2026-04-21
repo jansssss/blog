@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '금리 변동에 따른 최적 대출 전략 완전 가이드',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/rate-strategy',
+  },
 }
 
 const tocItems = [

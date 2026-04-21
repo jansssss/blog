@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '모든 대출 종류를 목적·금리·조건별로 한눈에 비교',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/loan-types-complete',
+  },
 }
 
 const tocItems = [

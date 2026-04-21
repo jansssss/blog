@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
   },
+  alternates: {
+    canonical: '/tools/health-overlap-check',
+  },
 }
 
 export default function HealthOverlapCheckLayout({

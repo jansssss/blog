@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '상환방식·금리 유형별 이자 계산법을 실전 사례로 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/loan-interest',
+  },
 }
 
 const tocItems = [

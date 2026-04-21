@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '거절 이유 파악부터 재신청 성공까지 완전 가이드',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/loan-rejection',
+  },
 }
 
 const tocItems = [

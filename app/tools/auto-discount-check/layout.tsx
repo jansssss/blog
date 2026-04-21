@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
   },
+  alternates: {
+    canonical: '/tools/auto-discount-check',
+  },
 }
 
 export default function AutoDiscountCheckLayout({

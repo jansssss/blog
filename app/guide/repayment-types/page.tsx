@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '3가지 상환 방식의 총이자·월납입액·현금흐름 차이를 실전 사례로 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/repayment-types',
+  },
 }
 
 const tocItems = [

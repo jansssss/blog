@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '호르무즈 봉쇄 시나리오·역사적 오일쇼크 사례·한국 경제 산업별 영향 완전 분석',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/us-iran-oil',
+  },
 }
 
 export default function UsIranOilPage() {

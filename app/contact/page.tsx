@@ -1,3 +1,19 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '문의하기 | ohyess 고객 문의',
+  description: 'ohyess에 궁금한 점이나 제안사항을 문의해주세요. 금융 정보, 계산기, 콘텐츠 관련 의견을 환영합니다.',
+  openGraph: {
+    title: '문의하기 — ohyess',
+    description: 'ohyess에 문의사항이나 제안을 남겨주세요.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  alternates: {
+    canonical: '/contact',
+  },
+}
+
 export default function ContactPage() {
   return (
     <div className="container max-w-4xl py-12">

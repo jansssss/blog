@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '주담대 한도·금리·절차를 실전 사례로 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/mortgage-loan',
+  },
 }
 
 const tocItems = [

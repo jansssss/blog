@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
   },
+  alternates: {
+    canonical: '/tools/insurance-remodel',
+  },
 }
 
 export default function InsuranceRemodelLayout({

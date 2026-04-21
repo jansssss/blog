@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: '신용점수 올리는 방법과 대출 금리에 미치는 영향 완전 정리',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/credit-score',
+  },
 }
 
 const tocItems = [

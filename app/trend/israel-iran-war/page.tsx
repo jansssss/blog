@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '네타냐후의 위기 돌파·트럼프의 시선 돌리기·중동 전쟁이 세계경제를 흔드는 구조 완전 해부',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/israel-iran-war',
+  },
 }
 
 export default function IsraelIranWarPage() {

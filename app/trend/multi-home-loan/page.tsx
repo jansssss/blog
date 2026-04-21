@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     description: '스트레스 DSR·2주택 대출 제한 전문가 분석',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/multi-home-loan',
+  },
 }
 
 export default function MultiHomeLoanPage() {

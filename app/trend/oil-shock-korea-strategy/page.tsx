@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '유가 폭등·글로벌 인플레이션 재가속 속 한국 경제 전망, 일본·중국 변수, 가계 실전 대비법 완전 분석',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/oil-shock-korea-strategy',
+  },
 }
 
 export default function OilShockKoreaStrategyPage() {

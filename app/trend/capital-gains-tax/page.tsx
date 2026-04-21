@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     description: '비과세 요건·중과세·절세 전략 전문가 분석',
     type: 'article',
   },
+  alternates: {
+    canonical: '/trend/capital-gains-tax',
+  },
 }
 
 export default function CapitalGainsTaxPage() {

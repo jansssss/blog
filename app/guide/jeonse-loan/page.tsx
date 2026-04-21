@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: '전세대출 종류·한도·보증·주의사항 완전 가이드',
     type: 'article',
   },
+  alternates: {
+    canonical: '/guide/jeonse-loan',
+  },
 }
 
 const tocItems = [

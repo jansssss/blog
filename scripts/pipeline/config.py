@@ -9,8 +9,8 @@ from pathlib import Path
 class AppConfig:
     project_root: Path
     prompt_path: Path
-    anthropic_api_key: str | None
-    anthropic_model: str
+    openai_api_key: str | None
+    openai_model: str
     tavily_api_key: str | None
     supabase_url: str | None
     supabase_service_role_key: str | None
@@ -38,8 +38,8 @@ def load_config() -> AppConfig:
     return AppConfig(
         project_root=project_root,
         prompt_path=scripts_root / "prompts" / "financial_columnist.txt",
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
-        anthropic_model=os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6",
+        openai_api_key=os.getenv("OPENAI_API_KEY") or None,
+        openai_model=os.getenv("OPENAI_MODEL") or "gpt-5.4-mini",
         tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
         supabase_url=os.getenv("NEXT_PUBLIC_SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,

@@ -43,8 +43,8 @@ def main() -> None:
     missing = []
     if not config.tavily_api_key:
         missing.append("TAVILY_API_KEY")
-    if not config.anthropic_api_key:
-        missing.append("ANTHROPIC_API_KEY")
+    if not config.openai_api_key:
+        missing.append("OPENAI_API_KEY")
     if not args.dry_run:
         if not config.supabase_url:
             missing.append("NEXT_PUBLIC_SUPABASE_URL")
@@ -55,10 +55,10 @@ def main() -> None:
         sys.exit(1)
 
     # ── 파이프라인 초기화 ──────────────────────────
-    researcher = TavilyResearcher(config.tavily_api_key, config.anthropic_api_key, config.anthropic_model)
+    researcher = TavilyResearcher(config.tavily_api_key, config.openai_api_key, config.openai_model)
     writer = ColumnistWriter(
-        api_key=config.anthropic_api_key,
-        model=config.anthropic_model,
+        api_key=config.openai_api_key,
+        model=config.openai_model,
         prompt_path=config.prompt_path,
     )
     publisher = SupabasePublisher(
@@ -89,8 +89,8 @@ def main() -> None:
             print(f"[STEP 1] 실패: {exc}", flush=True)
             sys.exit(1)
 
-        # 2. Claude - 칼럼 작성
-        print("[STEP 2] Claude 칼럼 작성 중...", flush=True)
+        # 2. OpenAI - 칼럼 작성
+        print("[STEP 2] OpenAI 칼럼 작성 중...", flush=True)
         try:
             article = writer.write(research)
             print(f"[STEP 2] 완료 - 제목: {article.title}", flush=True)

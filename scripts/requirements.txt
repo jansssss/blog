@@ -1,1 +1,3 @@
-anthropic>=0.40.0
+# ohyess.kr 자동 발행 파이프라인
+# Python 표준 라이브러리만 사용 (urllib, json, os, pathlib, hashlib)
+# 별도 패키지 설치 불필요

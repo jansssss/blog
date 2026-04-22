@@ -1,7 +1,7 @@
 """
-Claude API로 금융 칼럼니스트 스타일 글 생성
-- max_tokens: 7000 (GitHub Actions에서는 타임아웃 없음)
-- 구조화 JSON → Blogger 스타일 HTML 렌더링
+OpenAI API로 금융 칼럼니스트 스타일 글 생성
+- max_completion_tokens: 8000 (GitHub Actions에서는 타임아웃 없음)
+- 구조화 JSON → Supabase 발행용 시멘틱 HTML 렌더링
 """
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ class Article:
 
 
 class ColumnistWriter:
-    ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+    OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
     def __init__(self, api_key: str, model: str, prompt_path: Path) -> None:
         self.api_key = api_key
@@ -59,7 +59,7 @@ class ColumnistWriter:
         self.prompt_text = prompt_path.read_text(encoding="utf-8")
 
     def write(self, research: dict) -> Article:
-        """Perplexity 리서치 결과를 받아 칼럼 Article 반환"""
+        """Tavily 리서치 결과를 받아 칼럼 Article 반환"""
         topic = research["topic"]
         category = research.get("category", "금융")
         article_type = research.get("article_type", "경제이슈")
@@ -120,34 +120,34 @@ class ColumnistWriter:
             f"{json_format}"
         )
 
-        print(f"[COLUMNIST] Claude API 호출 중... 모델: {self.model}", flush=True)
+        print(f"[COLUMNIST] OpenAI API 호출 중... 모델: {self.model}", flush=True)
         payload = _post_json(
-            self.ANTHROPIC_API_URL,
+            self.OPENAI_API_URL,
             headers={
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
+                "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             },
             payload={
                 "model": self.model,
-                "max_tokens": 8000,
+                "max_completion_tokens": 8000,
+                "temperature": 0.3,
                 "messages": [{"role": "user", "content": instructions}],
             },
             timeout=300,
         )
 
-        content_text = payload["content"][0]["text"]
+        content_text = payload["choices"][0]["message"]["content"]
         try:
             data = json.loads(_extract_json(content_text))
         except json.JSONDecodeError as e:
-            # 디버그: 실패한 원본 응답 일부 출력
             snippet = content_text[:500].replace("\n", "\\n")
             print(f"[COLUMNIST] JSON 파싱 실패: {e}", flush=True)
             print(f"[COLUMNIST] 응답 앞 500자: {snippet}", flush=True)
-            raise RuntimeError(f"Claude JSON 파싱 실패: {e}") from e
+            raise RuntimeError(f"OpenAI JSON 파싱 실패: {e}") from e
 
-        input_tokens = payload.get("usage", {}).get("input_tokens", 0)
-        output_tokens = payload.get("usage", {}).get("output_tokens", 0)
+        usage = payload.get("usage", {})
+        input_tokens = usage.get("prompt_tokens", 0)
+        output_tokens = usage.get("completion_tokens", 0)
         print(
             f"[COLUMNIST] 완료! 섹션={len(data.get('sections', []))} "
             f"토큰={input_tokens}→{output_tokens}",

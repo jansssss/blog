@@ -12,12 +12,12 @@ from datetime import date
 
 class TavilyResearcher:
     TAVILY_URL = "https://api.tavily.com/search"
-    ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+    OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
-    def __init__(self, tavily_api_key: str, anthropic_api_key: str, anthropic_model: str = "claude-haiku-4-5-20251001") -> None:
+    def __init__(self, tavily_api_key: str, openai_api_key: str, openai_model: str = "gpt-5.4-mini") -> None:
         self.tavily_api_key = tavily_api_key
-        self.anthropic_api_key = anthropic_api_key
-        self.anthropic_model = anthropic_model
+        self.openai_api_key = openai_api_key
+        self.openai_model = openai_model
 
     def _tavily_search(self, query: str) -> dict:
         payload = {
@@ -80,7 +80,7 @@ class TavilyResearcher:
             "\n\n[주요 기사]\n" + "\n".join(combined_snippets)
         )
 
-        # Step 2: Anthropic으로 JSON 포맷
+        # Step 2: OpenAI로 JSON 포맷
         user_content = (
             f"오늘({today}) 아래 검색 결과에서 독자의 실생활에 직접 영향을 주는 이슈를 1개 선정하세요.\n\n"
             "【선정 기준 — 아래 3가지 유형 중 하나여야 합니다】\n"
@@ -108,22 +108,27 @@ class TavilyResearcher:
             "- 추측이나 불확실한 내용 금지"
         )
         payload = {
-            "model": self.anthropic_model,
-            "max_tokens": 2000,
-            "system": (
-                "당신은 대한민국 금융·경제 전문 리서처입니다. "
-                "주어진 검색 결과를 분석하여 정확한 JSON 형식으로 응답합니다."
-            ),
-            "messages": [{"role": "user", "content": user_content}],
+            "model": self.openai_model,
+            "max_completion_tokens": 2000,
+            "temperature": 0.2,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "당신은 대한민국 금융·경제 전문 리서처입니다. "
+                        "주어진 검색 결과를 분석하여 정확한 JSON 형식으로 응답합니다."
+                    ),
+                },
+                {"role": "user", "content": user_content},
+            ],
         }
 
         raw_body = json.dumps(payload).encode("utf-8")
         req = request.Request(
-            self.ANTHROPIC_URL,
+            self.OPENAI_URL,
             data=raw_body,
             headers={
-                "x-api-key": self.anthropic_api_key,
-                "anthropic-version": "2023-06-01",
+                "Authorization": f"Bearer {self.openai_api_key}",
                 "Content-Type": "application/json",
             },
             method="POST",
@@ -131,7 +136,7 @@ class TavilyResearcher:
         try:
             with request.urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                content = data["content"][0]["text"].strip()
+                content = data["choices"][0]["message"]["content"].strip()
                 if content.startswith("```"):
                     content = content.split("```")[1]
                     if content.startswith("json"):
@@ -139,4 +144,4 @@ class TavilyResearcher:
                 return json.loads(content.strip())
         except HTTPError as e:
             body = e.read().decode("utf-8")
-            raise RuntimeError(f"Anthropic HTTP {e.code}: {body}") from e
+            raise RuntimeError(f"OpenAI HTTP {e.code}: {body}") from e

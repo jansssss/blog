@@ -16,6 +16,16 @@ export interface TrendItem {
 
 export const TREND_DATA: TrendItem[] = [
   {
+    href: '/trend/kospi-7800',
+    badge: '속보',
+    badgeColor: '#0369a1',
+    title: '코스피 7800 돌파 완전 분석: 37년 역사·불장 이유·고점 이후 투자 전략',
+    description: '이란-미국 전쟁 역풍을 뚫고 세계 증시를 압도한 코스피, AI 반도체 슈퍼사이클의 구조적 배경과 역대 고점 이후 실전 투자 전략 완전 분석',
+    tag: '증시·투자전략',
+    gradient: 'linear-gradient(135deg, #0c4a6e 0%, #0369a1 50%, #7c3aed 100%)',
+    updatedAt: '2026.05.11',
+  },
+  {
     href: '/trend/oil-shock-korea-strategy',
     badge: '긴급분석',
     badgeColor: '#b45309',

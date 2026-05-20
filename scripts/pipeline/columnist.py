@@ -58,7 +58,7 @@ class ColumnistWriter:
         self.model = model
         self.prompt_text = prompt_path.read_text(encoding="utf-8")
 
-    def write(self, research: dict) -> Article:
+    def write(self, research: dict, performance_hints: str | None = None) -> Article:
         """Tavily 리서치 결과를 받아 칼럼 Article 반환"""
         topic = research["topic"]
         category = research.get("category", "금융")
@@ -111,9 +111,12 @@ class ColumnistWriter:
             '}'
         )
 
+        hints_block = f"\n{performance_hints}\n" if performance_hints else ""
+
         instructions = (
             f"{self.prompt_text}\n\n"
-            f"{research_block}\n\n"
+            f"{research_block}\n"
+            f"{hints_block}\n"
             f"위 리서치 자료를 바탕으로 칼럼을 작성하세요. "
             f"반드시 리서치의 수치와 출처를 글에 직접 인용하세요.\n\n"
             f"아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요:\n"

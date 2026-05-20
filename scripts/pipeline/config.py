@@ -16,6 +16,9 @@ class AppConfig:
     supabase_service_role_key: str | None
     publish_mode: str          # "publish" | "draft"
     posts_per_run: int         # 한 번에 생성할 글 수
+    gsc_client_secret_path: str | None
+    gsc_token_path: str | None
+    gsc_site_url: str | None
 
 
 def _load_dotenv(dotenv_path: Path) -> None:
@@ -45,4 +48,7 @@ def load_config() -> AppConfig:
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
         publish_mode=os.getenv("PUBLISH_MODE", "publish"),
         posts_per_run=int(os.getenv("POSTS_PER_RUN", "1")),
+        gsc_client_secret_path=os.getenv("GSC_CLIENT_SECRET_PATH") or str(scripts_root / "credentials" / "client_secret.json"),
+        gsc_token_path=os.getenv("GSC_TOKEN_PATH") or str(scripts_root / "credentials" / "token.json"),
+        gsc_site_url=os.getenv("GSC_SITE_URL") or None,
     )

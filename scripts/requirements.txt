@@ -1,3 +1,8 @@
-# ohyess.kr 자동 발행 파이프라인
-# Python 표준 라이브러리만 사용 (urllib, json, os, pathlib, hashlib)
-# 별도 패키지 설치 불필요
+# ohyess.kr 파이프라인 의존성
+# Python 3.9+
+
+# GSC (Google Search Console) 데이터 수집용
+google-api-python-client>=2.100.0
+google-auth>=2.23.0
+google-auth-httplib2>=0.1.1
+google-auth-oauthlib>=1.1.0

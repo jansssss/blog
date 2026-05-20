@@ -80,3 +80,7 @@ coverage/
 
 # Windows specific files
 Thumbs.db
+
+# GSC OAuth credentials
+scripts/credentials/client_secret*.json
+scripts/credentials/token.json

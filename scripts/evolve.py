@@ -83,7 +83,7 @@ def main() -> None:
             days=args.days,
         )
         collected = collector.collect_and_save()
-        print(f"[EVOLVE] 완료 — {collected}건 저장", flush=True)
+        print(f"[EVOLVE] 완료 - {collected}건 저장", flush=True)
     except Exception as exc:
         print(f"[EVOLVE] 실패: {exc}", flush=True)
         sys.exit(1)

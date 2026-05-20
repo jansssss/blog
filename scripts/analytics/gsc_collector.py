@@ -106,6 +106,69 @@ class GSCCollector:
         print(f"[GSC] {saved}건 upsert 완료 → {self.table}", flush=True)
         return saved
 
+    def collect_queries_and_save(self, query_table: str = "gsc_search_queries", days: int | None = None) -> int:
+        """GSC 검색어별 성과 데이터 수집 → Supabase 저장. 저장된 행 수 반환."""
+        rows = self._fetch_query_rows(days or self.days)
+        if not rows:
+            print("[GSC-Q] 수집된 쿼리 없음", flush=True)
+            return 0
+
+        records = [
+            {
+                "query": row["keys"][0],
+                "date": row["keys"][1],
+                "clicks": int(row.get("clicks", 0)),
+                "impressions": int(row.get("impressions", 0)),
+                "ctr": float(row.get("ctr", 0.0)),
+                "position": float(row.get("position", 0.0)),
+            }
+            for row in rows
+            if len(row.get("keys", [])) >= 2
+        ]
+
+        url = f"{self.supabase_url}/rest/v1/{query_table}?on_conflict=query%2Cdate"
+        raw_body = json.dumps(records).encode("utf-8")
+        req = request.Request(
+            url,
+            data=raw_body,
+            headers={
+                **self._headers,
+                "Prefer": "resolution=merge-duplicates,return=minimal",
+            },
+            method="POST",
+        )
+        try:
+            with request.urlopen(req, timeout=30) as resp:
+                resp.read()
+            print(f"[GSC-Q] {len(records)}건 upsert 완료 → {query_table}", flush=True)
+            return len(records)
+        except HTTPError as e:
+            body = e.read().decode("utf-8")
+            raise RuntimeError(f"{query_table} upsert 실패 ({e.code}): {body}") from e
+
+    def _fetch_query_rows(self, days: int) -> list[dict]:
+        end_date = date.today() - timedelta(days=3)
+        start_date = end_date - timedelta(days=days - 1)
+        body = {
+            "startDate": start_date.isoformat(),
+            "endDate": end_date.isoformat(),
+            "dimensions": ["query", "date"],
+            "rowLimit": 25000,
+        }
+        print(f"[GSC-Q] 쿼리 데이터 조회 중... ({start_date} ~ {end_date})", flush=True)
+        try:
+            response = (
+                self._service.searchanalytics()
+                .query(siteUrl=self.site_url, body=body)
+                .execute()
+            )
+        except Exception as exc:
+            print(f"[GSC-Q] API 호출 실패: {exc}", flush=True)
+            return []
+        rows = response.get("rows", [])
+        print(f"[GSC-Q] {len(rows)}행 수신", flush=True)
+        return rows
+
     def _fetch_gsc_rows(self) -> list[dict]:
         end_date = date.today() - timedelta(days=3)
         start_date = end_date - timedelta(days=self.days - 1)

@@ -3,7 +3,8 @@ ohyess.kr GSC 데이터 수집 파이프라인
 
 순서:
   1. config 로드 + 환경변수 검증
-  2. GSC 데이터 수집 → Supabase post_performance 테이블 upsert
+  2. GSC 페이지별 성과 수집 → Supabase post_performance 테이블 upsert
+  3. GSC 검색어별 데이터 수집 → Supabase gsc_search_queries 테이블 upsert
 
 Usage:
   python -m scripts.evolve             # GSC 데이터 수집 실행
@@ -16,7 +17,7 @@ Usage:
   4. pip install -r scripts/requirements.txt
   5. 첫 실행 시 브라우저 OAuth 인증 흐름 진행 (token.json 자동 저장)
 
-Supabase 사전 준비 (테이블 없으면 생성 필요):
+Supabase 사전 준비:
   CREATE TABLE post_performance (
     post_slug TEXT NOT NULL,
     date DATE NOT NULL,
@@ -25,6 +26,16 @@ Supabase 사전 준비 (테이블 없으면 생성 필요):
     ctr FLOAT DEFAULT 0,
     position FLOAT DEFAULT 0,
     PRIMARY KEY (post_slug, date)
+  );
+
+  CREATE TABLE gsc_search_queries (
+    query TEXT NOT NULL,
+    date DATE NOT NULL,
+    clicks INT DEFAULT 0,
+    impressions INT DEFAULT 0,
+    ctr FLOAT DEFAULT 0,
+    position FLOAT DEFAULT 0,
+    PRIMARY KEY (query, date)
   );
 """
 from __future__ import annotations
@@ -83,7 +94,12 @@ def main() -> None:
             days=args.days,
         )
         collected = collector.collect_and_save()
-        print(f"[EVOLVE] 완료 - {collected}건 저장", flush=True)
+        print(f"[EVOLVE] 페이지 성과 - {collected}건 저장", flush=True)
+
+        query_collected = collector.collect_queries_and_save()
+        print(f"[EVOLVE] 검색어 데이터 - {query_collected}건 저장", flush=True)
+
+        print(f"[EVOLVE] 완료", flush=True)
     except Exception as exc:
         print(f"[EVOLVE] 실패: {exc}", flush=True)
         sys.exit(1)

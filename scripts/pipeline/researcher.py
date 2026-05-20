@@ -41,10 +41,14 @@ class TavilyResearcher:
             body = e.read().decode("utf-8")
             raise RuntimeError(f"Tavily HTTP {e.code}: {body}") from e
 
-    def research_today(self, excluded_topics: list[str] | None = None) -> dict:
+    def research_today(
+        self,
+        excluded_topics: list[str] | None = None,
+        seed_query: str | None = None,
+    ) -> dict:
         """
         오늘의 금융/경제/정책 이슈 1개 선정 + 심층 리서치
-        선정 기준: 독자의 실생활(자산·가계·소비)에 직접 영향을 미치는 이슈
+        seed_query가 있으면 해당 독자 질문에 답하는 방향으로 리서치.
         excluded_topics: 이미 발행된 주제 목록 (중복 방지)
         Returns: { topic, category, background, key_data, impact_on_public, related_keywords }
         """
@@ -59,38 +63,64 @@ class TavilyResearcher:
                 + titles
             )
 
-        # Step 1: 3가지 각도로 Tavily 검색 (경제이슈 / 정책제도 / 정부지원)
-        queries = [
-            f"환율 금리 물가 전쟁 경제 영향 한국 {today}",
-            f"금융위원회 금감원 정부 정책 제도 변경 시행 {today}",
-            f"정부 지원금 보조금 혜택 신청 서민 {today}",
-        ]
-        combined_snippets = []
-        combined_answers = []
-        for q in queries:
-            result = self._tavily_search(q)
-            if result.get("answer"):
-                combined_answers.append(result["answer"])
-            for r in result.get("results", [])[:3]:
-                combined_snippets.append(
-                    f"- [{r['title']}]({r['url']}): {r['content'][:250]}"
-                )
-        context = (
-            "[검색 요약]\n" + "\n".join(combined_answers) +
-            "\n\n[주요 기사]\n" + "\n".join(combined_snippets)
-        )
+        # Step 1: Tavily 검색
+        if seed_query:
+            tavily_query = f"{seed_query} 금융 경제 정책 한국"
+            print(f"[RESEARCHER] GSC 시드 쿼리 사용: '{seed_query}'", flush=True)
+            search_results = self._tavily_search(tavily_query)
+            answer = search_results.get("answer", "")
+            snippets = "\n".join(
+                f"- [{r['title']}]({r['url']}): {r['content'][:300]}"
+                for r in search_results.get("results", [])
+            )
+            context = f"[검색 요약]\n{answer}\n\n[주요 기사]\n{snippets}"
+        else:
+            print("[RESEARCHER] Tavily 자유 선정 모드", flush=True)
+            queries = [
+                f"환율 금리 물가 전쟁 경제 영향 한국 {today}",
+                f"금융위원회 금감원 정부 정책 제도 변경 시행 {today}",
+                f"정부 지원금 보조금 혜택 신청 서민 {today}",
+            ]
+            combined_snippets = []
+            combined_answers = []
+            for q in queries:
+                result = self._tavily_search(q)
+                if result.get("answer"):
+                    combined_answers.append(result["answer"])
+                for r in result.get("results", [])[:3]:
+                    combined_snippets.append(
+                        f"- [{r['title']}]({r['url']}): {r['content'][:250]}"
+                    )
+            context = (
+                "[검색 요약]\n" + "\n".join(combined_answers) +
+                "\n\n[주요 기사]\n" + "\n".join(combined_snippets)
+            )
 
         # Step 2: OpenAI로 JSON 포맷
+        if seed_query:
+            task_instruction = (
+                f"실제 독자가 구글에서 검색한 질문입니다: \"{seed_query}\"\n\n"
+                "이 질문에 제대로 된 답변을 제공하는 글을 작성하기 위한 리서치를 수행하세요. "
+                "독자가 이 질문을 검색한 상황과 맥락을 먼저 파악하고, "
+                "그들이 실제로 알고 싶은 것(결론과 판단 기준)을 중심으로 리서치하세요.\n\n"
+                f"[참고 자료]\n{context}\n\n"
+                + exclusion_block + "\n\n"
+            )
+        else:
+            task_instruction = (
+                f"오늘({today}) 아래 검색 결과에서 독자의 실생활에 직접 영향을 주는 이슈를 1개 선정하세요.\n\n"
+                "【선정 기준 — 아래 3가지 유형 중 하나여야 합니다】\n"
+                "① 경제·시장 이슈 (환율 급등, 금리 변동, 전쟁·지정학 등) → 내 자산/물가/소비에 어떤 영향인가\n"
+                "② 금융 정책·제도 변경 (금융위원회, 금감원, 세제 개편 등) → 내 금융생활에 어떤 변화가 생기나\n"
+                "③ 정부 지원금·보조금·혜택 → 내가 받을 수 있나, 어떻게 신청하나\n\n"
+                "단순 뉴스 브리핑이 아닌, 독자가 '그래서 나는 어떻게 해야 하나'를 알 수 있는 이슈를 선정하세요.\n\n"
+                f"[검색 결과]\n{context}\n\n"
+                + exclusion_block + "\n\n"
+            )
+
         user_content = (
-            f"오늘({today}) 아래 검색 결과에서 독자의 실생활에 직접 영향을 주는 이슈를 1개 선정하세요.\n\n"
-            "【선정 기준 — 아래 3가지 유형 중 하나여야 합니다】\n"
-            "① 경제·시장 이슈 (환율 급등, 금리 변동, 전쟁·지정학 등) → 내 자산/물가/소비에 어떤 영향인가\n"
-            "② 금융 정책·제도 변경 (금융위원회, 금감원, 세제 개편 등) → 내 금융생활에 어떤 변화가 생기나\n"
-            "③ 정부 지원금·보조금·혜택 → 내가 받을 수 있나, 어떻게 신청하나\n\n"
-            "단순 뉴스 브리핑이 아닌, 독자가 '그래서 나는 어떻게 해야 하나'를 알 수 있는 이슈를 선정하세요.\n\n"
-            f"[검색 결과]\n{context}\n\n"
-            + exclusion_block + "\n\n"
-            "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요.\n"
+            task_instruction
+            + "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요.\n"
             "{\n"
             '  "topic": "이슈 제목 (한국어, 50자 이내)",\n'
             '  "article_type": "경제이슈 | 정책제도 | 정부지원 중 1개",\n'

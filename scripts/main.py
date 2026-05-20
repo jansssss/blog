@@ -19,6 +19,7 @@ from scripts.pipeline.config import load_config
 from scripts.pipeline.researcher import TavilyResearcher
 from scripts.pipeline.columnist import ColumnistWriter, render_html
 from scripts.pipeline.publisher import SupabasePublisher
+from scripts.analytics.gsc_query_selector import GSCQuerySelector
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -74,15 +75,25 @@ def main() -> None:
         if excluded_topics:
             print(f"[INIT] 제외할 주제 {len(excluded_topics)}개 로드 완료", flush=True)
 
+    # ── GSC 쿼리 선택기 초기화 ────────────────────────
+    gsc_selector: GSCQuerySelector | None = None
+    if config.supabase_url and config.supabase_service_role_key:
+        gsc_selector = GSCQuerySelector(config.supabase_url, config.supabase_service_role_key)
+
     # ── 실행 ────────────────────────────────────────
     for i in range(count):
         print(f"\n{'='*50}", flush=True)
         print(f"[PIPELINE] {i+1}/{count}번째 글 생성 시작", flush=True)
 
+        # STEP 0: GSC 시드 쿼리 선택 (있으면)
+        seed_query: str | None = None
+        if gsc_selector:
+            seed_query = gsc_selector.pick_best_query(excluded_topics)
+
         # 1. Tavily - 오늘의 이슈 리서치
         print("[STEP 1] Tavily 리서치 중...", flush=True)
         try:
-            research = researcher.research_today(excluded_topics=excluded_topics)
+            research = researcher.research_today(excluded_topics=excluded_topics, seed_query=seed_query)
             print(f"[STEP 1] 완료 - 주제: {research['topic']}", flush=True)
             excluded_topics.append(research["topic"])  # 같은 실행 내 중복 방지
         except Exception as exc:

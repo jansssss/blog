@@ -7,8 +7,9 @@ import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { Calculator, ArrowLeftRight, BookOpen, ArrowRight } from 'lucide-react'
+import { BookOpen, ArrowRight } from 'lucide-react'
 import TrendingBanner from '@/components/TrendingBanner'
+import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
 
 const HOME_GUIDE_ITEMS = [
   { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
@@ -114,25 +115,8 @@ export default async function HomePage({
         {/* 지금 핫한 이슈 배너 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <TrendingBanner />}
 
-        {/* 즉시 실행 CTA 버튼 (ohyess.kr 전용) */}
-        {site?.domain === 'ohyess.kr' && (
-          <section className="mb-8">
-            <div className="grid grid-cols-2 gap-3">
-              <Link href="/calculator/loan-interest" className="block">
-                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors">
-                  <Calculator className="w-5 h-5" />
-                  <span className="text-sm sm:text-base">대출 이자 계산</span>
-                </div>
-              </Link>
-              <Link href="/calculator/repayment-compare" className="block">
-                <div className="flex items-center justify-center gap-2 py-4 px-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors border">
-                  <ArrowLeftRight className="w-5 h-5" />
-                  <span className="text-sm sm:text-base">상환방식 비교</span>
-                </div>
-              </Link>
-            </div>
-          </section>
-        )}
+        {/* 인라인 대출 이자 계산기 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && <HomeLoanCalculator />}
 
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}

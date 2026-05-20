@@ -1,0 +1,60 @@
+name: Weekly GSC Data Collection
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (저장 없이 확인만)"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "0 0 * * 1"   # KST 월요일 09:00 (UTC 일요일 00:00)
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write environment file
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        shell: bash
+        run: |
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n'  "$NEXT_PUBLIC_SUPABASE_URL"  >> .env
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY" >> .env
+
+      - name: Write GSC credentials
+        env:
+          GSC_CLIENT_SECRET_JSON: ${{ secrets.GSC_CLIENT_SECRET_JSON }}
+          GSC_TOKEN_JSON: ${{ secrets.GSC_TOKEN_JSON }}
+        shell: bash
+        run: |
+          mkdir -p scripts/credentials
+          printf '%s' "$GSC_CLIENT_SECRET_JSON" > scripts/credentials/client_secret.json
+          printf '%s' "$GSC_TOKEN_JSON"         > scripts/credentials/token.json
+
+      - name: Run GSC collection
+        env:
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        shell: bash
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python -m scripts.evolve --dry-run
+          else
+            python -m scripts.evolve
+          fi

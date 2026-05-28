@@ -16,6 +16,16 @@ export interface TrendItem {
 
 export const TREND_DATA: TrendItem[] = [
   {
+    href: '/trend/kospi-8300-ai-oil-investment',
+    badge: '속보',
+    badgeColor: '#4f46e5',
+    title: '코스피 8300 돌파·AI 버블론·유가 재고 바닥: 2026년 5월 투자 지형 완전 분석',
+    description: 'AI 인프라에 수백조를 쏟아붓는 빅테크와 체감 못 하는 개인들, 3개월째 이어지는 이란 전쟁과 바닥나는 유가 재고 — 지금 어디에 투자해야 하나 완전 분석',
+    tag: '증시·AI·유가·투자전략',
+    gradient: 'linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #0369a1 100%)',
+    updatedAt: '2026.05.28',
+  },
+  {
     href: '/trend/kospi-7800',
     badge: '속보',
     badgeColor: '#0369a1',

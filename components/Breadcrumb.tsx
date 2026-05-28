@@ -56,11 +56,6 @@ const PATH_LABELS: Record<string, string> = {
   'multi-home-loan': '다주택자 대출 규제',
   'capital-market-shift': '자본시장 정상화 분석',
   'us-iran-oil': '미국·이란 전쟁과 유가 급등',
-
-  // 보험 도구 하위
-  'auto-discount-check': '자동차보험 할인 체크',
-  'health-overlap-check': '실비보험 중복 체크',
-  'insurance-remodel': '보험 리모델링 체크',
 }
 
 export default function Breadcrumb() {

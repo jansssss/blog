@@ -311,26 +311,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     )
 
-    toolPages.push(
-      {
-        url: `${baseUrl}/tools/auto-discount-check`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.7,
-      },
-      {
-        url: `${baseUrl}/tools/health-overlap-check`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.7,
-      },
-      {
-        url: `${baseUrl}/tools/insurance-remodel`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.7,
-      }
-    )
   }
 
   return [...staticPages, ...guidePages, ...calculatorPages, ...trendPages, ...comparePages, ...policyPages, ...toolPages, ...blogUrls]

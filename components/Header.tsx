@@ -71,9 +71,10 @@ const OHYESS_NAV: NavItem[] = [
     label: '핫이슈',
     href: '/trend',
     subItems: [
+      { label: '코스피 8300·AI·유가 재고', href: '/trend/kospi-8300-ai-oil-investment', description: '2026년 5월 투자 지형 완전 분석' },
+      { label: '코스피 7800 돌파 분석', href: '/trend/kospi-7800', description: '불장 이유·고점 이후 투자 전략' },
       { label: '자본시장 정상화 2026', href: '/trend/capital-market-shift', description: '부동산-금융 자금 이동 분석' },
       { label: '다주택자 대출 규제 2026', href: '/trend/multi-home-loan', description: '스트레스 DSR, 주택 수별 규제 분석' },
-      { label: '1가구 2주택 양도세 2026', href: '/trend/capital-gains-tax', description: '비과세·중과세·절세 포인트 정리' },
     ],
   },
   { label: '소개', href: '/about' },

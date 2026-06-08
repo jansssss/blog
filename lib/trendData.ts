@@ -16,6 +16,16 @@ export interface TrendItem {
 
 export const TREND_DATA: TrendItem[] = [
   {
+    href: '/trend/kospi-black-friday-june-2026',
+    badge: '긴급속보',
+    badgeColor: '#dc2626',
+    title: '코스피 대폭락 6월 8일: SpaceX 상장 자금이탈·IT버블 비교·진입 기회 완전 분석',
+    description: '하루 -6.6% 역대급 폭락의 5가지 원인, SpaceX 6월 18일 상장과 글로벌 자금 이동, IT버블 붕괴 유사점·차이점, 보유자·미진입자 각각의 실전 대처 전략',
+    tag: '증시·폭락·투자전략',
+    gradient: 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #b45309 100%)',
+    updatedAt: '2026.06.08',
+  },
+  {
     href: '/trend/kospi-8300-ai-oil-investment',
     badge: '속보',
     badgeColor: '#4f46e5',

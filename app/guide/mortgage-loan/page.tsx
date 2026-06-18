@@ -28,6 +28,11 @@ const tocItems = [
 
 const ctas = [
   {
+    label: 'DSR DTI LTV 계산기',
+    href: '/calculator/dsr-dti-ltv',
+    description: '내 소득·대출로 DSR·LTV 즉시 계산 + 한도 역산',
+  },
+  {
     label: '주택담보대출 한도 계산기',
     href: '/calculator/loan-limit',
     description: 'LTV·DSR 기준 실제 대출 가능 금액 즉시 계산',

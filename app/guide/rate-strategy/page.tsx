@@ -28,6 +28,11 @@ const tocItems = [
 
 const ctas = [
   {
+    label: '대출 갈아타기 손익 계산기',
+    href: '/calculator/refinancing',
+    description: '수수료 차감 후 실제 절감액·손익분기점 계산',
+  },
+  {
     label: '대출 이자 계산기',
     href: '/calculator/loan-interest',
     description: '금리 변동 시 이자 부담 변화 계산',

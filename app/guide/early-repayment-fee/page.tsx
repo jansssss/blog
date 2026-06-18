@@ -31,6 +31,11 @@ const ctas = [
     description: '잔액·금리·잔여기간으로 수수료 즉시 계산',
   },
   {
+    label: '대출 갈아타기 손익 계산기',
+    href: '/calculator/refinancing',
+    description: '수수료 빼고 실제 갈아타기 이득 계산',
+  },
+  {
     label: '중도상환 vs 유지 비교 계산기',
     href: '/calculator/prepayment-comparison',
     description: '중도상환 절감액과 수수료를 비교해 최적 선택',

@@ -1,4 +1,4 @@
-import { Calculator, ArrowLeftRight, Target, RotateCcw, DollarSign, Activity, Scale, Shield, RefreshCcw } from 'lucide-react'
+import { Calculator, ArrowLeftRight, Target, RotateCcw, DollarSign, Activity, Scale, Shield, RefreshCcw, PieChart } from 'lucide-react'
 import Link from 'next/link'
 
 const CALCULATORS = [
@@ -7,6 +7,12 @@ const CALCULATORS = [
     title: '대출 갈아타기 손익',
     description: '수수료 차감 후 실제 절감액 계산',
     href: '/calculator/refinancing',
+  },
+  {
+    icon: <PieChart className="w-5 h-5" />,
+    title: 'DSR DTI LTV 계산기',
+    description: '내 비율 즉시 확인 · 규제 한도 비교',
+    href: '/calculator/dsr-dti-ltv',
   },
   {
     icon: <Calculator className="w-5 h-5" />,
@@ -65,7 +71,7 @@ export default function CalculatorPage() {
       {/* Hero Section */}
       <div className="rounded-3xl bg-gradient-to-b from-blue-50/60 to-white border border-blue-100/60 px-8 py-12 text-center mb-10">
         <span className="inline-block px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full mb-5">
-          9가지 무료 계산기
+          10가지 무료 계산기
         </span>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
           금융 계산기

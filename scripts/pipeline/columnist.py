@@ -6,6 +6,7 @@ OpenAI API로 금융 칼럼니스트 스타일 글 생성
 from __future__ import annotations
 
 import json
+import random
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -80,6 +81,9 @@ class ColumnistWriter:
             f"관련 키워드: {', '.join(research.get('related_keywords', []))}\n"
         )
 
+        # 섹션 수를 3~5개로 무작위 변주 → 글 구조 동일성(scaled-content 패턴) 완화
+        section_target = random.randint(3, 5)
+
         json_format = (
             '{\n'
             '  "title": "SEO H1 제목 (40~60자, 핵심 수치 포함)",\n'
@@ -99,7 +103,7 @@ class ColumnistWriter:
             '      ],\n'
             '      "expert_insight": "전문가 인사이트 1~2문장 (없으면 빈 문자열)"\n'
             '    },\n'
-            '    ... (섹션 3개)\n'
+            f'    ... (섹션 {section_target}개)\n'
             '  ],\n'
             '  "action_tips": ["구체적 행동 팁1", "팁2", "팁3", "팁4"],\n'
             '  "sources": ["한국은행, 2024", "금융위원회, 2025", ...],\n'
@@ -118,7 +122,9 @@ class ColumnistWriter:
             f"{research_block}\n"
             f"{hints_block}\n"
             f"위 리서치 자료를 바탕으로 칼럼을 작성하세요. "
-            f"반드시 리서치의 수치와 출처를 글에 직접 인용하세요.\n\n"
+            f"반드시 리서치의 수치와 출처를 글에 직접 인용하세요.\n"
+            f"이번 글은 섹션을 정확히 {section_target}개로 작성하세요. "
+            f"섹션마다 길이·문단 수를 주제에 맞게 다르게 구성해 천편일률적인 구조를 피하세요.\n\n"
             f"아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요:\n"
             f"{json_format}"
         )

@@ -1,6 +1,7 @@
 """
-Tavily Search + OpenAI로 오늘의 한국 금융/경제 인기 이슈 조사
-- Tavily로 실시간 검색 → OpenAI로 JSON 포맷
+Tavily Search + OpenAI로 한국 금융/경제 에버그린 실무 주제 조사
+- Tavily로 검색 → OpenAI로 JSON 포맷
+- 단명 뉴스 추격 대신, 독자가 반복 검색하는 고의도 에버그린 질의 중심
 """
 from __future__ import annotations
 
@@ -8,6 +9,43 @@ import json
 from urllib import request
 from urllib.error import HTTPError
 from datetime import date
+
+
+# 에버그린·고의도(고CPC) 금융 실무 질의 클러스터.
+# 실행 날짜 기준으로 클러스터를 회전시켜 매번 다른 영역의 글을 생성한다.
+# 단명 뉴스가 아니라 "조건/방법/비교/계산"형 검색 수요를 노린다.
+EVERGREEN_QUERY_CLUSTERS: list[list[str]] = [
+    [
+        "전세대출 거절 이유와 재신청 조건 방법",
+        "주택담보대출 갈아타기 절차 비용 조건",
+        "신용대출 한도 늘리는 방법과 조건",
+    ],
+    [
+        "신용점수 단기간 올리는 방법 실제 기준",
+        "고정금리 변동금리 갈아타기 판단 기준",
+        "대출 중도상환수수료 면제 조건과 계산 방법",
+    ],
+    [
+        "청년 정책자금 대출 자격 조건 신청 방법",
+        "정부 보증부 대출 종류 자격 비교 HUG HF SGI",
+        "서민 금융 지원 상품 자격 신청 방법",
+    ],
+    [
+        "양도소득세 비과세 요건과 계산 사례",
+        "연말정산 공제 항목 절세 방법",
+        "종합소득세 신고 대상과 절세 전략",
+    ],
+    [
+        "전세보증보험 가입 조건 종류 비교",
+        "주택청약 1순위 조건과 가점 계산",
+        "DSR DTI LTV 계산 방법과 대출 한도",
+    ],
+    [
+        "근로장려금 자녀장려금 자격 조건 신청 방법",
+        "정부 지원금 보조금 신청 자격 기준",
+        "소상공인 정책자금 대출 종류 자격 비교",
+    ],
+]
 
 
 class TavilyResearcher:
@@ -52,8 +90,6 @@ class TavilyResearcher:
         excluded_topics: 이미 발행된 주제 목록 (중복 방지)
         Returns: { topic, category, background, key_data, impact_on_public, related_keywords }
         """
-        today = date.today().strftime("%Y년 %m월 %d일")
-
         exclusion_block = ""
         if excluded_topics:
             titles = "\n".join(f"- {t}" for t in excluded_topics)
@@ -75,12 +111,14 @@ class TavilyResearcher:
             )
             context = f"[검색 요약]\n{answer}\n\n[주요 기사]\n{snippets}"
         else:
-            print("[RESEARCHER] Tavily 자유 선정 모드", flush=True)
-            queries = [
-                f"환율 금리 물가 전쟁 경제 영향 한국 {today}",
-                f"금융위원회 금감원 정부 정책 제도 변경 시행 {today}",
-                f"정부 지원금 보조금 혜택 신청 서민 {today}",
-            ]
+            # 날짜 기준으로 에버그린 클러스터 회전 (실행마다 다른 영역)
+            cluster_idx = date.today().toordinal() % len(EVERGREEN_QUERY_CLUSTERS)
+            year = date.today().year
+            queries = [f"{q} {year}년 기준" for q in EVERGREEN_QUERY_CLUSTERS[cluster_idx]]
+            print(
+                f"[RESEARCHER] 에버그린 자유 선정 모드 (클러스터 {cluster_idx})",
+                flush=True,
+            )
             combined_snippets = []
             combined_answers = []
             for q in queries:
@@ -108,12 +146,18 @@ class TavilyResearcher:
             )
         else:
             task_instruction = (
-                f"오늘({today}) 아래 검색 결과에서 독자의 실생활에 직접 영향을 주는 이슈를 1개 선정하세요.\n\n"
-                "【선정 기준 — 아래 3가지 유형 중 하나여야 합니다】\n"
-                "① 경제·시장 이슈 (환율 급등, 금리 변동, 전쟁·지정학 등) → 내 자산/물가/소비에 어떤 영향인가\n"
-                "② 금융 정책·제도 변경 (금융위원회, 금감원, 세제 개편 등) → 내 금융생활에 어떤 변화가 생기나\n"
-                "③ 정부 지원금·보조금·혜택 → 내가 받을 수 있나, 어떻게 신청하나\n\n"
-                "단순 뉴스 브리핑이 아닌, 독자가 '그래서 나는 어떻게 해야 하나'를 알 수 있는 이슈를 선정하세요.\n\n"
+                "아래 검색 결과를 바탕으로, 독자가 검색엔진에서 '반복적으로' 검색하는 "
+                "에버그린(시간이 지나도 검색되는) 금융 실무 주제를 1개 선정하세요.\n\n"
+                "【선정 기준 — 단명 뉴스가 아닌 에버그린 고의도 질문】\n"
+                "① 조건/자격형 — '~할 수 있는 조건', '~자격 기준' (예: 전세대출 거절 후 재신청 조건)\n"
+                "② 방법/절차형 — '~하는 방법', '~신청 절차' (예: 주담대 갈아타기 절차)\n"
+                "③ 비교/판단형 — '~vs~ 차이', '~언제 유리한가' (예: 고정 vs 변동 금리)\n"
+                "④ 계산/사례형 — '~계산 방법', '~얼마인가' (예: 중도상환수수료 계산)\n\n"
+                "【반드시 지킬 것】\n"
+                "- 특정 날짜·속보성 사건(오늘의 환율, 주가 폭락 등)에 의존하는 주제는 피한다.\n"
+                "- 1년 뒤에 검색해도 유효한, 제도·절차·기준 중심의 주제를 고른다.\n"
+                "- 제목에 연도가 들어가더라도 내용은 '기준·방법·조건'이 핵심이어야 한다.\n"
+                "- 독자가 '그래서 나는 어떻게 해야 하나'를 끝까지 알 수 있는 주제를 선정한다.\n\n"
                 f"[검색 결과]\n{context}\n\n"
                 + exclusion_block + "\n\n"
             )

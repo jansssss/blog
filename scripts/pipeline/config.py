@@ -46,7 +46,7 @@ def load_config() -> AppConfig:
         tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
         supabase_url=os.getenv("NEXT_PUBLIC_SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
-        publish_mode=os.getenv("PUBLISH_MODE", "publish"),
+        publish_mode=os.getenv("PUBLISH_MODE", "draft"),
         posts_per_run=int(os.getenv("POSTS_PER_RUN", "1")),
         gsc_client_secret_path=os.getenv("GSC_CLIENT_SECRET_PATH") or str(scripts_root / "credentials" / "client_secret.json"),
         gsc_token_path=os.getenv("GSC_TOKEN_PATH") or str(scripts_root / "credentials" / "token.json"),

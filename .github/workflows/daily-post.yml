@@ -58,7 +58,7 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'publish' }}
+          PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'draft' }}
           POSTS_PER_RUN: ${{ inputs.count || '1' }}
         run: |
           printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" >> .env.local

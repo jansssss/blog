@@ -9,12 +9,50 @@ import EditButton from '@/components/EditButton'
 import DeleteButton from '@/components/DeleteButton'
 import { getCurrentSiteId, getCurrentSite } from '@/lib/site'
 import ArticleToc from '@/components/ArticleToc'
-import BithumbCTA from '@/components/guide/BithumbCTA'
+import AdUnit from '@/components/AdUnit'
+import RelatedCalculators from '@/components/RelatedCalculators'
 
-// 동적 렌더링 강제 (항상 최신 데이터 표시)
+// 동적 렌더링 강제 (멀티테넌트 host 헤더 의존 + 최신 데이터 표시)
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const dynamicParams = true
+
+// 본문 prose 스타일 (광고 삽입을 위해 본문을 둘로 나눠도 동일 스타일 적용)
+const ARTICLE_PROSE_CLASS = `prose prose-base max-w-none
+  prose-headings:font-bold prose-headings:text-gray-900
+  prose-h2:text-xl prose-h3:text-lg
+  prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2 prose-h2:mt-10
+  prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-gray-700
+  prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+  prose-strong:text-gray-900 prose-strong:font-semibold
+  prose-ol:my-4 prose-ol:pl-6
+  prose-ul:my-4 prose-ul:pl-6
+  prose-li:my-1 prose-li:text-gray-700 prose-li:leading-relaxed
+  prose-li:marker:text-blue-500 prose-li:marker:font-semibold
+  prose-blockquote:border-l-4 prose-blockquote:border-blue-400
+  prose-blockquote:bg-blue-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r
+  prose-blockquote:text-gray-600 prose-blockquote:not-italic
+  prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:text-pink-600
+  prose-pre:bg-gray-900 prose-pre:text-gray-100
+  prose-table:text-sm prose-th:bg-gray-100 prose-th:font-semibold
+  prose-hr:border-gray-200`
+
+/**
+ * 본문 HTML을 중간 H2 경계에서 둘로 분할.
+ * 인아티클 광고를 글 정중앙 섹션 사이에 1개만 삽입하기 위함.
+ * H2가 2개 미만이면 분할하지 않음(광고 미삽입).
+ */
+function splitAtMiddleH2(html: string): [string, string] {
+  const positions: number[] = []
+  const regex = /<h2[\s>]/gi
+  let match: RegExpExecArray | null
+  while ((match = regex.exec(html)) !== null) {
+    positions.push(match.index)
+  }
+  if (positions.length < 2) return [html, '']
+  const target = positions[Math.floor(positions.length / 2)]
+  return [html.slice(0, target), html.slice(target)]
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -43,11 +81,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
   }
 
+  const canonicalHost = site?.domain || 'ohyess.kr'
+
   return {
     title: `${post.title} | ${siteName}`,
     description: post.summary,
     keywords: post.tags,
     authors: [{ name: siteName }],
+    alternates: {
+      canonical: `https://${canonicalHost}/blog/${id}`,
+    },
     openGraph: {
       title: post.title,
       description: post.summary,
@@ -84,7 +127,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     postQuery = postQuery.eq('site_id', siteId)
   }
 
-  const { data: post } = await postQuery.single()
+  // 현재 글 + 사이트 정보를 병렬 조회 (순차 round-trip 제거 → TTFB 단축)
+  const [{ data: post }, site] = await Promise.all([
+    postQuery.single(),
+    getCurrentSite(),
+  ])
 
   if (!post) {
     notFound()
@@ -103,8 +150,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     prevQuery = prevQuery.eq('site_id', siteId)
   }
 
-  const { data: prevPost } = await prevQuery.single()
-
   // 다음 글 (현재 글보다 이후에 발행된 글 중 가장 오래된 글, 같은 사이트)
   let nextQuery = supabase
     .from('posts')
@@ -118,9 +163,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     nextQuery = nextQuery.eq('site_id', siteId)
   }
 
-  const { data: nextPost } = await nextQuery.single()
+  // 이전/다음 글도 병렬 조회
+  const [{ data: prevPost }, { data: nextPost }] = await Promise.all([
+    prevQuery.single(),
+    nextQuery.single(),
+  ])
 
-  const site = await getCurrentSite()
   const siteName = site?.name || '오예스'
   const protocol = 'https'
   const host = site?.domain || 'ohyess.kr'
@@ -220,33 +268,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             </div>
           </header>
 
-          {/* Post Content */}
-          <div
-            data-article-content
-            className="prose prose-base max-w-none
-              prose-headings:font-bold prose-headings:text-gray-900
-              prose-h2:text-xl prose-h3:text-lg
-              prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2 prose-h2:mt-10
-              prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-gray-700
-              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900 prose-strong:font-semibold
-              prose-ol:my-4 prose-ol:pl-6
-              prose-ul:my-4 prose-ul:pl-6
-              prose-li:my-1 prose-li:text-gray-700 prose-li:leading-relaxed
-              prose-li:marker:text-blue-500 prose-li:marker:font-semibold
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-400
-              prose-blockquote:bg-blue-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r
-              prose-blockquote:text-gray-600 prose-blockquote:not-italic
-              prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:text-pink-600
-              prose-pre:bg-gray-900 prose-pre:text-gray-100
-              prose-table:text-sm prose-th:bg-gray-100 prose-th:font-semibold
-              prose-hr:border-gray-200"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+          {/* Post Content — 중간 H2 사이에 인아티클 광고 1개 삽입.
+              data-article-content는 부모 1개에만 두어 목차(ArticleToc)가 모든 헤딩을 스캔하도록 유지 */}
+          <div data-article-content className={ARTICLE_PROSE_CLASS}>
+            {(() => {
+              const [first, second] = splitAtMiddleH2(post.content)
+              if (!second) {
+                return <div dangerouslySetInnerHTML={{ __html: first }} />
+              }
+              return (
+                <>
+                  <div dangerouslySetInnerHTML={{ __html: first }} />
+                  <AdUnit
+                    slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INARTICLE}
+                    format="fluid"
+                    layout="in-article"
+                    className="my-8"
+                  />
+                  <div dangerouslySetInnerHTML={{ __html: second }} />
+                </>
+              )
+            })()}
+          </div>
+
+          {/* 본문 하단 광고 (멀티플렉스) */}
+          <AdUnit
+            slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM}
+            format="autorelaxed"
+            className="mt-10"
           />
 
-          <div className="mt-10">
-            <BithumbCTA />
-          </div>
+          {/* 관련 계산기 내부링크 (모든 글 → 고가치 계산기 동선) */}
+          <RelatedCalculators />
         </article>
 
         {/* Sticky TOC Sidebar */}

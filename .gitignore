@@ -87,3 +87,7 @@ scripts/credentials/token.json
 
 __pycache__/
 *.pyc
+
+# Local agent tooling
+.claude/
+.omc/

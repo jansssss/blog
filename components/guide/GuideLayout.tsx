@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import Toc from './Toc'
 import FAQ from './FAQ'
 import RelatedLinks from './RelatedLinks'
+import AdUnit from '@/components/AdUnit'
 
 interface TocItem {
   id: string
@@ -66,7 +67,15 @@ export default function GuideLayout({
       <Toc items={tocItems} />
 
       {/* 본문 */}
-      <article className="mb-10">{children}</article>
+      <article className="mb-6">{children}</article>
+
+      {/* 인아티클 광고 */}
+      <AdUnit
+        slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INARTICLE}
+        format="fluid"
+        layout="in-article"
+        className="mb-6"
+      />
 
       <hr className="border-gray-200 mb-10" />
 
@@ -103,6 +112,13 @@ export default function GuideLayout({
           </div>
         </div>
       </section>
+
+      {/* 멀티플렉스 광고 */}
+      <AdUnit
+        slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM}
+        format="autorelaxed"
+        className="mb-10"
+      />
 
       {/* FAQ */}
       <section className="mb-10">

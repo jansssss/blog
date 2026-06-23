@@ -115,11 +115,11 @@ export default async function HomePage({
         {/* 인라인 대출 이자 계산기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <HomeLoanCalculator />}
 
-        {/* 지금 핫한 이슈 배너 (ohyess.kr 전용) */}
-        {site?.domain === 'ohyess.kr' && <TrendingBanner />}
-
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
+
+        {/* 지금 핫한 이슈 배너 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && <TrendingBanner />}
 
         {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (

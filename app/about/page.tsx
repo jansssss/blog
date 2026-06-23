@@ -66,7 +66,7 @@ function OhyessAbout() {
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">4+</div>
+              <div className="text-4xl font-bold text-indigo-600 mb-2">10+</div>
               <div className="text-sm text-gray-600">금융 계산기</div>
             </div>
             <div className="text-center">
@@ -122,9 +122,9 @@ function OhyessAbout() {
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Shield className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">정확한 정보</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">공식 자료 기반</h3>
               <p className="text-gray-600 leading-relaxed">
-                금융감독원, 한국은행 등 공식 자료를 기반으로 정확한 정보만을 제공합니다. 허위 정보는 절대 없습니다.
+                금융감독원, 한국은행 등 공식기관 자료와 검증된 계산 공식을 기반으로 콘텐츠를 제공합니다. 계산 결과는 참고용이며, 실제 금융기관 심사와 다를 수 있습니다.
               </p>
             </div>
           </div>
@@ -268,15 +268,15 @@ function OhyessAbout() {
             </div>
 
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">👨‍💼 운영자 배경</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">👨‍💼 운영자 소개</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                오예스는 금융 서비스 분야에서 실무 경험을 쌓은 운영자가 직접 관리합니다.
-                대출 상담, 금융 상품 분석, 재무 설계 등 다양한 금융 업무 경험을 바탕으로
-                실생활에서 실제로 필요한 정보만을 엄선하여 제공합니다.
+                오예스는 직장인이 대출과 월 상환 부담을 스스로 이해하고 계산할 수 있도록
+                금융 계산기와 사례형 가이드를 직접 개발·운영합니다.
+                금융상품을 판매하거나 중개하지 않으며, 특정 금융사와 제휴 관계도 없습니다.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                사용자가 복잡한 금융 용어에 막히지 않고 자신에게 맞는 금융 의사결정을 내릴 수 있도록
-                명확하고 이해하기 쉬운 설명을 제공하는 것을 최우선 목표로 삼고 있습니다.
+                공식기관 자료와 계산 공식을 바탕으로 대출 의사결정에 필요한 숫자를 누구나
+                쉽게 확인할 수 있도록 돕는 것을 목표로 합니다.
               </p>
             </div>
 

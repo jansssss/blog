@@ -153,8 +153,8 @@ export default function DsrDtiLtvCalculatorPage() {
         <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
           ⚡ 슬라이더 조작 즉시 계산
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">DSR DTI LTV 계산기</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">내 소득·대출 조건으로 DSR·DTI·LTV를 즉시 계산하고 규제 한도와 비교합니다</p>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">DSR 계산기 — 내 소득과 기존 대출로 주담대 한도 계산</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">소득·기존 대출 월 납입액·신규 대출 조건을 입력하면 DSR·DTI·LTV와 최대 대출 한도를 즉시 계산합니다</p>
       </div>
 
       {/* 2컬럼 레이아웃 */}
@@ -216,6 +216,12 @@ export default function DsrDtiLtvCalculatorPage() {
 
         {/* 결과 영역 */}
         <div className="space-y-5 mt-8 lg:mt-0">
+
+          {/* 참고용 안내 */}
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800 leading-relaxed">
+            이 결과는 기본 DSR·원리금균등 상환 기준의 <strong>참고용 추정치</strong>입니다.
+            스트레스 DSR·지역 규제·소득 인정 방식·금융기관 내부 심사 기준은 반영되지 않습니다.
+          </div>
 
           {/* 히어로: 핵심 비율 3개 */}
           <div

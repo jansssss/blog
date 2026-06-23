@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -234,6 +235,32 @@ export default function EmergencyFundCalculatorPage() {
           </div>
         </div>
 
+        <div className="mt-10 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">⚡</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">다음 단계로 — 관련 계산기</p>
+              <p className="text-xs text-gray-400">비상자금 계획 후 이어서 확인해보세요</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '대출 상환 부담과 함께 비상자금 계획' },
+              { href: '/calculator/repayment-burden', emoji: '📉', title: '월 상환 부담 체감 계산기', desc: '상환+비상자금 동시에 얼마나 감당 가능한지' },
+              { href: '/calculator/prepayment-comparison', emoji: '💰', title: '중도상환 vs 유지 비교', desc: '비상자금 확보 후 목돈 활용 전략' },
+              { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR · DTI · LTV 계산기', desc: '내 소득으로 대출 여력이 얼마나 남았나' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href} className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
         <DisclaimerNotice message="본 계산 결과는 참고용 예상치이며, 개인의 재무 상황에 따라 필요한 비상자금 규모는 달라질 수 있습니다. 자세한 재무 계획은 전문 금융 상담사와 상담하세요." />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">

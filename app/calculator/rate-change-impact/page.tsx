@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -306,6 +307,32 @@ export default function RateChangeImpactCalculatorPage() {
           </div>
         </div>
 
+        <div className="mt-10 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">⚡</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">다음 단계로 — 관련 계산기</p>
+              <p className="text-xs text-gray-400">금리 변동 확인 후 이어서 계산해보세요</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '변동된 금리로 새 이자와 납입액 계산' },
+              { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '금리 높아졌다면 갈아타기 손익 비교' },
+              { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR · DTI · LTV 계산기', desc: '금리 변동 후 내 DSR 한도 재확인' },
+              { href: '/calculator/prepayment-fee', emoji: '💸', title: '중도상환수수료 계산기', desc: '갈아타기 전 수수료부터 계산' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href} className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
         <DisclaimerNotice message="본 계산 결과는 원리금균등 또는 원금균등 방식 기준 예상치이며, 실제 상환액은 대출 조건·우대금리·수수료 등에 따라 달라질 수 있습니다." />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">

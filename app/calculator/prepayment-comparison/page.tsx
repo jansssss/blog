@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -278,6 +279,32 @@ export default function PrepaymentComparisonCalculatorPage() {
           </div>
         </div>
 
+        <div className="mt-10 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">⚡</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">다음 단계로 — 관련 계산기</p>
+              <p className="text-xs text-gray-400">중도상환 결정 후 이어서 확인해보세요</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/calculator/prepayment-fee', emoji: '💸', title: '중도상환수수료 계산기', desc: '수수료 정확히 계산해 순절감액 확인' },
+              { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '상환 후 남은 대출 이자 재계산' },
+              { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '상환 대신 갈아타기가 더 나을 수도' },
+              { href: '/calculator/emergency-fund', emoji: '🛡️', title: '비상자금 계산기', desc: '상환 후 비상자금 여유 점검' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href} className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
         <DisclaimerNotice message="본 계산 결과는 단순 이자 기준 예상치이며, 실제 중도상환 효과는 상환 방식·금리 조건·수수료 등에 따라 달라질 수 있습니다." />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">

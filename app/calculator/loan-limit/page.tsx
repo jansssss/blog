@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -501,6 +502,32 @@ export default function LoanLimitSimulatorPage() {
         </CardContent>
       </Card>
 
+      <div className="mt-10 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">⚡</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">다음 단계로 — 관련 계산기</p>
+            <p className="text-xs text-gray-400">한도 확인 후 이어서 계산해보세요</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR · DTI · LTV 계산기', desc: '기존 대출 포함 더 상세한 DSR·DTI·LTV 분석' },
+            { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '한도 내 금액으로 월 납입액과 총이자 계산' },
+            { href: '/calculator/repayment-burden', emoji: '📉', title: '월 상환 부담 체감 계산기', desc: '소득 대비 실제 상환 부담이 어느 정도인지' },
+            { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '더 좋은 조건으로 갈아타면 얼마나 절약되나' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href} className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-indigo-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
       <DisclaimerNotice message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요." />
 
       <Card className="mt-6 bg-gray-50">

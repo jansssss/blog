@@ -7,11 +7,41 @@ import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { BookOpen, ArrowRight } from 'lucide-react'
-import TrendingBanner from '@/components/TrendingBanner'
+import { BookOpen, ArrowRight, HelpCircle } from 'lucide-react'
 import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
 
+const FEATURED_QUESTIONS = [
+  {
+    q: '월급 5천이면 주담대 얼마까지?',
+    hint: '소득별 한도 + DSR 즉시 계산',
+    href: '/guide/mortgage-salary-5000',
+    emoji: '🏠',
+  },
+  {
+    q: '자동차 할부, 주담대 한도 얼마나 깎여?',
+    hint: '할부 금액별 감소분 계산',
+    href: '/guide/car-loan-dsr-impact',
+    emoji: '🚗',
+  },
+  {
+    q: 'LTV는 되는데 왜 대출이 안 될까?',
+    hint: 'LTV·DSR 동시 비교 + 실제 한도',
+    href: '/guide/ltv-ok-dsr-blocked',
+    emoji: '🔒',
+  },
+  {
+    q: '금리 0.5% 차이, 실제로 얼마나 달라?',
+    hint: '금액·기간별 총이자 비교 계산',
+    href: '/guide/rate-0p5-difference',
+    emoji: '📊',
+  },
+]
+
 const HOME_GUIDE_ITEMS = [
+  { title: '월급 5천 주담대 한도', href: '/guide/mortgage-salary-5000', desc: '소득별 한도 + DSR 즉시 계산' },
+  { title: '자동차 할부 DSR 영향', href: '/guide/car-loan-dsr-impact', desc: '할부가 대출 한도를 깎는 구조' },
+  { title: 'LTV는 되는데 DSR 막힘', href: '/guide/ltv-ok-dsr-blocked', desc: 'LTV·DSR 동시 비교로 실제 한도 확인' },
+  { title: '금리 0.5% 차이 계산', href: '/guide/rate-0p5-difference', desc: '금액·기간별 총이자 차이 비교' },
   { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', desc: '대출 한도 결정 3가지 핵심 지표' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', desc: '원리금균등 vs 원금균등 총이자 차이' },
@@ -118,8 +148,34 @@ export default async function HomePage({
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
 
-        {/* 지금 핫한 이슈 배너 (ohyess.kr 전용) */}
-        {site?.domain === 'ohyess.kr' && <TrendingBanner />}
+        {/* 자주 묻는 대출 질문 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <HelpCircle className="w-4 h-4 text-indigo-500" />
+              <h2 className="text-sm font-bold text-gray-800">자주 묻는 대출 질문</h2>
+              <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-semibold">계산기 포함</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {FEATURED_QUESTIONS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-2xl shadow-sm transition-all"
+                >
+                  <span className="text-2xl leading-none mt-0.5 shrink-0">{item.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 transition-colors leading-snug mb-0.5">
+                      {item.q}
+                    </p>
+                    <p className="text-[11px] text-gray-400">{item.hint}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-500 transition-colors shrink-0 mt-0.5" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (

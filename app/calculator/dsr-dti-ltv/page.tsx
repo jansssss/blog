@@ -325,78 +325,115 @@ export default function DsrDtiLtvCalculatorPage() {
         </div>
       </div>
 
-      {/* 하단 가이드 (SEO) */}
+      {/* 하단 가이드 */}
       <div className="space-y-6 mt-10">
 
+        {/* 1. DSR 높게 나왔을 때 실제 전략 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold mb-4 text-gray-900">DSR · DTI · LTV란 무엇인가?</h2>
-          <div className="grid sm:grid-cols-3 gap-4 text-sm">
-            <div className="bg-indigo-50 p-4 rounded-xl">
-              <p className="font-bold text-indigo-800 mb-2">DSR — 총부채원리금상환비율</p>
-              <p className="text-gray-600 text-xs leading-relaxed">모든 대출의 연간 원리금 ÷ 연 소득 × 100. 2023년부터 1억 초과 대출에 40% 규제 적용. 소득 대비 갚아야 할 빚의 총량을 측정하는 가장 강력한 지표입니다.</p>
+          <h2 className="text-lg font-bold mb-1 text-gray-900">DSR이 40%를 넘었다면 — 실제로 낮추는 방법</h2>
+          <p className="text-sm text-gray-500 mb-5">단순히 "대출 줄이거나 소득 올리면 된다"는 정보는 어디에나 있습니다. 실제로 어떤 선택이 DSR에 얼마나 영향을 주는지 살펴봅니다.</p>
+          <div className="space-y-4 text-sm">
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="font-bold text-gray-800 mb-2">① 기존 대출 중 어떤 걸 먼저 갚아야 할까?</p>
+              <p className="text-gray-600 leading-relaxed mb-3">DSR을 낮추는 데 효과적인 건 <strong className="text-indigo-700">원리금이 높은 대출</strong>을 먼저 상환하는 것입니다. 예를 들어 신용대출 2,000만원(60개월, 6.5%)의 월 납입액은 약 39만원인데, 이를 완납하면 DSR이 즉시 <strong>약 7.8%p</strong> 낮아집니다 (연 소득 6천만원 기준). 반면 잔액이 비슷하더라도 장기 주담대는 월 납입액이 낮아 효과가 작습니다.</p>
+              <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-800">
+                💡 DSR 개선 효과 = 상환하는 대출의 월 원리금 × 12 ÷ 연 소득 × 100. 월 납입액이 클수록 효과가 큽니다.
+              </div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-xl">
-              <p className="font-bold text-blue-800 mb-2">DTI — 총부채상환비율</p>
-              <p className="text-gray-600 text-xs leading-relaxed">신규 주담대 원리금 + 기타 대출 이자 ÷ 연 소득 × 100. 수도권 50%, 지방 60% 적용. DSR보다 범위가 좁아 주담대 심사에 주로 사용됩니다.</p>
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="font-bold text-gray-800 mb-2">② 상환기간 늘리기 — 득실 계산</p>
+              <p className="text-gray-600 leading-relaxed mb-3">3억원, 4.5% 주담대를 <strong>240개월(20년)</strong>로 하면 월 납입액 약 190만원, DSR 영향 38%p. 같은 조건에서 <strong>360개월(30년)</strong>로 늘리면 월 납입액 약 152만원, DSR 영향 30.4%p — 약 7.6%p 감소합니다. 단, 이렇게 하면 <strong>총 이자가 약 3,600만원 더</strong> 납니다. 한도를 통과하기 위한 임시방편이지, 이자 절약 방법이 아닙니다.</p>
+              <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800">
+                ⚠️ 한도를 위해 기간을 늘렸다면, 여유 자금 생길 때마다 중도상환으로 기간을 줄이는 전략이 유리합니다.
+              </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-xl">
-              <p className="font-bold text-purple-800 mb-2">LTV — 주택담보인정비율</p>
-              <p className="text-gray-600 text-xs leading-relaxed">대출금액 ÷ 담보(주택) 가치 × 100. 투기과열지구 40%, 조정대상지역 50%, 일반 70%. 소득이 아닌 담보 가치 기준으로 한도를 제한합니다.</p>
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="font-bold text-gray-800 mb-2">③ 소득 증빙 — 어떤 소득이 인정되나</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs mt-2">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-gray-400">
+                      <th className="text-left pb-2 font-medium">소득 유형</th>
+                      <th className="text-left pb-2 font-medium">인정 방식</th>
+                      <th className="text-left pb-2 font-medium">유의사항</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-600 space-y-1">
+                    {[
+                      ['근로소득', '원천징수영수증 전년도 기준', '2년 이상 재직 시 유리'],
+                      ['사업소득', '종합소득세 신고 기준', '경비 차감 후 소득으로 낮아질 수 있음'],
+                      ['프리랜서', '수입금액의 60~80% 인정', '은행마다 인정 비율 상이'],
+                      ['임대소득', '임대차계약서 기준', '건보료 등 증빙 필요'],
+                      ['배우자 소득', '합산 심사 가능', '공동 차주로 등재해야 인정'],
+                    ].map(([t, m, n]) => (
+                      <tr key={t} className="border-b border-gray-50">
+                        <td className="py-1.5 font-semibold text-gray-700">{t}</td>
+                        <td className="py-1.5">{m}</td>
+                        <td className="py-1.5 text-gray-400">{n}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* 2. 스트레스 DSR */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold mb-4 text-gray-900">규제 기준표 — 어디까지 빌릴 수 있나</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="pb-2 text-gray-500 font-medium">지표</th>
-                  <th className="pb-2 text-gray-500 font-medium">한도</th>
-                  <th className="pb-2 text-gray-500 font-medium">적용 대상</th>
-                </tr>
-              </thead>
-              <tbody className="space-y-1">
-                {[
-                  ['DSR', '40%', '1억 초과 대출 전체 (2023~)'],
-                  ['DTI', '50%', '수도권 주택담보대출'],
-                  ['DTI', '60%', '지방 주택담보대출'],
-                  ['LTV', '40%', '투기과열지구 9억 이하'],
-                  ['LTV', '50%', '조정대상지역 9억 이하'],
-                  ['LTV', '70%', '일반지역 주택담보대출'],
-                ].map(([g, l, d]) => (
-                  <tr key={`${g}-${l}`} className="border-b border-gray-50">
-                    <td className="py-2 font-semibold text-indigo-700">{g}</td>
-                    <td className="py-2 font-bold">{l}</td>
-                    <td className="py-2 text-gray-500 text-xs">{d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-gray-400 mt-3">※ 규제 기준은 정부 정책에 따라 변경될 수 있습니다. 최신 기준은 금융위원회·금융감독원에서 확인하세요.</p>
-        </div>
-
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold mb-4 text-gray-900">DSR이 40%를 넘으면 어떻게 되나?</h2>
-          <div className="space-y-3 text-sm text-gray-700">
-            <div className="bg-red-50 p-4 rounded-xl border border-red-100">
-              <p className="font-semibold text-red-800 mb-1">원칙적으로 대출 거절</p>
-              <p className="text-gray-600">2023년부터 총 대출이 1억 원을 초과하면 금융기관이 DSR 40%를 초과하는 대출을 취급할 수 없습니다. 소득 증빙이 충분해도 DSR 한도가 우선입니다.</p>
+          <h2 className="text-lg font-bold mb-1 text-gray-900">스트레스 DSR — 왜 계산기보다 실제 한도가 더 낮을까?</h2>
+          <p className="text-sm text-gray-500 mb-5">이 계산기에서 DSR 39%가 나왔는데 은행에서 한도 초과라고 한다면? 스트레스 DSR 때문입니다.</p>
+          <div className="space-y-4 text-sm text-gray-700">
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+              <p className="font-semibold text-red-800 mb-2">스트레스 DSR이란?</p>
+              <p className="leading-relaxed">2024년부터 적용된 규제로, 대출 신청 금리에 <strong>스트레스 금리(가산율)를 추가</strong>해서 DSR을 계산합니다. 실제 금리가 4.5%여도, 스트레스 금리 1.5%p를 더한 <strong>6.0% 기준으로 DSR을 계산</strong>합니다. 금리가 오를 상황을 미리 반영해 심사를 더 보수적으로 하는 것입니다.</p>
             </div>
-            <div className="bg-amber-50 p-4 rounded-xl">
-              <p className="font-semibold text-amber-800 mb-1">해결 방법 4가지</p>
-              <ul className="space-y-1 text-gray-600">
-                <li>① <strong>대출 금액 줄이기</strong> — DSR 40% 이내 금액으로 조정</li>
-                <li>② <strong>상환 기간 늘리기</strong> — 월 원리금↓ → DSR↓ (단, 총 이자 증가)</li>
-                <li>③ <strong>기존 대출 상환</strong> — 기존 원리금 줄여 DSR 여유 확보</li>
-                <li>④ <strong>소득 증빙 강화</strong> — 인정 소득 범위 확대 (부업·임대소득 등)</li>
-              </ul>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-bold text-gray-500 mb-2">일반 DSR 계산 (이 계산기)</p>
+                <p className="text-sm text-gray-700">3억원 × 4.5% × 30년 기준</p>
+                <p className="font-bold text-gray-900 mt-1">월 납입 152만원 → DSR 30.4%</p>
+              </div>
+              <div className="bg-red-50 rounded-xl p-4">
+                <p className="text-xs font-bold text-red-500 mb-2">스트레스 DSR 계산 (은행 실제 심사)</p>
+                <p className="text-sm text-gray-700">3억원 × 6.0% × 30년 기준</p>
+                <p className="font-bold text-red-700 mt-1">월 납입 180만원 → DSR 36%</p>
+              </div>
             </div>
+            <p className="text-xs text-gray-400">※ 스트레스 금리 가산율은 정책에 따라 변동됩니다. 변동금리 대출에 더 높은 가산율이 적용됩니다.</p>
           </div>
         </div>
 
+        {/* 3. 은행마다 다른 이유 */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-bold mb-1 text-gray-900">A은행은 되고 B은행은 안 되는 이유</h2>
+          <p className="text-sm text-gray-500 mb-5">같은 조건인데 은행마다 한도가 수천만원씩 차이 나는 현상은 흔합니다. 이유는 세 가지입니다.</p>
+          <div className="space-y-3 text-sm">
+            <div className="flex gap-3 p-4 border border-gray-100 rounded-xl">
+              <span className="text-2xl shrink-0">📋</span>
+              <div>
+                <p className="font-bold text-gray-800 mb-1">소득 산정 방식의 차이</p>
+                <p className="text-gray-600 leading-relaxed">프리랜서·사업자 소득은 은행마다 인정 비율이 다릅니다. 같은 종합소득세 신고 소득도 한 은행은 실소득 100%, 다른 은행은 60%만 인정하기도 합니다. 특히 최근 2년 소득 평균을 쓰는 곳과 직전 1년만 보는 곳이 달라, 소득이 올라가는 중이라면 최신 연도를 많이 보는 은행이 유리합니다.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 p-4 border border-gray-100 rounded-xl">
+              <span className="text-2xl shrink-0">💳</span>
+              <div>
+                <p className="font-bold text-gray-800 mb-1">마이너스통장·카드론 처리 방식</p>
+                <p className="text-gray-600 leading-relaxed">마이너스통장 한도 1,000만원 중 200만원만 사용 중이라도, 일부 은행은 <strong>한도 전액(1,000만원)을 대출로 간주</strong>해 DSR에 포함시킵니다. 반면 실제 사용액만 보는 은행도 있어, 마이너스통장 한도가 크다면 미리 한도를 줄이거나 닫고 신청하는 게 유리할 수 있습니다.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 p-4 border border-gray-100 rounded-xl">
+              <span className="text-2xl shrink-0">⏱️</span>
+              <div>
+                <p className="font-bold text-gray-800 mb-1">기존 대출 상환 반영 타이밍</p>
+                <p className="text-gray-600 leading-relaxed">신용대출을 완납했더라도 신용정보원 등록까지 <strong>수일~수주 지연</strong>되는 경우가 있습니다. 이 기간에 주담대를 신청하면 이미 갚은 대출이 DSR에 포함돼 한도 초과가 나올 수 있습니다. 상환 후 최소 1~2주 뒤 신청하거나, 상환 증빙 서류를 직접 제출하는 방법이 있습니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. 계산 방식 */}
         <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600 space-y-1">
           <p className="font-semibold text-gray-700 mb-2 text-xs">📌 계산 방식</p>
           <p>• DSR = (기존 연 원리금 + 신규 연 원리금) ÷ 연 소득 × 100</p>

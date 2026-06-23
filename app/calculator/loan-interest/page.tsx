@@ -400,116 +400,118 @@ export default function LoanInterestCalculatorPage() {
       </div>{/* 결과 영역 끝 */}
       </div>{/* 2컬럼 그리드 끝 */}
 
-      {/* ─── 하단 안내 콘텐츠 (SEO + 가이드, 풀 width) ─── */}
+      {/* ─── 하단 안내 콘텐츠 ─── */}
       <div className="space-y-6 mt-8">
 
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">언제 대출 이자 계산이 필요할까요?</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-blue-900 mb-2">1. 신용대출 갈아타기 검토 시</h3>
-                <p>기존 대출의 금리가 높아 다른 금융기관으로 갈아탈지 고민할 때, 현재 대출의 총 이자와 신규 대출의 예상 이자를 비교하여 실제 절감 효과를 확인할 수 있습니다. 단, 중도상환수수료와 신규 대출 취급 수수료를 함께 고려해야 정확한 비교가 가능합니다.</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-green-900 mb-2">2. 주택담보대출 실행 전 예산 계획</h3>
-                <p>내 집 마련을 위해 주택담보대출을 받기 전, 월 납입액과 총 상환액을 미리 계산하여 가계 예산에 무리가 없는지 확인할 수 있습니다. 특히 원리금균등 상환과 원금균등 상환 방식 중 어떤 것을 선택할지 결정하는 데 도움이 됩니다.</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-purple-900 mb-2">3. 거치기간 설정 여부 결정</h3>
-                <p>대출 초기 현금 흐름이 부족한 경우 거치기간을 설정하면 초기 부담을 줄일 수 있지만, 총 상환액이 증가합니다. 거치기간 사용 시와 미사용 시의 이자 차이를 계산하여 본인의 재무 상황에 맞는 선택을 할 수 있습니다.</p>
+        {/* 1. 중도상환 타이밍 전략 */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-bold mb-1 text-gray-900">이자를 가장 많이 줄이는 방법 — 중도상환 타이밍</h2>
+          <p className="text-sm text-gray-500 mb-5">총 이자를 보고 충격받는 분이 많습니다. 같은 금액을 중도상환해도 <strong>언제</strong> 하느냐에 따라 절약 효과가 크게 다릅니다.</p>
+          <div className="space-y-4 text-sm">
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+              <p className="font-bold text-emerald-800 mb-2">초반 중도상환이 훨씬 효과적입니다</p>
+              <p className="text-gray-700 leading-relaxed mb-3">원리금균등 방식에서 초반에는 납입액의 대부분이 이자입니다. 3억원, 4.5%, 30년 대출 기준으로 1개월차 납입액 152만원 중 이자가 112만원(74%)입니다. 즉, 초반에 원금을 줄이면 남은 기간 내내 이자가 줄어드는 복리 효과가 생깁니다.</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="bg-white rounded-lg p-3 border border-emerald-100">
+                  <p className="text-xs text-emerald-600 font-semibold mb-1">5년 후 5천만원 중도상환</p>
+                  <p className="text-base font-bold text-gray-800">총 이자 절약 <span className="text-emerald-600">약 3,200만원</span></p>
+                  <p className="text-xs text-gray-400 mt-0.5">잔여 25년 이자 감소</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-gray-100">
+                  <p className="text-xs text-gray-500 font-semibold mb-1">25년 후 5천만원 중도상환</p>
+                  <p className="text-base font-bold text-gray-800">총 이자 절약 <span className="text-gray-600">약 540만원</span></p>
+                  <p className="text-xs text-gray-400 mt-0.5">잔여 5년 이자 감소</p>
+                </div>
               </div>
             </div>
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="font-bold text-gray-800 mb-2">중도상환수수료 vs 이자 절약 — 언제 득인가?</p>
+              <p className="text-gray-600 leading-relaxed">중도상환수수료는 보통 잔액의 1~1.5%, 3년 이내 상환 시 부과됩니다. 5,000만원 중도상환 시 수수료 최대 75만원. 반면 이자 절약은 수백만~수천만원대이므로 수수료를 내더라도 중도상환이 거의 항상 유리합니다. 단, <strong>3년 이후에 수수료 없이</strong> 상환할 수 있다면 그때까지 기다리는 것이 가장 낫습니다.</p>
+            </div>
           </div>
+        </div>
 
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">계산 방식과 가정</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-gray-900 mb-2">원리금균등 공식</h3>
-                <p className="mb-2">월 납입액 M = P × [r(1+r)ⁿ] / [(1+r)ⁿ - 1]</p>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-gray-600">
-                  <li>P = 대출 원금, r = 월 금리(연금리÷12÷100), n = 상환 기간(개월)</li>
-                  <li>매월 납입액은 동일, 이자 비중이 점점 줄고 원금 비중이 늘어납니다</li>
-                </ul>
-              </div>
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                <h3 className="font-semibold text-amber-900 mb-2">계산에 포함되지 않는 요소</h3>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-gray-600">
-                  <li><strong>중도상환수수료:</strong> 조기 상환 시 발생하는 수수료 미반영</li>
-                  <li><strong>우대금리 및 할인:</strong> 급여이체·자동이체 등 조건부 할인 미반영</li>
-                  <li><strong>원금균등 방식:</strong> 이 계산기는 원리금균등 기준</li>
-                </ul>
-              </div>
+        {/* 2. 원리금균등 vs 원금균등 */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-bold mb-1 text-gray-900">원리금균등 vs 원금균등 — 실제 차이는 얼마나 될까?</h2>
+          <p className="text-sm text-gray-500 mb-5">많은 분이 "원리금균등이 편하지만 이자를 더 낸다"는 걸 알면서도 얼마나 더 내는지는 모릅니다. 구체적으로 계산해봤습니다.</p>
+          <div className="space-y-4 text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-gray-400 text-xs">
+                    <th className="text-left pb-2 font-medium">항목</th>
+                    <th className="text-center pb-2 font-medium">원리금균등</th>
+                    <th className="text-center pb-2 font-medium">원금균등</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-700">
+                  {[
+                    ['첫 달 납입액', '126만원', '158만원 (더 높음)'],
+                    ['마지막 달 납입액', '126만원', '83만원 (더 낮음)'],
+                    ['총 이자 (2억, 4.5%, 20년)', '1억 3,343만원', '9,045만원'],
+                    ['이자 차이', '—', '4,298만원 절약'],
+                  ].map(([item, a, b]) => (
+                    <tr key={item} className="border-b border-gray-50">
+                      <td className="py-2 text-gray-500 text-xs">{item}</td>
+                      <td className="py-2 text-center font-medium">{a}</td>
+                      <td className="py-2 text-center font-medium text-emerald-700">{b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+              <p className="font-semibold text-amber-800 mb-2">많은 사람이 오해하는 부분</p>
+              <p className="text-gray-700 leading-relaxed">원금균등의 <strong>첫 달 납입액이 원리금균등보다 높습니다.</strong> 원금을 매달 똑같이 갚기 때문에 초반 납입 부담이 크고, 후반으로 갈수록 줄어드는 구조입니다. 즉, 초기 현금 여유가 있고 장기적으로 이자를 아끼고 싶다면 원금균등이 유리하고, 매달 고정된 금액으로 계획적으로 살고 싶다면 원리금균등이 적합합니다.</p>
             </div>
           </div>
+        </div>
 
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">결과를 어떻게 해석하나요?</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="bg-green-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-green-900 mb-2">월 납입액 해석</h3>
-                <p>월 소득 대비 월 납입액이 30%를 넘으면 DSR 기준에서 위험 구간입니다. 월 소득의 20% 이내로 유지하는 것이 안전합니다.</p>
+        {/* 3. 거치기간의 진짜 비용 */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-bold mb-1 text-gray-900">거치기간의 진짜 비용 — 나중에 내는 게 아니라 더 내는 것</h2>
+          <p className="text-sm text-gray-500 mb-5">거치기간을 쓰면 초기 부담이 줄지만, 사라지는 이자가 아니라 <strong>뒤로 밀리는 이자+새로 생기는 이자</strong>입니다.</p>
+          <div className="space-y-4 text-sm">
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-xs text-gray-400 mb-1">거치기간 없음</p>
+                <p className="font-bold text-gray-800">1억, 4.5%, 10년</p>
+                <p className="text-2xl font-extrabold text-gray-900 my-1">2,393만원</p>
+                <p className="text-xs text-gray-400">총 이자</p>
               </div>
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-blue-900 mb-2">총 이자 vs 총 상환액</h3>
-                <p>총 이자가 원금의 50%를 넘는다면 대출 기간이 너무 길거나 금리가 높다는 신호입니다. 기간을 줄이거나 중도상환을 활용하면 이자를 크게 줄일 수 있습니다.</p>
+              <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-100">
+                <p className="text-xs text-amber-600 mb-1">거치 6개월</p>
+                <p className="font-bold text-gray-800">1억, 4.5%, 10년</p>
+                <p className="text-2xl font-extrabold text-amber-700 my-1">2,623만원</p>
+                <p className="text-xs text-amber-500">+230만원 추가</p>
               </div>
-              <div className="bg-purple-50 p-4 rounded-xl">
-                <h3 className="font-semibold text-purple-900 mb-2">거치기간 사용 시 주의사항</h3>
-                <p>거치기간을 쓰면 초기 월 부담은 줄지만 총 이자는 반드시 늘어납니다. 창업 초기나 소득이 불안정한 경우에만 선택적으로 활용하세요.</p>
-              </div>
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                <h3 className="font-semibold text-amber-900 mb-2">실제 대출과의 차이</h3>
-                <p>실제 은행 상환 스케줄과 차이가 있을 수 있습니다. 대출 실행 전 반드시 금융기관에서 제공하는 <strong>대출 상환 계획서</strong>를 확인하세요.</p>
+              <div className="bg-red-50 rounded-xl p-4 text-center border border-red-100">
+                <p className="text-xs text-red-500 mb-1">거치 12개월</p>
+                <p className="font-bold text-gray-800">1억, 4.5%, 10년</p>
+                <p className="text-2xl font-extrabold text-red-600 my-1">2,853만원</p>
+                <p className="text-xs text-red-400">+460만원 추가</p>
               </div>
             </div>
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="font-bold text-gray-800 mb-2">그래도 거치기간이 유용한 경우</p>
+              <ul className="space-y-1.5 text-gray-600">
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold shrink-0">✓</span><span><strong>창업 초기 운전자금:</strong> 매출 발생 전 현금 흐름 확보가 생존보다 우선일 때</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold shrink-0">✓</span><span><strong>입주 전 잔금 대출:</strong> 전세 보증금 회수와 잔금 사이 갭 기간</span></li>
+                <li className="flex gap-2"><span className="text-red-400 font-bold shrink-0">✗</span><span><strong>단순히 월 부담이 커서:</strong> 이 경우엔 대출 금액 자체를 줄이는 게 낫습니다</span></li>
+              </ul>
+            </div>
           </div>
+        </div>
 
-          <div className="rounded-2xl bg-blue-50 border border-blue-100 p-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">공식 출처 및 참고 자료</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">금융 당국 및 공공기관</h3>
-                <ul className="space-y-1.5 ml-2">
-                  <li>• <a href="https://www.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융감독원</a> — 대출 상품 비교 및 금리 정보</li>
-                  <li>• <a href="https://www.bok.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">한국은행</a> — 기준금리 및 금융통계</li>
-                  <li>• <a href="https://www.hf.go.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">주택금융공사</a> — 주택담보대출 안내</li>
-                  <li>• <a href="https://finlife.fss.or.kr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">금융상품통합비교공시</a> — 대출 금리 비교</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">시중 은행 대출 정보</h3>
-                <ul className="space-y-1.5 ml-2">
-                  <li>• <a href="https://www.kbanknow.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">KB국민은행</a> — 개인대출 상품 안내</li>
-                  <li>• <a href="https://www.shinhan.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">신한은행</a> — 대출금리 및 한도 조회</li>
-                  <li>• <a href="https://www.wooribank.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">우리은행</a> — 주택담보대출 안내</li>
-                </ul>
-              </div>
-              <p className="text-xs text-gray-500 bg-white rounded-lg p-3">※ 실제 대출 조건은 개인의 신용등급·소득·담보 가치 등에 따라 달라질 수 있습니다. 대출 실행 전 반드시 해당 금융기관에 직접 문의하시기 바랍니다.</p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-blue-50 border border-blue-100 p-6">
-            <h3 className="font-semibold mb-3 text-gray-900">거치기간, 언제 사용하면 좋을까요?</h3>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="bg-white p-3 rounded-xl">
-                <p className="font-semibold text-green-700 mb-1">추천하는 경우</p>
-                <ul className="space-y-1 text-gray-600 ml-2">
-                  <li>• 초기 현금 흐름이 부족할 때 (창업 초기, 사업 안정화 전)</li>
-                  <li>• 소득이 점진적으로 증가할 것으로 예상될 때</li>
-                  <li>• 단기적으로 자금을 다른 곳에 투자하여 수익을 낼 수 있을 때</li>
-                </ul>
-              </div>
-              <div className="bg-white p-3 rounded-xl">
-                <p className="font-semibold text-red-700 mb-1">신중해야 하는 경우</p>
-                <ul className="space-y-1 text-gray-600 ml-2">
-                  <li>• 안정적인 소득이 있고 원금 상환 여력이 충분할 때</li>
-                  <li>• 총 이자 비용을 최소화하고 싶을 때</li>
-                  <li>• 대출 기간이 짧거나 금리가 높을 때</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        {/* 4. 계산 방식 */}
+        <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600 space-y-1">
+          <p className="font-semibold text-gray-700 mb-2 text-xs">📌 계산 방식</p>
+          <p>• 월 납입액(원리금균등) M = P × r(1+r)ⁿ / ((1+r)ⁿ - 1)</p>
+          <p>• P = 대출 원금, r = 월 금리(연금리 ÷ 12 ÷ 100), n = 상환 기간(개월)</p>
+          <p>• 총 이자 = 월 납입액 × n - P</p>
+          <p className="text-xs text-gray-400 pt-1">※ 원금균등 방식, 중도상환수수료, 우대금리는 반영되지 않습니다. 실제 상환 계획서는 금융기관에서 확인하세요.</p>
+        </div>
 
       </div>
 

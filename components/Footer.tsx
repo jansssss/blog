@@ -72,28 +72,17 @@ export default function Footer({ siteTheme, siteName }: FooterProps) {
               </span>
             ))}
 
-            {/* 관리자 메뉴 */}
-            {adminEnabled && (
+            {/* 관리자 메뉴 — 로그인 후에만 표시 (공개 링크 없음) */}
+            {adminEnabled && isAdmin && (
               <>
                 <span className="flex items-center gap-4">
                   <span className="text-gray-300">|</span>
-                  {!isAdmin ? (
-                    <Link
-                      href="/admin/login"
-                      className="text-gray-500 hover:text-gray-900 transition-colors text-xs"
-                    >
-                      관리자
-                    </Link>
-                  ) : (
-                    <>
-                      <Link
-                        href="/admin/editor"
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        새 글쓰기
-                      </Link>
-                    </>
-                  )}
+                  <Link
+                    href="/admin/editor"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    새 글쓰기
+                  </Link>
                 </span>
                 {isAdmin && (
                   <>

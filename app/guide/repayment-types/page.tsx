@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import RepaymentTypesWidget from './RepaymentTypesWidget'
 
 export const metadata: Metadata = {
   title: '원리금균등·원금균등·만기일시 상환방식 완전 비교 | ohyess 가이드',
@@ -137,15 +138,18 @@ export default function RepaymentTypesGuidePage() {
       title="원리금균등·원금균등·만기일시 상환방식 완전 비교"
       description="3가지 대출 상환 방식의 월납입액·총이자·현금흐름 차이를 실전 사례와 비교표로 완전히 정리하고, 내 상황에 맞는 선택 기준을 제시합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <P>
         대출 상담을 받다 보면 창구 직원이 으레 묻습니다. &ldquo;원리금균등이요, 원금균등이요?&rdquo;
         이 질문이 단순해 보이지만, 선택에 따라 총 납입 이자가 수백만원씩 달라집니다. 세 가지
         방식의 구조를 정확히 이해하고 나면 답이 명확해집니다.
       </P>
+
+      <RepaymentTypesWidget />
 
       <H2 id="equal-payment">원리금균등상환 — 매달 같은 금액, 내부는 변한다</H2>
       <P>

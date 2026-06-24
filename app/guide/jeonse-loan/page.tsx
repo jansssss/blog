@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
+import JeonseWidget from './JeonseWidget'
 
 export const metadata: Metadata = {
   title: '전세대출 완전 정리 | ohyess 가이드',
@@ -103,9 +104,10 @@ export default function JeonseLoangGuidePage() {
       title="전세대출 완전 정리 — 종류·한도·보증·사기 예방까지"
       description="버팀목대출부터 시중은행 전세대출까지 3가지 경로 비교, 한도 계산 구조, 보증 기관 선택법, 전세 사기 예방 체크리스트를 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <GeminiImage
         src="/images/guide/jeonse-loan.png"
@@ -114,6 +116,8 @@ export default function JeonseLoangGuidePage() {
         className="mb-8"
         height={280}
       />
+
+      <JeonseWidget />
 
       <H2 id="types">전세대출 3가지 경로</H2>
       <P>

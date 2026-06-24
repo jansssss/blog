@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
+import MortgageLimitWidget from './MortgageLimitWidget'
 
 export const metadata: Metadata = {
   title: '주택담보대출 완전 정리 | ohyess 가이드',
@@ -117,9 +118,10 @@ export default function MortgageLoanGuidePage() {
       title="주택담보대출 완전 정리 — 한도·금리·절차 한 번에 이해하기"
       description="주택담보대출의 종류부터 실제 대출 한도 계산(LTV·DSR·DTI), 은행별 금리 비교 방법, 신청·실행 7단계 절차까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <GeminiImage
         src="/images/guide/mortgage-loan.png"
@@ -128,6 +130,8 @@ export default function MortgageLoanGuidePage() {
         className="mb-8"
         height={300}
       />
+
+      <MortgageLimitWidget />
 
       <H2 id="types">주담대 종류 한눈에 보기</H2>
       <P>

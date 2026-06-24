@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import EarlyRepaymentWidget from './EarlyRepaymentWidget'
 
 export const metadata: Metadata = {
   title: '중도상환수수료 완전 정리 — 계산 공식·면제 조건·절약 전략 | ohyess 가이드',
@@ -133,9 +134,10 @@ export default function EarlyRepaymentFeeGuidePage() {
       title="중도상환수수료 완전 정리 — 계산 공식부터 면제 조건까지"
       description="대출을 만기 전에 갚을 때 발생하는 중도상환수수료의 계산 공식, 면제 조건, 수수료 없이 중도상환하는 방법, 그리고 중도상환 vs 유지의 현실적인 손익 판단법을 완전히 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <H2 id="what-is">중도상환수수료란 무엇인가</H2>
       <P>
@@ -196,6 +198,8 @@ export default function EarlyRepaymentFeeGuidePage() {
         <li>금융사가 금리를 일방적으로 인상하는 경우</li>
         <li>상품 약관에 명시된 특정 사유 발생 시</li>
       </Ul>
+
+      <EarlyRepaymentWidget />
 
       <H2 id="cases">실전 사례로 확인하는 중도상환 손익</H2>
       <CaseBox title="사례 1 — 직장인 G씨: 주담대 1.5억 잔액, 연 5.5% → 연 3.8% 대환 검토">

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
+import RateStrategyWidget from './RateStrategyWidget'
 
 export const metadata: Metadata = {
   title: '금리 인상기 대출 전략 완전 정리 | ohyess 가이드',
@@ -96,9 +97,10 @@ export default function RateStrategyGuidePage() {
       title="금리 인상기 대출 전략 — 고정·변동 선택부터 갈아타기까지"
       description="금리가 오를 때 내 대출에 미치는 영향, 고정·변동금리 선택 기준, 대환대출 타이밍과 손익 계산, 금리 인하 요구권 활용법을 실전 사례로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <GeminiImage
         src="/images/guide/rate-strategy.png"
@@ -107,6 +109,8 @@ export default function RateStrategyGuidePage() {
         className="mb-8"
         height={280}
       />
+
+      <RateStrategyWidget />
 
       <H2 id="understanding">금리 인상이 내 대출에 미치는 영향</H2>
       <P>

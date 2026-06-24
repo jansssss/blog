@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import LoanInterestGuideWidget from './LoanInterestGuideWidget'
 
 export const metadata: Metadata = {
   title: '대출이자 계산법 완전 정리 | ohyess 가이드',
@@ -129,9 +130,10 @@ export default function LoanInterestGuidePage() {
       title="대출이자 계산법 완전 정리 — 왜 이자가 다르게 나올까"
       description="원리금균등·원금균등·만기일시 상환 방식별 이자 계산 공식, 변동금리와 고정금리의 차이, 직장인과 자영업자의 실전 사례 2개를 통해 대출이자 계산의 구조를 완전히 이해합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <H2 id="basic-formula">이자 계산의 기본 공식</H2>
       <P>
@@ -157,6 +159,8 @@ export default function LoanInterestGuidePage() {
         이자액도 변합니다. 이 메커니즘을 이해하면 상환 방식별 이자 차이가 왜 발생하는지
         자연스럽게 납득됩니다.
       </P>
+
+      <LoanInterestGuideWidget />
 
       <H2 id="loan-types">신용대출 vs 담보대출, 금리 구조가 다른 이유</H2>
       <P>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import LoanReadinessWidget from './LoanReadinessWidget'
 
 export const metadata: Metadata = {
   title: '대출 신청 전 필수 체크리스트 — 놓치면 후회하는 10가지 | ohyess 가이드',
@@ -134,15 +135,18 @@ export default function LoanChecklistGuidePage() {
       title="대출 신청 전 필수 체크리스트 — 놓치면 후회하는 10가지"
       description="대출 신청 전 반드시 확인해야 할 신용·소득·한도 파악, 상품 비교 포인트, 계약서 필수 확인 항목을 직장인·자영업자 실전 사례와 함께 완전히 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <P>
         대출 실행 후 가장 많이 듣는 말이 있습니다. &ldquo;조금만 더 알고 받았으면 좋았을 텐데.&rdquo; 금리
         비교만 제대로 해도 수십~수백만원을 아낄 수 있고, 중도상환수수료 하나 놓쳤다가 대환을
         못 하는 경우도 흔합니다. 대출 전 30분의 준비가 10년의 이자 부담을 바꿉니다.
       </P>
+
+      <LoanReadinessWidget />
 
       <H2 id="preparation">사전 준비 — 신용·소득·한도 현황 파악</H2>
       <P>

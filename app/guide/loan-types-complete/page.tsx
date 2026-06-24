@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
+import LoanTypeFinderWidget from './LoanTypeFinderWidget'
 
 export const metadata: Metadata = {
   title: '대출 종류 완전 가이드 | ohyess 가이드',
@@ -83,9 +84,10 @@ export default function LoanTypesCompletePage() {
       title="대출 종류 완전 가이드 — 목적·금리·조건별 한눈에 비교"
       description="신용대출·주택담보대출·전세대출·사업자대출·정책금융까지 한국의 모든 대출 종류를 목적, 금리 수준, 자격 조건별로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <GeminiImage
         src="/images/guide/loan-types-complete.png"
@@ -155,6 +157,8 @@ export default function LoanTypesCompletePage() {
       <P>
         사업소득이 있는 자영업자·프리랜서는 종합소득세 신고 소득 기준으로 DSR이 계산됩니다. 근로소득자보다 소득 증빙이 어려워 한도가 작을 수 있습니다. 사업용 통장의 매출 실적, 부가세 신고 내역을 적극 활용하세요.
       </P>
+
+      <LoanTypeFinderWidget />
 
       <H2 id="selection">내 상황에 맞는 대출 선택법</H2>
       <div className="space-y-3 mb-6">

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
+import GuaranteeFeeWidget from './GuaranteeFeeWidget'
 
 export const metadata: Metadata = {
   title: '대출 보증보험 완전 정리 | ohyess 가이드',
@@ -83,9 +84,10 @@ export default function LoanGuaranteePage() {
       title="대출 보증보험 완전 정리 — HUG·HF·SGI 비교와 활용 전략"
       description="전세보증보험·대출보증서의 구조, HUG·HF·SGI 3대 보증 기관 비교, 보증료 계산법, 전세 사기 방어 활용법까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={ctas}
+      ctas={[]}
       relatedGuides={relatedGuides}
       faqs={faqs}
+      lastUpdated="2026년 6월"
     >
       <GeminiImage
         src="/images/guide/loan-guarantee.png"
@@ -180,6 +182,8 @@ export default function LoanGuaranteePage() {
         <li>HF 보증: 정책 전세대출(버팀목 등)과 연계. HF 보증 후 은행 대출 실행</li>
         <li>SGI 보증: 별도 창구 방문 또는 연계 은행에서 신청. 소득 조건 없어 편리</li>
       </Ul>
+
+      <GuaranteeFeeWidget />
 
       <H2 id="fee">보증료 계산과 절약 방법</H2>
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5 font-mono text-sm text-blue-900">

@@ -138,6 +138,14 @@ export default function EarlyRepaymentFeeGuidePage() {
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
+      publishedAt="2026년 4월"
+      reviewedAt="2026년 6월"
+      referenceDate="2026년 6월 기준"
+      appliesTo="은행권·저축은행·보험사 대출 중도상환수수료"
+      sources={[
+        { label: '금융감독원 — 중도상환수수료 안내', href: 'https://www.fss.or.kr/fss/main/contents.do?menuNo=200465' },
+        { label: '금융위원회 — 대출 관련 규정', href: 'https://www.fsc.go.kr/no010101' },
+      ]}
     >
       <H2 id="what-is">중도상환수수료란 무엇인가</H2>
       <P>

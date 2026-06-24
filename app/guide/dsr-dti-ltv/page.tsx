@@ -140,6 +140,14 @@ export default function DsrDtiLtvGuidePage() {
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
+      publishedAt="2026년 3월"
+      reviewedAt="2026년 6월"
+      referenceDate="2026년 6월 기준"
+      appliesTo="주택담보대출·신용대출·DSR 규제 적용 대출"
+      sources={[
+        { label: '금융위원회 — DSR 규제 고시', href: 'https://www.korea.kr/policy/financialView.do?newsId=148930490' },
+        { label: '금융감독원 — 가계대출 건전성 관리', href: 'https://www.fss.or.kr/fss/main/contents.do?menuNo=200465' },
+      ]}
     >
       <H2 id="ltv">LTV란? — 담보 가치 기준 대출 한도</H2>
       <P>

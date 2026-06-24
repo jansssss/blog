@@ -1,5 +1,21 @@
+import { Metadata } from 'next'
 import { Calculator, ArrowLeftRight, Target, RotateCcw, DollarSign, Activity, Scale, Shield, RefreshCcw, PieChart } from 'lucide-react'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: '금융 계산기 모음 | 대출이자·DSR·중도상환·갈아타기 즉시 계산 | ohyess',
+  description: '대출이자, DSR/DTI/LTV, 중도상환수수료, 대출 갈아타기, 상환방식 비교 등 10가지 무료 금융 계산기를 슬라이더로 즉시 계산하세요. 버튼 없이 실시간 결과 확인.',
+  keywords: ['금융 계산기', '대출 계산기', 'dsr 계산기', '이자 계산기', '중도상환 계산기', '대출 갈아타기 계산기', '상환 계산기'],
+  openGraph: {
+    title: '금융 계산기 모음 — 대출이자·DSR·갈아타기 즉시 계산',
+    description: '10가지 무료 금융 계산기. 슬라이더 조작으로 대출이자, DSR, 중도상환수수료를 실시간 계산합니다.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  alternates: {
+    canonical: '/calculator',
+  },
+}
 
 const CALCULATORS = [
   {

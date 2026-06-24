@@ -1,5 +1,21 @@
+import { Metadata } from 'next'
 import { Users, Briefcase, Building2, Home } from 'lucide-react'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: '금융 정책 안내 | 청년·소상공인·중소기업·주택 지원 정책 총정리 | ohyess',
+  description: '청년 금융 지원, 소상공인·자영업자 지원, 중소기업 정책자금, 주택 금융 정책을 한곳에 정리했습니다. 정부·공공기관 공식 정보 기준으로 조건과 신청 방법을 안내합니다.',
+  keywords: ['금융 정책', '청년 금융 지원', '소상공인 지원', '중소기업 정책자금', '주택 금융 정책', '정부 금융 지원'],
+  openGraph: {
+    title: '금융 정책 안내 — 청년·소상공인·중소기업·주택 지원 총정리',
+    description: '정부·공공기관 금융 지원 정책을 대상별로 정리했습니다. 조건, 한도, 신청 방법 확인하세요.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  alternates: {
+    canonical: '/policy',
+  },
+}
 
 const POLICIES = [
   {

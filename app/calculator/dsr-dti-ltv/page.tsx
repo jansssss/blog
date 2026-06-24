@@ -137,7 +137,10 @@ export default function DsrDtiLtvCalculatorPage() {
       ? maxMonthly * ((Math.pow(1 + rate/12/100, months) - 1) / (rate/12/100 * Math.pow(1 + rate/12/100, months)))
       : 0
 
-    return { newMonthly, dsr, dti, ltv, dsrMaxLoan, maxMonthly }
+    const stressNewMonthly = pmt(loanAmt, rate + 1.5, months)
+    const stressDsr = income > 0 ? ((existDebt * 12 + stressNewMonthly * 12) / income) * 100 : 0
+
+    return { newMonthly, dsr, dti, ltv, dsrMaxLoan, maxMonthly, stressDsr }
   }, [income, existDebt, loanAmt, rate, months, propVal])
 
   const chartData = [
@@ -295,9 +298,11 @@ export default function DsrDtiLtvCalculatorPage() {
                 <p className="text-xs text-indigo-300 mt-1">{rate.toFixed(1)}% · {months}개월 기준</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
-                <p className="text-xs text-gray-400 mb-1">신규 월 납입액</p>
-                <p className="text-xl font-extrabold text-gray-700">{fmt(result.newMonthly)}원</p>
-                <p className="text-xs text-gray-400 mt-1">원리금균등 기준</p>
+                <p className="text-xs text-gray-400 mb-1">신규 월 상환 가능액</p>
+                <p className="text-xl font-extrabold text-gray-700">
+                  {result.maxMonthly > 0 ? `${fmt(result.maxMonthly)}원` : '한도 없음'}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">DSR 40% 기준 가능 금액</p>
               </div>
             </div>
             {result.dsrMaxLoan > 0 && loanAmt > result.dsrMaxLoan && (
@@ -305,6 +310,27 @@ export default function DsrDtiLtvCalculatorPage() {
                 신청 금액이 DSR 한도보다 <strong>{fmtShort(loanAmt - result.dsrMaxLoan)}</strong> 초과 — 한도 내로 줄이거나 소득 증빙을 강화하세요
               </div>
             )}
+          </div>
+
+          {/* 기본 DSR vs 스트레스 DSR */}
+          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+            <h3 className="font-bold text-sm text-gray-700 mb-1">기본 DSR vs 스트레스 DSR</h3>
+            <p className="text-xs text-gray-500 mb-4">은행 실제 심사는 스트레스 금리를 가산해 더 엄격하게 계산합니다</p>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="bg-indigo-50 rounded-xl p-4 text-center border border-indigo-100">
+                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">기본 DSR 추정치</p>
+                <p className="text-2xl font-extrabold text-indigo-700">{result.dsr.toFixed(1)}%</p>
+                <p className="text-xs text-indigo-400 mt-1">금리 {rate.toFixed(1)}% 적용</p>
+              </div>
+              <div className={`rounded-xl p-4 text-center border ${result.stressDsr > 40 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-100'}`}>
+                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${result.stressDsr > 40 ? 'text-red-500' : 'text-amber-500'}`}>스트레스 DSR 추정</p>
+                <p className={`text-2xl font-extrabold ${result.stressDsr > 40 ? 'text-red-700' : 'text-amber-700'}`}>{result.stressDsr.toFixed(1)}%</p>
+                <p className={`text-xs mt-1 ${result.stressDsr > 40 ? 'text-red-400' : 'text-amber-500'}`}>금리 {(rate + 1.5).toFixed(1)}% 가산 적용</p>
+              </div>
+            </div>
+            <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5 text-xs text-amber-800 leading-relaxed">
+              ⚠️ 스트레스 DSR은 기본 DSR 추정치와 달리, 금융기관이 금리 인상 가능성을 반영해 실제 심사에 적용하는 가중 지표입니다. 가산율(현행 1.5%p 예시)·적용 방식은 금융기관·대출 종류별로 다르며, 실제 심사 결과와 다를 수 있습니다.
+            </div>
           </div>
 
           {/* 계산 내역 */}

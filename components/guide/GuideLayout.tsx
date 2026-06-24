@@ -5,6 +5,7 @@ import Toc from './Toc'
 import FAQ from './FAQ'
 import RelatedLinks from './RelatedLinks'
 import AdUnit from '@/components/AdUnit'
+import ContentTrustHeader, { type ContentTrustHeaderProps } from '@/components/ContentTrustHeader'
 
 interface TocItem {
   id: string
@@ -28,7 +29,7 @@ interface FAQItem {
   answer: string
 }
 
-interface GuideLayoutProps {
+interface GuideLayoutProps extends ContentTrustHeaderProps {
   title: string
   description: string
   tocItems: TocItem[]
@@ -47,6 +48,11 @@ export default function GuideLayout({
   relatedGuides,
   faqs,
   lastUpdated = '2026년 2월',
+  publishedAt,
+  reviewedAt,
+  referenceDate,
+  appliesTo,
+  sources,
   children,
 }: GuideLayoutProps) {
   return (
@@ -61,6 +67,13 @@ export default function GuideLayout({
           <Clock className="w-3.5 h-3.5" />
           <span>최종 업데이트: {lastUpdated}</span>
         </div>
+        <ContentTrustHeader
+          publishedAt={publishedAt}
+          reviewedAt={reviewedAt}
+          referenceDate={referenceDate}
+          appliesTo={appliesTo}
+          sources={sources}
+        />
       </header>
 
       {/* 목차 */}

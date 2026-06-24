@@ -1,5 +1,21 @@
+import { Metadata } from 'next'
 import { TrendingUp, FileText, GitCompare, Landmark } from 'lucide-react'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: '대출 비교 | 은행 금리·고정 vs 변동·정책대출 한눈에 비교 | ohyess',
+  description: '은행별 대출 금리, 고정금리 vs 변동금리, 주택담보·정책 대출 상품을 비교합니다. 금융감독원 공식 채널 활용법과 상품별 장단점을 정리했습니다.',
+  keywords: ['대출 비교', '은행별 금리 비교', '고정금리 변동금리', '정책대출 비교', '대출 상품 비교'],
+  openGraph: {
+    title: '대출 비교 — 은행 금리·고정 vs 변동·정책대출 한눈에',
+    description: '은행별 대출 금리와 상품 조건을 비교하고 내게 유리한 대출을 찾아보세요.',
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  alternates: {
+    canonical: '/compare',
+  },
+}
 
 const COMPARISONS = [
   {

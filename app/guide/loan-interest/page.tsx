@@ -134,6 +134,14 @@ export default function LoanInterestGuidePage() {
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
+      publishedAt="2026년 4월"
+      reviewedAt="2026년 6월"
+      referenceDate="2026년 6월 기준"
+      appliesTo="주택담보대출·신용대출·전세대출 이자 계산"
+      sources={[
+        { label: '금융감독원 — 금융상품 한눈에', href: 'https://www.fss.or.kr/fss/main/contents.do?menuNo=200467' },
+        { label: '한국은행 — 기준금리', href: 'https://www.bok.or.kr/portal/singl/baseRate/list.do?dataStat=totalData&menuNo=200656' },
+      ]}
     >
       <H2 id="basic-formula">이자 계산의 기본 공식</H2>
       <P>

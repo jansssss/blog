@@ -122,6 +122,14 @@ export default function MortgageLoanGuidePage() {
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
+      publishedAt="2026년 3월"
+      reviewedAt="2026년 6월"
+      referenceDate="2026년 6월 기준"
+      appliesTo="주택담보대출 (시중은행·보금자리론·디딤돌대출)"
+      sources={[
+        { label: '금융감독원 — 주택담보대출 안내', href: 'https://www.fss.or.kr/fss/main/contents.do?menuNo=200465' },
+        { label: '주택도시기금 — 보금자리론', href: 'https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp' },
+      ]}
     >
       <GeminiImage
         src="/images/guide/mortgage-loan.png"

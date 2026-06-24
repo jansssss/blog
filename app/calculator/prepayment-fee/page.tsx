@@ -82,6 +82,20 @@ export default function PrepaymentFeeCalculatorPage() {
   const [feeRate,  setFeeRate]  = useState(1.5)
   const [interest, setInterest] = useState(4.5)
   const [months,   setMonths]   = useState(120)
+  const [loanStart, setLoanStart] = useState('')
+  const [exemptYears, setExemptYears] = useState(3)
+
+  /* 면제 기간 계산 */
+  const exemptionInfo = useMemo(() => {
+    if (!loanStart) return null
+    const start = new Date(loanStart)
+    if (isNaN(start.getTime())) return null
+    const daysElapsed = Math.floor((Date.now() - start.getTime()) / 86400000)
+    const exemptDays = exemptYears * 365
+    const isExempt = exemptYears > 0 && daysElapsed >= exemptDays
+    const remainDays = exemptYears > 0 && !isExempt ? exemptDays - daysElapsed : 0
+    return { daysElapsed, isExempt, remainDays }
+  }, [loanStart, exemptYears])
 
   /* 실시간 계산 */
   const result = useMemo(() => {
@@ -123,7 +137,7 @@ export default function PrepaymentFeeCalculatorPage() {
         <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
           ⚡ 슬라이더 조작 즉시 계산
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">중도상환수수료 계산기</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">중도상환수수료 추정 계산기</h1>
         <p className="text-muted-foreground text-sm sm:text-base">
           조기 상환 시 발생하는 수수료와 실제 절감액을 즉시 확인합니다
         </p>
@@ -177,7 +191,50 @@ export default function PrepaymentFeeCalculatorPage() {
             displayValue={`${months / 12 >= 1 ? `${(months / 12).toFixed(months % 12 === 0 ? 0 : 1)}년` : ''} ${months % 12 !== 0 || months < 12 ? `${months % 12 || months}개월` : ''}`.trim()}
           />
         </div>
+
+        {/* 대출 실행일 & 수수료 면제 기간 */}
+        <div className="mt-6 border border-indigo-100 rounded-2xl p-4 bg-white">
+          <p className="text-xs font-semibold text-indigo-600 mb-3">🗓 수수료 면제 기간 확인 (선택)</p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-500 block mb-1">대출 실행일</label>
+              <input
+                type="date"
+                value={loanStart}
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={e => setLoanStart(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-indigo-300 bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 block mb-1">수수료 면제 기간</label>
+              <select
+                value={exemptYears}
+                onChange={e => setExemptYears(Number(e.target.value))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-indigo-300 bg-gray-50"
+              >
+                <option value={0}>면제 없음</option>
+                <option value={3}>3년 면제</option>
+                <option value={5}>5년 면제</option>
+              </select>
+            </div>
+          </div>
+          {exemptionInfo && (
+            <div className={`mt-3 rounded-lg px-3 py-2 text-xs font-medium ${exemptionInfo.isExempt ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+              {exemptionInfo.isExempt
+                ? '✅ 면제 기간 경과 — 수수료 없이 중도상환 가능할 수 있습니다 (금융기관 확인 필요)'
+                : `⏳ 면제까지 약 ${exemptionInfo.remainDays}일 남음 (${Math.ceil(exemptionInfo.remainDays / 30)}개월)`}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* 면제 기간 경과 배너 */}
+      {exemptionInfo?.isExempt && (
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800 font-medium mb-5">
+          ✅ 입력하신 대출 실행일 기준 면제 기간이 경과했습니다. 실제 수수료 부과 여부는 금융기관에 확인하세요.
+        </div>
+      )}
 
       {/* ─── 순 절감액 히어로 카드 ─────────────────────────────── */}
       <div
@@ -245,6 +302,7 @@ export default function PrepaymentFeeCalculatorPage() {
         <p>• 이자 절감액 = (기존 잔액 × 월금리 × 개월) − (상환 후 잔액 × 월금리 × 개월)</p>
         <p>• 순 절감액 = 이자 절감액 − 중도상환수수료</p>
         <p className="text-xs text-gray-400 pt-1">※ 단순 이자 기준 — 원리금균등 복리 효과 미반영</p>
+        <p className="text-xs text-amber-700 bg-amber-50 rounded px-2 py-1.5 mt-1.5">⚠️ 금융기관 상품별 산식 확인 필요 — 이 계산기는 추정치이며 실제 수수료와 다를 수 있습니다.</p>
       </div>
 
       {/* ─── 하단 가이드 카드 ────────────────────────────────────── */}
@@ -303,11 +361,11 @@ export default function PrepaymentFeeCalculatorPage() {
               <p className="mt-2 text-xs">※ 본 계산기는 단순 이자 기준이며, 실제로는 원리금균등 방식의 복리 효과를 고려해야 합니다.</p>
             </div>
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 법적 규제</h3>
+              <h3 className="font-semibold text-amber-900 mb-2">⚠️ 참고 사항</h3>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>2021년 7월부터 <strong>신규 주택담보대출</strong>은 중도상환수수료가 폐지되었습니다.</li>
-                <li>신용대출 등 일반 가계대출은 여전히 중도상환수수료가 적용됩니다.</li>
+                <li>중도상환수수료율·면제 기간은 대출 상품·금융기관별로 다릅니다. 반드시 대출 계약서를 확인하세요.</li>
                 <li>수수료율 상한: 법적으로 연간 원금의 2% 이내로 제한됩니다.</li>
+                <li>이 계산기는 추정치로, 실제 금융기관의 산식과 다를 수 있습니다.</li>
               </ul>
             </div>
           </div>

@@ -108,6 +108,14 @@ export default function JeonseLoangGuidePage() {
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
+      publishedAt="2026년 3월"
+      reviewedAt="2026년 6월"
+      referenceDate="2026년 6월 기준"
+      appliesTo="버팀목전세대출·한국주택금융공사 전세대출·시중은행 전세대출"
+      sources={[
+        { label: '주택도시기금 — 버팀목전세대출', href: 'https://nhuf.molit.go.kr/FP/FP05/FP0503/FP05030201.jsp' },
+        { label: '한국주택금융공사 — 전세자금보증', href: 'https://www.hf.go.kr/hf/sub03/sub03_01_01.do' },
+      ]}
     >
       <GeminiImage
         src="/images/guide/jeonse-loan.png"

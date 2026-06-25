@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import GeminiImage from '@/components/GeminiImage'
 import JeonseWidget from './JeonseWidget'
 
@@ -250,6 +251,7 @@ export default function JeonseLoangGuidePage() {
           <li><strong>결론: 자기자금 비중 높일수록 이자 절감. HF 전세대출도 병행 비교 추천</strong></li>
         </Ul>
       </CaseBox>
+      <MortgagePrepHubCTA />
     </GuideLayout>
   )
 }

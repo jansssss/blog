@@ -474,6 +474,62 @@ export default function MortgagePreparationHubPage() {
         </div>
       </div>
 
+      {/* 주제별 연결 금융 도구 */}
+      <div className="mb-8">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">주제별 연결 도구</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              icon: '🏠',
+              label: '전세대출',
+              color: 'text-blue-700',
+              links: [
+                { text: '전세대출 완전 정리', href: '/guide/jeonse-loan' },
+                { text: '대출 보증보험 정리', href: '/guide/loan-guarantee' },
+                { text: '대출이자 계산기', href: '/calculator/loan-interest' },
+              ],
+              hover: 'hover:text-blue-700',
+            },
+            {
+              icon: '⭐',
+              label: '신용·대환',
+              color: 'text-emerald-700',
+              links: [
+                { text: '신용점수 완전 정리', href: '/guide/credit-score' },
+                { text: '갈아타기 손익 계산기', href: '/calculator/refinancing' },
+                { text: '중도상환수수료 계산', href: '/calculator/prepayment-fee' },
+              ],
+              hover: 'hover:text-emerald-700',
+            },
+            {
+              icon: '📋',
+              label: '대출 공통',
+              color: 'text-indigo-700',
+              links: [
+                { text: '대출 종류 완전 가이드', href: '/guide/loan-types-complete' },
+                { text: '대출 거절 극복 전략', href: '/guide/loan-rejection' },
+                { text: '금리 인상기 대출 전략', href: '/guide/rate-strategy' },
+              ],
+              hover: 'hover:text-indigo-700',
+            },
+          ].map((cat) => (
+            <div key={cat.label} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+              <p className={`text-xs font-bold mb-3 ${cat.color}`}>{cat.icon} {cat.label}</p>
+              <ul className="space-y-2">
+                {cat.links.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href}
+                      className={`text-xs text-gray-600 flex items-center gap-1.5 transition-colors ${cat.hover}`}>
+                      <ChevronRight className="w-3 h-3 shrink-0 text-gray-300" /> {item.text}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 관련 가이드 */}
       <div className="mb-8 rounded-2xl bg-gray-50 border border-gray-200 p-5">
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">관련 가이드</p>

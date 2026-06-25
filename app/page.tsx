@@ -38,22 +38,14 @@ const FEATURED_QUESTIONS = [
 ]
 
 const HOME_GUIDE_ITEMS = [
-  { title: '월급 5천 주담대 한도', href: '/guide/mortgage-salary-5000', desc: '소득별 한도 + DSR 즉시 계산' },
-  { title: '자동차 할부 DSR 영향', href: '/guide/car-loan-dsr-impact', desc: '할부가 대출 한도를 깎는 구조' },
-  { title: 'LTV는 되는데 DSR 막힘', href: '/guide/ltv-ok-dsr-blocked', desc: 'LTV·DSR 동시 비교로 실제 한도 확인' },
-  { title: '금리 0.5% 차이 계산', href: '/guide/rate-0p5-difference', desc: '금액·기간별 총이자 차이 비교' },
-  { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
+  { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', desc: '한도·금리·절차 한 번에 이해하기' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', desc: '대출 한도 결정 3가지 핵심 지표' },
+  { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', desc: '원리금균등 vs 원금균등 총이자 차이' },
   { title: '중도상환수수료 정리', href: '/guide/early-repayment-fee', desc: '수수료 계산·면제 조건·절약 전략' },
-  { title: '신용점수 완전 정리', href: '/guide/credit-score', desc: '점수 올리는 방법·금리에 미치는 영향' },
   { title: '대출 전 체크리스트', href: '/guide/loan-checklist', desc: '놓치면 후회하는 10가지 확인 항목' },
-  { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', desc: '한도·금리·절차 한 번에 이해하기' },
-  { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', desc: '종류·보증·사기 예방까지 완전 가이드' },
-  { title: '금리 인상기 대출 전략', href: '/guide/rate-strategy', desc: '고정·변동 선택부터 갈아타기 타이밍' },
-  { title: '대출 종류 완전 가이드', href: '/guide/loan-types-complete', desc: '신용·주담대·정책금융 목적별 비교' },
-  { title: '대출 보증보험 정리', href: '/guide/loan-guarantee', desc: 'HUG·HF·SGI 비교와 전세 사기 방어' },
-  { title: '대출 거절 극복 전략', href: '/guide/loan-rejection', desc: '거절 이유 파악부터 재신청 성공까지' },
+  { title: '자동차 할부 DSR 영향', href: '/guide/car-loan-dsr-impact', desc: '할부가 대출 한도를 깎는 구조' },
+  { title: '금리 0.5% 차이 계산', href: '/guide/rate-0p5-difference', desc: '금액·기간별 총이자 차이 비교' },
 ]
 
 // ISR 설정 (60초마다 재검증)
@@ -227,7 +219,7 @@ export default async function HomePage({
                   </div>
                   <div>
                     <h2 className="text-sm font-bold text-gray-900 leading-tight">핵심 금융 가이드</h2>
-                    <p className="text-[11px] text-gray-500 leading-tight">전문가 수준의 대출·신용 완전 정리</p>
+                    <p className="text-[11px] text-gray-500 leading-tight">공식자료 기반 실전 금융 가이드</p>
                   </div>
                 </div>
                 <Link

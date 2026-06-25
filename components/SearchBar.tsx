@@ -51,7 +51,7 @@ export default function SearchBar() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="궁금한 내용을 검색해보세요... (예: 프리랜서 신용대출, 세금)"
+              placeholder="궁금한 내용을 검색해보세요... (예: 주담대 한도, DSR 계산)"
               className="flex-1 bg-transparent py-4 pr-4 text-base outline-none placeholder:text-muted-foreground"
             />
 
@@ -81,7 +81,7 @@ export default function SearchBar() {
       {/* Popular searches suggestion - hidden on mobile */}
       <div className="mt-3 hidden sm:flex items-center justify-center gap-2 flex-wrap">
         <span className="text-xs text-muted-foreground">인기 검색어:</span>
-        {['신용대출', '프리랜서', '세금', '대출계산기'].map((keyword) => (
+        {['주담대 한도', 'DSR 계산', '자동차 할부', '대환대출', '전세보증보험'].map((keyword) => (
           <button
             key={keyword}
             onClick={() => {

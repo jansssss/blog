@@ -216,7 +216,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2 mb-6">
           <BookOpen className="w-5 h-5 text-blue-600" />
           <h2 className="text-xl font-bold text-gray-900">핵심 금융 가이드</h2>
-          <span className="text-xs text-gray-400 ml-1">12개 완전 정리 · 전문가 콘텐츠</span>
+          <span className="text-xs text-gray-400 ml-1">공식자료 기반 실전 금융 가이드</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {STATIC_GUIDES.map((guide) => (
@@ -249,7 +249,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
       {/* 카테고리 필터 */}
       {categories && categories.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">블로그 관련글</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-3">금융 가이드 더보기</h2>
           <div className="flex flex-wrap gap-2">
             <Link href="/guide">
               <Button variant={!selectedCategory ? 'default' : 'outline'} size="sm">

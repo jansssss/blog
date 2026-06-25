@@ -10,8 +10,8 @@ const PATH_LABELS: Record<string, string> = {
   'calculator': '계산기',
   'compare': '금융 비교',
   'policy': '정책 지원',
-  'guide': '관련글',
-  'blog': '관련글',
+  'guide': '금융 가이드',
+  'blog': '금융 가이드',
   'tools': '보험 도구',
   'about': '소개',
 

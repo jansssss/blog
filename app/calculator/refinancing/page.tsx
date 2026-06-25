@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 
 /* ── 원리금균등 월 납입액 ── */
@@ -448,6 +449,7 @@ export default function RefinancingCalculatorPage() {
           ))}
         </div>
       </div>
+      <MortgagePrepHubCTA />
       <DisclaimerNotice />
 
       <style>{`

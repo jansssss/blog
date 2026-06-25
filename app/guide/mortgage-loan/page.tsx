@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
 import MortgageLimitWidget from './MortgageLimitWidget'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 
 export const metadata: Metadata = {
   title: '주택담보대출 완전 정리 | ohyess 가이드',
@@ -297,6 +298,7 @@ export default function MortgageLoanGuidePage() {
       <P>
         신용점수 700점대 초반과 800점대 초반은 대출 금리 차이가 0.3~0.8%p까지 납니다. 대출 신청 6개월 전부터 카드 연체 없애기, 신용카드 사용률 30% 이하 유지, 불필요한 대출 조회 자제 등으로 점수를 관리하세요.
       </P>
+      <MortgagePrepHubCTA />
     </GuideLayout>
   )
 }

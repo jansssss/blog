@@ -7,7 +7,7 @@ import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { BookOpen, ArrowRight, HelpCircle } from 'lucide-react'
+import { BookOpen, ArrowRight, HelpCircle, ChevronRight } from 'lucide-react'
 import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
 
 const FEATURED_QUESTIONS = [
@@ -144,6 +144,44 @@ export default async function HomePage({
 
         {/* 인라인 대출 이자 계산기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <HomeLoanCalculator />}
+
+        {/* 주담대 준비 허브 카드 (ohyess.kr 전용) */}
+        {site?.domain === 'ohyess.kr' && (
+          <section className="mb-8">
+            <div className="rounded-2xl overflow-hidden border border-indigo-200 shadow-sm">
+              <div className="bg-gradient-to-br from-indigo-600 to-blue-600 px-5 py-5 sm:px-6">
+                <p className="text-indigo-200 text-[10px] font-bold uppercase tracking-widest mb-1">STEP BY STEP</p>
+                <h2 className="text-white text-base sm:text-lg font-bold leading-snug mb-1">
+                  집을 사기 전, 대출 준비를 순서대로 확인하세요
+                </h2>
+                <p className="text-indigo-200 text-xs leading-relaxed">
+                  연봉·기존 대출·집값을 기준으로 한도와 월 납입액을 확인하고, 사전심사 전 체크할 항목까지 한 번에 정리합니다.
+                </p>
+              </div>
+              <div className="bg-white px-5 py-4">
+                <div className="flex flex-wrap items-center gap-1.5 mb-4">
+                  {(['한도 확인', '월 납입액 계산', '기존 부채 영향', '사전심사 체크'] as const).map((step, i, arr) => (
+                    <span key={step} className="flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                        <span className="w-4 h-4 bg-indigo-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {i + 1}
+                        </span>
+                        {step}
+                      </span>
+                      {i < arr.length - 1 && <ChevronRight className="w-3 h-3 text-gray-300 shrink-0" />}
+                    </span>
+                  ))}
+                </div>
+                <Link
+                  href="/hub/mortgage-preparation"
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors"
+                >
+                  주담대 준비 순서 확인하기 <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <QuickToolsSection />}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import LoanReadinessWidget from './LoanReadinessWidget'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 
 export const metadata: Metadata = {
   title: '대출 신청 전 필수 체크리스트 — 놓치면 후회하는 10가지 | ohyess 가이드',
@@ -297,6 +298,7 @@ export default function LoanChecklistGuidePage() {
         연말 성과급이나 인센티브가 생기면 연간 무수수료 한도(통상 원금의 10~30%) 범위에서
         부분 상환을 진행하세요. 원금이 줄면 이후 발생하는 이자도 함께 줄어듭니다.
       </P>
+      <MortgagePrepHubCTA />
     </GuideLayout>
   )
 }

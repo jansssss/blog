@@ -6,6 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 
 /* ──────────────────────────────────────────
@@ -545,6 +546,7 @@ export default function LoanInterestCalculatorPage() {
         </div>
       </div>
 
+      <MortgagePrepHubCTA />
       <DisclaimerNotice />
 
       {/* 슬라이더 스타일 */}

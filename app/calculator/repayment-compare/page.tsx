@@ -8,6 +8,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -578,6 +579,7 @@ export default function RepaymentComparePage() {
           ))}
         </div>
       </div>
+      <MortgagePrepHubCTA />
       <DisclaimerNotice />
 
       {/* ─── 슬라이더 스타일 ─────────────────────────────────────── */}

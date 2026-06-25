@@ -56,6 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const calculatorPages: MetadataRoute.Sitemap = []
   const guidePages: MetadataRoute.Sitemap = []
+  const hubPages: MetadataRoute.Sitemap = []
   const trendPages: MetadataRoute.Sitemap = []
   const comparePages: MetadataRoute.Sitemap = []
   const policyPages: MetadataRoute.Sitemap = []
@@ -130,6 +131,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       }
     )
+
+    hubPages.push({
+      url: `${baseUrl}/hub/mortgage-preparation`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    })
 
     guidePages.push(
       {
@@ -325,5 +333,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   }
 
-  return [...staticPages, ...guidePages, ...calculatorPages, ...trendPages, ...comparePages, ...policyPages, ...toolPages, ...blogUrls]
+  return [...staticPages, ...hubPages, ...guidePages, ...calculatorPages, ...trendPages, ...comparePages, ...policyPages, ...toolPages, ...blogUrls]
 }

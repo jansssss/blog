@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -528,6 +529,7 @@ export default function LoanLimitSimulatorPage() {
           ))}
         </div>
       </div>
+      <MortgagePrepHubCTA />
       <DisclaimerNotice message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요." />
 
       <Card className="mt-6 bg-gray-50">

@@ -55,6 +55,22 @@ EVERGREEN_QUERY_CLUSTERS: list[list[str]] = [
 ]
 
 
+def _get_topic_guidance(topic_hints: str) -> str:
+    """주제 키워드를 감지해 JSON 출력 지침을 보강한다."""
+    h = topic_hints.lower()
+    if any(kw in h for kw in ["전세", "임대차", "hug", "hf", "sgi", "버팀목"]):
+        return (
+            "\n⚠️ [전세대출 주제 특별 지침]\n"
+            "- article_type: '조건비교' 또는 '절차방법' 권장\n"
+            "- calc_assumptions에 DSR 40%를 핵심 항목으로 포함하지 말 것\n"
+            "- calc_assumptions 권장 항목: 보증금, 공시가격(또는 감정가), 소득 유형, 보증기관, 보증한도 비율\n"
+            "- related_calculators 권장: /calculator/loan-limit, /calculator/loan-interest\n"
+            "- key_data 출처 우선: HUG 상품안내, HF 보증 기준, 주택도시기금\n"
+            "- slug_hint 예: jeonse-loan-hug-hf-sgi-conditions\n\n"
+        )
+    return ""
+
+
 class TavilyResearcher:
     TAVILY_URL = "https://api.tavily.com/search"
     OPENAI_URL = "https://api.openai.com/v1/chat/completions"
@@ -182,8 +198,13 @@ class TavilyResearcher:
                 + exclusion_block + "\n\n"
             )
 
+        # 주제별 추가 지침
+        topic_hints = (seed_query or "") + (opportunity or {}).get("page_path", "")
+        topic_guidance = _get_topic_guidance(topic_hints)
+
         user_content = (
             task_instruction
+            + topic_guidance
             + "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요.\n"
             "{\n"
             '  "topic": "글 주제 (한국어, 50자 이내)",\n'

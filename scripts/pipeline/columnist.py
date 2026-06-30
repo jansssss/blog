@@ -61,6 +61,55 @@ class Article:
         return f"{today}-{cat}-{title_hash}"
 
 
+def _get_category_frame(category: str, topic: str) -> str:
+    """카테고리·주제 키워드를 보고 주제별 작성 프레임 지시를 반환한다."""
+    cat = category.lower()
+    top = topic.lower()
+
+    is_jeonse = "전세" in cat or "전세" in top
+    is_refinancing = "대환" in cat or "대환" in top or "갈아타기" in top
+    is_credit = "신용" in cat or "신용" in top or "거절" in top
+    is_policy = "정책" in cat or "정책" in top
+
+    if is_jeonse:
+        return (
+            "━━━ [이번 글 적용 프레임: 전세대출] ━━━\n"
+            "이 글은 전세대출 주제입니다. 아래 규칙을 반드시 지키세요.\n"
+            "① 제목과 핵심 결론에 'DSR 40%'를 사용하지 말 것 — 전세대출의 주요 심사 기준이 아님\n"
+            "② DSR은 기존부채 영향을 설명할 때만 보조 항목으로 언급\n"
+            "③ 계산 가정 표 항목: 보증금, 공시가격(감정가), 소득 유형, 보증기관, 보증한도 비율\n"
+            "④ HUG/HF/SGI/버팀목 각 상품 조건을 구분해서 설명 — 서로 다른 상품을 한 조건처럼 합치지 말 것\n"
+            "⑤ 출처 우선: HUG 상품안내, HF 보증 기준, 주택도시기금 홈페이지 (공식 기관 자료)\n"
+            "⑥ 계산기 CTA 우선: /calculator/loan-limit, /calculator/loan-interest"
+        )
+    if is_refinancing:
+        return (
+            "━━━ [이번 글 적용 프레임: 대환대출] ━━━\n"
+            "핵심 기준: 금리 차이, 중도상환수수료, 잔여기간, 손익분기점\n"
+            "계산 가정 표 항목: 현재 대출 잔액, 현재 금리, 신규 금리, 잔여기간, 중도상환수수료율\n"
+            "계산기 CTA 우선: /calculator/refinancing, /calculator/prepayment-fee, /calculator/repayment-compare"
+        )
+    if is_credit:
+        return (
+            "━━━ [이번 글 적용 프레임: 신용점수/대출거절] ━━━\n"
+            "핵심 기준: 신용점수 구간, 연체 이력, 기존 대출 건수, 소득증빙 방법, 재신청 시점\n"
+            "시나리오: 점수 구간별 금리 차이, 거절 후 대안 상품 순서"
+        )
+    if is_policy:
+        return (
+            "━━━ [이번 글 적용 프레임: 정책자금] ━━━\n"
+            "핵심 기준: 대상 자격, 소득/자산 기준, 신청 기간, 제외 조건\n"
+            "공식 신청 경로 반드시 포함 (주택도시기금 홈페이지, 서민금융진흥원 등)"
+        )
+    # 주담대/기본 DSR 프레임
+    return (
+        "━━━ [이번 글 적용 프레임: 주담대/DSR] ━━━\n"
+        "핵심 기준: DSR, LTV, 금리, 상환기간, 월상환액, 기존부채\n"
+        "계산 가정 표 항목: 연소득, 기존부채 월상환액, 금리, 대출기간, DSR 상한(40%), LTV 상한\n"
+        "계산기 CTA 우선: /calculator/dsr-dti-ltv, /calculator/loan-limit"
+    )
+
+
 class ColumnistWriter:
     OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
@@ -74,6 +123,7 @@ class ColumnistWriter:
         topic = research["topic"]
         category = research.get("category", "금융")
         article_type = research.get("article_type", "경제이슈")
+        category_frame = _get_category_frame(category, topic)
 
         # 리서치 데이터 포맷팅
         key_data_lines = "\n".join(
@@ -144,6 +194,7 @@ class ColumnistWriter:
 
         instructions = (
             f"{self.prompt_text}\n\n"
+            f"{category_frame}\n\n"
             f"{research_block}\n"
             f"{hints_block}\n"
             f"위 리서치 자료를 바탕으로 칼럼을 작성하세요. "
@@ -283,7 +334,7 @@ def render_html(article: Article) -> str:
     cta_html = ""
     if article.calculator_ctas:
         cta_links = "".join(
-            f'<li><a href="{_esc(c["url"])}">{_esc(c["label"])} →</a></li>'
+            f'<li><a href="{_esc(c["url"])}">{_esc(c["label"].rstrip().rstrip("→").rstrip())} →</a></li>'
             for c in article.calculator_ctas
         )
         cta_html = (

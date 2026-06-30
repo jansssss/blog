@@ -102,7 +102,10 @@ ${paragraphsHtml}${insightHtml}</section>`
   let calcCtaHtml = ''
   if (data.calculator_ctas && data.calculator_ctas.length > 0) {
     const ctaLinks = data.calculator_ctas
-      .map(c => `<li style="margin-bottom:8px;"><a href="${esc(c.url)}" style="font-family:${font};font-size:15px;color:#4f46e5;font-weight:600;text-decoration:none;">${esc(c.label)} →</a></li>`)
+      .map(c => {
+        const label = c.label.replace(/\s*→\s*$/, '')
+        return `<li style="margin-bottom:8px;"><a href="${esc(c.url)}" style="font-family:${font};font-size:15px;color:#4f46e5;font-weight:600;text-decoration:none;">${esc(label)} →</a></li>`
+      })
       .join('\n')
     calcCtaHtml = `
 <div style="background:#f0f4ff;border-radius:12px;padding:20px 24px;margin:28px 0;">
@@ -243,7 +246,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
               items: {
                 type: 'object',
                 properties: {
-                  label: { type: 'string', description: '링크 텍스트' },
+                  label: { type: 'string', description: '링크 텍스트 (화살표 → 포함 금지 — 렌더러가 자동 추가)' },
                   url: { type: 'string', description: '/calculator/... 또는 /guide/...' }
                 },
                 required: ['label', 'url']

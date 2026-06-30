@@ -88,15 +88,33 @@ def main() -> None:
         print(f"\n{'='*50}", flush=True)
         print(f"[PIPELINE] {i+1}/{count}번째 글 생성 시작", flush=True)
 
-        # STEP 0: GSC 시드 쿼리 선택 (있으면)
+        # STEP 0: 주제 선정 — opportunity → GSC query → Tavily 순서로 폴백
         seed_query: str | None = None
+        opportunity: dict | None = None
+        topic_source = "tavily_evergreen"
+
         if gsc_selector:
-            seed_query = gsc_selector.pick_best_query(excluded_topics)
+            opportunity = gsc_selector.pick_best_opportunity(excluded_topics)
+            if opportunity:
+                seed_query = opportunity["query"]
+                topic_source = "gsc_opportunity"
+            else:
+                seed_query = gsc_selector.pick_best_query(excluded_topics)
+                if seed_query:
+                    topic_source = "gsc_query"
+
+        print(f"[STEP 0] 주제 선정 방식: {topic_source}", flush=True)
+        if opportunity:
+            print(f"[STEP 0] 기회: '{seed_query}' on {opportunity['page_path']} — {opportunity['reason']}", flush=True)
 
         # 1. Tavily - 오늘의 이슈 리서치
         print("[STEP 1] Tavily 리서치 중...", flush=True)
         try:
-            research = researcher.research_today(excluded_topics=excluded_topics, seed_query=seed_query)
+            research = researcher.research_today(
+                excluded_topics=excluded_topics,
+                seed_query=seed_query,
+                opportunity=opportunity,
+            )
             print(f"[STEP 1] 완료 - 주제: {research['topic']}", flush=True)
             excluded_topics.append(research["topic"])  # 같은 실행 내 중복 방지
         except Exception as exc:

@@ -36,18 +36,28 @@ class Article:
     tags: list[str]
     sources: list[str] = field(default_factory=list)
     faqs: list[dict] = field(default_factory=list)
+    slug_hint: str = ""           # 리서처가 제안한 slug (영문 하이픈)
+    disclaimer: str = ""          # 면책 고지 문구
+    calculator_ctas: list[dict] = field(default_factory=list)  # [{label, url}]
 
     @property
     def slug(self) -> str:
-        today = date.today().strftime("%Y%m%d")
+        # slug_hint가 있고 유효하면 그대로 사용 (날짜 남발 방지)
+        if self.slug_hint:
+            clean = re.sub(r"[^a-z0-9-]", "", self.slug_hint.lower()).strip("-")
+            if 3 <= len(clean) <= 80:
+                return clean
+        # fallback: 제목에서 ASCII 추출
+        import hashlib
         normalized = unicodedata.normalize("NFKD", self.title).encode("ascii", "ignore").decode("ascii")
         slug_part = re.sub(r"[^a-zA-Z0-9]+", "-", normalized).strip("-").lower()
         if slug_part:
+            today = date.today().strftime("%Y%m%d")
             return f"{today}-{slug_part[:40]}"
         # 한국어 제목은 ASCII 변환 불가 → 날짜+카테고리+해시
-        import hashlib
         title_hash = hashlib.md5(self.title.encode()).hexdigest()[:8]
         cat = re.sub(r"[^a-z]", "", self.category.lower()) or "finance"
+        today = date.today().strftime("%Y%m%d")
         return f"{today}-{cat}-{title_hash}"
 
 
@@ -70,15 +80,24 @@ class ColumnistWriter:
             f"  - {d['fact']} ({d['source']})"
             for d in research.get("key_data", [])
         )
+        calc_assumption_lines = "\n".join(
+            f"  - {a['label']}: {a['value']}"
+            for a in research.get("calc_assumptions", [])
+        )
+        related_calcs = ", ".join(research.get("related_calculators", []))
         research_block = (
             f"━━━ 리서치 자료 (반드시 수치 인용) ━━━\n"
             f"주제: {topic}\n"
             f"글 유형: {article_type}\n"
             f"카테고리: {category}\n"
+            f"독자 핵심 질문: {research.get('core_question', topic)}\n"
+            f"slug 힌트(영문): {research.get('slug_hint', '')}\n"
             f"배경: {research.get('background', '')}\n"
+            f"계산 가정:\n{calc_assumption_lines}\n"
             f"핵심 데이터:\n{key_data_lines}\n"
             f"독자 생활에 미치는 영향: {research.get('impact_on_public', '')}\n"
             f"관련 키워드: {', '.join(research.get('related_keywords', []))}\n"
+            f"삽입할 ohyess 계산기 URL: {related_calcs}\n"
         )
 
         # 섹션 수를 3~5개로 무작위 변주 → 글 구조 동일성(scaled-content 패턴) 완화
@@ -86,32 +105,38 @@ class ColumnistWriter:
 
         json_format = (
             '{\n'
-            '  "title": "SEO H1 제목 (40~60자, 핵심 수치 포함)",\n'
+            '  "title": "SEO H1 제목 (40~60자, 핵심 수치·조건 포함)",\n'
             '  "meta_description": "메타 설명 150~170자",\n'
             '  "subtitle": "부제목 30~60자",\n'
+            '  "slug": "영문 소문자+하이픈 3~6단어, 날짜 없이 주제 중심 (리서치 slug_hint 활용)",\n'
             '  "tags": ["태그1", "태그2", "태그3"],\n'
             '  "summary_points": [\n'
-            '    "요약 1개 (60자 이상, 수치+연쇄효과 포함)"\n'
+            '    "요약 1개 (60자 이상, 계산 가정+결과 수치+\'조건에 따라 다를 수 있음\' 포함)"\n'
             '  ],\n'
             '  "sections": [\n'
             '    {\n'
-            '      "heading": "섹션 제목 (질문형 또는 핵심 메시지형)",\n'
+            '      "heading": "섹션 제목 (조건 명시형 또는 질문형)",\n'
             '      "paragraphs": [\n'
-            '        "문단1 (3~4문장, 수치+출처 포함)",\n'
+            '        "문단1 (3~4문장, 수치+출처+계산 근거 포함)",\n'
             '        "문단2",\n'
             '        "문단3"\n'
             '      ],\n'
-            '      "expert_insight": "전문가 인사이트 1~2문장 (없으면 빈 문자열)"\n'
+            '      "expert_insight": "핵심 포인트 1~2문장 (없으면 빈 문자열)"\n'
             '    },\n'
-            f'    ... (섹션 {section_target}개)\n'
+            f'    ... (섹션 {section_target}개, 계산 가정 표·시나리오 비교·계산기 CTA 섹션 포함)\n'
             '  ],\n'
-            '  "action_tips": ["구체적 행동 팁1", "팁2", "팁3", "팁4"],\n'
+            '  "calculator_ctas": [\n'
+            '    {"label": "계산기 링크 텍스트", "url": "/calculator/dsr-dti-ltv"},\n'
+            '    {"label": "계산기 링크 텍스트2", "url": "/calculator/loan-limit"}\n'
+            '  ],\n'
+            '  "action_tips": ["구체적 행동 팁1 (계산기 URL 포함 가능)", "팁2", "팁3", "팁4"],\n'
             '  "sources": ["한국은행, 2024", "금융위원회, 2025", ...],\n'
             '  "faqs": [\n'
             '    {"question": "독자가 실제로 검색할 법한 질문1?", "answer": "명확하고 구체적인 답변 (2~3문장, 수치 포함)"},\n'
             '    {"question": "질문2?", "answer": "답변2"},\n'
             '    {"question": "질문3?", "answer": "답변3"}\n'
-            '  ]\n'
+            '  ],\n'
+            '  "disclaimer": "이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. 실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다."\n'
             '}'
         )
 
@@ -182,6 +207,9 @@ class ColumnistWriter:
             tags=data.get("tags", []),
             sources=data.get("sources", []),
             faqs=data.get("faqs", []),
+            slug_hint=data.get("slug", research.get("slug_hint", "")),
+            disclaimer=data.get("disclaimer", "이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. 실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다."),
+            calculator_ctas=data.get("calculator_ctas", []),
         )
 
 
@@ -251,6 +279,18 @@ def render_html(article: Article) -> str:
             f"<dl>{faq_items_html}</dl>"
         )
 
+    # 계산기 CTA
+    cta_html = ""
+    if article.calculator_ctas:
+        cta_links = "".join(
+            f'<li><a href="{_esc(c["url"])}">{_esc(c["label"])} →</a></li>'
+            for c in article.calculator_ctas
+        )
+        cta_html = (
+            f"<h3>🧮 직접 계산해보기</h3>"
+            f"<ul>{cta_links}</ul>"
+        )
+
     # 출처
     if article.sources:
         sources_items = "".join(f"<li>{_esc(s)}</li>" for s in article.sources)
@@ -262,7 +302,15 @@ def render_html(article: Article) -> str:
     else:
         sources_html = ""
 
-    return summary_html + sections_html + action_html + faq_html + sources_html
+    # 면책 고지
+    disclaimer_html = ""
+    if article.disclaimer:
+        disclaimer_html = (
+            f"<hr>"
+            f"<p><small>⚠️ {_esc(article.disclaimer)}</small></p>"
+        )
+
+    return summary_html + sections_html + action_html + cta_html + faq_html + sources_html + disclaimer_html
 
 
 def _extract_json(text: str) -> str:

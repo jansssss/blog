@@ -12,38 +12,45 @@ from datetime import date
 
 
 # 에버그린·고의도(고CPC) 금융 실무 질의 클러스터.
+# ohyess.kr 계산기(DSR/주담대/대환/중도상환) 중심으로 편성.
 # 실행 날짜 기준으로 클러스터를 회전시켜 매번 다른 영역의 글을 생성한다.
-# 단명 뉴스가 아니라 "조건/방법/비교/계산"형 검색 수요를 노린다.
+# 단명 뉴스가 아니라 "계산/조건/비교/사례"형 검색 수요를 노린다.
 EVERGREEN_QUERY_CLUSTERS: list[list[str]] = [
+    # 클러스터 0: 주담대 한도·DSR 계산 사례
     [
-        "전세대출 거절 이유와 재신청 조건 방법",
-        "주택담보대출 갈아타기 절차 비용 조건",
-        "신용대출 한도 늘리는 방법과 조건",
+        "주택담보대출 한도 계산 DSR 소득별 사례",
+        "DSR 40% 기준 연봉별 주담대 최대 한도",
+        "주담대 월납입액 계산 원리금균등 원금균등 비교",
     ],
+    # 클러스터 1: 자동차 할부·기존 부채와 주담대 한도
     [
-        "신용점수 단기간 올리는 방법 실제 기준",
-        "고정금리 변동금리 갈아타기 판단 기준",
-        "대출 중도상환수수료 면제 조건과 계산 방법",
+        "자동차 할부 있을 때 주담대 한도 얼마나 줄어드나",
+        "기존 신용대출 마이너스통장 주담대 DSR 영향 계산",
+        "카드론 할부 주담대 한도 감소 DSR 계산 사례",
     ],
+    # 클러스터 2: 대환대출·중도상환 손익 계산
     [
-        "청년 정책자금 대출 자격 조건 신청 방법",
-        "정부 보증부 대출 종류 자격 비교 HUG HF SGI",
-        "서민 금융 지원 상품 자격 신청 방법",
+        "주담대 갈아타기 손익 계산 중도상환수수료 vs 금리 차이",
+        "대환대출 언제 유리한가 금리 차이 수수료 계산 기준",
+        "고정금리 변동금리 갈아타기 총이자 비교 계산 사례",
     ],
+    # 클러스터 3: 전세대출·보증·거절 사례
     [
-        "양도소득세 비과세 요건과 계산 사례",
-        "연말정산 공제 항목 절세 방법",
-        "종합소득세 신고 대상과 절세 전략",
+        "전세대출 거절 이유와 DSR LTV 재신청 조건",
+        "전세보증보험 HUG HF SGI 가입 조건 비교 계산",
+        "전세대출 한도 계산 보증금 대비 대출 비율 사례",
     ],
+    # 클러스터 4: 신용점수·대출 거절·금리 영향
     [
-        "전세보증보험 가입 조건 종류 비교",
-        "주택청약 1순위 조건과 가점 계산",
-        "DSR DTI LTV 계산 방법과 대출 한도",
+        "신용점수 구간별 대출 금리 차이 실제 계산 사례",
+        "대출 거절 후 신용점수 올리는 조건과 재신청 기준",
+        "신용점수 낮을 때 주담대 가능한가 DSR 조건 분석",
     ],
+    # 클러스터 5: 정책자금·보조 (보조 클러스터)
     [
-        "근로장려금 자녀장려금 자격 조건 신청 방법",
-        "정부 지원금 보조금 신청 자격 기준",
-        "소상공인 정책자금 대출 종류 자격 비교",
+        "청년 정책자금 대출 자격 조건 금리 비교 2024 2025",
+        "정부 보증부 대출 HUG HF SGI 자격 금리 비교",
+        "소상공인 정책자금 대출 종류 자격 한도 비교",
     ],
 ]
 
@@ -83,12 +90,13 @@ class TavilyResearcher:
         self,
         excluded_topics: list[str] | None = None,
         seed_query: str | None = None,
+        opportunity: dict | None = None,
     ) -> dict:
         """
-        오늘의 금융/경제/정책 이슈 1개 선정 + 심층 리서치
-        seed_query가 있으면 해당 독자 질문에 답하는 방향으로 리서치.
+        오늘의 금융/경제/정책 이슈 1개 선정 + 심층 리서치.
+        seed_query: GSC 시드 쿼리 (독자 질문 기반)
+        opportunity: {query, page_path, page_type, ...} — source_page 지시에 활용
         excluded_topics: 이미 발행된 주제 목록 (중복 방지)
-        Returns: { topic, category, background, key_data, impact_on_public, related_keywords }
         """
         exclusion_block = ""
         if excluded_topics:
@@ -136,13 +144,25 @@ class TavilyResearcher:
 
         # Step 2: OpenAI로 JSON 포맷
         if seed_query:
+            source_page = (opportunity or {}).get("page_path", "")
+            page_type = (opportunity or {}).get("page_type", "")
+            source_page_instruction = ""
+            if source_page and page_type in ("calculator", "guide"):
+                source_page_instruction = (
+                    f"\n\n[SOURCE PAGE 연결 지시]\n"
+                    f"이 글은 ohyess.kr의 '{source_page}' 페이지를 방문한 독자를 위한 "
+                    f"사례형 보조 글입니다. 글 내에서 반드시 '{source_page}'를 "
+                    f"related_calculators 목록에 포함하세요."
+                )
+
             task_instruction = (
                 f"실제 독자가 구글에서 검색한 질문입니다: \"{seed_query}\"\n\n"
                 "이 질문에 제대로 된 답변을 제공하는 글을 작성하기 위한 리서치를 수행하세요. "
                 "독자가 이 질문을 검색한 상황과 맥락을 먼저 파악하고, "
                 "그들이 실제로 알고 싶은 것(결론과 판단 기준)을 중심으로 리서치하세요.\n\n"
                 f"[참고 자료]\n{context}\n\n"
-                + exclusion_block + "\n\n"
+                + exclusion_block
+                + source_page_instruction + "\n\n"
             )
         else:
             task_instruction = (
@@ -166,19 +186,29 @@ class TavilyResearcher:
             task_instruction
             + "아래 형식의 JSON으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요.\n"
             "{\n"
-            '  "topic": "이슈 제목 (한국어, 50자 이내)",\n'
-            '  "article_type": "경제이슈 | 정책제도 | 정부지원 중 1개",\n'
-            '  "category": "금융 | 경제 | 대출 | 세금 | 부동산 | 지원금 중 1개",\n'
-            '  "background": "이슈 배경 설명 (200자 이상, 왜 지금 화제인지)",\n'
+            '  "topic": "글 주제 (한국어, 50자 이내)",\n'
+            '  "article_type": "계산사례 | 조건비교 | 절차방법 | 정책제도 중 1개",\n'
+            '  "category": "주담대 | 대환대출 | 전세대출 | 신용대출 | 신용점수 | 정책자금 중 1개",\n'
+            '  "slug_hint": "영문 소문자 + 하이픈, 3~6단어 권장 (날짜 포함 금지). 예: dsr-salary-400-loan-limit",\n'
+            '  "core_question": "독자가 이 글을 찾게 된 핵심 질문 1개 (40자 이내)",\n'
+            '  "calc_assumptions": [\n'
+            '    {"label": "계산 가정 항목명", "value": "구체적 수치 또는 조건"},\n'
+            '    ...\n'
+            '  ],\n'
+            '  "background": "주제 배경 설명 (200자 이상, 관련 규제·기준·제도 포함)",\n'
             '  "key_data": [\n'
             '    {"fact": "구체적 수치나 사실", "source": "출처 기관명, 연도"},\n'
             '    ...\n'
             '  ],\n'
-            '  "impact_on_public": "일반 국민/독자의 가계·자산·일상에 미치는 실질적 영향 (200자 이상)",\n'
-            '  "related_keywords": ["키워드1", "키워드2", "키워드3"]\n'
+            '  "impact_on_public": "독자 가계·자산에 미치는 실질적 영향 (200자 이상, 계산 기반)",\n'
+            '  "related_keywords": ["키워드1", "키워드2", "키워드3"],\n'
+            '  "related_calculators": ["/calculator/dsr-dti-ltv", "/calculator/loan-limit"]\n'
             "}\n\n"
             "요구사항:\n"
-            "- key_data는 최소 3개 이상 (구체적 수치 필수)\n"
+            "- key_data는 최소 3개 이상 (구체적 수치 + 공식 출처 필수)\n"
+            "- calc_assumptions는 최소 3개 이상 (소득, 금리, 기간 등)\n"
+            "- related_calculators는 ohyess.kr 계산기 URL 1~3개 (위 목록에서 선택)\n"
+            "- slug_hint는 영문 소문자+하이픈, 날짜 없이 주제 중심으로\n"
             "- 추측이나 불확실한 내용 금지"
         )
         payload = {

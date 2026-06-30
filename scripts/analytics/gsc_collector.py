@@ -106,6 +106,106 @@ class GSCCollector:
         print(f"[GSC] {saved}건 upsert 완료 → {self.table}", flush=True)
         return saved
 
+    def collect_query_pages_and_save(self, table: str = "gsc_query_pages", days: int | None = None) -> int:
+        """GSC query+page 조합 데이터 수집 → gsc_query_pages upsert.
+        테이블 미존재·오류 시 0 반환하고 기존 수집 흐름에 영향 없음."""
+        try:
+            rows = self._fetch_query_page_rows(days or self.days)
+            if not rows:
+                print("[GSC-QP] 수집된 데이터 없음", flush=True)
+                return 0
+
+            records = []
+            for row in rows:
+                keys = row.get("keys", [])
+                if len(keys) < 3:
+                    continue
+                query, page_url, row_date = keys[0], keys[1], keys[2]
+                page_path, page_type, page_key = self._classify_page(page_url)
+                records.append({
+                    "query": query,
+                    "page_url": page_url,
+                    "page_path": page_path,
+                    "page_type": page_type,
+                    "page_key": page_key,
+                    "date": row_date,
+                    "clicks": int(row.get("clicks", 0)),
+                    "impressions": int(row.get("impressions", 0)),
+                    "ctr": float(row.get("ctr", 0.0)),
+                    "position": float(row.get("position", 0.0)),
+                })
+
+            if not records:
+                print("[GSC-QP] 변환된 레코드 없음", flush=True)
+                return 0
+
+            url = f"{self.supabase_url}/rest/v1/{table}?on_conflict=query%2Cpage_url%2Cdate"
+            raw_body = json.dumps(records).encode("utf-8")
+            req = request.Request(
+                url,
+                data=raw_body,
+                headers={
+                    **self._headers,
+                    "Prefer": "resolution=merge-duplicates,return=minimal",
+                },
+                method="POST",
+            )
+            with request.urlopen(req, timeout=30) as resp:
+                resp.read()
+            print(f"[GSC-QP] {len(records)}건 upsert 완료 → {table}", flush=True)
+            return len(records)
+        except Exception as exc:
+            print(f"[GSC-QP] 오류 (기존 수집에 영향 없음): {exc}", flush=True)
+            return 0
+
+    def _fetch_query_page_rows(self, days: int) -> list[dict]:
+        end_date = date.today() - timedelta(days=3)
+        start_date = end_date - timedelta(days=days - 1)
+        body = {
+            "startDate": start_date.isoformat(),
+            "endDate": end_date.isoformat(),
+            "dimensions": ["query", "page", "date"],
+            "rowLimit": 25000,
+        }
+        print(f"[GSC-QP] query+page 데이터 조회 중... ({start_date} ~ {end_date})", flush=True)
+        try:
+            response = (
+                self._service.searchanalytics()
+                .query(siteUrl=self.site_url, body=body)
+                .execute()
+            )
+        except Exception as exc:
+            print(f"[GSC-QP] API 호출 실패: {exc}", flush=True)
+            return []
+        rows = response.get("rows", [])
+        print(f"[GSC-QP] {len(rows)}행 수신", flush=True)
+        return rows
+
+    @staticmethod
+    def _classify_page(page_url: str) -> tuple[str, str, str | None]:
+        """page_url → (page_path, page_type, page_key)"""
+        from urllib.parse import urlparse
+        parsed = urlparse(page_url)
+        page_path = parsed.path.rstrip("/") or "/"
+
+        type_map = [
+            ("/blog/",       "blog"),
+            ("/calculator/", "calculator"),
+            ("/guide/",      "guide"),
+            ("/compare/",    "compare"),
+            ("/policy/",     "policy"),
+            ("/trend/",      "trend"),
+        ]
+        page_type = "other"
+        for prefix, ptype in type_map:
+            if prefix in page_path:
+                page_type = ptype
+                break
+
+        segments = [s for s in page_path.split("/") if s]
+        page_key = segments[-1] if segments else None
+        return page_path, page_type, page_key
+
     def collect_queries_and_save(self, query_table: str = "gsc_search_queries", days: int | None = None) -> int:
         """GSC 검색어별 성과 데이터 수집 → Supabase 저장. 저장된 행 수 반환."""
         rows = self._fetch_query_rows(days or self.days)

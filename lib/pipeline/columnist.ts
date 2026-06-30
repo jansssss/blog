@@ -32,14 +32,24 @@ interface ArticleSection {
   expert_insight?: string
 }
 
+interface CalculatorCta {
+  label: string
+  url: string
+}
+
 interface StructuredArticle {
   title: string
   meta_description: string
   subtitle: string
+  slug?: string
   tags: string[]
   summary_points: string[]
   sections: ArticleSection[]
+  calculator_ctas?: CalculatorCta[]
   action_tips: string[]
+  faqs?: Array<{ question: string; answer: string }>
+  sources?: string[]
+  disclaimer?: string
 }
 
 // ───────────────────────────────────────────
@@ -88,7 +98,53 @@ ${paragraphsHtml}${insightHtml}</section>`
   <div>${tipsHtml}</div>
 </div>`
 
-  return summaryHtml + '\n' + sectionsHtml + '\n' + actionHtml
+  // 계산기 CTA 섹션
+  let calcCtaHtml = ''
+  if (data.calculator_ctas && data.calculator_ctas.length > 0) {
+    const ctaLinks = data.calculator_ctas
+      .map(c => `<li style="margin-bottom:8px;"><a href="${esc(c.url)}" style="font-family:${font};font-size:15px;color:#4f46e5;font-weight:600;text-decoration:none;">${esc(c.label)} →</a></li>`)
+      .join('\n')
+    calcCtaHtml = `
+<div style="background:#f0f4ff;border-radius:12px;padding:20px 24px;margin:28px 0;">
+  <div style="font-family:${font};font-size:13px;font-weight:700;color:#4f46e5;margin-bottom:12px;letter-spacing:0.04em;">🧮 직접 계산해보기</div>
+  <ul style="margin:0;padding-left:20px;">${ctaLinks}</ul>
+</div>`
+  }
+
+  // FAQ 섹션
+  let faqHtml = ''
+  if (data.faqs && data.faqs.length > 0) {
+    const faqItems = data.faqs
+      .map(faq => `
+<dt style="font-family:${font};font-size:15px;font-weight:700;color:#1c2741;margin:16px 0 6px;">Q. ${esc(faq.question)}</dt>
+<dd style="font-family:${font};font-size:15px;color:#3a4a62;margin:0 0 8px;line-height:1.85;word-break:keep-all;">${esc(faq.answer)}</dd>`)
+      .join('\n')
+    faqHtml = `
+<div style="background:#f8fafc;border-radius:12px;padding:20px 24px;margin:28px 0;">
+  <div style="font-family:${font};font-size:13px;font-weight:700;color:#374151;margin-bottom:4px;letter-spacing:0.04em;">❓ 자주 묻는 질문</div>
+  <dl style="margin:0;">${faqItems}</dl>
+</div>`
+  }
+
+  // 출처
+  let sourcesHtml = ''
+  if (data.sources && data.sources.length > 0) {
+    const sourceItems = data.sources
+      .map(s => `<li style="font-family:${font};font-size:13px;color:#6b7280;margin-bottom:4px;">${esc(s)}</li>`)
+      .join('\n')
+    sourcesHtml = `
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 16px;">
+<div style="font-family:${font};font-size:12px;font-weight:700;color:#9ca3af;margin-bottom:8px;letter-spacing:0.04em;">참고 자료</div>
+<ul style="margin:0;padding-left:20px;">${sourceItems}</ul>`
+  }
+
+  // 면책 고지
+  const disclaimerText = data.disclaimer || '이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. 실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다.'
+  const disclaimerHtml = `
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0 12px;">
+<p style="font-family:${font};font-size:12px;color:#9ca3af;line-height:1.7;margin:0;">⚠️ ${esc(disclaimerText)}</p>`
+
+  return summaryHtml + '\n' + sectionsHtml + '\n' + actionHtml + calcCtaHtml + faqHtml + sourcesHtml + disclaimerHtml
 }
 
 function esc(text: string): string {
@@ -150,43 +206,77 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
       max_tokens: 3000,
       tools: [{
         name: 'write_blog_post',
-        description: '블로그 글을 구조화된 형식으로 작성합니다',
+        description: '금융 사례 분석 블로그 글을 구조화된 형식으로 작성합니다',
         input_schema: {
           type: 'object' as const,
           properties: {
-            title: { type: 'string', description: 'SEO H1 제목 (40자 이내)' },
+            title: { type: 'string', description: 'SEO H1 제목 (40~60자, 핵심 수치·조건 포함)' },
             meta_description: { type: 'string', description: '150~170자 메타 설명' },
             subtitle: { type: 'string', description: '부제목 (30~60자)' },
+            slug: { type: 'string', description: '영문 소문자+하이픈, 3~6단어, 날짜 없이 주제 중심' },
             tags: { type: 'array', items: { type: 'string' }, description: 'SEO 태그 3개' },
             summary_points: {
               type: 'array',
               items: { type: 'string' },
-              description: '핵심 요약 3가지 (각 40~60자, 수치 포함)'
+              description: '핵심 요약 1개 (60자 이상, 계산 가정+결과+조건 가변성 포함)'
             },
             sections: {
               type: 'array',
-              description: '본문 섹션 3개',
+              description: '본문 섹션 (계산 가정 표·시나리오 비교·계산기 CTA 포함)',
               items: {
                 type: 'object',
                 properties: {
-                  heading: { type: 'string', description: 'H2 섹션 제목 (15자 이내)' },
+                  heading: { type: 'string', description: 'H2 제목 (조건 명시형 또는 질문형)' },
                   paragraphs: {
                     type: 'array',
                     items: { type: 'string' },
-                    description: '문단 2개 (각 3~4문장, 경험담+수치 포함)'
+                    description: '문단 2~3개 (수치+출처+계산 근거 포함)'
                   },
                   expert_insight: { type: 'string', description: '핵심 포인트 1문장 (없으면 빈 문자열 "")' }
                 },
                 required: ['heading', 'paragraphs', 'expert_insight']
               }
             },
+            calculator_ctas: {
+              type: 'array',
+              description: 'ohyess.kr 계산기·가이드 링크 2개 이상',
+              items: {
+                type: 'object',
+                properties: {
+                  label: { type: 'string', description: '링크 텍스트' },
+                  url: { type: 'string', description: '/calculator/... 또는 /guide/...' }
+                },
+                required: ['label', 'url']
+              }
+            },
             action_tips: {
               type: 'array',
               items: { type: 'string' },
-              description: '지금 바로 확인할 것 3가지 (10~20자, 짧게)'
+              description: '지금 바로 확인할 것 5~6가지 (계산기 URL 포함 가능, 구체적 행동+수치)'
+            },
+            faqs: {
+              type: 'array',
+              description: 'FAQ 3개',
+              items: {
+                type: 'object',
+                properties: {
+                  question: { type: 'string', description: '검색 의도 기반 질문' },
+                  answer: { type: 'string', description: '2~3문장, 수치 포함' }
+                },
+                required: ['question', 'answer']
+              }
+            },
+            sources: {
+              type: 'array',
+              items: { type: 'string' },
+              description: '참고 출처 (기관명 + 연도)'
+            },
+            disclaimer: {
+              type: 'string',
+              description: '면책 고지 문구'
             }
           },
-          required: ['title', 'meta_description', 'subtitle', 'tags', 'summary_points', 'sections', 'action_tips']
+          required: ['title', 'meta_description', 'subtitle', 'slug', 'tags', 'summary_points', 'sections', 'calculator_ctas', 'action_tips', 'faqs', 'disclaimer']
         }
       }],
       tool_choice: { type: 'any' as const }
@@ -207,12 +297,22 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
     // HTML 빌드
     const html = buildHtml(data)
 
-    // 간단 검증
+    // YMYL 검증
     const failures: string[] = []
     const warnings: string[] = []
-    if (!data.sections || data.sections.length < 2) failures.push('섹션이 2개 미만입니다')
-    if (!data.summary_points || data.summary_points.length < 2) failures.push('핵심 요약이 2개 미만입니다')
-    if (!data.action_tips || data.action_tips.length < 2) warnings.push('실천 팁이 2개 미만입니다')
+
+    if (!data.sections || data.sections.length < 3) failures.push('섹션이 3개 미만입니다')
+    if (!data.summary_points || data.summary_points.length < 1) failures.push('핵심 요약이 없습니다')
+    if (!data.calculator_ctas || data.calculator_ctas.length < 2) failures.push(`계산기 링크 부족 (${data.calculator_ctas?.length ?? 0}개, 2개 이상 필요)`)
+    if (!data.faqs || data.faqs.length < 3) warnings.push(`FAQ ${data.faqs?.length ?? 0}개 (3개 권장)`)
+    if (!data.disclaimer) failures.push('면책 고지 누락')
+    if (!data.slug) warnings.push('slug 미생성 — fallback slug 사용됨')
+    if (!data.action_tips || data.action_tips.length < 3) warnings.push('실천 팁이 3개 미만입니다')
+
+    // HTML에 기준일 문구 있는지 체크
+    if (!/기준\s*(으로|)?\s*작성|공시\s*기준|기준일/.test(html)) {
+      failures.push('기준일 문구 미포함')
+    }
 
     if (failures.length > 0) console.warn('[COLUMNIST] 검증 실패:', failures)
     else console.log('[COLUMNIST] 완료!')
@@ -222,6 +322,7 @@ export async function runColumnist(cleanDraft: string): Promise<PipelineResult<C
       data: {
         title: data.title || '제목 없음',
         metaDescription: data.meta_description || '',
+        slug: data.slug || '',
         tags: data.tags || [],
         markdown: html,
         usedPhrases,

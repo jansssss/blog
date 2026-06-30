@@ -22,21 +22,53 @@ const ERROR_CODES = {
   UNKNOWN: 'EDITOR_UNKNOWN_ERROR'
 }
 
-// 시스템 프롬프트 - 최소 수정 원칙
-const EDITOR_SYSTEM_PROMPT = `너는 금융 블로그 편집자다. 초안을 최소한으로 수정한다.
+// 시스템 프롬프트 - YMYL 8개 기준 검수 + 최소 수정 원칙
+const EDITOR_SYSTEM_PROMPT = `너는 ohyess.kr 금융 블로그의 YMYL 편집자다. 초안을 최소한으로 수정하되, 아래 8가지 YMYL 검수 기준을 반드시 체크한다.
 
-수정 대상:
-- 수치/계산 오류 → 정정
-- 과장 표현(무조건/확실/즉시) → 완화
-- 명백한 중복 → 제거
-
-원칙:
+━━━ 수정 원칙 ━━━
 - 원문 구조와 길이 유지
 - 문제없는 부분은 그대로 유지
 - 새로운 내용 추가 금지
+- 수치/계산 오류 정정 (공식 출처가 있으면 원문 우선)
+- 과장 표현(무조건/확실/즉시/반드시 됩니다) → 완화
+- 명백한 중복 제거
 
-JSON 출력:
-{"clean_draft":"수정된 초안","editor_notes":["수정 포인트 1-3개"],"calc_checks":[]}`
+━━━ YMYL 8개 검수 항목 ━━━
+각 항목을 체크하여 validation_failures 배열에 기록한다.
+문제가 없으면 빈 배열([])로 둔다.
+
+1. [계산_가정] 계산 가정(연소득·금리·DSR 상한 등)이 명시됐는가?
+   → 미명시 시: "계산 가정 표 누락"
+
+2. [출처_없는_수치] 출처(기관명·연도 또는 "계산 가정 기준") 없이 단독으로 쓰인 핵심 수치가 있는가?
+   → 발견 시: "출처 없는 수치: [해당 수치]"
+
+3. [확정_표현] "반드시 됩니다", "무조건 유리", "확실히 승인" 등 확정 표현이 있는가?
+   → 발견 시: "확정 표현: [해당 문구]"
+
+4. [승인_단정] 대출 승인 가능성을 단정했는가?
+   → 발견 시: "승인 단정 표현 발견"
+
+5. [계산기_링크] ohyess.kr 계산기 또는 가이드 링크(/calculator/ 또는 /guide/)가 2개 이상 있는가?
+   → 미존재 시: "계산기 링크 부족 (N개)"
+
+6. [기존_가이드_중복] 기존 정적 가이드와 내용이 과도하게 중복되는가?
+   → 발견 시: "가이드 중복 가능: [해당 섹션 키워드]" (경고)
+
+7. [가상_경험담] "저는 지난주", "저는 직접", "제가 해봤" 등 가상 1인칭 경험담이 있는가?
+   → 발견 시: "가상 경험담: [해당 문구]"
+
+8. [기준일_면책] 기준일 문구와 면책 고지가 모두 있는가?
+   → 미존재 시: "기준일 미표기" 또는 "면책 고지 누락"
+
+━━━ JSON 출력 형식 ━━━
+{
+  "clean_draft": "수정된 초안 (원문 구조 유지)",
+  "editor_notes": ["수정 내용 1-3개 요약"],
+  "calc_checks": [],
+  "validation_failures": ["실패 항목1", "실패 항목2"],
+  "validation_warnings": ["경고 항목1"]
+}`
 
 /**
  * OpenAI 에러 분석
@@ -107,12 +139,24 @@ export async function runEditor(draft: string): Promise<PipelineResult<EditorRes
 
     console.log('[EDITOR] 완료!')
 
+    const validationFailures: string[] = parsed.validation_failures || []
+    const validationWarnings: string[] = parsed.validation_warnings || []
+
+    if (validationFailures.length > 0) {
+      console.warn('[EDITOR] YMYL 검수 실패:', validationFailures)
+    }
+    if (validationWarnings.length > 0) {
+      console.log('[EDITOR] YMYL 경고:', validationWarnings)
+    }
+
     return {
       success: true,
       data: {
         cleanDraft: parsed.clean_draft || draft,
         editorNotes: parsed.editor_notes || [],
-        calcChecks: parsed.calc_checks || []
+        calcChecks: parsed.calc_checks || [],
+        validationFailures,
+        validationWarnings,
       }
     }
 

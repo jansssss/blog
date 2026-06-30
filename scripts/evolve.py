@@ -99,6 +99,9 @@ def main() -> None:
         query_collected = collector.collect_queries_and_save()
         print(f"[EVOLVE] 검색어 데이터 - {query_collected}건 저장", flush=True)
 
+        qp_collected = collector.collect_query_pages_and_save()
+        print(f"[EVOLVE] query+page 데이터 - {qp_collected}건 저장", flush=True)
+
         print(f"[EVOLVE] 완료", flush=True)
     except Exception as exc:
         print(f"[EVOLVE] 실패: {exc}", flush=True)

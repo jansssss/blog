@@ -40,12 +40,16 @@ export interface EditorResult {
     after: string
     reason: string
   }>
+  // YMYL 8개 검수 결과
+  validationFailures: string[]
+  validationWarnings: string[]
 }
 
 // Columnist 결과
 export interface ColumnistResult {
   title: string
   metaDescription: string
+  slug: string          // AI 생성 slug (없으면 빈 문자열, publisher에서 fallback)
   tags: string[]
   markdown: string
   usedPhrases: string[]

@@ -1,129 +1,57 @@
 /**
- * OHYESS 칼럼니스트(pass2) 프롬프트 빌더
- * 사람 문구풀을 주입하여 더 자연스러운 글을 생성
+ * OHYESS 사례 분석 콘텐츠 프롬프트 빌더 (v3)
  *
- * v2: 아웃라인 템플릿 + 도입부 패턴 + 결론 힌트 랜덤화로 "비슷비슷함" 해소
+ * v3 변경사항:
+ * - 1인칭 가상 경험담 패턴(INTRO_PATTERNS, OUTRO_ACTION_HINTS) 전면 제거
+ * - 사례 분석 리포트 포맷으로 교체 (계산 가정 → 결과 → 시나리오 → 계산기 CTA)
+ * - validateColumnistOutput: YMYL 8개 기준으로 교체
  */
 
 export interface ColumnistPromptParams {
   cleanDraft: string
-  humanPhrases: string[]
+  humanPhrases?: string[]  // v3에서는 미사용 (하위호환성 유지)
 }
 
 // ============================================
-// [1] 아웃라인 템플릿 5종 (섹션 순서 + 강조점)
+// [1] 사례 분석 아웃라인 템플릿 4종
 // ============================================
-const OUTLINE_TEMPLATES = [
+const CASE_ANALYSIS_TEMPLATES = [
   {
-    id: 'T1_STANDARD',
-    name: '문제제기형 (기본)',
-    order: ['H1', '도입부 3문단', '한 줄 요약', '이슈 배경', '나에게 미치는 영향', '❌ 안 되는 사람(제외 기준) 3가지', '✅ 안 될 때 대안 2가지', '계산 예시', '구체적 사례', '실제 활용 방법', 'FAQ 3개', '판단 프레임 1문장', '정리', '주의사항', 'SEO 태그 3개'],
-    emphasis: '도입부에서 "왜 이게 내 돈과 관련 있는가?"를 명확히 제기하고, 이후 논리적으로 풀어나간다.'
+    id: 'CA1_CALC_FIRST',
+    name: '계산 결과 선행형',
+    order: ['H1', '기준일+주의문', '핵심 질문 제시', '계산 가정 표', '계산 결과 요약', '조건별 시나리오 비교', '결과를 바꾸는 변수', '계산기 CTA', 'FAQ 3개', '참고 출처', '면책 고지'],
+    emphasis: '첫 섹션에서 계산 조건과 결과를 먼저 제시하고, 이후 시나리오 비교로 전개한다.',
   },
   {
-    id: 'T2_NUMBER_FIRST',
-    name: '숫자 요약 선행형',
-    order: ['H1', '핵심 숫자 3개 요약', '도입부 2문단', '이슈 배경', '쟁점(찬반 또는 해석 차이)', '나에게 미치는 영향', '❌ 안 되는 사람(제외 기준) 3가지', '✅ 안 될 때 대안 2가지', '구체적 사례', '계산 예시', '실제 활용 방법', 'FAQ 3개', '판단 프레임 1문장', '정리', '주의사항', 'SEO 태그 3개'],
-    emphasis: '글 초반에 핵심 숫자 3개를 먼저 던지고, 독자가 "이게 뭐지?" 하며 읽게 만든다.'
+    id: 'CA2_QUESTION_FIRST',
+    name: '핵심 질문 선행형',
+    order: ['H1', '기준일+주의문', '독자 핵심 질문', '왜 이 계산이 필요한가 (배경)', '계산 가정 표', '계산 결과', '시나리오 비교 표', '계산기 CTA', 'FAQ 3개', '참고 출처', '면책 고지'],
+    emphasis: '독자가 이 글을 찾게 된 질문에서 시작해 계산 가정·결과 순으로 안내한다.',
   },
   {
-    id: 'T3_CASE_OPENING',
-    name: '사례 오프닝 강화형',
-    order: ['H1', '사례 힌트 도입(1문단)', '도입부 2문단', '한 줄 요약', '이슈 배경', '나에게 미치는 영향', '❌ 안 되는 사람(제외 기준) 3가지', '✅ 안 될 때 대안 2가지', '체크리스트 3개', '계산 예시', '구체적 사례(확장)', 'FAQ 3개', '판단 프레임 1문장', '정리', '주의사항', 'SEO 태그 3개'],
-    emphasis: '도입 첫 문장에 가상 인물 상황을 암시하고, 독자가 "나도 저럴 수 있겠다"고 느끼게 한다.'
+    id: 'CA3_SCENARIO_MATRIX',
+    name: '시나리오 매트릭스형',
+    order: ['H1', '기준일+주의문', '핵심 질문', '계산 가정 표', '기본 시나리오 결과', '소득 구간별 비교', '기존 부채 유무 비교', '계산기 CTA', 'FAQ 3개', '참고 출처', '면책 고지'],
+    emphasis: '여러 조건 조합(소득 구간, 부채 유무, 금리 변동)을 매트릭스 형태로 비교한다.',
   },
   {
-    id: 'T4_QA_CENTRIC',
-    name: 'Q&A 중심형',
-    order: ['H1', '핵심 질문 3개 제시', '질문1 답변(배경+영향)', '❌ 안 되는 사람(제외 기준) 3가지', '✅ 안 될 때 대안 2가지', '질문2 답변(계산+사례)', '질문3 답변(활용 방법)', '추가 FAQ 2개', '판단 프레임 1문장', '정리', '주의사항', 'SEO 태그 3개'],
-    emphasis: '글 전체를 질문-답변 구조로 전개하여 독자가 궁금증을 따라가며 읽게 한다.'
+    id: 'CA4_VARIABLE_FOCUS',
+    name: '변수 중심 분석형',
+    order: ['H1', '기준일+주의문', '핵심 질문', '계산 가정 표', '기본 결과', '변수①이 결과에 미치는 영향', '변수②가 결과에 미치는 영향', '계산기 CTA', 'FAQ 3개', '참고 출처', '면책 고지'],
+    emphasis: '결과를 바꾸는 주요 변수(금리, 기존부채, 대출기간)를 하나씩 분석한다.',
   },
-  {
-    id: 'T5_MISTAKE_PREVENTION',
-    name: '실수 방지형',
-    order: ['H1', '도입부 2문단', '❌ 하지 말아야 할 것 3가지', '✅ 체크포인트 3가지', '이슈 배경', '나에게 미치는 영향', '❌ 안 되는 사람(제외 기준) 3가지', '✅ 안 될 때 대안 2가지', '계산 예시', '구체적 사례', 'FAQ 3개', '판단 프레임 1문장', '정리', '주의사항', 'SEO 태그 3개'],
-    emphasis: '"이건 하지 마세요"를 먼저 제시해 독자의 주의를 끌고, 이후 올바른 방향을 안내한다.'
-  }
 ]
 
 // ============================================
-// [2] 도입부 전개 패턴 5종
+// [유틸리티] 배열 랜덤 선택
 // ============================================
-const INTRO_PATTERNS = [
-  {
-    id: 'P1_PERSONAL_DISCOVERY',
-    name: '개인적 발견형',
-    guide: '첫 문장을 "저는 지난주에 ○○을 알게 됐어요"처럼 개인 경험으로 시작. 독자가 "나도 그런 적 있는데" 하며 공감하게 만든다.',
-    example: '저는 지난주 월요일 아침에 출근길 버스에서 우연히 이 뉴스를 봤어요. 처음엔 대충 넘길까 했는데, 숫자 하나가 눈에 확 들어오더라고요.'
-  },
-  {
-    id: 'P2_MOMENT_OF_REALIZATION',
-    name: '깨달음의 순간형',
-    guide: '첫 문장에서 "○○했을 때 깨달았어요"처럼 특정 순간의 인사이트를 공유. 스토리에 빠져들게 만든다.',
-    example: '제가 직접 계산기를 두드려봤을 때 깨달았어요. "아, 이거 내 얘기구나" 하고요.'
-  },
-  {
-    id: 'P3_HONEST_CONFESSION',
-    name: '솔직 고백형',
-    guide: '첫 문장에서 "사실 저도 처음엔 ○○라고 생각했어요"처럼 솔직한 고백으로 시작. 독자와의 거리를 좁힌다.',
-    example: '사실 저도 처음엔 "이런 뉴스가 나한테 무슨 상관이야" 하고 넘겼어요. 그런데 직접 확인해보니 완전 다르더라고요.'
-  },
-  {
-    id: 'P4_SPECIFIC_ACTION',
-    name: '구체적 행동형',
-    guide: '첫 문장에서 "저는 어제 ○○을 해봤어요"처럼 구체적 행동으로 시작. 독자가 "나도 해봐야지" 느끼게 만든다.',
-    example: '저는 어제 퇴근하고 바로 은행 앱을 켜봤어요. 제 대출 금리가 얼마나 바뀌었는지 확인하려고요.'
-  },
-  {
-    id: 'P5_EMOTIONAL_HOOK',
-    name: '감정 훅형',
-    guide: '첫 문장에서 "○○했을 때 정말 놀랐어요"처럼 강한 감정으로 시작. 독자의 호기심을 자극한다.',
-    example: '계산 결과를 보고 정말 놀랐어요. 저는 월 12만 원 정도 차이 날 거라고 예상했는데, 실제로는 완전 달랐거든요.'
-  },
-  {
-    id: 'P6_PLOT_TWIST',
-    name: '반전형',
-    guide: '첫 부분에서 A라고 예상했다가 B였던 경험으로 시작. "○○인 줄 알았는데, 알고보니 ○○였어요" 구조. 독자가 "헐 진짜?" 하며 끝까지 읽게 만든다.',
-    example: '저는 이번 금리 인상이 제 대출에 월 5만 원 정도 영향 줄 거라고 생각했어요. 그런데 실제로 계산해보니까... 15만 원이 늘어나더라고요. 완전히 예상 밖이었죠.'
-  }
-]
-
-// ============================================
-// [3] 결론/행동힌트 문장 템플릿 10종
-// ============================================
-const OUTRO_ACTION_HINTS = [
-  '저는 일단 ○○만 확인해봤어요. 여러분도 그것만 먼저 체크해보시면 좋을 것 같아요.',
-  '제 경우엔 ○○을 먼저 했더니 상황이 훨씬 명확해지더라고요.',
-  '처음엔 복잡해 보였는데, 막상 ○○을 해보니까 생각보다 간단했어요.',
-  '저는 이번 주 안에 ○○만 해볼 계획이에요. 급하게 결정할 필요는 없으니까요.',
-  '전부 다 바꿀 필요는 없더라고요. 저는 ○○ 하나만 확인했는데도 충분했어요.',
-  '제가 가장 먼저 한 건 ○○ 앱에서 제 상태를 확인한 거예요. 5분도 안 걸렸어요.',
-  '최악의 상황을 피하려면, 저처럼 최소한 ○○은 알고 계셔야 할 것 같아요.',
-  '저는 ○○에 관한 알림을 켜뒀어요. 나중에 놓칠까봐요.',
-  '당장 판단하지 않아도 돼요. 저도 일단 ○○만 메모해뒀어요.',
-  '저한테 가장 중요했던 건 "내가 해당되는지 아닌지"였어요. ○○에서 바로 확인할 수 있더라고요.'
-]
-
-// ============================================
-// [유틸리티] 배열 셔플 함수
-// ============================================
-function shuffle<T>(array: T[]): T[] {
-  const result = [...array]
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[result[i], result[j]] = [result[j], result[i]]
-  }
-  return result
+function pickRandom<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)]
 }
 
 // ============================================
-// [메인] 칼럼니스트 프롬프트 빌드
+// [메인] 사례 분석 프롬프트 빌드
 // ============================================
-/**
- * 칼럼니스트 프롬프트를 생성합니다.
- * @param params cleanDraft와 humanPhrases를 포함한 객체
- * @returns 시스템 프롬프트와 유저 프롬프트, 변주 메타데이터
- */
 export function buildColumnistPrompt(params: ColumnistPromptParams): {
   systemPrompt: string
   userPrompt: string
@@ -133,211 +61,73 @@ export function buildColumnistPrompt(params: ColumnistPromptParams): {
     outroHints: string[]
   }
 } {
-  const { cleanDraft, humanPhrases } = params
+  const { cleanDraft } = params
 
-  // [랜덤 선택] 아웃라인 템플릿
-  const outline = OUTLINE_TEMPLATES[Math.floor(Math.random() * OUTLINE_TEMPLATES.length)]
+  const template = pickRandom(CASE_ANALYSIS_TEMPLATES)
 
-  // [랜덤 선택] 도입부 패턴
-  const intro = INTRO_PATTERNS[Math.floor(Math.random() * INTRO_PATTERNS.length)]
+  const systemPrompt = `너는 ohyess.kr의 금융 사례 분석 콘텐츠 작성자다.
+공식자료와 계산 가정을 바탕으로 독자의 금융 질문에 검증 가능한 방식으로 답한다.
 
-  // [랜덤 선택] 결론 힌트 2~3개
-  const shuffledOutros = shuffle(OUTRO_ACTION_HINTS)
-  const outroCount = Math.floor(Math.random() * 2) + 2 // 2 or 3
-  const outros = shuffledOutros.slice(0, outroCount)
+[절대 금지]
+- "저는/제가/지난주에/직접 해봤다" 등 가상 1인칭 경험담
+- "전문가로서 확신한다", "반드시 승인됩니다", "무조건 유리합니다" 등 확정 표현
+- 출처 없는 단독 수치 (수치에는 반드시 출처 기관명 또는 "계산 가정 기준" 표기)
+- "서울 직장인 A씨는" 같은 가상 인물 일화형 도입
+- "이 글을 통해", "알아보겠습니다", "살펴봅니다" 등 기사체 도입
 
-  // 선택된 문구를 bullet 형태로 포맷
-  const phraseBullets = humanPhrases.map(p => `- "${p}"`).join('\n')
-  const outroBullets = outros.map(o => `- ${o}`).join('\n')
+[필수 포함 요소]
+1. 기준일과 주의 문구: "이 글은 [기준년월] 공시 기준으로 작성했습니다. 금리·규제는 변동될 수 있으므로 실제 한도는 금융기관에 확인하세요."
+2. 계산 가정 표: 연소득, 금리, 기간, DSR 상한, LTV 상한 등 이 글의 계산 조건 명시
+3. 계산 결과: 가정 적용 결과 수치 + 공식/산식 간략 표기
+4. 시나리오 비교: 2~3개 조건 변경 시 결과 비교 (소득 구간, 금리, 기존부채)
+5. 결과를 바꾸는 변수: 한도·결과를 줄이거나 늘리는 요인 열거
+6. 계산기 CTA 2개 이상: 본문 내 ohyess.kr 계산기·가이드 링크 (cleanDraft에 있는 URL 우선)
+7. FAQ 3개: 검색 의도 기반 질문 + 2~3문장 구체적 답변 (수치 포함)
+8. 참고 출처: 인용 기관명 + 연도
+9. 면책 고지: "이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. 실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다."
 
-  const systemPrompt = `너는 지금부터 "컬럼니스트(pass2)"다.
+[이번 글 아웃라인 템플릿: ${template.name}]
+섹션 순서: ${template.order.join(' → ')}
+강조점: ${template.emphasis}
 
-[규칙 우선순위 — 반드시 지킬 것]
-1. 새로운 사실·숫자 추가 금지 (가장 중요)
-2. 필수 섹션 충족 (사례, 계산 예시, FAQ, 정리, 주의사항 + 제외 기준/대안)
-3. 대상 구분 2회 이상 + 숫자 뒤 판단 해석
-4. 경험담 톤 유지 + Human Phrase 활용
-5. 변주 요소(아웃라인/도입/결론 힌트)
+[섹션 헤딩 원칙]
+- 조건 명시형: "DSR 40% 기준, 월급 400만 원의 주담대 한도는?"
+- 비교형: "자동차 할부가 있을 때 한도가 얼마나 줄어드나"
+- 결과 선행형: "계산 가정: 연소득 5,000만 원 · 금리 3.5% · 30년 · DSR 40%"
 
-[전제]
-- clean_draft는 이미 편집장(pass1)에서 팩트·수치·과장 제거 완료된 상태다.
-- 너는 새로운 사실·숫자·계산을 절대 추가하지 않는다.
+[수치 해석 규칙]
+숫자·계산 결과 뒤에 반드시 해석 문장 추가:
+- "이 경우 월 납입액은 약 XX만 원으로, 월 소득의 X%에 해당한다"
+- "DSR 기준 월상환 가능액 대비 X% 수준이다"
 
-[목표]
-- 정보 나열이 아닌 경험과 감정 중심의 스토리텔링으로 작성
-- 실제 사람의 경험담처럼 생생하고 공감 가는 글쓰기
-- "이렇게 하면 됩니다" ❌ → "저는 이렇게 해서 이런 결과를 얻었어요" ✅
-- 조회수를 높이는 핵심: 독자가 "나도 해봐야지" 느끼게 만들기
+[계산기 CTA 형식]
+cleanDraft에 포함된 ohyess.kr 계산기 URL을 본문에 자연스럽게 삽입:
+- "→ <a href='/calculator/dsr-dti-ltv'>DSR·DTI·LTV 계산기에서 직접 확인하기</a>"
+- "→ <a href='/calculator/loan-limit'>대출 한도 계산기로 내 한도 계산하기</a>"
 
-[핵심 원칙]
-- 규칙만 따르지 말고, 아래 'Human Phrase Pool'의 문구를 자연스럽게 활용해 문장을 구성하라.
-- 같은 표현을 반복하지 말고, 설명을 풀어서 쓰는 것을 허용한다.
-- 한 문단에 최소 1번은 '설명 덧붙이기'를 시도한다.
-
-[Human Phrase Pool — 자연스럽게 활용할 것]
-아래 문구들은 그대로 쓰거나, 자연스럽게 변형해서 사용해도 된다.
-최소 2개 이상 사용 (도입부 1개 + 정리/결론부 1개 권장)
-
-${phraseBullets}
-
-═══════════════════════════════════════════
-🎲 이번 글의 변주 규칙 (이번 요청에만 적용)
-═══════════════════════════════════════════
-
-[선택된 아웃라인 템플릿: ${outline.name}]
-섹션 순서: ${outline.order.join(' → ')}
-강조점: ${outline.emphasis}
-
-※ 위 순서를 우선하되, 기존 필수 섹션(FAQ 3개, 사례, 계산 예시, 정리, 주의사항)은 반드시 포함할 것.
-※ 템플릿에 없는 섹션이라도 필수 섹션이면 적절한 위치에 삽입한다.
-※ [필수] "❌ 안 되는 사람(제외 기준)"과 "✅ 안 될 때 대안"은 반드시 포함할 것.
-※ [필수] 정리 직전 또는 정리 첫 문장에 "판단 프레임" 1문장 삽입 (예: "결국 핵심은 ○○입니다")
-
-[선택된 도입부 패턴: ${intro.name}]
-가이드: ${intro.guide}
-예시: "${intro.example}"
-
-※ 도입부 첫 문장은 위 패턴을 따르되, 기계적으로 복사하지 말고 뉴스 내용에 맞게 자연스럽게 변형할 것.
-
-[선택된 결론/행동 힌트]
-아래 힌트 중 1~2개를 정리 섹션에 자연스럽게 녹여서 사용하라:
-${outroBullets}
-
-※ ○○ 부분은 실제 뉴스 내용에 맞는 구체적 행동으로 대체할 것.
-
-═══════════════════════════════════════════
-
-[절대 금지 표현]
-다음 표현이 포함되면 실패로 간주된다:
-- "이 글을 통해"
-- "알아보겠습니다"
-- "살펴봅니다"
-- "살펴보겠습니다"
-- 기사형·교과서형 시작
-
-[경험담 작성 규칙 - 매우 중요!]
-글 전체를 1인칭 경험담 형식으로 작성하라:
-
-✅ 좋은 예시:
-"저는 작년 3월부터 매일 아침 6시에 일어나서 30분씩 플랭크를 했어요. 처음엔 10초도 버티기 힘들었는데, 3일차부터는 '이거 정말 효과 있을까?' 하는 의심이 들더라고요. 그런데 2주가 지나니까 배에 힘이 들어가는 게 느껴지기 시작했어요. 20일 후 체중계에 올라갔을 때 10kg이 빠진 걸 확인하고 정말 놀랐습니다."
-
-❌ 나쁜 예시:
-"플랭크 운동은 코어 근육을 강화하는 효과가 있습니다. 매일 30분씩 꾸준히 하면 다이어트에 도움이 됩니다."
-
-필수 요소:
-- 구체적인 시점 (작년 3월, 지난주 월요일 등)
-- 숫자로 표현된 경험 (30분, 10kg, 20일 등)
-- 과정 중 느낀 감정 (의심, 놀람, 걱정, 기대, 실망 등)
-- 결과에 대한 솔직한 반응
-- "저는/제가" 시점 유지
-
-※ 위 예시는 톤과 구조를 이해시키기 위한 참고용이다.
-문장이나 표현을 그대로 복사하지 말고, 주제와 맥락에 맞게 완전히 새로 작성하라.
-
-[반전 요소 활용 - 자연스러운 경우에만]
-주제의 특성상 반전이 자연스럽게 가능한 경우에만 사용하라.
-※ 반전을 위해 숫자 과장 ❌, 새 수치 추가 ❌, 억지 감정 증폭 ❌
-※ 반전은 품질 상승 요소이지, 필수 조건이 아니다.
-
-✅ 반전 예시 1 (기대 vs 현실):
-"저는 이번 정책이 월 3만 원 정도 아낄 수 있을 거라 예상했어요. 그런데 막상 계산해보니 월 15만 원이 절약되더라고요. 1년이면 180만 원이에요!"
-
-✅ 반전 예시 2 (오해 → 진실):
-"처음엔 '이거 고소득자만 해당되겠지' 했어요. 그런데 알고보니 연봉 3천만 원대도 충분히 혜택 받을 수 있더라고요."
-
-✅ 반전 예시 3 (손해인 줄 알았는데 이득):
-"금리가 오른다니까 당연히 손해라고 생각했죠. 근데 제 경우엔 오히려 예금 이자가 늘어나서 플러스였어요."
-
-반전 구조 (자연스러운 경우에만):
-1. 처음 생각/기대 → 2. 실제 확인/계산 → 3. 놀라운 결과 → 4. 구체적 숫자로 증명
-
-※ 위 예시는 톤과 구조를 이해시키기 위한 참고용이다.
-문장이나 표현을 그대로 복사하지 말고, 주제와 맥락에 맞게 완전히 새로 작성하라.
-
-[계산 예시 규칙]
-- 기존 수치를 다시 설명하는 용도만 허용
-- "이 숫자를 어떻게 해석하면 좋은지" 설명 문장 1개 필수
-- 미래 예측·수익 단정 금지
-
-[숫자 판단 해석 규칙 - 매우 중요!]
-숫자·계산·비율이 등장하는 모든 구간 뒤에 반드시 '판단 해석 문장'을 1문장 이상 삽입하라.
-독자가 "이 숫자가 나한테 좋은 건지 나쁜 건지"를 즉시 알 수 있어야 한다.
-
-✅ 좋은 예시:
-"월 15만 원이 절약되더라고요. 이 정도면 1년에 180만 원인데, 적금 하나 더 드는 효과예요."
-"금리가 0.5%p 올랐어요. 이 수치는 대출 3억 원 기준 월 12만 원 이자가 늘어난다는 신호예요."
-"적용 대상이 60%로 늘었어요. 이 말은 이제 대부분의 직장인이 해당된다는 뜻이에요."
-
-❌ 나쁜 예시 (숫자만 나열):
-"월 15만 원이 절약됩니다."
-"금리가 0.5%p 올랐습니다."
-"적용 대상이 60%입니다."
-
-판단 해석 문장 패턴:
-- "이 수치는 ○○가 충분하지 않다는 신호예요"
-- "이 정도면 ○○ 하나 더 하는 효과예요"
-- "이 말은 ○○ 하다는 뜻이에요"
-- "○○ 기준으로 보면, ○○ 수준이에요"
-- "솔직히 이 숫자, ○○에게는 좋은 소식이에요"
-
-[대상 구분 규칙 - 필수!]
-글 전체에 최소 2회 이상 "이 글이 해당되는 사람 / 덜 해당되는 사람"을 명확히 구분하라.
-독자가 "이게 나한테 해당되는 얘기인가?"를 스스로 판단할 수 있어야 한다.
-
-✅ 좋은 예시 1 (문장형):
-"이 정책은 연봉 5천만 원 이하 직장인에게 특히 유리해요. 반대로 연봉 8천만 원 이상이라면 오히려 손해일 수도 있어요."
-
-✅ 좋은 예시 2 (목록형):
-"📌 이 글이 특히 해당되는 분:
-- 30~40대 직장인 중 대출이 있는 분
-- 변동금리로 주택담보대출 받은 분
-- 월 상환액이 100만 원 이상인 분
-
-📌 이 글이 덜 해당되는 분:
-- 대출 없이 전세로 사시는 분
-- 고정금리로 이미 갈아탄 분
-- 1년 내 대출 상환 예정인 분"
-
-✅ 좋은 예시 3 (조건형):
-"만약 여러분이 ○○라면 이건 좋은 기회예요. 하지만 ○○라면 굳이 서두를 필요 없어요."
-
-삽입 위치:
-- 1회: 도입부 또는 이슈 배경 뒤
-- 1회: 정리/마무리 전
-
-절대 금지:
-- "생각해보세요" / "점검해보세요" 같은 모호한 마무리
-- 뉴스 요약처럼 보이는 문단 구성
-
-[문체 규칙]
-- 경험담·후기 톤 (뉴스 기사체 X, 교과서체 X, 설명서체 X)
-- 1인칭 시점 유지 (저는/제가/저희)
-- 구어체 자연스럽게 섞기 ("~더라고요", "~했어요", "~네요")
-- 짧은 문장과 긴 문장 섞어서 리듬감 살리기
-- 독자에게 경험을 공유하듯 서술
+[스타일]
+- 분석적·설명적 어조 (감정 공감 없이 계산과 조건으로 안내)
+- 한국어, 전문적이되 평이한 문장
+- 금융 확정 표현 금지: "반드시" → "계산 가정 기준으로는"
 
 [출력 구조 — write_blog_post 도구 호출]
-아래 필드를 채워 write_blog_post 도구를 호출하라:
-
-- title: SEO H1 제목 (40자 이내)
-- meta_description: 150~170자 메타 설명
-- subtitle: 부제목 (30~60자)
+- title: SEO H1 제목 (40~60자, 핵심 수치·조건 포함)
+- meta_description: 150~170자
+- subtitle: 부제목 30~60자
+- slug: 영문 소문자+하이픈, 3~6단어, 날짜 없이 주제 중심
 - tags: SEO 태그 3개
-- summary_points: 핵심 요약 3~4가지 (각 50자 이상, 수치 포함 권장)
-- sections: 본문 섹션 3~4개
-  - heading: H2 섹션 제목
-  - paragraphs: 문단 2~3개 (각 3~5문장, 경험담 + 수치 + 판단해석 포함)
-  - expert_insight: 핵심 포인트 1~2문장 (없으면 빈 문자열 "")
-- action_tips: 지금 바로 확인할 것 3~5가지 (짧고 구체적으로)
+- summary_points: 요약 1개 (60자 이상, 계산 가정+결과+조건 가변성 포함)
+- sections: 본문 섹션 (아웃라인 순서 준수, 계산 가정 표·시나리오·CTA 포함)
+  - heading: H2 제목
+  - paragraphs: 문단 2~3개 (수치+출처 포함)
+  - expert_insight: 핵심 포인트 1문장 (없으면 빈 문자열 "")
+- calculator_ctas: [{label, url}] 2개 이상
+- action_tips: 5~6개 (계산기 URL 포함 가능, 구체적 행동+수치)
+- faqs: 3개 [{question, answer}]
+- sources: 인용 출처 목록
+- disclaimer: 면책 고지 문구`
 
-[자동 실패 조건]
-- 금지 표현 사용 (이 글을 통해, 알아보겠습니다, 살펴봅니다 등)
-- 모호한 마무리 (생각해보세요, 점검해보세요 등)
-- sections가 2개 미만
-- 1인칭 시점("저는/제가") paragraphs 전체에 3회 미만
-- 감정 표현("놀랐다/걱정됐다/기뻤다" 등) 없음`
-
-  const userPrompt = `다음 초안을 블로그 글로 재작성해주세요:
+  const userPrompt = `다음 초안을 사례 분석 리포트 형식으로 재작성해주세요:
 
 ${cleanDraft}`
 
@@ -345,22 +135,17 @@ ${cleanDraft}`
     systemPrompt,
     userPrompt,
     variationMeta: {
-      outlineId: outline.id,
-      introId: intro.id,
-      outroHints: outros
-    }
+      outlineId: template.id,
+      introId: 'CASE_ANALYSIS',
+      outroHints: [],
+    },
   }
 }
 
 // ============================================
-// [검증] 품질 검증 함수
+// [검증] YMYL 품질 검증 함수 (v3)
 // ============================================
-/**
- * 컬럼니스트 결과물의 품질을 검증합니다.
- * @param markdown 생성된 마크다운 본문
- * @returns 검증 결과 (성공 여부, 실패/경고 이유)
- */
-export function validateColumnistOutput(markdown: string): {
+export function validateColumnistOutput(content: string): {
   isValid: boolean
   failures: string[]
   warnings: string[]
@@ -368,156 +153,99 @@ export function validateColumnistOutput(markdown: string): {
   const failures: string[] = []
   const warnings: string[] = []
 
-  // 1. 금지 표현 검사 (실패)
-  const forbiddenPhrases = [
-    '이 글을 통해',
-    '알아보겠습니다',
-    '살펴봅니다',
-    '살펴보겠습니다'
-  ]
+  // 1. 계산 가정 명시 여부 [실패]
+  const hasCalcAssumption = /계산\s*가정|가정\s*기준|연소득|DSR\s*(40|50)%|LTV\s*(70|80)%/.test(content)
+  if (!hasCalcAssumption) {
+    failures.push('계산 가정이 명시되지 않았습니다 — 연소득·금리·DSR 상한 등 계산 조건 표 필요')
+  }
 
-  for (const phrase of forbiddenPhrases) {
-    if (markdown.includes(phrase)) {
-      failures.push(`금지 표현 발견: "${phrase}"`)
+  // 2. 출처 없는 단독 수치 패턴 [경고]
+  // 수치 뒤에 출처 표기(기관명, 연도, "계산 가정") 없이 단독으로 쓰인 경우
+  const hasSourcedNumbers = /\d+[\s]*(만원|억원|%|bp|원)[\s\S]{0,30}(한국은행|금융위원회|금융감독원|국토교통부|통계청|계산\s*가정|가정\s*기준)/.test(content)
+  if (!hasSourcedNumbers) {
+    warnings.push('수치 뒤 출처 표기가 확인되지 않습니다 — 숫자에 출처 기관명 또는 "계산 가정 기준" 표기 권장')
+  }
+
+  // 3. 확정 표현 사용 [실패]
+  const certaintyPhrases = ['반드시 됩니다', '무조건 유리', '확실히 승인', '반드시 승인', '100% 가능']
+  for (const phrase of certaintyPhrases) {
+    if (content.includes(phrase)) {
+      failures.push(`확정 표현 발견: "${phrase}" — "계산 가정 기준으로는" 등으로 완화 필요`)
     }
   }
 
-  // 2. 도입부 물음표 검사 (첫 1500자 내) - 경고로 변경
-  const introSection = markdown.slice(0, 1500)
-  if (!introSection.includes('?')) {
-    warnings.push('도입부(첫 1500자)에 질문(물음표)이 없습니다')
+  // 4. 실제 승인 가능성 단정 [실패]
+  const approvalCertain = /대출이\s*(됩니다|가능합니다|나옵니다)(?!\s*만|[\s\S]{0,10}(가정|기준|조건에\s*따라))/.test(content)
+  if (approvalCertain) {
+    failures.push('대출 승인 가능성을 단정하는 표현이 있습니다 — "계산 가정 기준" 또는 "실제 심사 결과는 달라질 수 있음" 추가 필요')
   }
 
-  // 3. 1인칭 시점 검사 - 실패
-  const firstPersonCount = (markdown.match(/저는|제가|저도|제|저한테/g) || []).length
-  if (firstPersonCount < 3) {
-    failures.push(`1인칭 시점 부족 (${firstPersonCount}회, 최소 3회 필요)`)
+  // 5. 계산기 링크 존재 여부 [실패]
+  const hasCalculatorLink = /\/calculator\/|\/guide\//.test(content)
+  if (!hasCalculatorLink) {
+    failures.push('ohyess.kr 계산기 또는 가이드 링크가 없습니다 — /calculator/ 또는 /guide/ URL 2개 이상 포함 필요')
+  } else {
+    const calcLinkCount = (content.match(/\/calculator\/|\/guide\//g) || []).length
+    if (calcLinkCount < 2) {
+      warnings.push(`계산기·가이드 링크가 ${calcLinkCount}개입니다 — 2개 이상 권장`)
+    }
   }
 
-  // 4. 감정 표현 검사 - 실패
-  const emotionWords = ['놀랐', '기뻤', '걱정', '불안', '조심', '고민', '망설', '부담', '확인', '깨달', '느꼈', '생각했']
-  const hasEmotionWord = emotionWords.some(word => markdown.includes(word))
-  if (!hasEmotionWord) {
-    failures.push(`감정 표현이 없습니다 (필요: ${emotionWords.join(', ')} 중 하나)`)
+  // 6. 가상 경험담·1인칭 허구 표현 [실패]
+  const fakeExperiencePhrases = [
+    '저는 지난주', '저는 직접', '제가 해봤', '지난달에 계산해봤',
+    '저도 처음엔', '저한테는', '제 경우엔', '저는 어제',
+  ]
+  for (const phrase of fakeExperiencePhrases) {
+    if (content.includes(phrase)) {
+      failures.push(`가상 경험담 표현 발견: "${phrase}" — 계산 가정 기반 서술로 대체 필요`)
+    }
   }
 
-  // 5. 구어체 표현 검사 - 경고
-  const colloquialCount = (markdown.match(/더라고요|했어요|네요|거든요|였어요/g) || []).length
-  if (colloquialCount < 2) {
-    warnings.push(`구어체 표현 부족 (${colloquialCount}회, 최소 2회 권장)`)
+  // 7. 기준일 문구 존재 여부 [실패]
+  const hasNoticeDate = /기준\s*(으로|으)?\s*작성|공시\s*기준|년\s*(기준|공시)|기준일/.test(content)
+  if (!hasNoticeDate) {
+    failures.push('기준일 문구가 없습니다 — "이 글은 YYYY년 MM월 공시 기준으로 작성했습니다" 포함 필요')
   }
 
-  // 6. 한 줄 요약 존재 여부 - 경고
-  if (!markdown.includes('한 줄 요약') && !markdown.includes('핵심 요약') && !markdown.includes('한줄 요약') && !markdown.includes('핵심 숫자')) {
-    warnings.push('한 줄 요약 섹션이 명시적으로 보이지 않습니다')
+  // 8. 면책 고지 존재 여부 [실패]
+  const hasDisclaimer = /정보\s*제공\s*목적|심사\s*결과를\s*보장|금융기관의\s*기준에\s*따라|달라질\s*수\s*있습니다/.test(content)
+  if (!hasDisclaimer) {
+    failures.push('면책 고지가 없습니다 — "이 글은 정보 제공 목적으로 작성되었으며..." 문구 필요')
   }
 
-  // 7. FAQ 존재 여부 - 경고
-  const faqCount = (markdown.match(/Q\d|FAQ|자주 묻는|질문/gi) || []).length
+  // 9. FAQ 3개 존재 여부 [경고]
+  const faqCount = (content.match(/FAQ|자주\s*묻는|Q\.|Q\d|질문\s*\d/gi) || []).length
   if (faqCount < 2) {
-    warnings.push('FAQ 섹션이 부족해 보입니다 (최소 3개 권장)')
+    warnings.push(`FAQ 섹션이 부족해 보입니다 (${faqCount}회 감지) — FAQ 3개 이상 필요`)
   }
 
-  // 8. 정리 섹션 존재 여부 - 경고
-  if (!markdown.includes('정리') && !markdown.includes('마무리') && !markdown.includes('마치며')) {
-    warnings.push('정리/마무리 섹션이 명시적으로 보이지 않습니다')
-  }
-
-  // 9. 대상 구분 검사 - 실패 (최소 2회)
-  const targetPatterns = [
-    /해당되는 (분|사람|경우)/g,
-    /덜 해당/g,
-    /특히 (유리|불리|좋|나쁜)/g,
-    /○○라면/g,
-    /이런 분/g,
-    /이런 경우/g,
-    /대상이 (아닌|되는)/g
-  ]
-  let targetMatchCount = 0
-  for (const pattern of targetPatterns) {
-    const matches = markdown.match(pattern)
-    if (matches) targetMatchCount += matches.length
-  }
-  if (targetMatchCount < 2) {
-    failures.push(`대상 구분 부족 (${targetMatchCount}회, 최소 2회 필요) - "해당되는 사람 / 덜 해당되는 사람" 구분 필요`)
-  }
-
-  // 10. 숫자 판단 해석 검사 - 경고
-  const interpretPatterns = [
-    /이 (수치|정도|말)는/g,
-    /이 정도면/g,
-    /○○ (기준|수준)/g,
-    /뜻이에요/g,
-    /신호예요/g,
-    /효과예요/g
-  ]
-  let interpretCount = 0
-  for (const pattern of interpretPatterns) {
-    const matches = markdown.match(pattern)
-    if (matches) interpretCount += matches.length
-  }
-  if (interpretCount < 2) {
-    warnings.push(`숫자 판단 해석 부족 (${interpretCount}회) - 숫자 뒤에 "이 수치는 ○○라는 신호예요" 형태의 해석 추가 권장`)
-  }
-
-  // 11. 모호한 마무리 검사 - 실패
-  const vagueEndings = ['생각해보세요', '점검해보세요', '확인해보세요', '고민해보세요']
-  for (const phrase of vagueEndings) {
-    if (markdown.includes(phrase)) {
-      failures.push(`모호한 마무리 표현 발견: "${phrase}" - 구체적 판단 기준으로 대체 필요`)
+  // 10. 기존 가이드 과도 중복 [경고]
+  const guideTopics = ['DSR·DTI·LTV 완전 정리', '대출이자 계산법 완전 정리', '상환방식 완전 비교', '중도상환수수료 정리']
+  for (const topic of guideTopics) {
+    if (content.includes(topic)) {
+      warnings.push(`기존 정적 가이드 제목과 중복 가능: "${topic}" — 링크로 대체 권장`)
     }
   }
 
-  // 12. 제외 기준/대안 섹션 검사 - 실패 (신규 추가)
-  const exclusionPatterns = [
-    /안 되는/g,
-    /제외/g,
-    /불가/g,
-    /대안/g,
-    /대체/g,
-    /이 경우/g,
-    /해당되지 않/g,
-    /적합하지 않/g
-  ]
-  let exclusionCount = 0
-  for (const pattern of exclusionPatterns) {
-    const matches = markdown.match(pattern)
-    if (matches) exclusionCount += matches.length
-  }
-  if (exclusionCount < 1) {
-    failures.push('제외 기준 또는 대안 섹션이 누락되었습니다 - "안 되는 사람" 또는 "대안" 내용 필요')
+  // 11. 금지 도입부 표현 [실패]
+  const forbiddenIntros = ['이 글을 통해', '알아보겠습니다', '살펴봅니다', '살펴보겠습니다']
+  for (const phrase of forbiddenIntros) {
+    if (content.includes(phrase)) {
+      failures.push(`금지 도입부 표현: "${phrase}"`)
+    }
   }
 
-  // 13. 구체적 숫자 검사 - 경고로 변경 (Fail → Warn)
-  const numberMatches = markdown.match(/\d+[만천백억원%개월일년시분초]/g) || []
+  // 12. 구체적 숫자 존재 여부 [경고]
+  const numberMatches = content.match(/\d+[만천백억원%개월일년]/g) || []
   if (numberMatches.length < 5) {
-    warnings.push(`구체적 숫자 부족 (${numberMatches.length}개, 5개 이상 권장) - cleanDraft에 숫자가 적은 경우 허용`)
-  }
-
-  // 14. 전문성 판단 프레임 검사 - 경고 (신규 추가)
-  const expertPatterns = [
-    /핵심은/g,
-    /정리하면/g,
-    /결국/g,
-    /이 말은/g,
-    /기준/g,
-    /신호/g,
-    /해당/g,
-    /제외/g
-  ]
-  let expertCount = 0
-  for (const pattern of expertPatterns) {
-    const matches = markdown.match(pattern)
-    if (matches) expertCount += matches.length
-  }
-  if (expertCount < 2) {
-    warnings.push(`전문성 판단 프레임 부족 (${expertCount}회) - "핵심은/정리하면/결국/기준/신호" 등의 판단 문장 추가 권장`)
+    warnings.push(`구체적 숫자 부족 (${numberMatches.length}개) — 계산 결과·가정 수치 5개 이상 권장`)
   }
 
   return {
     isValid: failures.length === 0,
     failures,
-    warnings
+    warnings,
   }
 }
 
@@ -525,7 +253,7 @@ export function validateColumnistOutput(markdown: string): {
 // [Export] 템플릿 메타데이터 (디버깅용)
 // ============================================
 export const VARIATION_OPTIONS = {
-  outlines: OUTLINE_TEMPLATES.map(t => ({ id: t.id, name: t.name })),
-  intros: INTRO_PATTERNS.map(p => ({ id: p.id, name: p.name })),
-  outroCount: OUTRO_ACTION_HINTS.length
+  outlines: CASE_ANALYSIS_TEMPLATES.map(t => ({ id: t.id, name: t.name })),
+  intros: [{ id: 'CASE_ANALYSIS', name: '사례 분석형 (계산 가정 기반)' }],
+  outroCount: 0,
 }

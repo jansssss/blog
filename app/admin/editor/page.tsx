@@ -238,8 +238,7 @@ function AdminEditorContent() {
         alert(`게시글이 "${selectedSite?.name}" 사이트에 성공적으로 저장되었습니다!`)
       }
 
-      // 메인 페이지로 이동
-      router.push('/')
+      router.push('/admin/posts')
     } catch (err) {
       console.error('예상치 못한 오류:', err)
       alert('게시글 저장 중 오류가 발생했습니다.')
@@ -324,6 +323,10 @@ function AdminEditorContent() {
           <Button variant="outline" onClick={handlePreview}>
             <Eye className="mr-2 h-4 w-4" />
             미리보기
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/admin/posts')}>
+            <X className="mr-2 h-4 w-4" />
+            취소
           </Button>
           <Button onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />

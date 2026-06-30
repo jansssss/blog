@@ -74,16 +74,23 @@ class SupabasePublisher:
             suffix += 1
         return slug
 
-    def publish(self, article: Article, html: str, mode: str = "publish") -> dict:
+    def publish(
+        self,
+        article: Article,
+        html: str,
+        mode: str = "publish",
+        ai_review: dict | None = None,
+    ) -> dict:
         """
         posts 테이블에 insert
         mode: "publish" → published=true, "draft" → published=false
+        ai_review: AI 검수 리포트 JSON (있으면 ai_review, ai_reviewed_at 컬럼에 저장)
         """
         site_id = self._get_site_id()
         slug = self._unique_slug(article.slug)
         now = datetime.now(timezone.utc).isoformat()
 
-        row = {
+        row: dict = {
             "title": article.title,
             "slug": slug,
             "summary": article.meta_description or article.subtitle,
@@ -94,6 +101,10 @@ class SupabasePublisher:
             "published_at": now if mode == "publish" else None,
             "site_id": site_id,
         }
+
+        if ai_review is not None:
+            row["ai_review"] = ai_review
+            row["ai_reviewed_at"] = now
 
         raw_body = json.dumps(row).encode("utf-8")
         req = request.Request(

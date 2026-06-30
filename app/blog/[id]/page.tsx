@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const siteId = site?.id
   const siteName = site?.name || '오예스'
 
-  let query = supabase.from('posts').select('*').eq('published', true)
+  let query = supabase.from('posts').select('id, title, slug, summary, content, category, tags, published, published_at, updated_at, thumbnail_url, site_id').eq('published', true)
   if (UUID_RE.test(idOrSlug)) {
     query = query.eq('id', idOrSlug)
   } else {
@@ -116,7 +116,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   const siteId = await getCurrentSiteId()
 
   // slug 또는 UUID로 현재 글 조회
-  let postQuery = supabase.from('posts').select('*').eq('published', true)
+  let postQuery = supabase.from('posts').select('id, title, slug, summary, content, category, tags, published, published_at, updated_at, thumbnail_url, site_id').eq('published', true)
   if (UUID_RE.test(idOrSlug)) {
     postQuery = postQuery.eq('id', idOrSlug)
   } else {

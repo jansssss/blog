@@ -12,6 +12,7 @@ import { generateSlug } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { uploadThumbnail } from '@/lib/upload'
 import Image from 'next/image'
+import { AiReviewPanel, type AiReview } from '@/components/admin/AiReviewPanel'
 
 interface Site {
   id: string
@@ -48,6 +49,8 @@ function AdminEditorContent() {
   const [publishedAt, setPublishedAt] = useState<string | null>(null)
   const [sites, setSites] = useState<Site[]>([])
   const [selectedSiteId, setSelectedSiteId] = useState<string>('')
+  const [aiReview, setAiReview] = useState<AiReview | null>(null)
+  const [aiReviewedAt, setAiReviewedAt] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -136,10 +139,11 @@ function AdminEditorContent() {
         setThumbnailUrl(data.thumbnail_url || '')
         setPublished(data.published)
         setPublishedAt(data.published_at || null)
-        // 게시글의 site_id 로드
         if (data.site_id) {
           setSelectedSiteId(data.site_id)
         }
+        setAiReview(data.ai_review || null)
+        setAiReviewedAt(data.ai_reviewed_at || null)
       }
     } catch (err) {
       console.error('예상치 못한 오류:', err)
@@ -374,6 +378,18 @@ function AdminEditorContent() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* AI 검수 리포트 (읽기 전용) */}
+          {isEditMode && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700 mb-2">AI 검수 리포트</p>
+              <AiReviewPanel
+                review={aiReview}
+                reviewedAt={aiReviewedAt}
+                defaultExpanded={!!aiReview}
+              />
+            </div>
+          )}
+
           {/* Publish Settings */}
           <Card>
             <CardHeader>

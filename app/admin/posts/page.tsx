@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, RefreshCw, Eye, Globe } from 'lucide-react'
+import { AiReviewBadge, AiReviewPanel, type AiReview } from '@/components/admin/AiReviewPanel'
 
 interface Post {
   id: string
@@ -21,6 +22,8 @@ interface Post {
   site_id: string
   tags: string[]
   thumbnail_url?: string
+  ai_review?: AiReview | null
+  ai_reviewed_at?: string | null
 }
 
 interface Site {
@@ -76,7 +79,7 @@ export default function AdminPostsPage() {
       // 쿼리 빌더 시작
       let query = supabase
         .from('posts')
-        .select('id, title, slug, summary, category, published, published_at, created_at, updated_at, site_id, tags, thumbnail_url', { count: 'exact' })
+        .select('id, title, slug, summary, category, published, published_at, created_at, updated_at, site_id, tags, thumbnail_url, ai_review, ai_reviewed_at', { count: 'exact' })
         .order('published_at', { ascending: false })
 
       // 필터 적용
@@ -380,6 +383,8 @@ export default function AdminPostsPage() {
                         }`}>
                           {post.published ? '공개' : '비공개'}
                         </span>
+                        {/* AI 검수 배지 */}
+                        <AiReviewBadge review={post.ai_review} />
                       </div>
 
                       {/* 제목 */}
@@ -396,6 +401,17 @@ export default function AdminPostsPage() {
                       <div className="text-xs text-muted-foreground">
                         <span>발행: {formatDate(post.published_at)}</span>
                       </div>
+
+                      {/* AI 검수 패널 (접이식) */}
+                      {post.ai_review && (
+                        <div className="mt-3">
+                          <AiReviewPanel
+                            review={post.ai_review}
+                            reviewedAt={post.ai_reviewed_at}
+                            defaultExpanded={false}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* 액션 버튼 */}

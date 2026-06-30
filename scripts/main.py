@@ -20,6 +20,7 @@ from scripts.pipeline.config import load_config
 from scripts.pipeline.researcher import TavilyResearcher
 from scripts.pipeline.columnist import ColumnistWriter, render_html
 from scripts.pipeline.publisher import SupabasePublisher
+from scripts.pipeline.reviewer import ArticleReviewer
 from scripts.analytics.gsc_query_selector import GSCQuerySelector
 from scripts.analytics.performance_analyzer import PerformanceAnalyzer
 
@@ -85,6 +86,7 @@ def main() -> None:
 
     # ── 파이프라인 초기화 ──────────────────────────
     researcher = TavilyResearcher(config.tavily_api_key, config.openai_api_key, config.openai_model)
+    reviewer = ArticleReviewer(config.openai_api_key, config.openai_model)
     writer = ColumnistWriter(
         api_key=config.openai_api_key,
         model=config.openai_model,
@@ -193,6 +195,17 @@ def main() -> None:
         html = render_html(article)
         print(f"[STEP 3] HTML 렌더링 완료 ({len(html):,}자)", flush=True)
 
+        # 3.5. AI 검수 리포트 생성
+        ai_review: dict | None = None
+        try:
+            ai_review = reviewer.review(article, html, research)
+            decision = ai_review.get("final_decision", "알 수 없음")
+            score = ai_review.get("total_score", 0)
+            fail_count = sum(1 for i in ai_review.get("issues", []) if i.get("severity") == "fail")
+            print(f"[STEP 3.5] AI 검수 완료 — {decision} ({score}점, fail {fail_count}건)", flush=True)
+        except Exception as exc:
+            print(f"[STEP 3.5] AI 검수 실패 (무시하고 계속): {exc}", flush=True)
+
         # 4. Dry-run이면 출력만
         if args.dry_run:
             output_path = Path(f"/tmp/{article.slug}.html")
@@ -205,7 +218,7 @@ def main() -> None:
         # 5. Supabase 발행
         print(f"[STEP 4] Supabase 발행 중... (mode={mode})", flush=True)
         try:
-            result = publisher.publish(article, html, mode)
+            result = publisher.publish(article, html, mode, ai_review=ai_review)
             status = "발행" if result["published"] else "초안 저장"
             print(f"[STEP 4] {status} 완료! slug={result['slug']}", flush=True)
         except Exception as exc:

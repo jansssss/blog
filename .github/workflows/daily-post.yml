@@ -21,6 +21,15 @@ on:
         required: false
         default: false
         type: boolean
+      content_seed_mode:
+        description: "콘텐츠 주제 선정 모드"
+        required: false
+        default: hybrid
+        type: choice
+        options:
+          - hybrid
+          - roadmap
+          - gsc
 
   schedule:
     # 2일 1회 KST 05:00 트리거 후 최대 3시간 랜덤 딜레이 → 실제 실행 05:00~08:00
@@ -60,6 +69,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'draft' }}
           POSTS_PER_RUN: ${{ inputs.count || '1' }}
+          CONTENT_SEED_MODE: ${{ inputs.content_seed_mode || 'hybrid' }}
         run: |
           printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" >> .env.local
           printf 'OPENAI_MODEL=%s\n' "$OPENAI_MODEL" >> .env.local
@@ -68,6 +78,7 @@ jobs:
           printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY" >> .env.local
           printf 'PUBLISH_MODE=%s\n' "$PUBLISH_MODE" >> .env.local
           printf 'POSTS_PER_RUN=%s\n' "$POSTS_PER_RUN" >> .env.local
+          printf 'CONTENT_SEED_MODE=%s\n' "$CONTENT_SEED_MODE" >> .env.local
 
       - name: Run pipeline
         run: |

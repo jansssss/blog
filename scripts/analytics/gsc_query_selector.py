@@ -129,6 +129,46 @@ class GSCQuerySelector:
         results.sort(key=lambda x: (type_priority.get(x["page_type"], 9), -x["impressions"]))
         return results[:limit]
 
+    def has_sufficient_data(
+        self,
+        table: str = "gsc_query_pages",
+        min_total_impressions: int = 10,
+        max_ctr: float = 0.08,
+    ) -> bool:
+        """
+        hybrid 모드용: GSC 데이터가 충분한지 확인.
+        position 4~60 + ctr <= max_ctr 조건의 노출 합계 >= min_total_impressions 이면 True.
+        """
+        url = (
+            f"{self.supabase_url}/rest/v1/{table}"
+            f"?select=impressions,ctr,position"
+            f"&order=impressions.desc&limit=1000"
+        )
+        req = request.Request(url, headers=self._headers)
+        try:
+            with request.urlopen(req, timeout=10) as resp:
+                rows = json.loads(resp.read().decode("utf-8"))
+        except HTTPError as e:
+            if e.code == 404:
+                print(f"[GSC-CHECK] {table} 테이블 없음 — 데이터 부족으로 판단", flush=True)
+            else:
+                print(f"[GSC-CHECK] 조회 실패 ({e.code}) — 데이터 부족으로 판단", flush=True)
+            return False
+        except Exception as exc:
+            print(f"[GSC-CHECK] 오류: {exc} — 데이터 부족으로 판단", flush=True)
+            return False
+
+        total = sum(
+            r["impressions"] for r in rows
+            if r.get("ctr", 1.0) <= max_ctr and 4.0 <= r.get("position", 0.0) <= 60.0
+        )
+        sufficient = total >= min_total_impressions
+        print(
+            f"[GSC-CHECK] 유효 노출 합계 {total}회 → {'충분 (GSC 모드 진입)' if sufficient else '부족 (roadmap 폴백)'}",
+            flush=True,
+        )
+        return sufficient
+
     def pick_best_query(
         self,
         excluded_topics: list[str] | None = None,

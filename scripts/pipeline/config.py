@@ -19,6 +19,7 @@ class AppConfig:
     gsc_client_secret_path: str | None
     gsc_token_path: str | None
     gsc_site_url: str | None
+    content_seed_mode: str      # "roadmap" | "hybrid" | "gsc"
 
 
 def _load_dotenv(dotenv_path: Path) -> None:
@@ -51,4 +52,5 @@ def load_config() -> AppConfig:
         gsc_client_secret_path=os.getenv("GSC_CLIENT_SECRET_PATH") or str(scripts_root / "credentials" / "client_secret.json"),
         gsc_token_path=os.getenv("GSC_TOKEN_PATH") or str(scripts_root / "credentials" / "token.json"),
         gsc_site_url=os.getenv("GSC_SITE_URL") or None,
+        content_seed_mode=os.getenv("CONTENT_SEED_MODE", "hybrid"),
     )

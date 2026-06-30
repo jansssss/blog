@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import date
 from pathlib import Path
 
 # 프로젝트 루트를 sys.path에 추가 (로컬 실행용)
@@ -21,6 +22,32 @@ from scripts.pipeline.columnist import ColumnistWriter, render_html
 from scripts.pipeline.publisher import SupabasePublisher
 from scripts.analytics.gsc_query_selector import GSCQuerySelector
 from scripts.analytics.performance_analyzer import PerformanceAnalyzer
+
+
+# 로드맵 모드용 핵심 콘텐츠 클러스터 (GSC 데이터 없이 사용)
+ROADMAP_TOPICS: list[tuple[str, str]] = [
+    ("주담대_DSR_사례",       "DSR 40% 기준 연봉별 주담대 최대 한도 계산 사례"),
+    ("연봉별_대출한도",       "연봉 5000만원 주담대 한도 얼마까지 가능한가"),
+    ("자동차할부_주담대",     "자동차 할부 있을 때 주담대 한도 얼마나 줄어드나"),
+    ("신용대출_DSR",          "마이너스통장 신용대출 있을 때 주담대 DSR 영향 계산"),
+    ("대환대출_손익",         "주담대 갈아타기 중도상환수수료 금리차이 손익분기점 계산"),
+    ("전세대출_거절재신청",   "전세대출 거절 이유와 재신청 조건 HUG HF"),
+    ("보증보험_비교",         "전세보증보험 HUG HF SGI 가입 조건 한도 비교"),
+    ("정책자금_신청",         "청년 정책자금 대출 자격 조건 소득 한도 신청 방법"),
+]
+
+
+def pick_roadmap_seed(excluded_topics: list[str]) -> str:
+    """날짜 기반으로 로드맵 클러스터에서 시드 쿼리 선택 (이미 발행된 주제 최대한 회피)."""
+    n = len(ROADMAP_TOPICS)
+    base = date.today().toordinal() % n
+    excluded_lower = [t.lower() for t in excluded_topics]
+    for offset in range(n):
+        _, query = ROADMAP_TOPICS[(base + offset) % n]
+        q_lower = query.lower()
+        if not any(q_lower in p or p in q_lower for p in excluded_lower):
+            return query
+    return ROADMAP_TOPICS[base][1]
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -88,24 +115,55 @@ def main() -> None:
         print(f"\n{'='*50}", flush=True)
         print(f"[PIPELINE] {i+1}/{count}번째 글 생성 시작", flush=True)
 
-        # STEP 0: 주제 선정 — opportunity → GSC query → Tavily 순서로 폴백
+        # STEP 0: 주제 선정 (CONTENT_SEED_MODE 분기)
         seed_query: str | None = None
         opportunity: dict | None = None
-        topic_source = "tavily_evergreen"
+        topic_source = "roadmap"
+        seed_mode = config.content_seed_mode
 
-        if gsc_selector:
-            opportunity = gsc_selector.pick_best_opportunity(excluded_topics)
-            if opportunity:
-                seed_query = opportunity["query"]
-                topic_source = "gsc_opportunity"
+        print(f"[STEP 0] CONTENT_SEED_MODE={seed_mode}", flush=True)
+
+        if seed_mode == "gsc":
+            # 기존 동작: opportunity → gsc_query → tavily_evergreen
+            topic_source = "tavily_evergreen"
+            if gsc_selector:
+                opportunity = gsc_selector.pick_best_opportunity(excluded_topics)
+                if opportunity:
+                    seed_query = opportunity["query"]
+                    topic_source = "gsc_opportunity"
+                else:
+                    seed_query = gsc_selector.pick_best_query(excluded_topics)
+                    if seed_query:
+                        topic_source = "gsc_query"
+
+        elif seed_mode == "hybrid":
+            # GSC 데이터 충분 여부 확인 후 분기
+            gsc_ready = bool(gsc_selector and gsc_selector.has_sufficient_data())
+            if gsc_ready:
+                opportunity = gsc_selector.pick_best_opportunity(excluded_topics)
+                if opportunity:
+                    seed_query = opportunity["query"]
+                    topic_source = "gsc_opportunity"
+                else:
+                    seed_query = gsc_selector.pick_best_query(excluded_topics)
+                    if seed_query:
+                        topic_source = "gsc_query"
+                    else:
+                        seed_query = pick_roadmap_seed(excluded_topics)
+                        topic_source = "roadmap"
             else:
-                seed_query = gsc_selector.pick_best_query(excluded_topics)
-                if seed_query:
-                    topic_source = "gsc_query"
+                seed_query = pick_roadmap_seed(excluded_topics)
+                topic_source = "roadmap"
+
+        else:  # roadmap
+            seed_query = pick_roadmap_seed(excluded_topics)
+            topic_source = "roadmap"
 
         print(f"[STEP 0] 주제 선정 방식: {topic_source}", flush=True)
         if opportunity:
             print(f"[STEP 0] 기회: '{seed_query}' on {opportunity['page_path']} — {opportunity['reason']}", flush=True)
+        elif topic_source == "roadmap" and seed_query:
+            print(f"[STEP 0] 로드맵 시드: '{seed_query}'", flush=True)
 
         # 1. Tavily - 오늘의 이슈 리서치
         print("[STEP 1] Tavily 리서치 중...", flush=True)

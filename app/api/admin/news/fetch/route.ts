@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server'
 import Parser from 'rss-parser'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { requireAdmin } from '@/lib/auth/admin'
 import {
   fetchNaverPopularNews,
   fetchGoogleTrends,
@@ -26,6 +27,10 @@ function generateHash(title: string, link: string): string {
 }
 
 export async function POST() {
+  // 관리자 검증: 세션 없으면 401, admins 테이블 미등록이면 403
+  const adminOrResponse = await requireAdmin()
+  if (adminOrResponse instanceof NextResponse) return adminOrResponse
+
   try {
     console.log('[ADMIN-NEWS-FETCH] Starting manual news fetch...')
 

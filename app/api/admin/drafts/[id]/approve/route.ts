@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { supabase } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/auth/admin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,6 +17,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 관리자 검증: 세션 없으면 401, admins 테이블 미등록이면 403
+    const adminOrResponse = await requireAdmin()
+    if (adminOrResponse instanceof NextResponse) return adminOrResponse
+    const admin = adminOrResponse
+
     const { id: draftId } = await params
 
     // 요청 body에서 site_id 추출 (필수)
@@ -34,13 +39,6 @@ export async function POST(
         { error: '발행할 사이트를 선택해주세요 (site_id 필수)' },
         { status: 400 }
       )
-    }
-
-    // 로그인 확인 (클라이언트에서 보낸 요청)
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // site_id 유효성 검증
@@ -89,7 +87,7 @@ export async function POST(
         thumbnail_url: draft.thumbnail_url,
         published: true,
         published_at: new Date().toISOString(),
-        author_id: user.id,
+        author_id: admin.id,
         site_id: siteId  // 선택된 사이트 ID
       })
       .select()

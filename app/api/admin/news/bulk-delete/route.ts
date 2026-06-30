@@ -4,11 +4,16 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { requireAdmin } from '@/lib/auth/admin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
+  // 관리자 검증: 세션 없으면 401, admins 테이블 미등록이면 403
+  const adminOrResponse = await requireAdmin()
+  if (adminOrResponse instanceof NextResponse) return adminOrResponse
+
   try {
     const body = await request.json()
     const { newsItemIds } = body

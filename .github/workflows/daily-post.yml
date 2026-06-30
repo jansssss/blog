@@ -6,7 +6,7 @@ on:
       mode:
         description: "발행 모드"
         required: false
-        default: publish
+        default: draft
         type: choice
         options:
           - publish

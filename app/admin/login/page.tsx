@@ -6,7 +6,7 @@ import { Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { supabase } from '@/lib/supabase'
+import { supabaseBrowser as supabase } from '@/lib/supabase-browser'
 
 export default function AdminLoginPage() {
   const router = useRouter()

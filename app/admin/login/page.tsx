@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
           // Header 업데이트를 위한 커스텀 이벤트 발생
           window.dispatchEvent(new Event('loginStateChange'))
 
-          router.push('/')
+          router.push('/admin/posts')
         } else {
           setError('관리자 권한이 없습니다.')
           await supabase.auth.signOut()

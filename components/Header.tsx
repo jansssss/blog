@@ -67,6 +67,7 @@ const OHYESS_NAV: NavItem[] = [
       { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
     ],
   },
+  { label: '블로그', href: '/blog' },
   {
     label: '핫이슈',
     href: '/trend',

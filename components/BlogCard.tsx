@@ -10,9 +10,11 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post }: BlogCardProps) {
+  const href = post.slug ? `/blog/${post.slug}` : `/blog/${post.id}`
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg">
-      <Link href={`/blog/${post.id}`}>
+      <Link href={href}>
         {post.thumbnail_url && (
           <div className="relative h-48 w-full overflow-hidden">
             <Image

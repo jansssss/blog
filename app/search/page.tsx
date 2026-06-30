@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
 import BlogCard from '@/components/BlogCard'
 import Link from 'next/link'
@@ -5,6 +6,10 @@ import { ArrowLeft } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>

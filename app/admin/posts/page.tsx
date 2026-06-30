@@ -409,7 +409,7 @@ export default function AdminPostsPage() {
                       </Link>
                       {/* 보기 (해당 사이트 도메인으로 이동) */}
                       <a
-                        href={`https://${getSiteDomain(post.site_id)}/blog/${post.id}`}
+                        href={`https://${getSiteDomain(post.site_id)}/blog/${post.slug || post.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

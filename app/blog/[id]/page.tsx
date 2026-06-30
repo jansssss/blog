@@ -17,6 +17,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const dynamicParams = true
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // 본문 prose 스타일 (광고 삽입을 위해 본문을 둘로 나눠도 동일 스타일 적용)
 const ARTICLE_PROSE_CLASS = `prose prose-base max-w-none
   prose-headings:font-bold prose-headings:text-gray-900
@@ -55,22 +57,18 @@ function splitAtMiddleH2(html: string): [string, string] {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+  const { id: idOrSlug } = await params
   const site = await getCurrentSite()
   const siteId = site?.id
-
-  // 사이트 이름 (메타데이터용)
   const siteName = site?.name || '오예스'
 
-  let query = supabase
-    .from('posts')
-    .select('*')
-    .eq('id', id)
-    .eq('published', true)
-
-  if (siteId) {
-    query = query.eq('site_id', siteId)
+  let query = supabase.from('posts').select('*').eq('published', true)
+  if (UUID_RE.test(idOrSlug)) {
+    query = query.eq('id', idOrSlug)
+  } else {
+    query = query.eq('slug', idOrSlug)
   }
+  if (siteId) query = query.eq('site_id', siteId)
 
   const { data: post } = await query.single()
 
@@ -82,6 +80,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 
   const canonicalHost = site?.domain || 'ohyess.kr'
+  const canonicalSlug = post.slug || post.id
 
   return {
     title: `${post.title} | ${siteName}`,
@@ -89,7 +88,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     keywords: post.tags,
     authors: [{ name: siteName }],
     alternates: {
-      canonical: `https://${canonicalHost}/blog/${id}`,
+      canonical: `https://${canonicalHost}/blog/${canonicalSlug}`,
     },
     openGraph: {
       title: post.title,
@@ -113,21 +112,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+  const { id: idOrSlug } = await params
   const siteId = await getCurrentSiteId()
 
-  // 현재 글 조회 (site_id 필터 적용)
-  let postQuery = supabase
-    .from('posts')
-    .select('*')
-    .eq('id', id)
-    .eq('published', true)
-
-  if (siteId) {
-    postQuery = postQuery.eq('site_id', siteId)
+  // slug 또는 UUID로 현재 글 조회
+  let postQuery = supabase.from('posts').select('*').eq('published', true)
+  if (UUID_RE.test(idOrSlug)) {
+    postQuery = postQuery.eq('id', idOrSlug)
+  } else {
+    postQuery = postQuery.eq('slug', idOrSlug)
   }
+  if (siteId) postQuery = postQuery.eq('site_id', siteId)
 
-  // 현재 글 + 사이트 정보를 병렬 조회 (순차 round-trip 제거 → TTFB 단축)
+  // 현재 글 + 사이트 정보를 병렬 조회
   const [{ data: post }, site] = await Promise.all([
     postQuery.single(),
     getCurrentSite(),
@@ -137,10 +134,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     notFound()
   }
 
-  // 이전 글 (현재 글보다 이전에 발행된 글 중 가장 최근 글, 같은 사이트)
+  // 이전 글 (slug 포함 조회)
   let prevQuery = supabase
     .from('posts')
-    .select('id, title')
+    .select('id, title, slug')
     .eq('published', true)
     .lt('published_at', post.published_at)
     .order('published_at', { ascending: false })
@@ -150,10 +147,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     prevQuery = prevQuery.eq('site_id', siteId)
   }
 
-  // 다음 글 (현재 글보다 이후에 발행된 글 중 가장 오래된 글, 같은 사이트)
+  // 다음 글 (slug 포함 조회)
   let nextQuery = supabase
     .from('posts')
-    .select('id, title')
+    .select('id, title, slug')
     .eq('published', true)
     .gt('published_at', post.published_at)
     .order('published_at', { ascending: true })
@@ -163,7 +160,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     nextQuery = nextQuery.eq('site_id', siteId)
   }
 
-  // 이전/다음 글도 병렬 조회
   const [{ data: prevPost }, { data: nextPost }] = await Promise.all([
     prevQuery.single(),
     nextQuery.single(),
@@ -173,6 +169,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   const protocol = 'https'
   const host = site?.domain || 'ohyess.kr'
   const baseUrl = `${protocol}://${host}`
+  const canonicalSlug = post.slug || post.id
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -193,11 +190,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${baseUrl}/blog/${post.id}`,
+      '@id': `${baseUrl}/blog/${canonicalSlug}`,
     },
     ...(post.thumbnail_url && { image: post.thumbnail_url }),
     ...(post.tags?.length && { keywords: post.tags.join(', ') }),
   }
+
+  // slug 있으면 /blog/{slug}, 없으면 /blog/{id} fallback
+  const postHref = (p: { id: string; slug?: string | null }) =>
+    p.slug ? `/blog/${p.slug}` : `/blog/${p.id}`
 
   return (
     <div className="container max-w-6xl py-10 px-4 sm:px-6 lg:px-8">
@@ -208,7 +209,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
 
       {/* Back Button & Admin Buttons */}
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/">
+        <Link href="/blog">
           <Button variant="ghost">
             <ArrowLeft className="mr-2 h-4 w-4" />
             목록으로
@@ -313,7 +314,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           {/* Previous Post */}
           {prevPost ? (
             <Link
-              href={`/blog/${prevPost.id}`}
+              href={postHref(prevPost)}
               className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -333,7 +334,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           {/* Next Post */}
           {nextPost ? (
             <Link
-              href={`/blog/${nextPost.id}`}
+              href={postHref(nextPost)}
               className="flex items-center justify-between py-4 group hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
@@ -353,7 +354,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
 
         {/* Back to List Button */}
         <div className="text-center mt-8">
-          <Link href="/">
+          <Link href="/blog">
             <Button size="lg">
               <ArrowLeft className="mr-2 h-4 w-4" />
               목록으로 돌아가기

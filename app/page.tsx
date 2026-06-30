@@ -248,9 +248,9 @@ export default async function HomePage({
           </section>
         )}
 
-        {/* Blog Posts Grid - 관련 가이드 */}
+        {/* Blog Posts Grid - 최신 사례글 */}
         <section>
-          <h2 className="mb-6 text-xl font-bold">관련 가이드</h2>
+          <h2 className="mb-6 text-xl font-bold">최신 사례글</h2>
         {posts && posts.length > 0 ? (
           <>
             <div className="blog-grid-md3 grid gap-6 grid-cols-1 md:grid-cols-3">
@@ -260,10 +260,15 @@ export default async function HomePage({
             </div>
 
             {/* 더보기 버튼 */}
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center gap-3 flex-wrap">
+              <Link href="/blog">
+                <Button variant="outline">
+                  블로그 전체 보기
+                </Button>
+              </Link>
               <Link href="/guide">
                 <Button variant="outline">
-                  더 많은 가이드 보기
+                  금융 가이드 보기
                 </Button>
               </Link>
             </div>

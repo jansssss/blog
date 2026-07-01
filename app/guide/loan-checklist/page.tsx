@@ -133,6 +133,7 @@ function CaseBox({ title, children }: { title: string; children: ReactNode }) {
 export default function LoanChecklistGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/loan-checklist"
       title="대출 신청 전 필수 체크리스트 — 놓치면 후회하는 10가지"
       description="대출 신청 전 반드시 확인해야 할 신용·소득·한도 파악, 상품 비교 포인트, 계약서 필수 확인 항목을 직장인·자영업자 실전 사례와 함께 완전히 정리합니다."
       tocItems={tocItems}

@@ -84,6 +84,7 @@ function Ul({ children }: { children: ReactNode }) {
 export default function CarLoanDsrImpactPage() {
   return (
     <GuideLayout
+      pageUrl="/guide/car-loan-dsr-impact"
       title="자동차 할부가 주담대 한도를 줄이는 이유 — 완납해야 할까?"
       description="차 할부 월 50만원이 주담대 한도를 1억 이상 낮추는 구조를 설명합니다. 잔여기간 예외처리, 현금 매입 vs 할부 손익, 완납 타이밍까지 — 내 숫자로 직접 계산해보세요."
       tocItems={tocItems}

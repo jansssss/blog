@@ -133,6 +133,7 @@ function CaseBox({ title, children }: { title: string; children: ReactNode }) {
 export default function DsrDtiLtvGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/dsr-dti-ltv"
       title="DTI란? DSR·DTI·LTV 뜻과 차이 — 대출 한도를 결정하는 3가지 지표 완전 정리"
       description="DTI란 무엇인지, DSR과 DTI의 차이는 무엇인지, LTV 뜻까지 대출 한도를 결정하는 3가지 지표를 공식과 실전 계산 사례로 완전히 정리합니다. LTV는 남는데 DSR에서 막히는 이유도 설명합니다."
       tocItems={tocItems}

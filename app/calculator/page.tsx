@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { Calculator, ArrowLeftRight, Target, RotateCcw, DollarSign, Activity, Scale, Shield, RefreshCcw, PieChart } from 'lucide-react'
 import Link from 'next/link'
+import { JsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: '금융 계산기 모음 | 대출이자·DSR·중도상환·갈아타기 즉시 계산 | ohyess',
@@ -80,9 +81,42 @@ const CALCULATORS = [
   }
 ]
 
+const indexJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ItemList',
+      name: '금융 계산기 모음',
+      description: '대출이자·DSR·중도상환·갈아타기 등 10가지 무료 금융 계산기',
+      url: 'https://www.ohyess.kr/calculator',
+      numberOfItems: 10,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '대출 갈아타기 손익 계산기', url: 'https://www.ohyess.kr/calculator/refinancing' },
+        { '@type': 'ListItem', position: 2, name: 'DSR DTI LTV 계산기', url: 'https://www.ohyess.kr/calculator/dsr-dti-ltv' },
+        { '@type': 'ListItem', position: 3, name: '대출 이자 계산기', url: 'https://www.ohyess.kr/calculator/loan-interest' },
+        { '@type': 'ListItem', position: 4, name: '원리금 vs 원금균등 비교 계산기', url: 'https://www.ohyess.kr/calculator/repayment-compare' },
+        { '@type': 'ListItem', position: 5, name: '대출 한도 시뮬레이터', url: 'https://www.ohyess.kr/calculator/loan-limit' },
+        { '@type': 'ListItem', position: 6, name: '중도상환수수료 계산기', url: 'https://www.ohyess.kr/calculator/prepayment-fee' },
+        { '@type': 'ListItem', position: 7, name: '월 상환 부담 체감 계산기', url: 'https://www.ohyess.kr/calculator/repayment-burden' },
+        { '@type': 'ListItem', position: 8, name: '금리 변동 영향 계산기', url: 'https://www.ohyess.kr/calculator/rate-change-impact' },
+        { '@type': 'ListItem', position: 9, name: '중도상환 vs 유지 비교 계산기', url: 'https://www.ohyess.kr/calculator/prepayment-comparison' },
+        { '@type': 'ListItem', position: 10, name: '비상자금 필요 금액 계산기', url: 'https://www.ohyess.kr/calculator/emergency-fund' },
+      ],
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: 'https://www.ohyess.kr' },
+        { '@type': 'ListItem', position: 2, name: '금융 계산기', item: 'https://www.ohyess.kr/calculator' },
+      ],
+    },
+  ],
+}
+
 export default function CalculatorPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
+      <JsonLd data={indexJsonLd} />
 
       {/* Hero Section */}
       <div className="rounded-3xl bg-gradient-to-b from-blue-50/60 to-white border border-blue-100/60 px-8 py-12 text-center mb-10">

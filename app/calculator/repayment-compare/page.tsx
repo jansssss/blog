@@ -579,8 +579,37 @@ export default function RepaymentComparePage() {
           ))}
         </div>
       </div>
+      {/* 관련 가이드 */}
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+            <p className="text-xs text-gray-400">상환 방식 선택에 필요한 배경 지식</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '원리금균등 vs 원금균등, 내 상황엔 어떤 게 맞나' },
+            { href: '/guide/loan-interest', emoji: '📊', title: '대출 이자 완전 정복', desc: '방식별 이자 계산 구조와 총비용 비교' },
+            { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '중도 상환 시 수수료와 절감 이자의 교환 조건' },
+            { href: '/guide/mortgage-loan', emoji: '🏠', title: '주택담보대출 완전 가이드', desc: '주담대 심사부터 실행까지 전체 흐름 정리' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href}
+              className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <MortgagePrepHubCTA />
-      <DisclaimerNotice />
+      <DisclaimerNotice basis="원리금균등·원금균등 표준 공식 대비 계산 · 세부 조건(우대금리 등) 미반영" />
 
       {/* ─── 슬라이더 스타일 ─────────────────────────────────────── */}
       <style jsx>{`

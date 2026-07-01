@@ -94,6 +94,7 @@ export default function Rate0p5DifferencePage() {
 
   return (
     <GuideLayout
+      pageUrl="/guide/rate-0p5-difference"
       title="주담대 금리 0.5% 차이, 총이자 얼마나 달라질까?"
       description="내 대출 금액으로 금리 차이를 실시간 비교하고, 실제로 금리를 낮추는 협상 전략과 갈아타기 손익분기점까지 알아봅니다."
       tocItems={tocItems}

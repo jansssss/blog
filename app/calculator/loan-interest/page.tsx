@@ -546,8 +546,37 @@ export default function LoanInterestCalculatorPage() {
         </div>
       </div>
 
+      {/* 관련 가이드 */}
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+            <p className="text-xs text-gray-400">계산 결과를 제대로 해석하는 법</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/guide/loan-interest', emoji: '📚', title: '대출 이자 완전 정복', desc: '원리금균등·원금균등·만기일시 방식별 이자 구조 비교' },
+            { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '내 상황에 맞는 상환 방식 고르는 기준' },
+            { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '언제 갚는 게 이득인지 수수료 구조부터 이해하기' },
+            { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '금리 사이클별 어떤 금리 유형이 유리한지' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href}
+              className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <MortgagePrepHubCTA />
-      <DisclaimerNotice />
+      <DisclaimerNotice basis="원리금균등·원금균등·만기일시 표준 공식 적용 · 주담대·신용대출 공통 이자 산출 기준" />
 
       {/* 슬라이더 스타일 */}
       <style>{`

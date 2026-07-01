@@ -333,7 +333,39 @@ export default function RateChangeImpactCalculatorPage() {
             ))}
           </div>
         </div>
-        <DisclaimerNotice message="본 계산 결과는 원리금균등 또는 원금균등 방식 기준 예상치이며, 실제 상환액은 대출 조건·우대금리·수수료 등에 따라 달라질 수 있습니다." />
+        {/* 관련 가이드 */}
+        <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+              <p className="text-xs text-gray-400">금리 변동에 대비하는 전략</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '금리 변동 리스크와 두 금리 유형 선택 기준' },
+              { href: '/guide/loan-interest', emoji: '📊', title: '대출 이자 완전 정복', desc: '금리 변동 시 실제 이자 계산 방법' },
+              { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '금리 오를 때 원금균등이 방어적인 이유' },
+              { href: '/guide/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 완전 정복', desc: '금리 변동이 DSR 한도에 미치는 영향' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href}
+                className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <DisclaimerNotice
+          basis="원리금균등상환 기준 금리 변동 영향 산출 · COFIX 연동 변동금리 참고용"
+          message="본 계산 결과는 원리금균등 또는 원금균등 방식 기준 예상치이며, 실제 상환액은 대출 조건·우대금리·수수료 등에 따라 달라질 수 있습니다."
+        />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">
           <h3 className="font-semibold mb-3 text-gray-900">💡 금리 변동 대비 체크리스트</h3>

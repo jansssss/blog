@@ -127,6 +127,7 @@ function CaseBox({ title, children }: { title: string; children: ReactNode }) {
 export default function LoanInterestGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/loan-interest"
       title="대출이자 계산법 완전 정리 — 왜 이자가 다르게 나올까"
       description="원리금균등·원금균등·만기일시 상환 방식별 이자 계산 공식, 변동금리와 고정금리의 차이, 직장인과 자영업자의 실전 사례 2개를 통해 대출이자 계산의 구조를 완전히 이해합니다."
       tocItems={tocItems}

@@ -131,6 +131,7 @@ function CaseBox({ title, children }: { title: string; children: ReactNode }) {
 export default function EarlyRepaymentFeeGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/early-repayment-fee"
       title="중도상환수수료 완전 정리 — 계산 공식부터 면제 조건까지"
       description="대출을 만기 전에 갚을 때 발생하는 중도상환수수료의 계산 공식, 면제 조건, 수수료 없이 중도상환하는 방법, 그리고 중도상환 vs 유지의 현실적인 손익 판단법을 완전히 정리합니다."
       tocItems={tocItems}

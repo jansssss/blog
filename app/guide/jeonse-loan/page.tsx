@@ -102,6 +102,7 @@ function WarnBox({ children }: { children: ReactNode }) {
 export default function JeonseLoangGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/jeonse-loan"
       title="전세대출 완전 정리 — 종류·한도·보증·사기 예방까지"
       description="버팀목대출부터 시중은행 전세대출까지 3가지 경로 비교, 한도 계산 구조, 보증 기관 선택법, 전세 사기 예방 체크리스트를 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}

@@ -102,6 +102,7 @@ function WarnBox({ children }: { children: ReactNode }) {
 export default function LoanRejectionPage() {
   return (
     <GuideLayout
+      pageUrl="/guide/loan-rejection"
       title="대출 거절 이유와 극복 전략 — 거절 후 재신청 성공 완전 가이드"
       description="대출 심사에서 거절되는 5가지 핵심 이유를 파악하고, 신용점수·DSR·소득 증빙을 개선해 재신청 성공률을 높이는 실전 전략을 완전 정리합니다."
       tocItems={tocItems}

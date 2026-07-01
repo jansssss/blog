@@ -502,8 +502,37 @@ export default function DsrDtiLtvCalculatorPage() {
         </div>
       </div>
 
+      {/* 관련 가이드 */}
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+            <p className="text-xs text-gray-400">계산 결과를 제대로 해석하는 법</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/guide/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 완전 정복', desc: 'DSR 40% 규제 구조와 실전 계산 방법 총정리' },
+            { href: '/guide/mortgage-salary-5000', emoji: '🏠', title: '연봉 5000만원 주담대 한도', desc: '소득별 DSR 기준 실제 대출 가능 금액 계산' },
+            { href: '/guide/ltv-ok-dsr-blocked', emoji: '🚧', title: 'LTV는 OK인데 DSR에 막힌다면', desc: 'LTV·DSR 동시 충족 전략과 해결 방법' },
+            { href: '/guide/car-loan-dsr-impact', emoji: '🚗', title: '자동차 대출과 DSR 영향', desc: '카론이 주담대 한도에 미치는 실제 영향' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href}
+              className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <MortgagePrepHubCTA />
-      <DisclaimerNotice />
+      <DisclaimerNotice basis="스트레스 DSR 3단계 적용(2025년 7월~) · 금융위원회 고시 기준 · 은행권 DSR 40%, 2금융권 50%" />
 
       <style>{`
         input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:8px}

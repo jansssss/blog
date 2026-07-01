@@ -301,7 +301,39 @@ export default function RepaymentBurdenCalculatorPage() {
             ))}
           </div>
         </div>
-        <DisclaimerNotice message="본 계산 결과는 참고용 예상치이며, 실제 가계 재무 상황은 개인마다 다릅니다. 정확한 재무 계획은 전문 금융 상담사와 상담하세요." />
+        {/* 관련 가이드 */}
+        <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+              <p className="text-xs text-gray-400">상환 부담을 낮추는 전략</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '부담률에 따라 원리금균등 vs 원금균등 선택법' },
+              { href: '/guide/loan-interest', emoji: '📊', title: '대출 이자 완전 정복', desc: '월 납입액 구성과 이자·원금 비율 이해하기' },
+              { href: '/guide/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 완전 정복', desc: '상환 부담률과 DSR 한도의 관계' },
+              { href: '/guide/loan-checklist', emoji: '✅', title: '대출 받기 전 체크리스트', desc: '부담률 점검 후 실행 전 준비 사항' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href}
+                className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <DisclaimerNotice
+          basis="세후 월소득 대비 납입액 비율 자체 산출 기준 · 금융 전문가 일반 권고치 참고"
+          message="본 계산 결과는 참고용 예상치이며, 실제 가계 재무 상황은 개인마다 다릅니다. 정확한 재무 계획은 전문 금융 상담사와 상담하세요."
+        />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">
           <h3 className="font-semibold mb-3 text-gray-900">💡 건강한 가계 재무 체크리스트</h3>

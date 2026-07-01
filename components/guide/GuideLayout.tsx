@@ -6,6 +6,7 @@ import FAQ from './FAQ'
 import RelatedLinks from './RelatedLinks'
 import AdUnit from '@/components/AdUnit'
 import ContentTrustHeader, { type ContentTrustHeaderProps } from '@/components/ContentTrustHeader'
+import { JsonLd } from '@/components/JsonLd'
 
 interface TocItem {
   id: string
@@ -37,8 +38,11 @@ interface GuideLayoutProps extends ContentTrustHeaderProps {
   relatedGuides: RelatedGuide[]
   faqs: FAQItem[]
   lastUpdated?: string
+  pageUrl?: string
   children: ReactNode
 }
+
+const BASE = 'https://www.ohyess.kr'
 
 export default function GuideLayout({
   title,
@@ -48,6 +52,7 @@ export default function GuideLayout({
   relatedGuides,
   faqs,
   lastUpdated = '2026년 2월',
+  pageUrl,
   publishedAt,
   reviewedAt,
   referenceDate,
@@ -55,8 +60,43 @@ export default function GuideLayout({
   sources,
   children,
 }: GuideLayoutProps) {
+  const jsonLd = pageUrl
+    ? {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'Article',
+            headline: title,
+            description,
+            url: `${BASE}${pageUrl}`,
+            inLanguage: 'ko',
+            publisher: { '@type': 'Organization', name: 'ohyess', url: BASE },
+            ...(publishedAt && { datePublished: publishedAt }),
+            ...(reviewedAt && { dateModified: reviewedAt }),
+          },
+          {
+            '@type': 'FAQPage',
+            mainEntity: faqs.map(({ question, answer }) => ({
+              '@type': 'Question',
+              name: question,
+              acceptedAnswer: { '@type': 'Answer', text: answer },
+            })),
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: '홈', item: BASE },
+              { '@type': 'ListItem', position: 2, name: '가이드', item: `${BASE}/guide` },
+              { '@type': 'ListItem', position: 3, name: title, item: `${BASE}${pageUrl}` },
+            ],
+          },
+        ],
+      }
+    : null
+
   return (
     <div className="container py-8 max-w-4xl mx-auto">
+      {jsonLd && <JsonLd data={jsonLd} />}
       {/* 헤더 */}
       <header className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">

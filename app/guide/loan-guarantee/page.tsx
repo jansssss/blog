@@ -81,6 +81,7 @@ function Ul({ children }: { children: ReactNode }) {
 export default function LoanGuaranteePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/loan-guarantee"
       title="대출 보증보험 완전 정리 — HUG·HF·SGI 비교와 활용 전략"
       description="전세보증보험·대출보증서의 구조, HUG·HF·SGI 3대 보증 기관 비교, 보증료 계산법, 전세 사기 방어 활용법까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}

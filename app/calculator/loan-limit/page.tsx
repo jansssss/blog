@@ -529,8 +529,40 @@ export default function LoanLimitSimulatorPage() {
           ))}
         </div>
       </div>
+      {/* 관련 가이드 */}
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+            <p className="text-xs text-gray-400">한도 결과를 제대로 해석하는 법</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/guide/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 완전 정복', desc: 'DSR 40% 규제 구조와 한도 계산 원리 총정리' },
+            { href: '/guide/mortgage-salary-5000', emoji: '💰', title: '연봉 5000만원 주담대 한도', desc: '소득별 DSR 기준 실제 대출 가능 금액' },
+            { href: '/guide/ltv-ok-dsr-blocked', emoji: '🚧', title: 'LTV는 OK인데 DSR에 막힌다면', desc: '두 규제를 동시에 통과하는 전략' },
+            { href: '/guide/loan-checklist', emoji: '✅', title: '대출 받기 전 체크리스트', desc: '한도 확인 후 실행 전 반드시 챙겨야 할 것들' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href}
+              className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <MortgagePrepHubCTA />
-      <DisclaimerNotice message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요." />
+      <DisclaimerNotice
+        basis="DSR 40% 규제 기준(은행권) · 스트레스 DSR 미반영 단순 역산 산출치 · 2025년 현행 기준"
+        message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요."
+      />
 
       <Card className="mt-6 bg-gray-50">
         <CardContent className="pt-6">

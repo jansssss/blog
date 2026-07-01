@@ -84,6 +84,7 @@ function Ul({ children }: { children: ReactNode }) {
 export default function LtvOkDsrBlockedPage() {
   return (
     <GuideLayout
+      pageUrl="/guide/ltv-ok-dsr-blocked"
       title="LTV는 남는데 DSR에서 막히는 이유"
       description="'LTV 70%면 3.5억은 빌릴 수 있다고 했는데 왜 은행에서 1.8억이 한도라고 하나요?' 이 질문의 답, 스트레스 DSR 적용 구조, 은행마다 한도가 달라지는 이유를 완전히 설명합니다."
       tocItems={tocItems}

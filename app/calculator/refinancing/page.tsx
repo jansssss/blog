@@ -449,8 +449,37 @@ export default function RefinancingCalculatorPage() {
           ))}
         </div>
       </div>
+      {/* 관련 가이드 */}
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+            <p className="text-xs text-gray-400">갈아타기 전 꼭 알아야 할 것들</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '갈아타기 전 수수료 계산과 절약 전략' },
+            { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '갈아탈 때 어떤 금리 유형으로 갈아탈지 기준' },
+            { href: '/guide/loan-interest', emoji: '📊', title: '대출 이자 완전 정복', desc: '금리별 이자 차이와 총비용 계산 방법' },
+            { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '갈아타면서 상환 방식도 바꿔야 할 때' },
+          ].map(({ href, emoji, title, desc }) => (
+            <Link key={href} href={href}
+              className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+              <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <MortgagePrepHubCTA />
-      <DisclaimerNotice />
+      <DisclaimerNotice basis="이자 절감액 - 중도상환수수료 = 순절감액 · 손익분기점 월 기준 산출" />
 
       <style>{`
         input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:8px}

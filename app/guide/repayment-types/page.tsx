@@ -135,6 +135,7 @@ function Highlight({ children }: { children: ReactNode }) {
 export default function RepaymentTypesGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/repayment-types"
       title="원리금균등·원금균등·만기일시 상환방식 완전 비교"
       description="3가지 대출 상환 방식의 월납입액·총이자·현금흐름 차이를 실전 사례와 비교표로 완전히 정리하고, 내 상황에 맞는 선택 기준을 제시합니다."
       tocItems={tocItems}

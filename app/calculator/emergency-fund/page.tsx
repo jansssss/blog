@@ -261,7 +261,39 @@ export default function EmergencyFundCalculatorPage() {
             ))}
           </div>
         </div>
-        <DisclaimerNotice message="본 계산 결과는 참고용 예상치이며, 개인의 재무 상황에 따라 필요한 비상자금 규모는 달라질 수 있습니다. 자세한 재무 계획은 전문 금융 상담사와 상담하세요." />
+        {/* 관련 가이드 */}
+        <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm">📖</div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">더 알아보기 — 관련 가이드</p>
+              <p className="text-xs text-gray-400">재무 안전망을 완성하는 지식</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { href: '/guide/loan-checklist', emoji: '✅', title: '대출 받기 전 체크리스트', desc: '비상자금 확보 후 대출 실행 순서' },
+              { href: '/guide/credit-score', emoji: '⭐', title: '신용점수 완전 정복', desc: '비상자금과 신용점수 관리를 함께 하는 법' },
+              { href: '/guide/repayment-types', emoji: '⚖️', title: '상환 방식 선택 가이드', desc: '비상자금 규모에 따른 상환 방식 선택' },
+              { href: '/guide/loan-interest', emoji: '📊', title: '대출 이자 완전 정복', desc: '비상자금 대출 시 이자 부담 미리 계산하기' },
+            ].map(({ href, emoji, title, desc }) => (
+              <Link key={href} href={href}
+                className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 rounded-xl shadow-sm transition-all">
+                <span className="text-xl shrink-0 mt-0.5">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-300 group-hover:text-emerald-400 transition-colors shrink-0 mt-0.5">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <DisclaimerNotice
+          basis="월 필수 생활비 3~6개월치 적립 기준 · 재무설계 일반 권고안 기반"
+          message="본 계산 결과는 참고용 예상치이며, 개인의 재무 상황에 따라 필요한 비상자금 규모는 달라질 수 있습니다. 자세한 재무 계획은 전문 금융 상담사와 상담하세요."
+        />
 
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6">
           <h3 className="font-semibold mb-3 text-gray-900">💡 비상자금 마련 체크리스트</h3>

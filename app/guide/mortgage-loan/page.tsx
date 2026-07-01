@@ -116,6 +116,7 @@ function InfoBox({ children }: { children: ReactNode }) {
 export default function MortgageLoanGuidePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/mortgage-loan"
       title="주택담보대출 완전 정리 — 한도·금리·절차 한 번에 이해하기"
       description="주택담보대출의 종류부터 실제 대출 한도 계산(LTV·DSR·DTI), 은행별 금리 비교 방법, 신청·실행 7단계 절차까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}

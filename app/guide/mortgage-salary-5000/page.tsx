@@ -80,6 +80,7 @@ function Callout({ color = 'blue', children }: { color?: 'blue' | 'amber' | 'eme
 export default function MortgageSalary5000Page() {
   return (
     <GuideLayout
+      pageUrl="/guide/mortgage-salary-5000"
       title="연봉 5,000만원, 신용대출 있으면 주담대 한도는?"
       description="내 숫자를 직접 입력해 주담대 한도를 계산하고, 은행이 한도를 정하는 실제 구조와 한도를 높이는 현실적인 방법을 알아봅니다."
       tocItems={tocItems}

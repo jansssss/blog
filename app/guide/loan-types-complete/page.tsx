@@ -81,6 +81,7 @@ function Ul({ children }: { children: ReactNode }) {
 export default function LoanTypesCompletePage() {
   return (
     <GuideLayout
+      pageUrl="/guide/loan-types-complete"
       title="대출 종류 완전 가이드 — 목적·금리·조건별 한눈에 비교"
       description="신용대출·주택담보대출·전세대출·사업자대출·정책금융까지 한국의 모든 대출 종류를 목적, 금리 수준, 자격 조건별로 완전 정리합니다."
       tocItems={tocItems}

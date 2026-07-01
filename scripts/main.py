@@ -38,6 +38,17 @@ ROADMAP_TOPICS: list[tuple[str, str]] = [
 ]
 
 
+def _needs_rewrite(ai_review: dict) -> bool:
+    """재작성이 필요한 조건: 발행 보류, 75점 미만, fail 이슈 존재 중 하나라도 해당."""
+    if ai_review.get("final_decision") == "발행 보류":
+        return True
+    if ai_review.get("total_score", 100) < 75:
+        return True
+    if any(i.get("severity") == "fail" for i in ai_review.get("issues", [])):
+        return True
+    return False
+
+
 def pick_roadmap_seed(excluded_topics: list[str]) -> str:
     """날짜 기반으로 로드맵 클러스터에서 시드 쿼리 선택 (이미 발행된 주제 최대한 회피)."""
     n = len(ROADMAP_TOPICS)
@@ -195,14 +206,54 @@ def main() -> None:
         html = render_html(article)
         print(f"[STEP 3] HTML 렌더링 완료 ({len(html):,}자)", flush=True)
 
-        # 3.5. AI 검수 리포트 생성
+        # 3.5. AI 검수 + 재작성 루프 (최대 2회)
+        MAX_REWRITES = 2
         ai_review: dict | None = None
+        previous_scores: list[int] = []
+        rewrite_attempts = 0
+
         try:
             ai_review = reviewer.review(article, html, research)
             decision = ai_review.get("final_decision", "알 수 없음")
             score = ai_review.get("total_score", 0)
-            fail_count = sum(1 for i in ai_review.get("issues", []) if i.get("severity") == "fail")
+            fail_count = sum(1 for iss in ai_review.get("issues", []) if iss.get("severity") == "fail")
             print(f"[STEP 3.5] AI 검수 완료 — {decision} ({score}점, fail {fail_count}건)", flush=True)
+
+            for attempt in range(1, MAX_REWRITES + 1):
+                if not _needs_rewrite(ai_review):
+                    break
+                previous_scores.append(ai_review.get("total_score", 0))
+                print(
+                    f"[STEP 3.5] 재작성 시도 {attempt}/{MAX_REWRITES} "
+                    f"(이전 점수: {previous_scores[-1]}점)...",
+                    flush=True,
+                )
+                try:
+                    new_article = writer.rewrite(article, ai_review.get("issues", []), research)
+                    new_html = render_html(new_article)
+                    print(f"[STEP 3.5] 재작성 HTML ({len(new_html):,}자)", flush=True)
+                    new_review = reviewer.review(new_article, new_html, research)
+                    # 세 단계 모두 성공한 경우에만 교체
+                    article, html, ai_review = new_article, new_html, new_review
+                    rewrite_attempts += 1
+                    new_decision = ai_review.get("final_decision", "알 수 없음")
+                    new_score = ai_review.get("total_score", 0)
+                    new_fail = sum(1 for iss in ai_review.get("issues", []) if iss.get("severity") == "fail")
+                    print(
+                        f"[STEP 3.5] 재작성 {attempt}회 검수 — "
+                        f"{new_decision} ({new_score}점, fail {new_fail}건)",
+                        flush=True,
+                    )
+                except Exception as exc:
+                    print(f"[STEP 3.5] 재작성 {attempt}회 실패 (이전 결과 유지): {exc}", flush=True)
+                    break
+
+            # 재작성 이력을 ai_review에 기록
+            if ai_review is not None:
+                ai_review["rewrite_attempts"] = rewrite_attempts
+                if previous_scores:
+                    ai_review["previous_scores"] = previous_scores
+
         except Exception as exc:
             print(f"[STEP 3.5] AI 검수 실패 (무시하고 계속): {exc}", flush=True)
 

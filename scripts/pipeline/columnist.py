@@ -264,6 +264,130 @@ class ColumnistWriter:
         )
 
 
+    def rewrite(self, article: Article, issues: list[dict], research: dict) -> Article:
+        """AI 검수 지적사항을 반영해 기존 글을 개선한다.
+        완전히 새로 쓰지 않고 지적받은 항목(fail/warn)만 수정한다.
+        """
+        category_frame = _get_category_frame(article.category, article.topic)
+        section_count = len(article.sections)
+
+        sections_summary = "\n".join(
+            f"  [{idx+1}] {s.heading}: {(s.paragraphs[0][:120] + '...') if s.paragraphs else '(단락 없음)'}"
+            for idx, s in enumerate(article.sections)
+        )
+
+        fix_items = [
+            f"  [{iss.get('severity', '?').upper()}·{iss.get('category', '')}] {iss.get('message', '')}\n"
+            f"    근거: \"{iss.get('evidence', '')}\"\n"
+            f"    수정 방향: {iss.get('fix', '')}"
+            for iss in issues
+            if iss.get("severity") in ("fail", "warn")
+        ]
+        issues_block = "\n".join(fix_items) if fix_items else "  (수정 필요 이슈 없음)"
+
+        json_format = (
+            '{\n'
+            '  "title": "SEO H1 제목 (40~60자, 핵심 수치·조건 포함)",\n'
+            '  "meta_description": "메타 설명 150~170자",\n'
+            '  "subtitle": "부제목 30~60자",\n'
+            '  "slug": "영문 소문자+하이픈 (기존 slug 최대한 유지)",\n'
+            '  "tags": ["태그1", "태그2", "태그3"],\n'
+            '  "summary_points": ["요약 (계산 가정+결과 수치 포함)"],\n'
+            '  "sections": [\n'
+            '    {\n'
+            '      "heading": "섹션 제목",\n'
+            '      "paragraphs": ["문단1", "문단2"],\n'
+            '      "expert_insight": "핵심 포인트 또는 빈 문자열"\n'
+            '    }\n'
+            f'    ... (섹션 {section_count}개)\n'
+            '  ],\n'
+            '  "calculator_ctas": [{"label": "텍스트", "url": "/calculator/..."}],\n'
+            '  "action_tips": ["팁1", "팁2", "팁3"],\n'
+            '  "sources": ["출처1 (기관명, 연도)", "출처2"],\n'
+            '  "faqs": [{"question": "질문?", "answer": "답변"}],\n'
+            '  "disclaimer": "면책 고지"\n'
+            '}'
+        )
+
+        instructions = (
+            f"{self.prompt_text}\n\n"
+            f"{category_frame}\n\n"
+            f"━━━ 현재 글 (개선 대상) ━━━\n"
+            f"제목: {article.title}\n"
+            f"부제목: {article.subtitle}\n"
+            f"메타: {article.meta_description}\n"
+            f"slug: {article.slug_hint or article.slug}\n"
+            f"섹션 구조:\n{sections_summary}\n"
+            f"출처: {', '.join(article.sources)}\n"
+            f"CTA URL: {', '.join(c.get('url', '') for c in article.calculator_ctas)}\n\n"
+            f"━━━ AI 검수 지적사항 (반드시 모두 반영) ━━━\n"
+            f"{issues_block}\n\n"
+            f"위 지적사항을 반영해 글을 개선하세요.\n"
+            f"- 지적받지 않은 섹션은 최대한 유지하고 지적된 부분만 수정\n"
+            f"- 수치·계산을 수정할 때는 반드시 출처와 함께 작성\n"
+            f"- 섹션 수는 기존과 동일하게 {section_count}개 유지\n"
+            f"- 원 리서치 주제: '{research.get('topic', '')}'\n\n"
+            f"아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 출력하지 마세요:\n"
+            f"{json_format}"
+        )
+
+        print("[COLUMNIST] 재작성 API 호출 중...", flush=True)
+        payload = _post_json(
+            self.OPENAI_API_URL,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            },
+            payload={
+                "model": self.model,
+                "max_completion_tokens": 8000,
+                "temperature": 0.2,
+                "messages": [{"role": "user", "content": instructions}],
+            },
+            timeout=300,
+        )
+
+        content_text = payload["choices"][0]["message"]["content"]
+        try:
+            data = json.loads(_extract_json(content_text))
+        except json.JSONDecodeError as e:
+            snippet = content_text[:500].replace("\n", "\\n")
+            print(f"[COLUMNIST] 재작성 JSON 파싱 실패: {e}", flush=True)
+            print(f"[COLUMNIST] 응답 앞 500자: {snippet}", flush=True)
+            raise RuntimeError(f"재작성 JSON 파싱 실패: {e}") from e
+
+        usage = payload.get("usage", {})
+        print(
+            f"[COLUMNIST] 재작성 완료! 섹션={len(data.get('sections', []))} "
+            f"토큰={usage.get('prompt_tokens', 0)}→{usage.get('completion_tokens', 0)}",
+            flush=True,
+        )
+
+        return Article(
+            topic=article.topic,
+            category=article.category,
+            title=data["title"],
+            meta_description=data.get("meta_description", ""),
+            subtitle=data.get("subtitle", ""),
+            summary_points=data.get("summary_points", []),
+            sections=[
+                ArticleSection(
+                    heading=s["heading"],
+                    paragraphs=s.get("paragraphs", []),
+                    expert_insight=s.get("expert_insight", ""),
+                )
+                for s in data.get("sections", [])
+            ],
+            action_tips=data.get("action_tips", []),
+            tags=data.get("tags", []),
+            sources=data.get("sources", []),
+            faqs=data.get("faqs", []),
+            slug_hint=data.get("slug", article.slug_hint),
+            disclaimer=data.get("disclaimer", article.disclaimer),
+            calculator_ctas=data.get("calculator_ctas", []),
+        )
+
+
 # ───────────────────────────────────────────
 # HTML 렌더러 (Tailwind prose 호환 시멘틱 HTML)
 # ───────────────────────────────────────────

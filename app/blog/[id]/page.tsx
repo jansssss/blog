@@ -79,7 +79,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
   }
 
-  const canonicalHost = site?.domain || 'ohyess.kr'
+  const _canonicalHostRaw = site?.domain || 'ohyess.kr'
+  const canonicalHost = _canonicalHostRaw === 'ohyess.kr' ? 'www.ohyess.kr' : _canonicalHostRaw
   const canonicalSlug = post.slug || post.id
 
   return {
@@ -167,7 +168,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
 
   const siteName = site?.name || '오예스'
   const protocol = 'https'
-  const host = site?.domain || 'ohyess.kr'
+  const _hostRaw = site?.domain || 'ohyess.kr'
+  const host = _hostRaw === 'ohyess.kr' ? 'www.ohyess.kr' : _hostRaw
   const baseUrl = `${protocol}://${host}`
   const canonicalSlug = post.slug || post.id
 

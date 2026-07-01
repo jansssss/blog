@@ -17,6 +17,11 @@ const nextConfig = {
         destination: '/guide/loan-checklist',
         permanent: true,
       },
+      {
+        source: '/guide/mortgage-preparation',
+        destination: '/hub/mortgage-preparation',
+        permanent: true,
+      },
     ]
   },
   images: {

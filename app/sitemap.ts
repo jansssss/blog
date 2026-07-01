@@ -6,7 +6,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const host = await getHostFromRequest()
   const siteId = await getCurrentSiteId()
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const baseUrl = `${protocol}://${host}`
+  // ohyess.kr 사이트: www/non-www/Vercel preview 무관하게 canonical을 www로 통일
+  const normalizedHost = host.toLowerCase().replace(/^www\./, '').replace(/:\d+$/, '')
+  const isOhyess = normalizedHost === 'ohyess.kr'
+  const baseUrl = isOhyess ? 'https://www.ohyess.kr' : `${protocol}://${host}`
 
   let postsQuery = supabase
     .from('posts')
@@ -80,7 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const policyPages: MetadataRoute.Sitemap = []
   const toolPages: MetadataRoute.Sitemap = []
 
-  if (host.includes('ohyess')) {
+  if (isOhyess) {
     calculatorPages.push(
       {
         url: `${baseUrl}/calculator`,

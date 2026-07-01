@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImage = theme?.meta?.ogImage
 
   return {
-    metadataBase: new URL('https://ohyess.kr'),
+    metadataBase: new URL('https://www.ohyess.kr'),
     title,
     description,
     keywords,

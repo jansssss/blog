@@ -67,7 +67,9 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          PUBLISH_MODE: ${{ inputs.mode || secrets.PUBLISH_MODE || 'draft' }}
+          # 예약(schedule) 자동 실행은 항상 draft로 저장 → 관리자가 '공개'를 눌러야 메인 노출.
+          # 수동 실행(workflow_dispatch)만 inputs.mode로 publish 선택 가능(품질 게이트 auto_ok일 때만 실제 발행).
+          PUBLISH_MODE: ${{ inputs.mode || 'draft' }}
           POSTS_PER_RUN: ${{ inputs.count || '1' }}
           CONTENT_SEED_MODE: ${{ inputs.content_seed_mode || 'hybrid' }}
         run: |

@@ -18,11 +18,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scripts.pipeline.config import load_config
 from scripts.pipeline.researcher import TavilyResearcher
-from scripts.pipeline.columnist import ColumnistWriter, render_html
+from scripts.pipeline.columnist import ColumnistWriter, assess
 from scripts.pipeline.publisher import SupabasePublisher
 from scripts.pipeline.reviewer import ArticleReviewer
 from scripts.analytics.gsc_query_selector import GSCQuerySelector
 from scripts.analytics.performance_analyzer import PerformanceAnalyzer
+from scripts.analytics.quality_feedback import QualityFeedbackAnalyzer
 
 
 # 로드맵 모드용 핵심 콘텐츠 클러스터 (GSC 데이터 없이 사용)
@@ -38,15 +39,45 @@ ROADMAP_TOPICS: list[tuple[str, str]] = [
 ]
 
 
-def _needs_rewrite(ai_review: dict) -> bool:
-    """재작성이 필요한 조건: 발행 보류, 75점 미만, fail 이슈 존재 중 하나라도 해당."""
-    if ai_review.get("final_decision") == "발행 보류":
-        return True
-    if ai_review.get("total_score", 100) < 75:
-        return True
-    if any(i.get("severity") == "fail" for i in ai_review.get("issues", [])):
-        return True
-    return False
+def compute_publish_gate(ai_review: dict, validation) -> dict:
+    """점수 + 코드 검증 하드 게이트를 합쳐 발행 상태를 판정한다.
+
+    상태:
+      auto_ok         90+ & warn 0 & 계산·출처·렌더링 검증 통과 → 자동 발행 품질
+      human_review    85~89 → 사람 검토 후 발행
+      draft_reinforce 80~84 → 초안 보강 필요
+      regenerate      79 이하 · fail · 하드 게이트 실패 → 재생성
+    금융 계산 글은 점수가 높아도 하드 게이트(계산/출처/렌더링) 실패 시 무조건 regenerate.
+    """
+    score = ai_review.get("total_score", 0)
+    issues = ai_review.get("issues", [])
+    fail_count = sum(1 for i in issues if i.get("severity") == "fail")
+    warn_count = sum(1 for i in issues if i.get("severity") == "warn")
+    hard_fail = list(getattr(validation, "hard_fail", []) or [])
+
+    if hard_fail or fail_count > 0 or score < 80:
+        status = "regenerate"
+    elif score >= 90 and warn_count == 0:
+        status = "auto_ok"
+    elif score >= 85:
+        status = "human_review"
+    else:  # 80~84
+        status = "draft_reinforce"
+
+    return {
+        "status": status,
+        "score": score,
+        "fail_count": fail_count,
+        "warn_count": warn_count,
+        "hard_fail": hard_fail,
+        "warnings": list(getattr(validation, "warnings", []) or []),
+        "checks": dict(getattr(validation, "checks", {}) or {}),
+    }
+
+
+def _needs_rewrite(gate: dict) -> bool:
+    """재작성이 필요한 조건: 발행 게이트가 regenerate인 경우."""
+    return gate.get("status") == "regenerate"
 
 
 def pick_roadmap_seed(excluded_topics: list[str]) -> str:
@@ -119,9 +150,11 @@ def main() -> None:
     # ── 분석기 초기화 (Supabase 연결 있을 때만) ─────────
     gsc_selector: GSCQuerySelector | None = None
     perf_analyzer: PerformanceAnalyzer | None = None
+    quality_analyzer: QualityFeedbackAnalyzer | None = None
     if config.supabase_url and config.supabase_service_role_key:
         gsc_selector = GSCQuerySelector(config.supabase_url, config.supabase_service_role_key)
         perf_analyzer = PerformanceAnalyzer(config.supabase_url, config.supabase_service_role_key)
+        quality_analyzer = QualityFeedbackAnalyzer(config.supabase_url, config.supabase_service_role_key)
 
     # ── 실행 ────────────────────────────────────────
     for i in range(count):
@@ -195,64 +228,84 @@ def main() -> None:
         # 2. OpenAI - 칼럼 작성
         print("[STEP 2] OpenAI 칼럼 작성 중...", flush=True)
         performance_hints = perf_analyzer.get_writing_hints() if perf_analyzer else None
+        quality_hints = quality_analyzer.get_quality_hints() if quality_analyzer else None
         try:
-            article = writer.write(research, performance_hints=performance_hints)
+            article = writer.write(
+                research,
+                performance_hints=performance_hints,
+                quality_hints=quality_hints,
+            )
             print(f"[STEP 2] 완료 - 제목: {article.title}", flush=True)
         except Exception as exc:
             print(f"[STEP 2] 실패: {exc}", flush=True)
             sys.exit(1)
 
-        # 3. HTML 렌더링
-        html = render_html(article)
-        print(f"[STEP 3] HTML 렌더링 완료 ({len(html):,}자)", flush=True)
+        # 3. HTML 렌더링 + 코드 검증 (계산/출처/렌더링 하드 게이트)
+        assessment = assess(article)
+        html = assessment["html"]
+        validation = assessment["validation"]
+        print(
+            f"[STEP 3] HTML 렌더링 완료 ({len(html):,}자) — "
+            f"코드검증 {'통과' if validation.passed else '실패: ' + '; '.join(validation.hard_fail)}",
+            flush=True,
+        )
 
         # 3.5. AI 검수 + 재작성 루프 (최대 2회)
         MAX_REWRITES = 2
         ai_review: dict | None = None
+        gate: dict | None = None
         previous_scores: list[int] = []
         rewrite_attempts = 0
 
         try:
-            ai_review = reviewer.review(article, html, research)
-            decision = ai_review.get("final_decision", "알 수 없음")
-            score = ai_review.get("total_score", 0)
-            fail_count = sum(1 for iss in ai_review.get("issues", []) if iss.get("severity") == "fail")
-            print(f"[STEP 3.5] AI 검수 완료 — {decision} ({score}점, fail {fail_count}건)", flush=True)
+            ai_review = reviewer.review(article, html, research, validation)
+            gate = compute_publish_gate(ai_review, validation)
+            print(
+                f"[STEP 3.5] AI 검수 — {ai_review.get('final_decision')} "
+                f"({gate['score']}점, fail {gate['fail_count']}건) → 게이트: {gate['status']}",
+                flush=True,
+            )
 
             for attempt in range(1, MAX_REWRITES + 1):
-                if not _needs_rewrite(ai_review):
+                if not _needs_rewrite(gate):
                     break
-                previous_scores.append(ai_review.get("total_score", 0))
+                previous_scores.append(gate["score"])
                 print(
                     f"[STEP 3.5] 재작성 시도 {attempt}/{MAX_REWRITES} "
-                    f"(이전 점수: {previous_scores[-1]}점)...",
+                    f"(이전 점수: {previous_scores[-1]}점, 하드실패: {gate['hard_fail']})...",
                     flush=True,
                 )
                 try:
                     new_article = writer.rewrite(article, ai_review.get("issues", []), research)
-                    new_html = render_html(new_article)
+                    new_assessment = assess(new_article)
+                    new_html = new_assessment["html"]
+                    new_validation = new_assessment["validation"]
                     print(f"[STEP 3.5] 재작성 HTML ({len(new_html):,}자)", flush=True)
-                    new_review = reviewer.review(new_article, new_html, research)
-                    # 세 단계 모두 성공한 경우에만 교체
-                    article, html, ai_review = new_article, new_html, new_review
+                    new_review = reviewer.review(new_article, new_html, research, new_validation)
+                    new_gate = compute_publish_gate(new_review, new_validation)
+                    # 모든 단계 성공 시에만 교체
+                    article, html, validation = new_article, new_html, new_validation
+                    ai_review, gate = new_review, new_gate
                     rewrite_attempts += 1
-                    new_decision = ai_review.get("final_decision", "알 수 없음")
-                    new_score = ai_review.get("total_score", 0)
-                    new_fail = sum(1 for iss in ai_review.get("issues", []) if iss.get("severity") == "fail")
                     print(
                         f"[STEP 3.5] 재작성 {attempt}회 검수 — "
-                        f"{new_decision} ({new_score}점, fail {new_fail}건)",
+                        f"{ai_review.get('final_decision')} ({gate['score']}점, "
+                        f"fail {gate['fail_count']}건) → 게이트: {gate['status']}",
                         flush=True,
                     )
                 except Exception as exc:
                     print(f"[STEP 3.5] 재작성 {attempt}회 실패 (이전 결과 유지): {exc}", flush=True)
                     break
 
-            # 재작성 이력을 ai_review에 기록
+            # 게이트·검증·재작성 이력을 ai_review에 기록 (관리자 노출용)
             if ai_review is not None:
+                ai_review["publish_gate"] = gate
                 ai_review["rewrite_attempts"] = rewrite_attempts
                 if previous_scores:
                     ai_review["previous_scores"] = previous_scores
+                # 하드 게이트 실패 시 최종 판정을 발행 보류로 강제
+                if gate and gate.get("hard_fail"):
+                    ai_review["final_decision"] = "발행 보류"
 
         except Exception as exc:
             print(f"[STEP 3.5] AI 검수 실패 (무시하고 계속): {exc}", flush=True)
@@ -266,10 +319,20 @@ def main() -> None:
             print(f"[DRY-RUN] 저장됨: {output_path}", flush=True)
             continue
 
-        # 5. Supabase 발행
-        print(f"[STEP 4] Supabase 발행 중... (mode={mode})", flush=True)
+        # 5. Supabase 발행 (안전장치: 자동 발행 품질이 아니면 무조건 초안 저장)
+        #    자동 파이프라인 글은 관리자가 '공개'를 눌러야 메인에 노출된다.
+        effective_mode = mode
+        gate_status = (gate or {}).get("status") if gate else None
+        if mode == "publish" and gate_status != "auto_ok":
+            effective_mode = "draft"
+            print(
+                f"[STEP 4] mode=publish 였으나 게이트가 '{gate_status}'(auto_ok 아님) → "
+                f"초안으로 강제 저장 (관리자 검토 후 공개 필요)",
+                flush=True,
+            )
+        print(f"[STEP 4] Supabase 저장 중... (요청 mode={mode}, 실제 mode={effective_mode})", flush=True)
         try:
-            result = publisher.publish(article, html, mode, ai_review=ai_review)
+            result = publisher.publish(article, html, effective_mode, ai_review=ai_review)
             status = "발행" if result["published"] else "초안 저장"
             print(f"[STEP 4] {status} 완료! slug={result['slug']}", flush=True)
         except Exception as exc:

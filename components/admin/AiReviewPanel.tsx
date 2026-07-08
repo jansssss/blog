@@ -11,11 +11,17 @@ export interface AiReviewIssue {
   fix: string
 }
 
-export interface AiReviewScores {
-  title: number
-  calculation: number
-  sources: number
-  cta: number
+// v1(4항목)·v2(9항목) 모두 허용
+export type AiReviewScores = Record<string, number>
+
+export interface AiReviewPublishGate {
+  status: 'auto_ok' | 'human_review' | 'draft_reinforce' | 'regenerate'
+  score?: number
+  fail_count?: number
+  warn_count?: number
+  hard_fail?: string[]
+  warnings?: string[]
+  checks?: Record<string, boolean>
 }
 
 export interface AiReview {
@@ -29,6 +35,7 @@ export interface AiReview {
   title_suggestions: string[]
   human_checkpoints: string[]
   review_summary: string
+  publish_gate?: AiReviewPublishGate
 }
 
 const DECISION_CONFIG = {
@@ -43,12 +50,38 @@ const SEVERITY_CONFIG = {
   info: { Icon: Info,          color: 'text-blue-500',  bg: 'bg-blue-50 border-blue-200',   label: '참고' },
 } as const
 
-const SCORE_LABELS: Record<keyof AiReviewScores, string> = {
+// v2(9항목) + v1(4항목) 라벨/배점
+const SCORE_LABELS: Record<string, string> = {
+  // v2
+  title_search:       '제목 검색적합',
+  answer_clarity:     '핵심답변',
+  key_numbers:        '핵심숫자',
+  calc_table:         '계산표',
+  scenario_table:     '시나리오표',
+  source_specificity: '출처 구체성',
+  freshness_date:     '기준일',
+  cta_restraint:      'CTA 절제',
+  rendering:          '렌더링',
+  // v1 (구버전 호환)
   title:       '제목',
   calculation: '계산',
   sources:     '출처',
   cta:         'CTA',
 }
+
+const SCORE_MAX_MAP: Record<string, number> = {
+  title_search: 15, answer_clarity: 15, key_numbers: 15, calc_table: 15,
+  scenario_table: 10, source_specificity: 10, freshness_date: 10,
+  cta_restraint: 5, rendering: 5,
+  // v1 기본 25
+}
+
+const GATE_CONFIG = {
+  auto_ok:         { label: '자동 발행 가능',  cls: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  human_review:    { label: '사람 검토 후 발행', cls: 'bg-amber-50 text-amber-800 border-amber-200' },
+  draft_reinforce: { label: '초안 보강 필요',   cls: 'bg-orange-50 text-orange-800 border-orange-200' },
+  regenerate:      { label: '재생성 필요',      cls: 'bg-red-50 text-red-800 border-red-200' },
+} as const
 
 function ScoreBar({ score, max = 25, label }: { score: number; max?: number; label: string }) {
   const pct = Math.min(100, (score / max) * 100)
@@ -140,12 +173,30 @@ export function AiReviewPanel({ review, reviewedAt, defaultExpanded = false }: A
             </p>
           )}
 
+          {/* 발행 게이트 (v2) */}
+          {review.publish_gate && (() => {
+            const g = review.publish_gate!
+            const cfg = GATE_CONFIG[g.status] ?? GATE_CONFIG.regenerate
+            return (
+              <div className={`rounded-lg border p-3 space-y-1 ${cfg.cls}`}>
+                <p className="text-xs font-semibold">발행 게이트: {cfg.label}</p>
+                {g.hard_fail && g.hard_fail.length > 0 && (
+                  <ul className="text-xs space-y-0.5">
+                    {g.hard_fail.map((h, i) => (
+                      <li key={i} className="flex gap-1.5"><span className="shrink-0">✕</span><span>{h}</span></li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )
+          })()}
+
           {/* 항목별 점수 */}
           <div className="space-y-1.5">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">항목별 점수</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {(Object.entries(review.scores) as [keyof AiReviewScores, number][]).map(([k, v]) => (
-                <ScoreBar key={k} score={v} label={SCORE_LABELS[k]} />
+              {Object.entries(review.scores).map(([k, v]) => (
+                <ScoreBar key={k} score={v} max={SCORE_MAX_MAP[k] ?? 25} label={SCORE_LABELS[k] ?? k} />
               ))}
             </div>
           </div>

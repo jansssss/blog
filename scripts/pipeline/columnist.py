@@ -15,6 +15,8 @@ from pathlib import Path
 from urllib import request
 from urllib.error import HTTPError
 
+from . import finance
+
 
 @dataclass
 class ArticleSection:
@@ -34,11 +36,13 @@ class Article:
     sections: list[ArticleSection]
     action_tips: list[str]
     tags: list[str]
-    sources: list[str] = field(default_factory=list)
+    sources: list = field(default_factory=list)   # [{org,doc,as_of,basis,url}] 또는 문자열
     faqs: list[dict] = field(default_factory=list)
     slug_hint: str = ""           # 리서처가 제안한 slug (영문 하이픈)
     disclaimer: str = ""          # 면책 고지 문구
-    calculator_ctas: list[dict] = field(default_factory=list)  # [{label, url}]
+    calculator_ctas: list[dict] = field(default_factory=list)  # [{label, url}] (최대 2개)
+    calc: dict | None = None      # 계산 입력값 (finance.compute_calc용). 없으면 None
+    answer_box: str = ""          # 상단 핵심 답변 (계산 결과 기반, 시스템 생성)
 
     @property
     def slug(self) -> str:
@@ -118,8 +122,16 @@ class ColumnistWriter:
         self.model = model
         self.prompt_text = prompt_path.read_text(encoding="utf-8")
 
-    def write(self, research: dict, performance_hints: str | None = None) -> Article:
-        """Tavily 리서치 결과를 받아 칼럼 Article 반환"""
+    def write(
+        self,
+        research: dict,
+        performance_hints: str | None = None,
+        quality_hints: str | None = None,
+    ) -> Article:
+        """Tavily 리서치 결과를 받아 칼럼 Article 반환.
+        performance_hints: 성과(CTR) 기반 제목 학습 힌트
+        quality_hints: 과거 검수 실패 패턴 기반 품질 학습 힌트
+        """
         topic = research["topic"]
         category = research.get("category", "금융")
         article_type = research.get("article_type", "경제이슈")
@@ -155,34 +167,40 @@ class ColumnistWriter:
 
         json_format = (
             '{\n'
-            '  "title": "SEO H1 제목 (40~60자, 핵심 수치·조건 포함)",\n'
+            '  "title": "검색자가 입력할 법한 질문형 제목 (핵심 조건 포함, 가능하면 결과 방향)",\n'
             '  "meta_description": "메타 설명 150~170자",\n'
             '  "subtitle": "부제목 30~60자",\n'
             '  "slug": "영문 소문자+하이픈 3~6단어, 날짜 없이 주제 중심 (리서치 slug_hint 활용)",\n'
             '  "tags": ["태그1", "태그2", "태그3"],\n'
+            '  "calc": {\n'
+            '    "type": "dsr_capacity 또는 refinancing (해당 없으면 이 필드를 null)",\n'
+            '    "annual_income": 50000000, "dsr_limit": 0.40,\n'
+            '    "existing_monthly_payment": 500000, "mortgage_rate": 0.045, "years": 30,\n'
+            '    "repayment_type": "원리금균등", "existing_label": "자동차 할부",\n'
+            '    "scenarios": [0, 300000, 500000, 800000], "as_of": "YYYY.MM"\n'
+            '  },\n'
             '  "summary_points": [\n'
-            '    "요약 1개 (60자 이상, 계산 가정+결과 수치+\'조건에 따라 다를 수 있음\' 포함)"\n'
+            '    "요약 1개 (계산 가정+결과 방향+\'조건에 따라 다를 수 있음\' 포함). calc가 있으면 시스템 답변 박스가 우선한다."\n'
             '  ],\n'
             '  "sections": [\n'
             '    {\n'
             '      "heading": "섹션 제목 (조건 명시형 또는 질문형)",\n'
-            '      "paragraphs": [\n'
-            '        "문단1 (3~4문장, 수치+출처+계산 근거 포함)",\n'
-            '        "문단2",\n'
-            '        "문단3"\n'
-            '      ],\n'
+            '      "paragraphs": ["해석 문단 (표의 숫자가 왜 그렇게 나오는지 설명, 결과 수치 임의 생성·링크·HTML 금지)", "문단2"],\n'
             '      "expert_insight": "핵심 포인트 1~2문장 (없으면 빈 문자열)"\n'
             '    },\n'
-            f'    ... (섹션 {section_target}개, 계산 가정 표·시나리오 비교·계산기 CTA 섹션 포함)\n'
+            f'    ... (섹션 {section_target}개: 해석 → 결과를 바꾸는 변수 → 실제 행동 가이드)\n'
             '  ],\n'
             '  "calculator_ctas": [\n'
-            '    {"label": "계산기 링크 텍스트", "url": "/calculator/dsr-dti-ltv"},\n'
-            '    {"label": "계산기 링크 텍스트2", "url": "/calculator/loan-limit"}\n'
+            '    {"label": "자연어 앵커 텍스트 (본문 중간용)", "url": "/calculator/dsr-dti-ltv"},\n'
+            '    {"label": "자연어 앵커 텍스트 (하단용)", "url": "/calculator/loan-limit"}\n'
             '  ],\n'
-            '  "action_tips": ["구체적 행동 팁1 (계산기 URL 포함 가능)", "팁2", "팁3", "팁4"],\n'
-            '  "sources": ["한국은행, 2024", "금융위원회, 2025", ...],\n'
+            '  "action_tips": ["지금 확인할 것1 (링크·HTML 없이 문장만)", "확인2", "확인3"],\n'
+            '  "sources": [\n'
+            '    {"org": "금융위원회", "doc": "DSR 제도 설명자료", "as_of": "YYYY.MM.DD", "basis": "DSR = 연간 원리금 상환액 / 연소득", "url": ""},\n'
+            '    {"org": "금융감독원", "doc": "가계대출 소비자 안내", "as_of": "YYYY.MM.DD", "basis": "기존부채 반영 방식", "url": ""}\n'
+            '  ],\n'
             '  "faqs": [\n'
-            '    {"question": "독자가 실제로 검색할 법한 질문1?", "answer": "명확하고 구체적인 답변 (2~3문장, 수치 포함)"},\n'
+            '    {"question": "검색 질문과 직결되는 질문1?", "answer": "숫자 예시 포함 답변 (2~3문장)"},\n'
             '    {"question": "질문2?", "answer": "답변2"},\n'
             '    {"question": "질문3?", "answer": "답변3"}\n'
             '  ],\n'
@@ -191,12 +209,14 @@ class ColumnistWriter:
         )
 
         hints_block = f"\n{performance_hints}\n" if performance_hints else ""
+        quality_block = f"\n{quality_hints}\n" if quality_hints else ""
 
         instructions = (
             f"{self.prompt_text}\n\n"
             f"{category_frame}\n\n"
             f"{research_block}\n"
             f"{hints_block}\n"
+            f"{quality_block}\n"
             f"위 리서치 자료를 바탕으로 칼럼을 작성하세요. "
             f"반드시 리서치의 수치와 출처를 글에 직접 인용하세요.\n"
             f"이번 글은 섹션을 정확히 {section_target}개로 작성하세요. "
@@ -239,29 +259,8 @@ class ColumnistWriter:
             flush=True,
         )
 
-        return Article(
-            topic=topic,
-            category=category,
-            title=data["title"],
-            meta_description=data.get("meta_description", ""),
-            subtitle=data.get("subtitle", ""),
-            summary_points=data.get("summary_points", []),
-            sections=[
-                ArticleSection(
-                    heading=s["heading"],
-                    paragraphs=s.get("paragraphs", []),
-                    expert_insight=s.get("expert_insight", ""),
-                )
-                for s in data.get("sections", [])
-            ],
-            action_tips=data.get("action_tips", []),
-            tags=data.get("tags", []),
-            sources=data.get("sources", []),
-            faqs=data.get("faqs", []),
-            slug_hint=data.get("slug", research.get("slug_hint", "")),
-            disclaimer=data.get("disclaimer", "이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. 실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다."),
-            calculator_ctas=data.get("calculator_ctas", []),
-        )
+        return _build_article(data, topic=topic, category=category,
+                              fallback_slug=research.get("slug_hint", ""))
 
 
     def rewrite(self, article: Article, issues: list[dict], research: dict) -> Article:
@@ -287,24 +286,25 @@ class ColumnistWriter:
 
         json_format = (
             '{\n'
-            '  "title": "SEO H1 제목 (40~60자, 핵심 수치·조건 포함)",\n'
+            '  "title": "질문형 제목 (핵심 조건·결과 방향 포함)",\n'
             '  "meta_description": "메타 설명 150~170자",\n'
             '  "subtitle": "부제목 30~60자",\n'
             '  "slug": "영문 소문자+하이픈 (기존 slug 최대한 유지)",\n'
             '  "tags": ["태그1", "태그2", "태그3"],\n'
-            '  "summary_points": ["요약 (계산 가정+결과 수치 포함)"],\n'
+            '  "calc": {"type": "dsr_capacity/refinancing 또는 null", "...": "계산 입력값 (금액=원, 금리/DSR=소수)"},\n'
+            '  "summary_points": ["요약 (계산 가정+결과 방향 포함)"],\n'
             '  "sections": [\n'
             '    {\n'
             '      "heading": "섹션 제목",\n'
-            '      "paragraphs": ["문단1", "문단2"],\n'
+            '      "paragraphs": ["해석 문단 (결과 수치 임의 생성·링크·HTML 금지)", "문단2"],\n'
             '      "expert_insight": "핵심 포인트 또는 빈 문자열"\n'
             '    }\n'
             f'    ... (섹션 {section_count}개)\n'
             '  ],\n'
-            '  "calculator_ctas": [{"label": "텍스트", "url": "/calculator/..."}],\n'
-            '  "action_tips": ["팁1", "팁2", "팁3"],\n'
-            '  "sources": ["출처1 (기관명, 연도)", "출처2"],\n'
-            '  "faqs": [{"question": "질문?", "answer": "답변"}],\n'
+            '  "calculator_ctas": [{"label": "자연어 텍스트", "url": "/calculator/..."}],\n'
+            '  "action_tips": ["확인1", "확인2", "확인3"],\n'
+            '  "sources": [{"org": "기관명", "doc": "문서명", "as_of": "YYYY.MM.DD", "basis": "확인 기준", "url": ""}],\n'
+            '  "faqs": [{"question": "질문?", "answer": "숫자 예시 포함 답변"}],\n'
             '  "disclaimer": "면책 고지"\n'
             '}'
         )
@@ -363,129 +363,199 @@ class ColumnistWriter:
             flush=True,
         )
 
-        return Article(
-            topic=article.topic,
-            category=article.category,
-            title=data["title"],
-            meta_description=data.get("meta_description", ""),
-            subtitle=data.get("subtitle", ""),
-            summary_points=data.get("summary_points", []),
-            sections=[
-                ArticleSection(
-                    heading=s["heading"],
-                    paragraphs=s.get("paragraphs", []),
-                    expert_insight=s.get("expert_insight", ""),
-                )
-                for s in data.get("sections", [])
-            ],
-            action_tips=data.get("action_tips", []),
-            tags=data.get("tags", []),
-            sources=data.get("sources", []),
-            faqs=data.get("faqs", []),
-            slug_hint=data.get("slug", article.slug_hint),
-            disclaimer=data.get("disclaimer", article.disclaimer),
-            calculator_ctas=data.get("calculator_ctas", []),
-        )
+        return _build_article(data, topic=article.topic, category=article.category,
+                              fallback_slug=article.slug_hint,
+                              fallback_disclaimer=article.disclaimer)
+
+
+DEFAULT_DISCLAIMER = (
+    "이 글은 정보 제공 목적으로 작성되었으며, 금융기관 심사 결과를 보장하지 않습니다. "
+    "실제 대출 여부 및 한도는 신청 금융기관의 기준에 따라 달라질 수 있습니다."
+)
+
+
+def _build_article(
+    data: dict,
+    *,
+    topic: str,
+    category: str,
+    fallback_slug: str = "",
+    fallback_disclaimer: str = DEFAULT_DISCLAIMER,
+) -> Article:
+    """LLM JSON → Article. calc 정제, 답변 박스 계산, CTA 정규화를 포함한다."""
+    calc = data.get("calc")
+    if not isinstance(calc, dict) or not calc.get("type"):
+        calc = None
+
+    article = Article(
+        topic=topic,
+        category=category,
+        title=data["title"],
+        meta_description=data.get("meta_description", ""),
+        subtitle=data.get("subtitle", ""),
+        summary_points=data.get("summary_points", []),
+        sections=[
+            ArticleSection(
+                heading=s["heading"],
+                paragraphs=s.get("paragraphs", []),
+                expert_insight=s.get("expert_insight", ""),
+            )
+            for s in data.get("sections", [])
+        ],
+        action_tips=data.get("action_tips", []),
+        tags=data.get("tags", []),
+        sources=data.get("sources", []),
+        faqs=data.get("faqs", []),
+        slug_hint=data.get("slug", fallback_slug),
+        disclaimer=data.get("disclaimer") or fallback_disclaimer,
+        calculator_ctas=finance.normalize_ctas(data.get("calculator_ctas", [])),
+        calc=calc,
+    )
+
+    # 상단 핵심 답변: 계산 결과가 있으면 계산값 기반(신뢰), 없으면 summary_point 첫 줄
+    calc_result = finance.compute_calc(calc)
+    if calc_result is not None:
+        article.answer_box = calc_result.answer_box
+    elif article.summary_points:
+        article.answer_box = article.summary_points[0]
+    return article
 
 
 # ───────────────────────────────────────────
 # HTML 렌더러 (Tailwind prose 호환 시멘틱 HTML)
 # ───────────────────────────────────────────
 
-def render_html(article: Article) -> str:
-    """Article → 인라인 스타일 없는 시멘틱 HTML (Tailwind prose 클래스로 렌더링)"""
+def _cta_paragraph(cta: dict) -> str:
+    """자연어 문장 안에 계산기 링크 1개를 삽입한 CTA 문단."""
+    label = cta["label"].rstrip().rstrip("→").rstrip()
+    return f'<p><a href="{_esc(cta["url"])}">👉 {_esc(label)}</a></p>'
 
-    # 핵심 요약
-    summary_items = "".join(f"<li>{_esc(p)}</li>" for p in article.summary_points)
-    summary_html = (
-        f"<h3>✅ 핵심 요약</h3>"
-        f"<ul>{summary_items}</ul>"
-    ) if summary_items else ""
 
-    # 본문 섹션
+def render_html(article: Article, calc_result: "finance.CalcResult | None" = None) -> str:
+    """Article → 시멘틱 HTML (Tailwind prose 렌더링).
+
+    구성: [상단 핵심 답변] → [계산 가정/과정/시나리오 표] → [본문 섹션 + 중간 CTA]
+          → [지금 확인할 것] → [하단 CTA] → [FAQ] → [출처] → [면책]
+    금융 수치가 담긴 표와 답변 박스는 finance 모듈이 생성한 값만 사용한다.
+    """
+    if calc_result is None:
+        calc_result = finance.compute_calc(article.calc)
+
+    # 1) 상단 핵심 답변
+    if calc_result is not None:
+        answer_html = finance.render_answer_box(calc_result)
+    elif article.answer_box:
+        answer_html = (
+            f'<blockquote><p><strong>📌 핵심 답변</strong><br>{_esc(article.answer_box)}</p></blockquote>'
+        )
+    else:
+        answer_html = ""
+
+    # 2) 계산 표 (계산 가정 / 계산 과정 / 시나리오 비교) — 코드 계산값
+    tables_html = finance.render_calc_tables(calc_result) if calc_result is not None else ""
+
+    # 3) 본문 섹션 (문단은 모두 이스케이프 → 원시 HTML 노출 방지)
+    ctas = article.calculator_ctas or []
+    mid_cta = ctas[0] if len(ctas) >= 1 else None
+    bottom_cta = ctas[1] if len(ctas) >= 2 else (ctas[0] if len(ctas) == 1 else None)
+
     sections_html = ""
-    for section in article.sections:
+    for idx, section in enumerate(article.sections):
         paragraphs_html = "".join(f"<p>{_esc(p)}</p>" for p in section.paragraphs)
         insight_html = (
             f"<blockquote><p>💡 {_esc(section.expert_insight)}</p></blockquote>"
         ) if section.expert_insight else ""
         sections_html += (
-            f"<h2>{_esc(section.heading)}</h2>"
-            f"{paragraphs_html}"
-            f"{insight_html}"
+            f"<h2>{_esc(section.heading)}</h2>{paragraphs_html}{insight_html}"
         )
+        # 본문 중간 CTA 1개: 첫 섹션 뒤에 삽입
+        if idx == 0 and mid_cta:
+            sections_html += _cta_paragraph(mid_cta)
 
-    # 실천 팁
-    tips_html = "".join(f"<li>{_esc(tip)}</li>" for tip in article.action_tips)
-    action_html = (
-        f"<h3>🎯 지금 바로 확인할 것</h3>"
-        f"<ul>{tips_html}</ul>"
-    )
+    # 4) 지금 확인할 것 (링크 없이 체크리스트만)
+    action_html = ""
+    if article.action_tips:
+        tips_html = "".join(f"<li>{_esc(tip)}</li>" for tip in article.action_tips if str(tip).strip())
+        if tips_html:
+            action_html = f"<h3>🎯 지금 바로 확인할 것</h3><ul>{tips_html}</ul>"
 
-    # FAQ 섹션 (시멘틱 HTML + JSON-LD 구조화 데이터)
+    # 5) 하단 CTA 1개 (중간 CTA와 URL이 다를 때만)
+    bottom_cta_html = ""
+    if bottom_cta and (not mid_cta or bottom_cta.get("url") != mid_cta.get("url")):
+        bottom_cta_html = _cta_paragraph(bottom_cta)
+
+    # 6) FAQ (시멘틱 + JSON-LD)
     faq_html = ""
-    if article.faqs:
+    valid_faqs = [f for f in article.faqs if f.get("question") and f.get("answer")]
+    if valid_faqs:
         faq_items_html = "".join(
-            f"<dt><strong>{_esc(faq['question'])}</strong></dt>"
-            f"<dd>{_esc(faq['answer'])}</dd>"
-            for faq in article.faqs
+            f"<dt><strong>{_esc(f['question'])}</strong></dt><dd>{_esc(f['answer'])}</dd>"
+            for f in valid_faqs
         )
         faq_schema = json.dumps(
             {
                 "@context": "https://schema.org",
                 "@type": "FAQPage",
                 "mainEntity": [
-                    {
-                        "@type": "Question",
-                        "name": faq["question"],
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": faq["answer"],
-                        },
-                    }
-                    for faq in article.faqs
+                    {"@type": "Question", "name": f["question"],
+                     "acceptedAnswer": {"@type": "Answer", "text": f["answer"]}}
+                    for f in valid_faqs
                 ],
             },
             ensure_ascii=False,
         )
         faq_html = (
             f'<script type="application/ld+json">{faq_schema}</script>'
-            f"<h3>자주 묻는 질문 (FAQ)</h3>"
-            f"<dl>{faq_items_html}</dl>"
+            f"<h3>자주 묻는 질문 (FAQ)</h3><dl>{faq_items_html}</dl>"
         )
 
-    # 계산기 CTA
-    cta_html = ""
-    if article.calculator_ctas:
-        cta_links = "".join(
-            f'<li><a href="{_esc(c["url"])}">{_esc(c["label"].rstrip().rstrip("→").rstrip())} →</a></li>'
-            for c in article.calculator_ctas
-        )
-        cta_html = (
-            f"<h3>🧮 직접 계산해보기</h3>"
-            f"<ul>{cta_links}</ul>"
-        )
+    # 7) 출처 (기관명·문서명·기준일·확인기준 구조화)
+    sources_html = finance.render_sources(article.sources)
 
-    # 출처
-    if article.sources:
-        sources_items = "".join(f"<li>{_esc(s)}</li>" for s in article.sources)
-        sources_html = (
-            f"<hr>"
-            f"<h3>참고 자료</h3>"
-            f"<ul>{sources_items}</ul>"
-        )
-    else:
-        sources_html = ""
+    # 8) 면책 고지
+    disclaimer_html = (
+        f"<hr><p><small>⚠️ {_esc(article.disclaimer)}</small></p>"
+        if article.disclaimer else ""
+    )
 
-    # 면책 고지
-    disclaimer_html = ""
-    if article.disclaimer:
-        disclaimer_html = (
-            f"<hr>"
-            f"<p><small>⚠️ {_esc(article.disclaimer)}</small></p>"
-        )
+    return (
+        answer_html + tables_html + sections_html + action_html
+        + bottom_cta_html + faq_html + sources_html + disclaimer_html
+    )
 
-    return summary_html + sections_html + action_html + cta_html + faq_html + sources_html + disclaimer_html
+
+# 계산이 반드시 필요한(계산 실패 시 발행 불가) 카테고리
+CALC_REQUIRED_CATEGORIES = {"주담대", "대환대출", "신용대출"}
+
+
+def assess(article: Article) -> dict:
+    """Article을 렌더링하고 하드 게이트 검증까지 수행한다.
+    반환: {html, calc_result, validation, requires_calc}
+    """
+    calc_result = finance.compute_calc(article.calc)
+    html = render_html(article, calc_result=calc_result)
+
+    requires_calc = article.category in CALC_REQUIRED_CATEGORIES
+    paragraphs: list[str] = []
+    for s in article.sections:
+        paragraphs.extend(s.paragraphs)
+    paragraphs.extend(str(t) for t in article.action_tips)
+
+    validation = finance.validate_article(
+        calc_result=calc_result,
+        paragraphs=paragraphs,
+        answer_box_text=(calc_result.answer_box if calc_result else article.answer_box),
+        sources=article.sources,
+        ctas=article.calculator_ctas,
+        full_html=html,
+        requires_calc=requires_calc,
+    )
+    return {
+        "html": html,
+        "calc_result": calc_result,
+        "validation": validation,
+        "requires_calc": requires_calc,
+    }
 
 
 def _extract_json(text: str) -> str:

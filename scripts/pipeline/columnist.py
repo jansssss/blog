@@ -318,7 +318,7 @@ class ColumnistWriter:
             f"메타: {article.meta_description}\n"
             f"slug: {article.slug_hint or article.slug}\n"
             f"섹션 구조:\n{sections_summary}\n"
-            f"출처: {', '.join(article.sources)}\n"
+            f"출처: {'; '.join(finance.source_to_text(s) for s in article.sources)}\n"
             f"CTA URL: {', '.join(c.get('url', '') for c in article.calculator_ctas)}\n\n"
             f"━━━ AI 검수 지적사항 (반드시 모두 반영) ━━━\n"
             f"{issues_block}\n\n"

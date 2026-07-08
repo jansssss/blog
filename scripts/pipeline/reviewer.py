@@ -207,15 +207,31 @@ class ArticleReviewer:
         html: str,
         research: dict,
         validation: "finance.ValidationResult | None" = None,
+        expects_calc: bool = True,
     ) -> dict:
         """
         Article + HTML + research + 코드 검증 결과를 검수하고 리포트 JSON을 반환.
+        expects_calc=False면 표준 계산공식이 없는 유형(전세대출/정책자금 등)으로 보고
+        계산 중심 항목을 '구조 적합성' 기준으로 적응 채점하도록 지시한다.
         JSON 파싱/API 오류 시 FALLBACK_REVIEW(발행 보류) 반환.
         """
+        adaptive_block = ""
+        if not expects_calc:
+            adaptive_block = (
+                "━━━ 카테고리 적응 채점 (이 글은 표준 계산공식이 없는 유형: 전세대출/정책자금/신용점수 등) ━━━\n"
+                "숫자 계산식·DSR 환산 표가 없다는 이유만으로 아래 항목을 0점 처리하지 마라.\n"
+                "- calc_table(15): 숫자 계산표 대신 '조건/자격/기관별 비교 표'의 완성도로 채점\n"
+                "- scenario_table(10): HUG/HF/SGI 등 상품·기관별 또는 조건별 비교의 완성도로 채점\n"
+                "- key_numbers(15): 보증한도 비율(%)·보증금·공시가격·소득 기준 등 구체적 기준 수치 존재로 채점\n"
+                "- answer_clarity(15): 상단에 '어느 기관·조건에서 막히고 어떻게 해결하는지'가 명확한지로 채점\n"
+                "단, 출처 구체성·기준일·CTA 절제·렌더링·제목 적합성은 동일하게 엄격히 본다.\n\n"
+            )
+
         user_content = (
             f"제목: {article.title}\n"
             f"카테고리: {article.category}\n"
             f"태그: {', '.join(article.tags or [])}\n\n"
+            f"{adaptive_block}"
             f"{_validation_facts(validation)}\n\n"
             f"--- 리서치 정보 ---\n"
             f"주제: {research.get('topic', '')}\n"

@@ -258,7 +258,10 @@ def main() -> None:
         rewrite_attempts = 0
 
         try:
-            ai_review = reviewer.review(article, html, research, validation)
+            ai_review = reviewer.review(
+                article, html, research, validation,
+                expects_calc=assessment["requires_calc"],
+            )
             gate = compute_publish_gate(ai_review, validation)
             print(
                 f"[STEP 3.5] AI 검수 — {ai_review.get('final_decision')} "
@@ -281,7 +284,10 @@ def main() -> None:
                     new_html = new_assessment["html"]
                     new_validation = new_assessment["validation"]
                     print(f"[STEP 3.5] 재작성 HTML ({len(new_html):,}자)", flush=True)
-                    new_review = reviewer.review(new_article, new_html, research, new_validation)
+                    new_review = reviewer.review(
+                        new_article, new_html, research, new_validation,
+                        expects_calc=new_assessment["requires_calc"],
+                    )
                     new_gate = compute_publish_gate(new_review, new_validation)
                     # 모든 단계 성공 시에만 교체
                     article, html, validation = new_article, new_html, new_validation

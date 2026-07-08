@@ -410,6 +410,23 @@ def render_sources(sources: list[Any]) -> str:
     return f"<hr><h3>참고 자료</h3><ul>{''.join(items)}</ul>"
 
 
+def source_to_text(source: Any) -> str:
+    """구조화 출처(dict) 또는 문자열 출처를 한 줄 요약 문자열로 변환 (프롬프트/로그용)."""
+    if isinstance(source, dict):
+        org = (source.get("org") or "").strip()
+        doc = (source.get("doc") or "").strip()
+        as_of = (source.get("as_of") or source.get("date") or "").strip()
+        basis = (source.get("basis") or "").strip()
+        parts = [p for p in [
+            org,
+            f"「{doc}」" if doc else "",
+            f"기준일: {as_of}" if as_of else "",
+            f"확인 기준: {basis}" if basis else "",
+        ] if p]
+        return ", ".join(parts)
+    return str(source)
+
+
 def source_has_date(source: Any) -> bool:
     """출처에 기준일/발표일이 구체적으로 있는지 판정."""
     if isinstance(source, dict):

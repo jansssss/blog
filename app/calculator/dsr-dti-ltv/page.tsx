@@ -8,6 +8,14 @@ import {
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
+import { epiTotalInterest } from '@/lib/calculators'
+import { DSR_REGULATION, dsrBasisLine, formatKoreanDate } from '@/lib/regulations'
+import CalcMeta from '@/components/CalcMeta'
+
+/* 가이드 예시: 3억·4.5% 주담대 상환기간 연장 시 총이자 증가분(공통 함수 산출) */
+const exInterest240 = epiTotalInterest(300_000_000, 4.5, 240)
+const exInterest360 = epiTotalInterest(300_000_000, 4.5, 360)
+const exInterestGap = exInterest360 - exInterest240
 
 /* ── 원리금균등 월 납입액 ── */
 function pmt(principal: number, annualRate: number, months: number): number {
@@ -138,7 +146,8 @@ export default function DsrDtiLtvCalculatorPage() {
       ? maxMonthly * ((Math.pow(1 + rate/12/100, months) - 1) / (rate/12/100 * Math.pow(1 + rate/12/100, months)))
       : 0
 
-    const stressNewMonthly = pmt(loanAmt, rate + 1.5, months)
+    const stressRate = DSR_REGULATION.stressDsr.baseStressRate
+    const stressNewMonthly = pmt(loanAmt, rate + stressRate, months)
     const stressDsr = income > 0 ? ((existDebt * 12 + stressNewMonthly * 12) / income) * 100 : 0
 
     return { newMonthly, dsr, dti, ltv, dsrMaxLoan, maxMonthly, stressDsr }
@@ -326,11 +335,11 @@ export default function DsrDtiLtvCalculatorPage() {
               <div className={`rounded-xl p-4 text-center border ${result.stressDsr > 40 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-100'}`}>
                 <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${result.stressDsr > 40 ? 'text-red-500' : 'text-amber-500'}`}>스트레스 DSR 추정</p>
                 <p className={`text-2xl font-extrabold ${result.stressDsr > 40 ? 'text-red-700' : 'text-amber-700'}`}>{result.stressDsr.toFixed(1)}%</p>
-                <p className={`text-xs mt-1 ${result.stressDsr > 40 ? 'text-red-400' : 'text-amber-500'}`}>금리 {(rate + 1.5).toFixed(1)}% 가산 적용</p>
+                <p className={`text-xs mt-1 ${result.stressDsr > 40 ? 'text-red-400' : 'text-amber-500'}`}>금리 {(rate + DSR_REGULATION.stressDsr.baseStressRate).toFixed(1)}% 가산 적용</p>
               </div>
             </div>
             <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5 text-xs text-amber-800 leading-relaxed">
-              ⚠️ 스트레스 DSR은 기본 DSR 추정치와 달리, 금융기관이 금리 인상 가능성을 반영해 실제 심사에 적용하는 가중 지표입니다. 가산율(현행 1.5%p 예시)·적용 방식은 금융기관·대출 종류별로 다르며, 실제 심사 결과와 다를 수 있습니다.
+              ⚠️ 스트레스 DSR은 기본 DSR 추정치와 달리, 금융기관이 금리 인상 가능성을 반영해 실제 심사에 적용하는 가중 지표입니다. 이 계산기는 {DSR_REGULATION.stressDsr.stage}({formatKoreanDate(DSR_REGULATION.stressDsr.effectiveFrom)}~) 기본 스트레스 금리 <strong>{DSR_REGULATION.stressDsr.baseStressRate}%p</strong>(변동형 100% 기준)를 가산해 계산합니다. 실제 가산율은 {DSR_REGULATION.stressDsr.rateTypeNote}이며, {DSR_REGULATION.stressDsr.regional.label}은 {formatKoreanDate(DSR_REGULATION.stressDsr.regional.until)}까지 {DSR_REGULATION.stressDsr.regional.rate}%p가 한시 적용되는 등 지역·금리유형별로 달라 실제 심사 결과와 다를 수 있습니다.
             </div>
           </div>
 
@@ -370,7 +379,7 @@ export default function DsrDtiLtvCalculatorPage() {
             </div>
             <div className="border border-gray-100 rounded-xl p-4">
               <p className="font-bold text-gray-800 mb-2">② 상환기간 늘리기 — 득실 계산</p>
-              <p className="text-gray-600 leading-relaxed mb-3">3억원, 4.5% 주담대를 <strong>240개월(20년)</strong>로 하면 월 납입액 약 190만원, DSR 영향 38%p. 같은 조건에서 <strong>360개월(30년)</strong>로 늘리면 월 납입액 약 152만원, DSR 영향 30.4%p — 약 7.6%p 감소합니다. 단, 이렇게 하면 <strong>총 이자가 약 3,600만원 더</strong> 납니다. 한도를 통과하기 위한 임시방편이지, 이자 절약 방법이 아닙니다.</p>
+              <p className="text-gray-600 leading-relaxed mb-3">3억원, 4.5% 주담대를 <strong>240개월(20년)</strong>로 하면 월 납입액 약 190만원, DSR 영향 38%p. 같은 조건에서 <strong>360개월(30년)</strong>로 늘리면 월 납입액 약 152만원, DSR 영향 30.4%p — 약 7.6%p 감소합니다. 단, 이렇게 하면 <strong>총 이자가 약 {fmtShort(exInterestGap)}원 더</strong> 납니다. 한도를 통과하기 위한 임시방편이지, 이자 절약 방법이 아닙니다.</p>
               <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800">
                 ⚠️ 한도를 위해 기간을 늘렸다면, 여유 자금 생길 때마다 중도상환으로 기간을 줄이는 전략이 유리합니다.
               </div>
@@ -414,7 +423,7 @@ export default function DsrDtiLtvCalculatorPage() {
           <div className="space-y-4 text-sm text-gray-700">
             <div className="bg-red-50 border border-red-100 rounded-xl p-4">
               <p className="font-semibold text-red-800 mb-2">스트레스 DSR이란?</p>
-              <p className="leading-relaxed">2024년부터 적용된 규제로, 대출 신청 금리에 <strong>스트레스 금리(가산율)를 추가</strong>해서 DSR을 계산합니다. 실제 금리가 4.5%여도, 스트레스 금리 1.5%p를 더한 <strong>6.0% 기준으로 DSR을 계산</strong>합니다. 금리가 오를 상황을 미리 반영해 심사를 더 보수적으로 하는 것입니다.</p>
+              <p className="leading-relaxed">대출 신청 금리에 <strong>스트레스 금리(가산율)를 추가</strong>해서 DSR을 계산하는 규제로, {DSR_REGULATION.stressDsr.stage}가 {formatKoreanDate(DSR_REGULATION.stressDsr.effectiveFrom)}부터 시행 중입니다. 예를 들어 실제 금리가 4.5%이고 기본 스트레스 금리 {DSR_REGULATION.stressDsr.baseStressRate}%p(변동형 100% 기준)가 적용되면 <strong>{(4.5 + DSR_REGULATION.stressDsr.baseStressRate).toFixed(1)}% 기준으로 DSR을 계산</strong>합니다. 금리가 오를 상황을 미리 반영해 심사를 더 보수적으로 하는 것입니다. 적용 가산율은 금리유형·지역에 따라 달라집니다.</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="bg-gray-50 rounded-xl p-4">
@@ -424,7 +433,7 @@ export default function DsrDtiLtvCalculatorPage() {
               </div>
               <div className="bg-red-50 rounded-xl p-4">
                 <p className="text-xs font-bold text-red-500 mb-2">스트레스 DSR 계산 (은행 실제 심사)</p>
-                <p className="text-sm text-gray-700">3억원 × 6.0% × 30년 기준</p>
+                <p className="text-sm text-gray-700">3억원 × {(4.5 + DSR_REGULATION.stressDsr.baseStressRate).toFixed(1)}% × 30년 기준</p>
                 <p className="font-bold text-red-700 mt-1">월 납입 180만원 → DSR 36%</p>
               </div>
             </div>
@@ -532,7 +541,8 @@ export default function DsrDtiLtvCalculatorPage() {
       </div>
 
       <MortgagePrepHubCTA />
-      <DisclaimerNotice basis="스트레스 DSR 3단계 적용(2025년 7월~) · 금융위원회 고시 기준 · 은행권 DSR 40%, 2금융권 50%" />
+      <DisclaimerNotice basis={dsrBasisLine()} />
+      <CalcMeta asOf={DSR_REGULATION.stressDsr.effectiveFrom} />
 
       <style>{`
         input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:8px}

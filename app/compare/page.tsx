@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 const COMPARISONS = [
   {
     icon: <TrendingUp className="w-5 h-5" />,
-    title: '은행별 금리 비교',
-    description: '주요 은행들의 대출 금리를 한눈에 비교해보세요',
+    title: '은행별 금리 비교 방법',
+    description: '공식 채널로 정확한 금리를 확인·비교하는 방법',
     href: '/compare/bank-rates'
   },
   {

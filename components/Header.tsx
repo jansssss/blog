@@ -39,7 +39,7 @@ const OHYESS_NAV: NavItem[] = [
     label: '금융 비교',
     href: '/compare',
     subItems: [
-      { label: '은행별 금리 비교', href: '/compare/bank-rates', description: '주요 은행 금리' },
+      { label: '은행별 금리 비교 방법', href: '/compare/bank-rates', description: '공식 채널로 정확한 금리 확인법' },
       { label: '대출 상품 비교', href: '/compare/loan-products', description: '상품별 조건 비교' },
       { label: '고정 vs 변동금리', href: '/compare/fixed-vs-variable', description: '금리 유형 비교' },
       { label: '정책자금 비교', href: '/compare/policy-loans', description: '정부 지원 대출' },
@@ -68,16 +68,6 @@ const OHYESS_NAV: NavItem[] = [
     ],
   },
   { label: '블로그', href: '/blog' },
-  {
-    label: '핫이슈',
-    href: '/trend',
-    subItems: [
-      { label: '코스피 8300·AI·유가 재고', href: '/trend/kospi-8300-ai-oil-investment', description: '2026년 5월 투자 지형 완전 분석' },
-      { label: '코스피 7800 돌파 분석', href: '/trend/kospi-7800', description: '불장 이유·고점 이후 투자 전략' },
-      { label: '자본시장 정상화 2026', href: '/trend/capital-market-shift', description: '부동산-금융 자금 이동 분석' },
-      { label: '다주택자 대출 규제 2026', href: '/trend/multi-home-loan', description: '스트레스 DSR, 주택 수별 규제 분석' },
-    ],
-  },
   { label: '소개', href: '/about' },
 ]
 

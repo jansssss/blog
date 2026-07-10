@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
+import { DSR_REGULATION, formatKoreanDate } from '@/lib/regulations'
+import CalcMeta from '@/components/CalcMeta'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -418,12 +420,14 @@ export default function LoanLimitSimulatorPage() {
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
               <h3 className="font-semibold text-green-900 mb-2">DSR 규제 적용 기준</h3>
-              <p>2024년 기준 주요 DSR 한도는 다음과 같습니다:</p>
+              <p>업권별 DSR 한도는 다음과 같습니다 (적용 기준일 {formatKoreanDate(DSR_REGULATION.stressDsr.effectiveFrom)}):</p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>주택담보대출 (9억 원 이하): 40%</li>
-                <li>주택담보대출 (9억 원 초과): 규제 강화</li>
-                <li>기타 가계대출 (신용대출 등): 40~50%</li>
+                <li>은행권 가계대출: {DSR_REGULATION.limits.은행권}%</li>
+                <li>제2금융권 가계대출: {DSR_REGULATION.limits.제2금융권}%</li>
               </ul>
+              <p className="mt-3 text-xs text-green-800 leading-relaxed">
+                ※ 이 계산기는 <strong>스트레스 DSR을 미반영</strong>한 단순 역산치입니다. 실제 심사에서는 {DSR_REGULATION.stressDsr.stage}({formatKoreanDate(DSR_REGULATION.stressDsr.effectiveFrom)}~) 기본 스트레스 금리 {DSR_REGULATION.stressDsr.baseStressRate}%p(변동형 100% 기준)가 가산되어 한도가 더 낮아질 수 있습니다. 가산율은 지역·금리유형별로 달라집니다. (출처: {DSR_REGULATION.stressDsr.sourceLabel})
+              </p>
             </div>
           </div>
         </CardContent>
@@ -560,9 +564,10 @@ export default function LoanLimitSimulatorPage() {
 
       <MortgagePrepHubCTA />
       <DisclaimerNotice
-        basis="DSR 40% 규제 기준(은행권) · 스트레스 DSR 미반영 단순 역산 산출치 · 2025년 현행 기준"
+        basis={`DSR ${DSR_REGULATION.limits.은행권}% 규제 기준(은행권) · 스트레스 DSR 미반영 단순 역산 산출치 · 적용 기준일 ${formatKoreanDate(DSR_REGULATION.stressDsr.effectiveFrom)} · ${DSR_REGULATION.stressDsr.sourceLabel}`}
         message="본 계산 결과는 DSR 규제 기준 예상치이며, 실제 대출 한도는 신용등급, 담보 가치, 금융기관 심사 기준, 소득 증빙 방식, 기타 부채 상황 등에 따라 크게 달라질 수 있습니다. 정확한 한도는 반드시 금융기관에 문의하세요."
       />
+      <CalcMeta asOf={DSR_REGULATION.stressDsr.effectiveFrom} />
 
       <Card className="mt-6 bg-gray-50">
         <CardContent className="pt-6">

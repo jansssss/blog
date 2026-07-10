@@ -10,6 +10,16 @@ import { Button } from '@/components/ui/button'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
+import { pmt as libPmt, epiTotalInterest, calcEP as libCalcEP } from '@/lib/calculators'
+import CalcMeta from '@/components/CalcMeta'
+
+/* ─── 하단 가이드 예시(2억·4.5%·20년)를 공통 계산 함수로 산출 ─── */
+const EX = { principal: 200_000_000, rate: 4.5, months: 240 }
+const exEpiMonthly = libPmt(EX.principal, EX.rate, EX.months)
+const exEpiInterest = epiTotalInterest(EX.principal, EX.rate, EX.months)
+const exEp = libCalcEP(EX.principal, EX.rate, EX.months)!
+const exEpInterest = exEp.totalInterest
+const exInterestGap = exEpiInterest - exEpInterest
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
 function fmt(v: number) {
@@ -512,9 +522,9 @@ export default function RepaymentComparePage() {
               <h3 className="font-semibold text-purple-900 mb-2">실제 사례 비교</h3>
               <p className="mb-2"><strong>사례: 2억 원, 4.5% 금리, 20년 대출</strong></p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>원리금균등: 매월 약 126만 원 고정, 총 이자 약 3,060만 원</li>
-                <li>원금균등: 첫 달 약 159만 원 → 마지막 달 약 84만 원, 총 이자 약 2,280만 원</li>
-                <li>차이: 총 이자 약 780만 원 절감 가능 (원금균등 선택 시)</li>
+                <li>원리금균등: 매월 약 {fmtWon(exEpiMonthly)} 고정, 총 이자 약 {fmtWon(exEpiInterest)}</li>
+                <li>원금균등: 첫 달 약 {fmtWon(exEp.firstPayment)} → 마지막 달 약 {fmtWon(exEp.lastPayment)}, 총 이자 약 {fmtWon(exEpInterest)}</li>
+                <li>차이: 총 이자 약 {fmtWon(exInterestGap)} 절감 가능 (원금균등 선택 시)</li>
               </ul>
             </div>
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
@@ -610,6 +620,7 @@ export default function RepaymentComparePage() {
 
       <MortgagePrepHubCTA />
       <DisclaimerNotice basis="원리금균등·원금균등 표준 공식 대비 계산 · 세부 조건(우대금리 등) 미반영" />
+      <CalcMeta />
 
       {/* ─── 슬라이더 스타일 ─────────────────────────────────────── */}
       <style jsx>{`

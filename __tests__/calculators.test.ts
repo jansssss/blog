@@ -251,3 +251,37 @@ describe('calcRefinancingProfit — 대환 손익', () => {
     expect(result.prepayFee).toBeCloseTo(balance * (feeRate / 100), 0)
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 가이드 하드코딩 예시값 회귀 방지 — 화면 표시 숫자는 공통 함수 산출값과 일치해야 한다.
+// 과거 오류(원리금 총이자 3,060만·원금 2,280만·차이 780만, 30→40년 이자차 3,600만)를
+// 다시 넣지 못하도록 경계값으로 고정한다.
+// ─────────────────────────────────────────────────────────────────────────────
+describe('가이드 예시값 회귀 — 2억·4.5%·20년 상환방식 비교', () => {
+  const [P, R, N] = [200_000_000, 4.5, 240]
+
+  it('원금균등 총이자 = 정확히 90,375,000원', () => {
+    // 원금균등 총이자 = 원금 × 월금리 × (개월수+1)/2 = 2억 × 0.00375 × 120.5
+    expect(calcEP(P, R, N)!.totalInterest).toBeCloseTo(90_375_000, 0)
+  })
+
+  it('원리금균등 총이자 ≈ 1억 3백만원대 (약 1억 367만원)', () => {
+    const interest = epiTotalInterest(P, R, N)
+    expect(interest).toBeGreaterThan(103_000_000)
+    expect(interest).toBeLessThan(104_000_000)
+  })
+
+  it('두 방식 총이자 차이 ≈ 1,330만원 (과거 표기 780만원은 오류)', () => {
+    const gap = epiTotalInterest(P, R, N) - calcEP(P, R, N)!.totalInterest
+    expect(gap).toBeGreaterThan(13_000_000)
+    expect(gap).toBeLessThan(13_600_000)
+  })
+})
+
+describe('가이드 예시값 회귀 — 3억·4.5% 상환기간 연장(240→360개월) 총이자 증가분', () => {
+  it('총이자 증가분 ≈ 9천만원대 (과거 표기 3,600만원은 오류)', () => {
+    const gap = epiTotalInterest(300_000_000, 4.5, 360) - epiTotalInterest(300_000_000, 4.5, 240)
+    expect(gap).toBeGreaterThan(90_000_000)
+    expect(gap).toBeLessThan(93_000_000)
+  })
+})

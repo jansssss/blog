@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -495,6 +496,7 @@ export default function PrepaymentFeeCalculatorPage() {
         basis="잔여대출액 × 수수료율 × (잔존기간/약정기간) 공식 · 금융위 고시 표준 산식 기준"
         message="본 계산 결과는 단순 이자 기준 예상치이며, 실제 중도상환수수료는 대출 종류, 금융기관, 계약 조건에 따라 다를 수 있습니다. 정확한 수수료는 반드시 대출 계약서를 확인하거나 금융기관에 문의하세요."
       />
+      <CalcMeta />
 
       <Card className="mt-6 bg-gray-50">
         <CardContent className="pt-6">

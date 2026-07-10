@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
+import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
 
 /* ── 원리금균등 월 납입액 ── */
@@ -480,6 +481,7 @@ export default function RefinancingCalculatorPage() {
 
       <MortgagePrepHubCTA />
       <DisclaimerNotice basis="이자 절감액 - 중도상환수수료 = 순절감액 · 손익분기점 월 기준 산출" />
+      <CalcMeta />
 
       <style>{`
         input[type=range]{-webkit-appearance:none;outline:none;border-radius:9999px;height:8px}

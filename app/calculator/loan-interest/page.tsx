@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
+import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
 
 /* ──────────────────────────────────────────
@@ -428,7 +429,7 @@ export default function LoanInterestCalculatorPage() {
             </div>
             <div className="border border-gray-100 rounded-xl p-4">
               <p className="font-bold text-gray-800 mb-2">중도상환수수료 vs 이자 절약 — 언제 득인가?</p>
-              <p className="text-gray-600 leading-relaxed">중도상환수수료는 보통 잔액의 1~1.5%, 3년 이내 상환 시 부과됩니다. 5,000만원 중도상환 시 수수료 최대 75만원. 반면 이자 절약은 수백만~수천만원대이므로 수수료를 내더라도 중도상환이 거의 항상 유리합니다. 단, <strong>3년 이후에 수수료 없이</strong> 상환할 수 있다면 그때까지 기다리는 것이 가장 낫습니다.</p>
+              <p className="text-gray-600 leading-relaxed">중도상환수수료는 보통 잔액의 1~1.5%, 3년 이내 상환 시 부과됩니다. 5,000만원 중도상환 시 수수료 최대 75만원. 잔여 기간이 길고 금리가 높을수록 이자 절약액이 수수료를 크게 웃돌아 중도상환이 유리한 경우가 많습니다. 다만 잔여 기간이 얼마 남지 않았거나 수수료율이 높으면 절약액이 수수료보다 작아 불리할 수 있으니, <strong>중도상환 vs 유지 비교 계산기</strong>로 본인 조건을 먼저 확인하세요. <strong>3년 이후에 수수료 없이</strong> 상환할 수 있다면 그때까지 기다리는 편이 유리합니다.</p>
             </div>
           </div>
         </div>
@@ -577,6 +578,7 @@ export default function LoanInterestCalculatorPage() {
 
       <MortgagePrepHubCTA />
       <DisclaimerNotice basis="원리금균등·원금균등·만기일시 표준 공식 적용 · 주담대·신용대출 공통 이자 산출 기준" />
+      <CalcMeta />
 
       {/* 슬라이더 스타일 */}
       <style>{`

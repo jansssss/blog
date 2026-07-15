@@ -18,7 +18,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scripts.pipeline.config import load_config
 from scripts.pipeline.researcher import TavilyResearcher
-from scripts.pipeline.columnist import ColumnistWriter, assess
+from scripts.pipeline.columnist import (
+    ColumnistWriter, assess, suggest_calc_type, CALC_REQUIRED_CATEGORIES,
+)
+from scripts.pipeline import finance
 from scripts.pipeline.publisher import SupabasePublisher
 from scripts.pipeline.reviewer import ArticleReviewer
 from scripts.analytics.gsc_query_selector import GSCQuerySelector
@@ -78,6 +81,30 @@ def compute_publish_gate(ai_review: dict, validation) -> dict:
 def _needs_rewrite(gate: dict) -> bool:
     """재작성이 필요한 조건: 발행 게이트가 regenerate인 경우."""
     return gate.get("status") == "regenerate"
+
+
+def diagnose_structural_failure(article, gate: dict) -> list[str]:
+    """재작성(텍스트 수정)으로는 고칠 수 없는 '구조적 실패'를 식별한다.
+
+    구조적 실패 = 코드 변경(계산 엔진 추가 등)이 있어야만 해결되는 하드 실패.
+    빈 목록이면 재작성으로 개선 가능한 실패다. 관리자에게 '코드 변경 필요' 신호로 노출된다.
+    """
+    hard = gate.get("hard_fail", []) or []
+    calc_missing = any(("계산 결과" in h) or ("계산 검증" in h) for h in hard)
+    if not calc_missing:
+        return []
+    if article.category not in CALC_REQUIRED_CATEGORIES:
+        return []
+    calc = article.calc or {}
+    ctype = calc.get("type")
+    if ctype and ctype not in finance.CALC_DISPATCH:
+        return [f"calc.type '{ctype}' 미지원 — finance.py에 계산 엔진 추가 필요"]
+    if not ctype and suggest_calc_type(article.category, article.topic) is None:
+        return [
+            f"'{article.category}' 계산형 글이지만 주제 '{article.topic}'에 "
+            f"매핑되는 계산 엔진이 없음 — 엔진 추가 필요"
+        ]
+    return []
 
 
 def pick_roadmap_seed(excluded_topics: list[str]) -> str:
@@ -256,6 +283,7 @@ def main() -> None:
         gate: dict | None = None
         previous_scores: list[int] = []
         rewrite_attempts = 0
+        structural: list[str] = []
 
         try:
             ai_review = reviewer.review(
@@ -269,39 +297,69 @@ def main() -> None:
                 flush=True,
             )
 
-            for attempt in range(1, MAX_REWRITES + 1):
-                if not _needs_rewrite(gate):
-                    break
-                previous_scores.append(gate["score"])
+            structural = diagnose_structural_failure(article, gate)
+            if structural and _needs_rewrite(gate):
+                # 재작성으로 못 고치는 실패 — API 낭비 없이 건너뛰고 코드 변경 신호로 남긴다
                 print(
-                    f"[STEP 3.5] 재작성 시도 {attempt}/{MAX_REWRITES} "
-                    f"(이전 점수: {previous_scores[-1]}점, 하드실패: {gate['hard_fail']})...",
+                    f"[STEP 3.5] ⚠️ 구조적 실패 감지 — 재작성 건너뜀(코드 변경 필요): "
+                    f"{'; '.join(structural)}",
                     flush=True,
                 )
-                try:
-                    new_article = writer.rewrite(article, ai_review.get("issues", []), research)
-                    new_assessment = assess(new_article)
-                    new_html = new_assessment["html"]
-                    new_validation = new_assessment["validation"]
-                    print(f"[STEP 3.5] 재작성 HTML ({len(new_html):,}자)", flush=True)
-                    new_review = reviewer.review(
-                        new_article, new_html, research, new_validation,
-                        expects_calc=new_assessment["requires_calc"],
-                    )
-                    new_gate = compute_publish_gate(new_review, new_validation)
-                    # 모든 단계 성공 시에만 교체
-                    article, html, validation = new_article, new_html, new_validation
-                    ai_review, gate = new_review, new_gate
-                    rewrite_attempts += 1
+            else:
+                for attempt in range(1, MAX_REWRITES + 1):
+                    if not _needs_rewrite(gate):
+                        break
+                    previous_scores.append(gate["score"])
                     print(
-                        f"[STEP 3.5] 재작성 {attempt}회 검수 — "
-                        f"{ai_review.get('final_decision')} ({gate['score']}점, "
-                        f"fail {gate['fail_count']}건) → 게이트: {gate['status']}",
+                        f"[STEP 3.5] 재작성 시도 {attempt}/{MAX_REWRITES} "
+                        f"(이전 점수: {previous_scores[-1]}점, 하드실패: {gate['hard_fail']})...",
                         flush=True,
                     )
-                except Exception as exc:
-                    print(f"[STEP 3.5] 재작성 {attempt}회 실패 (이전 결과 유지): {exc}", flush=True)
-                    break
+                    try:
+                        new_article = writer.rewrite(article, ai_review.get("issues", []), research)
+                        new_assessment = assess(new_article)
+                        new_html = new_assessment["html"]
+                        new_validation = new_assessment["validation"]
+                        print(f"[STEP 3.5] 재작성 HTML ({len(new_html):,}자)", flush=True)
+                        new_review = reviewer.review(
+                            new_article, new_html, research, new_validation,
+                            expects_calc=new_assessment["requires_calc"],
+                        )
+                        new_gate = compute_publish_gate(new_review, new_validation)
+                        # 개선된 경우에만 채택 — 점수 하락 시 이전(더 나은) 결과 유지
+                        improved = (
+                            not _needs_rewrite(new_gate)
+                            or new_gate["score"] > gate["score"]
+                        )
+                        if not improved:
+                            print(
+                                f"[STEP 3.5] 재작성 {attempt}회 미개선 "
+                                f"({new_gate['score']}점 ≤ {gate['score']}점) — "
+                                f"이전 결과 유지, 재작성 중단",
+                                flush=True,
+                            )
+                            break
+                        article, html, validation = new_article, new_html, new_validation
+                        ai_review, gate = new_review, new_gate
+                        rewrite_attempts += 1
+                        print(
+                            f"[STEP 3.5] 재작성 {attempt}회 채택 — "
+                            f"{ai_review.get('final_decision')} ({gate['score']}점, "
+                            f"fail {gate['fail_count']}건) → 게이트: {gate['status']}",
+                            flush=True,
+                        )
+                        # 채택 후에도 구조적 실패면 더 돌지 않는다
+                        structural = diagnose_structural_failure(article, gate)
+                        if structural and _needs_rewrite(gate):
+                            print(
+                                f"[STEP 3.5] ⚠️ 재작성 후에도 구조적 실패 — 중단: "
+                                f"{'; '.join(structural)}",
+                                flush=True,
+                            )
+                            break
+                    except Exception as exc:
+                        print(f"[STEP 3.5] 재작성 {attempt}회 실패 (이전 결과 유지): {exc}", flush=True)
+                        break
 
             # 게이트·검증·재작성 이력을 ai_review에 기록 (관리자 노출용)
             if ai_review is not None:
@@ -309,6 +367,13 @@ def main() -> None:
                 ai_review["rewrite_attempts"] = rewrite_attempts
                 if previous_scores:
                     ai_review["previous_scores"] = previous_scores
+                # 구조적 실패 = 코드 변경 필요. 관리자 화면에 명시 신호로 노출
+                if structural:
+                    ai_review["needs_code_change"] = structural
+                    ai_review.setdefault("human_checkpoints", []).append(
+                        "⚠️ 코드 변경 필요(재작성으로 해결 불가): " + "; ".join(structural)
+                    )
+                    ai_review["final_decision"] = "발행 보류"
                 # 하드 게이트 실패 시 최종 판정을 발행 보류로 강제
                 if gate and gate.get("hard_fail"):
                     ai_review["final_decision"] = "발행 보류"

@@ -36,6 +36,7 @@ export interface AiReview {
   human_checkpoints: string[]
   review_summary: string
   publish_gate?: AiReviewPublishGate
+  needs_code_change?: string[]   // 재작성으로 못 고치는 구조적 실패(코드 변경 필요)
 }
 
 const DECISION_CONFIG = {
@@ -110,10 +111,18 @@ export function AiReviewBadge({ review }: { review: AiReview | null | undefined 
     )
   }
   const cfg = DECISION_CONFIG[review.final_decision] ?? DECISION_CONFIG['발행 보류']
+  const needsCode = (review.needs_code_change?.length ?? 0) > 0
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-      AI {review.final_decision} ({review.total_score}점)
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+        AI {review.final_decision} ({review.total_score}점)
+      </span>
+      {needsCode && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border bg-purple-50 text-purple-800 border-purple-200 font-semibold">
+          🛠 코드 필요
+        </span>
+      )}
     </span>
   )
 }
@@ -165,6 +174,21 @@ export function AiReviewPanel({ review, reviewedAt, defaultExpanded = false }: A
       {/* 본문 — 펼쳐짐 */}
       {expanded && (
         <div className="p-4 space-y-4 bg-white text-sm">
+
+          {/* 코드 변경 필요 — 재작성으로 못 고치는 구조적 실패(최우선 신호) */}
+          {review.needs_code_change && review.needs_code_change.length > 0 && (
+            <div className="rounded-lg border border-purple-300 bg-purple-50 p-3 space-y-1">
+              <p className="text-xs font-bold text-purple-800">🛠 코드 변경 필요 (재작성으로 해결 불가)</p>
+              <ul className="text-xs text-purple-700 space-y-0.5">
+                {review.needs_code_change.map((c, i) => (
+                  <li key={i} className="flex gap-1.5"><span className="shrink-0">›</span><span>{c}</span></li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-purple-500 pt-0.5">
+                이 유형은 프롬프트·재작성이 아니라 파이프라인 코드(계산 엔진 등) 보강이 필요합니다.
+              </p>
+            </div>
+          )}
 
           {/* 검수 요약 */}
           {review.review_summary && (

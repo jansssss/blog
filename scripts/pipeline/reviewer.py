@@ -150,6 +150,7 @@ def _validation_facts(validation: "finance.ValidationResult | None") -> str:
         "cta_within_limit": "CTA 2개 이하",
         "no_raw_html_in_body": "본문에 원시 HTML 없음",
         "no_empty_bullet": "빈 목록 없음",
+        "comparison_table_present": "구조화 비교표 존재(비계산형)",
     }
     for key, ok in validation.checks.items():
         lines.append(f"- {labels.get(key, key)}: {'통과' if ok else '실패'}")

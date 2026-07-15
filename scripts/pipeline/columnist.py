@@ -43,6 +43,7 @@ class Article:
     calculator_ctas: list[dict] = field(default_factory=list)  # [{label, url}] (최대 2개)
     calc: dict | None = None      # 계산 입력값 (finance.compute_calc용). 없으면 None
     answer_box: str = ""          # 상단 핵심 답변 (계산 결과 기반, 시스템 생성)
+    comparison_tables: list = field(default_factory=list)  # 비계산형 글용 [{title, headers, rows}]
 
     @property
     def slug(self) -> str:
@@ -114,6 +115,68 @@ def _get_category_frame(category: str, topic: str) -> str:
     )
 
 
+def suggest_calc_type(category: str, topic: str) -> str | None:
+    """주제·카테고리를 보고 채워야 할 calc.type을 추정한다.
+    표준 계산이 없는 유형(전세/정책/신용점수)은 None을 반환한다.
+    LLM이 calc 타입을 빠뜨리거나 잘못 고르는 것을 막는 힌트로 사용한다.
+    """
+    t = (topic or "").lower()
+    c = (category or "").lower()
+
+    # 표준 공식 없음 → calc=null 경로
+    if "전세" in c or "전세" in t or "정책" in c or "신용점수" in c:
+        return None
+    # 주택 구매 자기자금(취득세·부대비용 포함)
+    if "자기자금" in t or "취득세" in t or ("자금" in t and any(k in t for k in ["주택", "집", "구매", "매매"])):
+        return "purchase_cash"
+    # 대출기간 비교 (30년 vs 40년 등)
+    if ("30년" in t and "40년" in t) or ("기간" in t and "비교" in t):
+        return "repayment_compare"
+    # 월 납입액·총이자 (보금자리론 등 상환 시뮬레이션)
+    if any(k in t for k in ["월납입", "월 납입", "납입액", "총이자", "보금자리", "원리금", "원금균등"]):
+        return "amortization"
+    # 대환·갈아타기·중도상환 손익
+    if "대환" in c or "대환" in t or "갈아타기" in t or "중도상환" in t:
+        return "refinancing"
+    # 기존부채가 한도를 얼마나 줄이는가
+    if any(k in t for k in ["할부", "마이너스", "마통", "카드론", "완납", "기존부채", "신용대출"]):
+        return "dsr_capacity"
+    # 소득 기준 한도 (단독 vs 부부합산 등)
+    if "한도" in t:
+        return "loan_limit"
+    return None
+
+
+_CALC_TYPE_DESC = {
+    "dsr_capacity": "기존부채(할부·마통·카드론 등)가 주담대 한도를 얼마나 줄이는지",
+    "refinancing": "대환대출 손익(금리차 절감 vs 중도상환수수료)",
+    "amortization": "대출 원금·금리·기간으로 월 납입액·총이자",
+    "repayment_compare": "동일 원금에서 기간별(30년 vs 40년) 월납입·총이자 비교",
+    "loan_limit": "소득·DSR(·LTV)로 주담대 한도(단독 vs 합산 비교 포함)",
+    "purchase_cash": "주택가격·LTV·취득세·부대비용으로 필요 자기자금",
+}
+
+
+def _calc_hint_block(calc_type: str | None) -> str:
+    """추정된 calc.type을 작성자에게 강한 힌트로 전달하는 블록."""
+    if calc_type is None:
+        return (
+            "━━━ [계산 타입 힌트 — 비계산형] ━━━\n"
+            "이 주제는 표준 계산공식이 없는 유형입니다. calc는 null로 두세요.\n"
+            "대신 comparison_tables에 '기관·조건 비교표'를 1~2개 반드시 채우세요 "
+            "(예: HUG·HF·SGI 보증 한도/보증금 상한/전세가율 비교, 또는 조건별 자격 비교).\n"
+            "표는 headers 2개 이상, rows 2개 이상으로 구체 수치·기준을 담아야 하며, "
+            "이 표가 이 글의 핵심 근거가 됩니다. 본문 문단은 표의 차이를 해설하는 데 집중하세요."
+        )
+    return (
+        "━━━ [계산 타입 힌트 — 반드시 반영] ━━━\n"
+        f"이 글은 '{calc_type}' 계산이 핵심입니다: {_CALC_TYPE_DESC.get(calc_type, '')}.\n"
+        f"calc 객체의 \"type\"을 반드시 \"{calc_type}\"으로 설정하고, 해당 타입의 필수 입력값을 "
+        "리서치 수치에 맞춰 정확히 채우세요. calc를 null로 두거나 다른 타입으로 바꾸지 마세요.\n"
+        "표는 시스템이 calc로 자동 생성하므로 comparison_tables는 빈 배열 []로 두세요."
+    )
+
+
 class ColumnistWriter:
     OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
@@ -136,6 +199,7 @@ class ColumnistWriter:
         category = research.get("category", "금융")
         article_type = research.get("article_type", "경제이슈")
         category_frame = _get_category_frame(category, topic)
+        calc_hint = _calc_hint_block(suggest_calc_type(category, topic))
 
         # 리서치 데이터 포맷팅
         key_data_lines = "\n".join(
@@ -194,6 +258,9 @@ class ColumnistWriter:
             '    {"label": "자연어 앵커 텍스트 (본문 중간용)", "url": "/calculator/dsr-dti-ltv"},\n'
             '    {"label": "자연어 앵커 텍스트 (하단용)", "url": "/calculator/loan-limit"}\n'
             '  ],\n'
+            '  "comparison_tables": [\n'
+            '    {"title": "비교표 제목 (예: HUG·HF·SGI 보증 조건 비교)", "headers": ["구분", "HUG", "HF", "SGI"], "rows": [["보증 한도", "값", "값", "값"], ["보증금 상한", "값", "값", "값"]]}\n'
+            '  ],\n'
             '  "action_tips": ["지금 확인할 것1 (링크·HTML 없이 문장만)", "확인2", "확인3"],\n'
             '  "sources": [\n'
             '    {"org": "금융위원회", "doc": "DSR 제도 설명자료", "as_of": "YYYY.MM.DD", "basis": "DSR = 연간 원리금 상환액 / 연소득", "url": ""},\n'
@@ -214,6 +281,7 @@ class ColumnistWriter:
         instructions = (
             f"{self.prompt_text}\n\n"
             f"{category_frame}\n\n"
+            f"{calc_hint}\n\n"
             f"{research_block}\n"
             f"{hints_block}\n"
             f"{quality_block}\n"
@@ -268,6 +336,7 @@ class ColumnistWriter:
         완전히 새로 쓰지 않고 지적받은 항목(fail/warn)만 수정한다.
         """
         category_frame = _get_category_frame(article.category, article.topic)
+        calc_hint = _calc_hint_block(suggest_calc_type(article.category, article.topic))
         section_count = len(article.sections)
 
         sections_summary = "\n".join(
@@ -302,6 +371,7 @@ class ColumnistWriter:
             f'    ... (섹션 {section_count}개)\n'
             '  ],\n'
             '  "calculator_ctas": [{"label": "자연어 텍스트", "url": "/calculator/..."}],\n'
+            '  "comparison_tables": [{"title": "비교표 제목", "headers": ["구분","A","B"], "rows": [["기준1","값","값"],["기준2","값","값"]]}],\n'
             '  "action_tips": ["확인1", "확인2", "확인3"],\n'
             '  "sources": [{"org": "기관명", "doc": "문서명", "as_of": "YYYY.MM.DD", "basis": "확인 기준", "url": ""}],\n'
             '  "faqs": [{"question": "질문?", "answer": "숫자 예시 포함 답변"}],\n'
@@ -312,6 +382,7 @@ class ColumnistWriter:
         instructions = (
             f"{self.prompt_text}\n\n"
             f"{category_frame}\n\n"
+            f"{calc_hint}\n\n"
             f"━━━ 현재 글 (개선 대상) ━━━\n"
             f"제목: {article.title}\n"
             f"부제목: {article.subtitle}\n"
@@ -410,6 +481,7 @@ def _build_article(
         disclaimer=data.get("disclaimer") or fallback_disclaimer,
         calculator_ctas=finance.normalize_ctas(data.get("calculator_ctas", [])),
         calc=calc,
+        comparison_tables=data.get("comparison_tables", []) if isinstance(data.get("comparison_tables"), list) else [],
     )
 
     # 상단 핵심 답변: 계산 결과가 있으면 계산값 기반(신뢰), 없으면 summary_point 첫 줄
@@ -451,8 +523,11 @@ def render_html(article: Article, calc_result: "finance.CalcResult | None" = Non
     else:
         answer_html = ""
 
-    # 2) 계산 표 (계산 가정 / 계산 과정 / 시나리오 비교) — 코드 계산값
-    tables_html = finance.render_calc_tables(calc_result) if calc_result is not None else ""
+    # 2) 표 영역 — 계산이 있으면 코드 계산 표, 없으면 LLM 구조화 비교표
+    if calc_result is not None:
+        tables_html = finance.render_calc_tables(calc_result)
+    else:
+        tables_html = finance.render_comparison_tables(article.comparison_tables)
 
     # 3) 본문 섹션 (문단은 모두 이스케이프 → 원시 HTML 노출 방지)
     ctas = article.calculator_ctas or []
@@ -549,6 +624,7 @@ def assess(article: Article) -> dict:
         ctas=article.calculator_ctas,
         full_html=html,
         requires_calc=requires_calc,
+        comparison_tables=article.comparison_tables,
     )
     return {
         "html": html,

@@ -43,6 +43,46 @@
     "prepayment_fee_rate": 중도상환수수료율 (소수). 예: 0.012
     "as_of": 기준일
 
+[type: "amortization"] — 대출 원금·금리·기간으로 월 납입액·총이자가 얼마인가 (보금자리론·주담대 월 상환)
+  필수 입력:
+    "type": "amortization"
+    "principal": 대출 원금 (원). 예: 300000000
+    "mortgage_rate": 금리 (소수). 예: 0.049
+    "years": 대출기간 (년). 예: 30
+    "repayment_type": "원리금균등"
+    "as_of": 기준일
+    "rate_scenarios": 비교할 금리 리스트 (소수) — 선택. 예: [0.049, 0.052] (우대금리 비교 등)
+
+[type: "repayment_compare"] — 동일 원금·금리에서 대출기간(30년 vs 40년 등)별 월납입·총이자 비교
+  필수 입력:
+    "type": "repayment_compare"
+    "principal": 대출 원금 (원)
+    "mortgage_rate": 금리 (소수)
+    "years_list": 비교할 기간 리스트 (년). 예: [30, 40]
+    "as_of": 기준일
+
+[type: "loan_limit"] — 소득·DSR(·LTV)로 주담대 한도가 얼마인가 (단독 vs 부부합산 비교 포함)
+  필수 입력:
+    "type": "loan_limit"
+    "annual_income": 연소득 (원)
+    "dsr_limit": DSR 한도 (소수). 예: 0.40
+    "mortgage_rate": 금리 (소수)
+    "years": 대출기간 (년)
+    "existing_monthly_payment": 기존부채 월상환액 (원) — 선택(없으면 0)
+    "home_price": 주택가격 (원) — 선택(있으면 LTV 상한도 반영)
+    "ltv_limit": LTV 한도 (소수) — 선택. 예: 0.70
+    "income_scenarios": 비교할 연소득 리스트 (원) — 선택. 예: [50000000, 80000000] (단독 vs 합산)
+    "as_of": 기준일
+
+[type: "purchase_cash"] — 주택가격·LTV·취득세·부대비용으로 필요한 자기자금이 얼마인가
+  필수 입력:
+    "type": "purchase_cash"
+    "home_price": 주택가격 (원). 예: 500000000
+    "ltv_limit": LTV 한도 (소수). 예: 0.70
+    "acquisition_tax_rate": 취득세율 (소수) — 리서치로 확인한 값. 예: 0.011
+    "other_costs": 기타 부대비용 (원, 중개보수·법무비 등) — 선택
+    "as_of": 기준일
+
 주의:
 - 금리·DSR·수수료율은 반드시 소수로 쓴다 (4.5% → 0.045, 40% → 0.40, 1.2% → 0.012).
 - 금액은 원 단위 정수로 쓴다 (5천만 원 → 50000000).

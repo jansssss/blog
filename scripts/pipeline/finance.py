@@ -316,9 +316,409 @@ def compute_refinancing(calc: dict) -> CalcResult:
     )
 
 
+# ───────────────────────────────────────────
+# 원리금균등 / 원금균등 상환 공식 (프론트 계산기와 동일)
+#   원리금균등 월납입 = P·r(1+r)^n / ((1+r)^n − 1)
+#   원금균등 첫 달   = 원금/개월 + 잔액×월이자 (잔액 체감으로 매월 감소)
+# ───────────────────────────────────────────
+
+def epi_monthly_payment(principal: float, annual_rate: float, months: int) -> float:
+    """원리금균등 월 납입액 (매월 동일)."""
+    if principal <= 0 or months <= 0:
+        return 0.0
+    r = annual_rate / 12
+    if r == 0:
+        return principal / months
+    return principal * (r * (1 + r) ** months) / ((1 + r) ** months - 1)
+
+
+def epi_total_interest(principal: float, annual_rate: float, months: int) -> float:
+    """원리금균등 총이자 = 월납입액 × 개월 − 원금."""
+    return epi_monthly_payment(principal, annual_rate, months) * months - principal
+
+
+def ep_first_monthly_payment(principal: float, annual_rate: float, months: int) -> float:
+    """원금균등 첫 달 납입액 = 원금/개월 + 원금×월이자."""
+    if principal <= 0 or months <= 0:
+        return 0.0
+    return principal / months + principal * (annual_rate / 12)
+
+
+def ep_total_interest(principal: float, annual_rate: float, months: int) -> float:
+    """원금균등 총이자 = 매월 잔액×월이자 누적."""
+    if principal <= 0 or months <= 0:
+        return 0.0
+    r = annual_rate / 12
+    princ = principal / months
+    balance = principal
+    total = 0.0
+    for _ in range(months):
+        total += balance * r
+        balance -= princ
+    return total
+
+
+# ───────────────────────────────────────────
+# amortization: 대출 원금·금리·기간 → 월 납입액·총이자 (보금자리론·주담대 월납입)
+# ───────────────────────────────────────────
+
+def compute_amortization(calc: dict) -> CalcResult:
+    """
+    필요 입력:
+      principal        대출 원금 (원)
+      mortgage_rate    금리 (소수, 예: 0.049)   ← annual_rate 로도 허용
+      years            대출기간 (년)
+      repayment_type   상환방식 (기본 '원리금균등')
+      as_of            기준일
+      rate_scenarios   비교할 금리 리스트 (소수) — 선택. 없으면 기간 민감도로 대체
+    """
+    principal = float(calc["principal"])
+    rate = float(calc.get("mortgage_rate", calc.get("annual_rate")))
+    years = int(calc["years"])
+    repay = calc.get("repayment_type", "원리금균등")
+    as_of = str(calc.get("as_of", "")).strip()
+    months = years * 12
+
+    epi_m = epi_monthly_payment(principal, rate, months)
+    epi_int = epi_total_interest(principal, rate, months)
+    ep_m = ep_first_monthly_payment(principal, rate, months)
+    ep_int = ep_total_interest(principal, rate, months)
+
+    answer_box = (
+        f"대출 원금 {format_krw_short(principal, approx=False)}, 금리 연 {format_pct(rate)}, "
+        f"{years}년 원리금균등 기준으로 월 납입액은 {format_man_1dp(epi_m)}, "
+        f"총이자는 {format_krw_short(epi_int)}, 총상환액은 {format_krw_short(principal + epi_int)}입니다. "
+        f"원금균등으로 상환하면 첫 달 {format_man_1dp(ep_m)}로 시작해 매월 줄어들고, "
+        f"총이자는 {format_krw_short(ep_int)}로 원리금균등보다 "
+        f"{format_krw_short(epi_int - ep_int)} 적습니다."
+    )
+
+    assumption_rows = [
+        ("대출 원금", format_krw_short(principal, approx=False)),
+        ("금리", f"연 {format_pct(rate)}"),
+        ("대출기간", f"{years}년 ({months}개월)"),
+        ("상환 방식", repay),
+        ("기준일", as_of or "본문 참조"),
+    ]
+
+    calc_process_headers = ["상환 방식", "월 납입액", "총이자", "총상환액"]
+    calc_process_rows = [
+        ["원리금균등", format_man_1dp(epi_m),
+         format_krw_short(epi_int), format_krw_short(principal + epi_int)],
+        ["원금균등(첫 달)", format_man_1dp(ep_m),
+         format_krw_short(ep_int), format_krw_short(principal + ep_int)],
+        ["차이", format_man_1dp(ep_m - epi_m),
+         format_krw_short(ep_int - epi_int), format_krw_short(ep_int - epi_int)],
+    ]
+
+    # 시나리오: 금리 리스트가 있으면 금리 민감도, 없으면 기간 민감도(사실 기반)
+    rate_scenarios = calc.get("rate_scenarios")
+    if rate_scenarios:
+        scenario_headers = ["적용 금리", "월 납입액(원리금균등)", "총이자", "총상환액"]
+        scenario_rows = []
+        for rr in sorted({round(float(x), 5) for x in rate_scenarios} | {rate}):
+            m = epi_monthly_payment(principal, rr, months)
+            it = epi_total_interest(principal, rr, months)
+            scenario_rows.append([
+                f"연 {format_pct(rr)}", format_man_1dp(m),
+                format_krw_short(it), format_krw_short(principal + it),
+            ])
+    else:
+        term_set = sorted({max(10, years - 10), years, years + 10})
+        scenario_headers = ["대출기간", "월 납입액(원리금균등)", "총이자", "총상환액"]
+        scenario_rows = []
+        for yy in term_set:
+            mm = yy * 12
+            m = epi_monthly_payment(principal, rate, mm)
+            it = epi_total_interest(principal, rate, mm)
+            scenario_rows.append([
+                f"{yy}년", format_man_1dp(m),
+                format_krw_short(it), format_krw_short(principal + it),
+            ])
+
+    return CalcResult(
+        calc_type="amortization",
+        as_of=as_of,
+        answer_box=answer_box,
+        assumption_rows=assumption_rows,
+        calc_process_headers=calc_process_headers,
+        calc_process_rows=calc_process_rows,
+        scenario_headers=scenario_headers,
+        scenario_rows=scenario_rows,
+        raw={"epi_monthly": epi_m, "epi_interest": epi_int,
+             "ep_first_monthly": ep_m, "ep_interest": ep_int,
+             "principal": principal},
+    )
+
+
+# ───────────────────────────────────────────
+# repayment_compare: 동일 원금·금리, 기간별(30년 vs 40년) 월납입·총이자 비교
+# ───────────────────────────────────────────
+
+def compute_repayment_compare(calc: dict) -> CalcResult:
+    """
+    필요 입력:
+      principal      대출 원금 (원)
+      mortgage_rate  금리 (소수)   ← annual_rate 허용
+      years_list     비교할 기간 리스트 (년). 예: [30, 40]
+      as_of          기준일
+    """
+    principal = float(calc["principal"])
+    rate = float(calc.get("mortgage_rate", calc.get("annual_rate")))
+    years_list = calc.get("years_list") or [30, 40]
+    years_list = sorted({int(y) for y in years_list})
+    as_of = str(calc.get("as_of", "")).strip()
+
+    shortest = years_list[0]
+    base_m = epi_monthly_payment(principal, rate, shortest * 12)
+    base_int = epi_total_interest(principal, rate, shortest * 12)
+    longest = years_list[-1]
+    long_m = epi_monthly_payment(principal, rate, longest * 12)
+    long_int = epi_total_interest(principal, rate, longest * 12)
+
+    answer_box = (
+        f"대출 원금 {format_krw_short(principal, approx=False)}, 금리 연 {format_pct(rate)} "
+        f"원리금균등 기준으로 {shortest}년은 월 {format_man_1dp(base_m)}·총이자 {format_krw_short(base_int)}, "
+        f"{longest}년은 월 {format_man_1dp(long_m)}·총이자 {format_krw_short(long_int)}입니다. "
+        f"{longest}년으로 늘리면 월 납입은 {format_man_1dp(base_m - long_m)} 줄지만 "
+        f"총이자는 {format_krw_short(long_int - base_int)} 더 냅니다."
+    )
+
+    assumption_rows = [
+        ("대출 원금", format_krw_short(principal, approx=False)),
+        ("금리", f"연 {format_pct(rate)}"),
+        ("비교 기간", " vs ".join(f"{y}년" for y in years_list)),
+        ("상환 방식", "원리금균등"),
+        ("기준일", as_of or "본문 참조"),
+    ]
+
+    calc_process_headers = ["대출기간", "월 납입액", "총이자", "총상환액"]
+    calc_process_rows = []
+    for y in years_list:
+        m = epi_monthly_payment(principal, rate, y * 12)
+        it = epi_total_interest(principal, rate, y * 12)
+        calc_process_rows.append([
+            f"{y}년", format_man_1dp(m),
+            format_krw_short(it), format_krw_short(principal + it),
+        ])
+
+    # 시나리오: 기간별 원금균등 방식 대조
+    scenario_headers = ["대출기간", "원금균등 첫 달", "원금균등 총이자", "원리금 대비 이자 절감"]
+    scenario_rows = []
+    for y in years_list:
+        mm = y * 12
+        ep_m = ep_first_monthly_payment(principal, rate, mm)
+        ep_int = ep_total_interest(principal, rate, mm)
+        epi_int = epi_total_interest(principal, rate, mm)
+        scenario_rows.append([
+            f"{y}년", format_man_1dp(ep_m),
+            format_krw_short(ep_int), format_krw_short(epi_int - ep_int),
+        ])
+
+    return CalcResult(
+        calc_type="repayment_compare",
+        as_of=as_of,
+        answer_box=answer_box,
+        assumption_rows=assumption_rows,
+        calc_process_headers=calc_process_headers,
+        calc_process_rows=calc_process_rows,
+        scenario_headers=scenario_headers,
+        scenario_rows=scenario_rows,
+        raw={"base_years": shortest, "base_monthly": base_m, "base_interest": base_int,
+             "long_years": longest, "long_monthly": long_m, "long_interest": long_int},
+    )
+
+
+# ───────────────────────────────────────────
+# loan_limit: 소득·DSR(·LTV) → 주담대 한도 (단독 vs 부부합산 비교)
+# ───────────────────────────────────────────
+
+def compute_loan_limit(calc: dict) -> CalcResult:
+    """
+    필요 입력:
+      annual_income            연소득 (원)
+      dsr_limit                DSR 한도 (소수)
+      mortgage_rate            금리 (소수)
+      years                    대출기간 (년)
+      existing_monthly_payment 기존부채 월상환액 (원) — 선택(기본 0)
+      home_price               주택가격 (원) — 선택(있으면 LTV 상한 반영)
+      ltv_limit                LTV 한도 (소수) — 선택
+      income_scenarios         비교할 연소득 리스트 (원) — 선택(단독 vs 합산)
+      as_of                    기준일
+    """
+    income = float(calc["annual_income"])
+    dsr = float(calc["dsr_limit"])
+    rate = float(calc["mortgage_rate"])
+    years = int(calc["years"])
+    existing_monthly = float(calc.get("existing_monthly_payment", 0) or 0)
+    home_price = calc.get("home_price")
+    ltv_limit = calc.get("ltv_limit")
+    as_of = str(calc.get("as_of", "")).strip()
+
+    ltv_cap = (float(home_price) * float(ltv_limit)) if home_price and ltv_limit else None
+
+    def limit_for(inc: float) -> dict:
+        cap_monthly = inc * dsr / 12 - existing_monthly
+        dsr_principal = loan_principal_by_monthly_payment(cap_monthly, rate, years) if cap_monthly > 0 else 0.0
+        final = min(dsr_principal, ltv_cap) if ltv_cap is not None else dsr_principal
+        bound = "LTV" if (ltv_cap is not None and ltv_cap < dsr_principal) else "DSR"
+        return {"income": inc, "dsr_principal": dsr_principal, "final": final, "bound": bound}
+
+    base = limit_for(income)
+
+    ltv_note = (
+        f", LTV {format_pct(float(ltv_limit))} 한도 {format_krw_short(ltv_cap)}"
+        if ltv_cap is not None else ""
+    )
+    answer_box = (
+        f"연소득 {format_krw_short(income, approx=False)}, DSR {format_pct(dsr)}, "
+        f"금리 연 {format_pct(rate)}, {years}년 원리금균등 기준 주담대 환산 한도는 "
+        f"{format_krw_short(base['final'])}입니다{ltv_note}. "
+        f"실제 한도는 DSR·LTV 중 낮은 값({base['bound']} 기준)으로 결정됩니다."
+    )
+
+    assumption_rows = [
+        ("연소득", format_krw_short(income, approx=False)),
+        ("DSR 한도", format_pct(dsr)),
+        ("주담대 금리", f"연 {format_pct(rate)}"),
+        ("상환 방식", f"{years}년 원리금균등"),
+    ]
+    if existing_monthly > 0:
+        assumption_rows.append(("기존부채 월상환액", format_krw_short(existing_monthly, approx=False)))
+    if ltv_cap is not None:
+        assumption_rows.append(("주택가격", format_krw_short(float(home_price), approx=False)))
+        assumption_rows.append(("LTV 한도", format_pct(float(ltv_limit))))
+    assumption_rows.append(("기준일", as_of or "본문 참조"))
+
+    calc_process_headers = ["구분", "DSR상 연간 상환 가능액", "DSR 환산 한도"]
+    if ltv_cap is not None:
+        calc_process_headers.append("LTV 한도")
+    calc_process_headers.append("최종 한도")
+    row = [
+        "기준 사례",
+        format_krw_short(income * dsr, approx=False),
+        format_krw_short(base["dsr_principal"]),
+    ]
+    if ltv_cap is not None:
+        row.append(format_krw_short(ltv_cap))
+    row.append(format_krw_short(base["final"]))
+    calc_process_rows = [row]
+
+    # 시나리오: 소득별(단독 vs 부부합산) 한도 비교
+    income_scenarios = calc.get("income_scenarios") or [income, round(income * 1.6)]
+    income_scenarios = sorted({float(x) for x in income_scenarios} | {income})
+    scenario_headers = ["연소득", "DSR 환산 한도", "최종 한도(DSR·LTV 중 낮은 값)", "기준 대비 증감"]
+    scenario_rows = []
+    for inc in income_scenarios:
+        r = limit_for(inc)
+        diff = r["final"] - base["final"]
+        scenario_rows.append([
+            format_krw_short(inc, approx=False),
+            format_krw_short(r["dsr_principal"]),
+            f"{format_krw_short(r['final'])} ({r['bound']})",
+            "기준" if inc == income else format_krw_short(diff),
+        ])
+
+    return CalcResult(
+        calc_type="loan_limit",
+        as_of=as_of,
+        answer_box=answer_box,
+        assumption_rows=assumption_rows,
+        calc_process_headers=calc_process_headers,
+        calc_process_rows=calc_process_rows,
+        scenario_headers=scenario_headers,
+        scenario_rows=scenario_rows,
+        raw={"final_limit": base["final"], "dsr_principal": base["dsr_principal"],
+             "ltv_cap": ltv_cap, "bound": base["bound"]},
+    )
+
+
+# ───────────────────────────────────────────
+# purchase_cash: 주택가격·LTV·취득세·부대비용 → 필요 자기자금
+# ───────────────────────────────────────────
+
+def compute_purchase_cash(calc: dict) -> CalcResult:
+    """
+    필요 입력:
+      home_price            주택가격 (원)
+      ltv_limit             LTV 한도 (소수, 예: 0.70)
+      acquisition_tax_rate  취득세율 (소수, 예: 0.011) — 리서치 근거값
+      other_costs           기타 부대비용 (원) — 선택(중개보수·법무비 등)
+      as_of                 기준일
+      ltv_scenarios         비교할 LTV 리스트 (소수) — 선택
+    """
+    price = float(calc["home_price"])
+    ltv = float(calc["ltv_limit"])
+    tax_rate = float(calc.get("acquisition_tax_rate", 0) or 0)
+    other = float(calc.get("other_costs", 0) or 0)
+    as_of = str(calc.get("as_of", "")).strip()
+
+    def cash_for(ltv_ratio: float) -> dict:
+        loanable = price * ltv_ratio
+        tax = price * tax_rate
+        own = price - loanable + tax + other
+        return {"ltv": ltv_ratio, "loanable": loanable, "tax": tax, "own": own}
+
+    base = cash_for(ltv)
+
+    answer_box = (
+        f"주택가격 {format_krw_short(price, approx=False)}, LTV {format_pct(ltv)} 기준 "
+        f"대출 가능액은 {format_krw_short(base['loanable'])}, 취득세 {format_krw_short(base['tax'])}"
+        f"{('·기타비용 ' + format_krw_short(other, approx=False)) if other else ''}를 더하면 "
+        f"필요한 자기자금은 {format_krw_short(base['own'])}입니다."
+    )
+
+    assumption_rows = [
+        ("주택가격", format_krw_short(price, approx=False)),
+        ("LTV 한도", format_pct(ltv)),
+        ("취득세율", format_pct(tax_rate) if tax_rate else "본문 참조"),
+        ("기타 부대비용", format_krw_short(other, approx=False) if other else "0원"),
+        ("기준일", as_of or "본문 참조"),
+    ]
+
+    calc_process_headers = ["구분", "금액"]
+    calc_process_rows = [
+        ["주택가격", format_krw_short(price, approx=False)],
+        [f"대출 가능액(LTV {format_pct(ltv)})", format_krw_short(base["loanable"])],
+        ["취득세", format_krw_short(base["tax"])],
+        ["기타 부대비용", format_krw_short(other, approx=False)],
+        ["필요 자기자금", format_krw_short(base["own"])],
+    ]
+
+    ltv_scenarios = calc.get("ltv_scenarios") or [0.40, 0.50, 0.70]
+    ltv_scenarios = sorted({round(float(x), 4) for x in ltv_scenarios} | {ltv})
+    scenario_headers = ["LTV", "대출 가능액", "필요 자기자금", "기준 대비 증감"]
+    scenario_rows = []
+    for lr in ltv_scenarios:
+        r = cash_for(lr)
+        diff = r["own"] - base["own"]
+        scenario_rows.append([
+            format_pct(lr),
+            format_krw_short(r["loanable"]),
+            format_krw_short(r["own"]),
+            "기준" if lr == ltv else format_krw_short(diff),
+        ])
+
+    return CalcResult(
+        calc_type="purchase_cash",
+        as_of=as_of,
+        answer_box=answer_box,
+        assumption_rows=assumption_rows,
+        calc_process_headers=calc_process_headers,
+        calc_process_rows=calc_process_rows,
+        scenario_headers=scenario_headers,
+        scenario_rows=scenario_rows,
+        raw={"loanable": base["loanable"], "tax": base["tax"], "own_cash": base["own"]},
+    )
+
+
 CALC_DISPATCH = {
     "dsr_capacity": compute_dsr_capacity,
     "refinancing": compute_refinancing,
+    "amortization": compute_amortization,
+    "repayment_compare": compute_repayment_compare,
+    "loan_limit": compute_loan_limit,
+    "purchase_cash": compute_purchase_cash,
 }
 
 
@@ -364,6 +764,46 @@ def _render_table(headers: list[str], rows: list[list[str]], numeric_from: int =
         tds = "".join(f"<td{align(i)}>{_esc(c)}</td>" for i, c in enumerate(row))
         body += f"<tr>{tds}</tr>"
     return f"<table><thead><tr>{thead}</tr></thead><tbody>{body}</tbody></table>"
+
+
+def render_comparison_tables(tables: list[Any] | None) -> str:
+    """비계산형 글(전세·정책·신용점수)용 구조화 비교표 렌더러.
+
+    LLM이 채운 comparison_tables([{title, headers, rows}])를 안전하게 렌더링한다.
+    모든 셀은 이스케이프되며, 텍스트 표이므로 좌측 정렬한다.
+    표준 계산 공식이 없는 글도 채점관이 실제로 채점할 '조건/기관 비교표'를 갖게 한다.
+    """
+    if not tables:
+        return ""
+    out: list[str] = []
+    for t in tables:
+        if not isinstance(t, dict):
+            continue
+        headers = [str(h) for h in (t.get("headers") or [])]
+        clean_rows: list[list[str]] = []
+        for r in t.get("rows") or []:
+            if isinstance(r, (list, tuple)) and r:
+                clean_rows.append([str(c) for c in r])
+        if len(headers) < 2 or not clean_rows:
+            continue
+        title = str(t.get("title") or "조건 비교")
+        # numeric_from=len(headers) → 모든 열 좌측 정렬(텍스트 표)
+        out.append(f"<h2>{_esc(title)}</h2>" + _render_table(headers, clean_rows, numeric_from=len(headers)))
+    return "".join(out)
+
+
+def count_valid_comparison_tables(tables: list[Any] | None) -> int:
+    """헤더 2개 이상 + 유효 행 2개 이상인 비교표 개수 (검증용)."""
+    n = 0
+    for t in tables or []:
+        if not isinstance(t, dict):
+            continue
+        headers = t.get("headers") or []
+        valid_rows = [r for r in (t.get("rows") or [])
+                      if isinstance(r, (list, tuple)) and len(r) >= 2]
+        if len(headers) >= 2 and len(valid_rows) >= 2:
+            n += 1
+    return n
 
 
 def render_calc_tables(result: CalcResult) -> str:
@@ -496,10 +936,12 @@ def validate_article(
     ctas: list[dict],
     full_html: str,
     requires_calc: bool,
+    comparison_tables: list[Any] | None = None,
 ) -> ValidationResult:
     """발행 전 하드 게이트 검증.
 
     requires_calc=True(금융 계산형 카테고리)인데 계산 결과가 없으면 발행 불가.
+    requires_calc=False(전세·정책 등)인데 계산 표도 비교표도 없으면 경고.
     """
     checks: dict[str, bool] = {}
     hard_fail: list[str] = []
@@ -510,6 +952,13 @@ def validate_article(
     checks["calc_present"] = calc_present
     if requires_calc and not calc_present:
         hard_fail.append("금융 계산형 글이지만 코드 계산 결과가 없습니다 (계산 검증 실패)")
+
+    # 1-b) 비계산형 글은 구조화 비교표가 있어야 채점 가능 (없으면 경고)
+    if not requires_calc and not calc_present:
+        table_count = count_valid_comparison_tables(comparison_tables)
+        checks["comparison_table_present"] = table_count > 0
+        if table_count == 0:
+            warnings.append("비계산형 글인데 구조화 비교표가 없습니다 (조건·기관 비교표 1개 이상 권장)")
 
     # 상단 핵심 답변에 최종 결과 수치가 있는지 (계산이 있으면 계산값 기반이라 자동 충족)
     has_number = bool(re.search(r"\d", answer_box_text or ""))

@@ -9,6 +9,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -42,15 +43,25 @@ ROADMAP_TOPICS: list[tuple[str, str]] = [
 ]
 
 
+# auto_ok(자동 발행 품질) 판정 시 허용하는 warn 최대 건수
+AUTO_OK_MAX_WARN = int(os.getenv("AUTO_OK_MAX_WARN", "2"))
+
+
 def compute_publish_gate(ai_review: dict, validation) -> dict:
     """점수 + 코드 검증 하드 게이트를 합쳐 발행 상태를 판정한다.
 
+    ※ 이 판정은 '품질 신호'일 뿐 발행 여부를 결정하지 않는다.
+      운영 정책상 자동 파이프라인 글은 항상 초안으로 저장되고, 발행은 사람이 한다.
+
     상태:
-      auto_ok         90+ & warn 0 & 계산·출처·렌더링 검증 통과 → 자동 발행 품질
+      auto_ok         90+ & fail 0 & warn 2건 이하 & 하드 게이트 통과 → 발행해도 될 품질
       human_review    85~89 → 사람 검토 후 발행
       draft_reinforce 80~84 → 초안 보강 필요
       regenerate      79 이하 · fail · 하드 게이트 실패 → 재생성
     금융 계산 글은 점수가 높아도 하드 게이트(계산/출처/렌더링) 실패 시 무조건 regenerate.
+
+    warn은 '개선 제안'이지 결함이 아니다. warn 0을 요구하면 90점대 글도 영구히
+    자동 발행되지 못하므로 2건까지 허용한다(AUTO_OK_MAX_WARN).
     """
     score = ai_review.get("total_score", 0)
     issues = ai_review.get("issues", [])
@@ -60,7 +71,7 @@ def compute_publish_gate(ai_review: dict, validation) -> dict:
 
     if hard_fail or fail_count > 0 or score < 80:
         status = "regenerate"
-    elif score >= 90 and warn_count == 0:
+    elif score >= 90 and warn_count <= AUTO_OK_MAX_WARN:
         status = "auto_ok"
     elif score >= 85:
         status = "human_review"
@@ -122,8 +133,8 @@ def pick_roadmap_seed(excluded_topics: list[str]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="ohyess.kr 자동 발행 파이프라인")
-    p.add_argument("--mode", choices=["publish", "draft"], default=None,
-                   help="발행 모드 (기본: 환경변수 PUBLISH_MODE 또는 publish)")
+    p.add_argument("--mode", choices=["draft"], default="draft",
+                   help="저장 모드. 운영 정책상 draft만 허용 — 발행은 관리자가 직접 한다")
     p.add_argument("--count", type=int, default=None,
                    help="생성할 글 수 (기본: 환경변수 POSTS_PER_RUN 또는 1)")
     p.add_argument("--dry-run", action="store_true",
@@ -135,7 +146,8 @@ def main() -> None:
     args = build_parser().parse_args()
     config = load_config()
 
-    mode = args.mode or config.publish_mode
+    # 운영 정책상 저장 모드는 항상 draft. PUBLISH_MODE 환경변수는 더 이상 사용하지 않는다.
+    mode = "draft"
     count = args.count or config.posts_per_run
 
     # ── 환경변수 검증 ──────────────────────────────
@@ -390,18 +402,16 @@ def main() -> None:
             print(f"[DRY-RUN] 저장됨: {output_path}", flush=True)
             continue
 
-        # 5. Supabase 발행 (안전장치: 자동 발행 품질이 아니면 무조건 초안 저장)
-        #    자동 파이프라인 글은 관리자가 '공개'를 눌러야 메인에 노출된다.
-        effective_mode = mode
+        # 5. Supabase 저장 — 자동 파이프라인은 어떤 경우에도 초안으로만 저장한다.
+        #    YMYL(금융) 글은 사람이 직접 검수하고 최종 발행한다는 운영 정책.
+        #    게이트 상태(auto_ok 등)는 관리자 화면의 품질 신호로만 쓰인다.
         gate_status = (gate or {}).get("status") if gate else None
-        if mode == "publish" and gate_status != "auto_ok":
-            effective_mode = "draft"
-            print(
-                f"[STEP 4] mode=publish 였으나 게이트가 '{gate_status}'(auto_ok 아님) → "
-                f"초안으로 강제 저장 (관리자 검토 후 공개 필요)",
-                flush=True,
-            )
-        print(f"[STEP 4] Supabase 저장 중... (요청 mode={mode}, 실제 mode={effective_mode})", flush=True)
+        effective_mode = "draft"
+        print(
+            f"[STEP 4] Supabase 초안 저장 중... (품질 게이트: {gate_status}) — "
+            f"발행은 관리자가 직접 검수 후 공개합니다.",
+            flush=True,
+        )
         try:
             result = publisher.publish(article, html, effective_mode, ai_review=ai_review)
             status = "발행" if result["published"] else "초안 저장"

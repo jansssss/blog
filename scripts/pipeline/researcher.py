@@ -10,6 +10,8 @@ from urllib import request
 from urllib.error import HTTPError
 from datetime import date
 
+from . import openai_client
+
 
 # 에버그린·고의도(고CPC) 금융 실무 질의 클러스터.
 # ohyess.kr 계산기(DSR/주담대/대환/중도상환) 중심으로 편성.
@@ -235,7 +237,6 @@ class TavilyResearcher:
         payload = {
             "model": self.openai_model,
             "max_completion_tokens": 2000,
-            "temperature": 0.2,
             "messages": [
                 {
                     "role": "system",
@@ -248,25 +249,15 @@ class TavilyResearcher:
             ],
         }
 
-        raw_body = json.dumps(payload).encode("utf-8")
-        req = request.Request(
-            self.OPENAI_URL,
-            data=raw_body,
-            headers={
-                "Authorization": f"Bearer {self.openai_api_key}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
-        )
         try:
-            with request.urlopen(req, timeout=60) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                content = data["choices"][0]["message"]["content"].strip()
-                if content.startswith("```"):
-                    content = content.split("```")[1]
-                    if content.startswith("json"):
-                        content = content[4:]
-                return json.loads(content.strip())
-        except HTTPError as e:
-            body = e.read().decode("utf-8")
-            raise RuntimeError(f"OpenAI HTTP {e.code}: {body}") from e
+            data = openai_client.post_chat(
+                self.openai_api_key, payload, timeout=60, tag="RESEARCHER"
+            )
+            content = data["choices"][0]["message"]["content"].strip()
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+            return json.loads(content.strip())
+        except openai_client.OpenAIRequestError as e:
+            raise RuntimeError(f"OpenAI HTTP {e.code}: {e.body}") from e

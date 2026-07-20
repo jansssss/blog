@@ -12,10 +12,9 @@ import unicodedata
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from urllib import request
-from urllib.error import HTTPError
 
 from . import finance
+from . import openai_client
 
 
 @dataclass
@@ -303,7 +302,6 @@ class ColumnistWriter:
             payload={
                 "model": self.model,
                 "max_completion_tokens": 8000,
-                "temperature": 0.3,
                 "messages": [{"role": "user", "content": instructions}],
             },
             timeout=300,
@@ -412,7 +410,6 @@ class ColumnistWriter:
             payload={
                 "model": self.model,
                 "max_completion_tokens": 8000,
-                "temperature": 0.2,
                 "messages": [{"role": "user", "content": instructions}],
             },
             timeout=300,
@@ -696,11 +693,9 @@ def _esc(text: str) -> str:
 # HTTP 헬퍼
 # ───────────────────────────────────────────
 def _post_json(url: str, headers: dict, payload: dict, timeout: int = 60) -> dict:
-    raw_body = json.dumps(payload).encode("utf-8")
-    req = request.Request(url, data=raw_body, headers=headers, method="POST")
+    """OpenAI 호출 래퍼. 모델이 거부하는 샘플링 파라미터는 자동으로 떼고 재시도한다."""
+    api_key = (headers.get("Authorization") or "").removeprefix("Bearer ").strip()
     try:
-        with request.urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except HTTPError as e:
-        body = e.read().decode("utf-8")
-        raise RuntimeError(f"HTTP {e.code} {e.reason}: {body}") from e
+        return openai_client.post_chat(api_key, payload, timeout=timeout, tag="COLUMNIST")
+    except openai_client.OpenAIRequestError as e:
+        raise RuntimeError(f"HTTP {e.code}: {e.body}") from e

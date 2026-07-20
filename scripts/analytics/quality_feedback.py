@@ -26,6 +26,12 @@ from scripts.pipeline.reviewer import SCORE_MAX
 
 MIN_REVIEWED = 6          # 힌트 생성 최소 검수 글 수
 FETCH_LIMIT = 40          # 최근 몇 건을 학습 대상으로 볼지
+
+# schema_version 2 이하의 검수는 신뢰하지 않는다.
+# v2 검수관은 잘린 HTML(앞 3500자)만 보고 채점해서 출처·기준일·CTA 같은
+# 글 뒷부분 항목을 "없다"고 오판했다. 그 오판을 학습에 넣으면 작가가
+# 멀쩡한 항목을 고치느라 실제 품질을 놓치는 악순환이 생긴다.
+MIN_TRUSTED_SCHEMA = 3
 _WEAK_RATIO = 0.6         # 항목 점수가 만점의 60% 미만이면 "약한 항목"
 _MIN_OCCURRENCE = 2       # 실패 원인이 최소 2회 반복돼야 힌트에 포함
 
@@ -121,10 +127,18 @@ class QualityFeedbackAnalyzer:
     def get_quality_hints(self, limit: int = FETCH_LIMIT, min_reviewed: int = MIN_REVIEWED) -> str | None:
         """반복 실패 패턴 + 긍정 패턴을 프롬프트용 문자열로 반환. 부족 시 None."""
         rows = self._fetch_reviews(limit)
-        reviewed = [r for r in rows if isinstance(r.get("ai_review"), dict)]
+        all_reviewed = [r for r in rows if isinstance(r.get("ai_review"), dict)]
+        # 구버전(잘린 HTML 기반) 검수는 학습에서 제외 — 유령 실패 학습 방지
+        reviewed = [
+            r for r in all_reviewed
+            if int(r["ai_review"].get("schema_version") or 0) >= MIN_TRUSTED_SCHEMA
+        ]
+        stale = len(all_reviewed) - len(reviewed)
+        if stale:
+            print(f"[QUALITY] 구버전 검수 {stale}건 제외 (schema_version < {MIN_TRUSTED_SCHEMA})", flush=True)
         if len(reviewed) < min_reviewed:
             print(
-                f"[QUALITY] 검수 이력 부족 ({len(reviewed)} < {min_reviewed}) — 품질 힌트 생략",
+                f"[QUALITY] 신뢰 가능한 검수 이력 부족 ({len(reviewed)} < {min_reviewed}) — 품질 힌트 생략",
                 flush=True,
             )
             return None

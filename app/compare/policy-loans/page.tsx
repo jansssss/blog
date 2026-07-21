@@ -1,9 +1,8 @@
-'use client'
-
 import { Card, CardContent } from '@/components/ui/card'
 import { Landmark, ArrowLeft, ExternalLink, CheckCircle2, Info, Users, Briefcase, Home, Search } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import PolicyDataNotice from '@/components/policy/PolicyDataNotice'
 
 // 정책자금 대출 종류
 const POLICY_CATEGORIES = [
@@ -111,6 +110,9 @@ export default function PolicyLoansPage() {
         </p>
       </div>
 
+      {/* 자격 확인기 유도 + 데이터 고지 */}
+      <PolicyDataNotice scope="정책자금" />
+
       {/* 핵심 안내 */}
       <Card className="mb-8 border-primary/30 bg-primary/5">
         <CardContent className="pt-6">
@@ -121,7 +123,8 @@ export default function PolicyLoansPage() {
               <p className="text-sm text-gray-600">
                 정부와 공공기관이 <strong className="text-gray-900">특정 대상</strong>을 위해
                 <strong className="text-gray-900"> 낮은 금리</strong>로 지원하는 대출입니다.
-                일반 은행 대출보다 1~3%p 낮은 금리로 이용할 수 있으며, 자격 조건에 해당하면 반드시 확인해보세요.
+                시중 대출보다 금리가 낮은 대신 소득·자산·업력 등 자격 요건이 붙습니다.
+                금리와 한도는 수시로 바뀌므로 반드시 기관 공식 사이트에서 확인하세요.
               </p>
             </div>
           </div>

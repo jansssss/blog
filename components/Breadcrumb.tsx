@@ -27,9 +27,9 @@ const PATH_LABELS: Record<string, string> = {
 
   // 비교 하위
   'bank-rates': '은행별 금리 비교',
-  'loan-products': '대출 상품 비교',
+  'loan-products': '대출 종류 고르기',
   'fixed-vs-variable': '고정금리 vs 변동금리',
-  'policy-loans': '정책자금 비교',
+  'policy-loans': '정책자금 찾기',
 
   // 정책 하위
   'youth': '청년 금융 지원',

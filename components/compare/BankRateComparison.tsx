@@ -278,13 +278,16 @@ function OfferRow({ row, rank }: { row: ComparisonRow; rank: number }) {
 export default function BankRateComparison({
   offers,
   disclosureMonths,
+  initialProductType = 'mortgage',
 }: {
   offers: LoanOffer[]
   disclosureMonths: Partial<Record<LoanProductType, string>>
+  /** 다른 페이지에서 상품종류를 지정해 들어올 때 (예: /compare/bank-rates?type=rent) */
+  initialProductType?: LoanProductType
 }) {
-  const [productType, setProductType] = useState<LoanProductType>('mortgage')
-  const [amount, setAmount] = useState(DEFAULTS.mortgage.amount)
-  const [months, setMonths] = useState(DEFAULTS.mortgage.months)
+  const [productType, setProductType] = useState<LoanProductType>(initialProductType)
+  const [amount, setAmount] = useState(DEFAULTS[initialProductType].amount)
+  const [months, setMonths] = useState(DEFAULTS[initialProductType].months)
   const [creditScore, setCreditScore] = useState(750)
   const [rateBasis, setRateBasis] = useState<RateBasis>('min')
   const [sortKey, setSortKey] = useState<SortKey>('totalInterest')

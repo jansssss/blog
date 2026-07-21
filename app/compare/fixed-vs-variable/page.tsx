@@ -1,427 +1,198 @@
-'use client'
-
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { GitCompare, TrendingUp, Lock, Unlock, ArrowLeft, ExternalLink, CheckCircle2, Info, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, ExternalLink, Info, Lock, Unlock } from 'lucide-react'
 import Link from 'next/link'
+
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import FixedVariableSimulator, { type MarketOption } from '@/components/compare/FixedVariableSimulator'
+import snapshotJson from '@/data/finlife-offers.json'
+import { computeMarketRates } from '@/lib/finlife/market'
+import { formatDisclosureMonth, type OfferSnapshot } from '@/lib/finlife/snapshot'
+import { LOAN_ENDPOINTS, type LoanProductType } from '@/lib/finlife/types'
+
+const snapshot = snapshotJson as unknown as OfferSnapshot
+
+/**
+ * 고정·변동 금리유형이 모두 공시되는 상품만 대상으로 한다.
+ * 개인신용대출은 FSS 공시에 금리유형 구분이 없어 제외한다.
+ */
+const TARGET_TYPES: LoanProductType[] = ['mortgage', 'rent']
+
+const OPTIONS: MarketOption[] = TARGET_TYPES.map((productType) => ({
+  productType,
+  label: LOAN_ENDPOINTS[productType].label,
+  market: computeMarketRates(snapshot.offers, productType),
+  disclosureMonth: formatDisclosureMonth(snapshot.disclosureMonths[productType]),
+})).filter((option) => option.market.fixed && option.market.variable)
 
 export default function FixedVsVariablePage() {
-  const [loanAmount, setLoanAmount] = useState<number>(100000000) // 1억
-  const [loanTerm, setLoanTerm] = useState<number>(30) // 30년
-  const [fixedRate, setFixedRate] = useState<number>(4.0)
-  const [variableRate, setVariableRate] = useState<number>(3.5)
-
-  // 월 상환액 계산 (원리금균등)
-  const calculateMonthlyPayment = (principal: number, annualRate: number, years: number) => {
-    const monthlyRate = annualRate / 100 / 12
-    const months = years * 12
-    if (monthlyRate === 0) return principal / months
-    return (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1)
-  }
-
-  const results = useMemo(() => {
-    const fixedMonthly = calculateMonthlyPayment(loanAmount, fixedRate, loanTerm)
-    const variableMonthly = calculateMonthlyPayment(loanAmount, variableRate, loanTerm)
-    const totalMonths = loanTerm * 12
-
-    // 금리 상승 시나리오 (1%p 상승)
-    const variableUp1 = calculateMonthlyPayment(loanAmount, variableRate + 1, loanTerm)
-    // 금리 상승 시나리오 (2%p 상승)
-    const variableUp2 = calculateMonthlyPayment(loanAmount, variableRate + 2, loanTerm)
-
-    return {
-      fixed: {
-        monthly: fixedMonthly,
-        totalPayment: fixedMonthly * totalMonths,
-        totalInterest: fixedMonthly * totalMonths - loanAmount
-      },
-      variable: {
-        monthly: variableMonthly,
-        totalPayment: variableMonthly * totalMonths,
-        totalInterest: variableMonthly * totalMonths - loanAmount
-      },
-      variableUp1: {
-        monthly: variableUp1,
-        increase: variableUp1 - variableMonthly
-      },
-      variableUp2: {
-        monthly: variableUp2,
-        increase: variableUp2 - variableMonthly
-      },
-      monthlyDiff: fixedMonthly - variableMonthly,
-      interestDiff: (fixedMonthly * totalMonths - loanAmount) - (variableMonthly * totalMonths - loanAmount)
-    }
-  }, [loanAmount, loanTerm, fixedRate, variableRate])
-
-  const formatNumber = (num: number) => Math.round(num).toLocaleString()
+  const primary = OPTIONS[0]
+  const spread = primary?.market.spread
 
   return (
-    <div className="container py-8 max-w-5xl">
+    <div className="container max-w-6xl py-8">
       {/* 뒤로가기 */}
       <div className="mb-6">
         <Link href="/compare" className="inline-flex items-center text-sm text-gray-600 hover:text-primary">
           <ArrowLeft className="w-4 h-4 mr-1" />
-          금융 상품 비교
+          금융 비교
         </Link>
       </div>
 
       {/* 헤더 */}
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
-          <GitCompare className="w-7 h-7 text-primary" />
+        <div className="inline-flex items-center gap-2 bg-indigo-100 px-3 py-1 rounded-full text-xs font-semibold text-indigo-700 mb-3">
+          ⚡ 금감원 공시 금리로 즉시 계산
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900">
-          고정금리 vs 변동금리 선택 가이드
-        </h1>
-        <p className="text-gray-600">
-          두 가지 금리 유형의 특징을 이해하고 나에게 맞는 선택을 하세요
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">고정금리 vs 변동금리</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          {spread !== null && spread !== undefined ? (
+            <>
+              지금 변동금리가 <strong className="text-indigo-700">{spread}%p</strong> 쌉니다. 앞으로
+              얼마나 올라야 이 할인폭이 사라지는지 계산합니다.
+            </>
+          ) : (
+            '변동금리가 얼마나 올라야 고정금리보다 불리해지는지 계산합니다'
+          )}
         </p>
       </div>
 
-      {/* 핵심 요약 */}
-      <div className="grid sm:grid-cols-2 gap-4 mb-8">
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Lock className="w-5 h-5 text-blue-600" />
+      {OPTIONS.length > 0 ? (
+        <FixedVariableSimulator options={OPTIONS} />
+      ) : (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          금리유형별 공시 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.
+        </div>
+      )}
+
+      {/* ── 하단 가이드 ─────────────────────────────────────────── */}
+      <div className="space-y-6 mt-8">
+        {/* 두 유형 요약 */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-indigo-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-blue-900">고정금리</h3>
-                <p className="text-sm text-blue-700">금리가 변하지 않음</p>
+                <h3 className="font-bold text-gray-900">고정금리</h3>
+                <p className="text-xs text-gray-500">만기까지 금리가 변하지 않음</p>
               </div>
             </div>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li className="flex items-start gap-1">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>상환액이 일정해 계획 수립 용이</span>
+            <ul className="text-sm text-gray-600 space-y-1.5">
+              <li className="flex items-start gap-1.5">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-500" />
+                <span>상환액이 일정해 장기 계획을 세우기 쉽습니다</span>
               </li>
-              <li className="flex items-start gap-1">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>금리 인상 위험 없음</span>
+              <li className="flex items-start gap-1.5">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-500" />
+                <span>금리가 아무리 올라도 부담이 늘지 않습니다</span>
               </li>
-              <li className="flex items-start gap-1">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
-                <span>초기 금리가 변동금리보다 높음</span>
+              <li className="flex items-start gap-1.5">
+                <span className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500 text-center leading-4">
+                  !
+                </span>
+                <span>대신 시작 금리가 변동금리보다 높습니다</span>
               </li>
             </ul>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="border-green-200 bg-green-50/50">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <Unlock className="w-5 h-5 text-green-600" />
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                <Unlock className="w-5 h-5 text-gray-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-green-900">변동금리</h3>
-                <p className="text-sm text-green-700">시장 금리에 따라 변동</p>
+                <h3 className="font-bold text-gray-900">변동금리</h3>
+                <p className="text-xs text-gray-500">주기적으로 시장금리에 따라 조정</p>
               </div>
             </div>
-            <ul className="text-sm text-green-800 space-y-1">
-              <li className="flex items-start gap-1">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>초기 금리가 상대적으로 낮음</span>
+            <ul className="text-sm text-gray-600 space-y-1.5">
+              <li className="flex items-start gap-1.5">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-500" />
+                <span>시작 금리가 낮아 초기 부담이 적습니다</span>
               </li>
-              <li className="flex items-start gap-1">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>금리 하락 시 이자 부담 감소</span>
+              <li className="flex items-start gap-1.5">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-500" />
+                <span>금리가 내리면 이자도 함께 줄어듭니다</span>
               </li>
-              <li className="flex items-start gap-1">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
-                <span>금리 인상 시 부담 증가</span>
+              <li className="flex items-start gap-1.5">
+                <span className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500 text-center leading-4">
+                  !
+                </span>
+                <span>오르면 월 부담이 그대로 늘어납니다</span>
               </li>
             </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 시뮬레이터 */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">💡 금리 차이 시뮬레이터</h2>
-
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-lg">조건 입력</CardTitle>
-            <p className="text-sm text-gray-500">아래 값을 조정하여 두 금리 유형을 비교해보세요</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">대출금액</label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={loanAmount}
-                    onChange={(e) => setLoanAmount(Number(e.target.value))}
-                    className="pr-8"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">원</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{formatNumber(loanAmount / 10000)}만원</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">대출기간</label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={loanTerm}
-                    onChange={(e) => setLoanTerm(Number(e.target.value))}
-                    className="pr-8"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">년</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">고정금리</label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={fixedRate}
-                    onChange={(e) => setFixedRate(Number(e.target.value))}
-                    className="pr-8"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">%</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">변동금리 (현재)</label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={variableRate}
-                    onChange={(e) => setVariableRate(Number(e.target.value))}
-                    className="pr-8"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">%</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 비교 결과 */}
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          {/* 고정금리 */}
-          <Card className="border-blue-200">
-            <CardHeader className="bg-blue-50/50">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Lock className="w-5 h-5 text-blue-600" />
-                고정금리 {fixedRate}%
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-sm text-gray-600">월 상환액</span>
-                  <span className="font-semibold text-blue-600">{formatNumber(results.fixed.monthly)}원</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">총 상환액</span>
-                  <span>{formatNumber(results.fixed.totalPayment)}원</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">총 이자</span>
-                  <span>{formatNumber(results.fixed.totalInterest)}원</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 변동금리 */}
-          <Card className="border-green-200">
-            <CardHeader className="bg-green-50/50">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Unlock className="w-5 h-5 text-green-600" />
-                변동금리 {variableRate}%
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-sm text-gray-600">월 상환액 (현재)</span>
-                  <span className="font-semibold text-green-600">{formatNumber(results.variable.monthly)}원</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">총 상환액</span>
-                  <span>{formatNumber(results.variable.totalPayment)}원</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">총 이자</span>
-                  <span>{formatNumber(results.variable.totalInterest)}원</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
-        {/* 차이 요약 */}
-        <Card className="bg-gray-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">현재 시점 월 상환액 차이</span>
-              <span className={`font-bold ${results.monthlyDiff > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                {results.monthlyDiff > 0 ? '고정금리가 ' : '변동금리가 '}
-                {formatNumber(Math.abs(results.monthlyDiff))}원 더 높음
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 변동금리 상승 시나리오 */}
-        <Card className="mt-4 border-amber-200">
-          <CardHeader className="bg-amber-50/50">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-amber-600" />
-              변동금리 상승 시나리오
-            </CardTitle>
-            <p className="text-sm text-amber-700 mt-1">향후 금리가 오르면 얼마나 부담이 늘어날까요?</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                <div>
-                  <span className="text-sm font-medium">1%p 상승 시</span>
-                  <span className="text-xs text-gray-500 ml-2">({variableRate}% → {variableRate + 1}%)</span>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-amber-600">{formatNumber(results.variableUp1.monthly)}원</p>
-                  <p className="text-xs text-amber-700">+{formatNumber(results.variableUp1.increase)}원/월</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                <div>
-                  <span className="text-sm font-medium">2%p 상승 시</span>
-                  <span className="text-xs text-gray-500 ml-2">({variableRate}% → {variableRate + 2}%)</span>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-red-600">{formatNumber(results.variableUp2.monthly)}원</p>
-                  <p className="text-xs text-red-700">+{formatNumber(results.variableUp2.increase)}원/월</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* 선택 가이드 */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">나에게 맞는 금리 선택하기</h2>
-
-        <div className="space-y-4">
-          <div className="bg-white border rounded-lg p-5">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-blue-600" />
-              고정금리를 선택하면 좋은 경우
-            </h3>
-            <ul className="text-gray-600 text-sm space-y-2">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">금리 인상이 예상될 때:</strong> 향후 기준금리가 오를 것으로 전망되는 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">장기 대출인 경우:</strong> 20년 이상 장기 대출로 안정성이 중요한 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">상환 계획이 필요할 때:</strong> 일정한 월 상환액으로 재정 계획을 세우고 싶은 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">소득이 고정적일 때:</strong> 급여 변동이 적어 안정적인 상환을 원하는 경우</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-white border rounded-lg p-5">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Unlock className="w-5 h-5 text-green-600" />
-              변동금리를 선택하면 좋은 경우
-            </h3>
-            <ul className="text-gray-600 text-sm space-y-2">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">금리 하락이 예상될 때:</strong> 향후 기준금리가 내릴 것으로 전망되는 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">단기 대출인 경우:</strong> 5년 이내 상환 예정으로 금리 변동 위험이 적은 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">초기 이자 부담을 줄이고 싶을 때:</strong> 당장의 월 상환액이 부담스러운 경우</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <span><strong className="text-gray-900">조기 상환 계획이 있을 때:</strong> 1~2년 내 중도상환 예정인 경우</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-white border rounded-lg p-5">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <GitCompare className="w-5 h-5 text-purple-600" />
-              혼합형 금리도 고려하세요
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              <strong className="text-gray-900">혼합형(MIX)</strong>은 처음 일정 기간은 고정금리, 이후는 변동금리가 적용됩니다.
-              예를 들어 "3년 고정 + 변동" 상품은 처음 3년간은 금리가 고정되고, 이후 변동금리로 전환됩니다.
-              두 금리의 장점을 적절히 활용할 수 있는 방법입니다.
+        {/* 판단 기준 */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <h2 className="font-bold text-gray-900 mb-4">이 계산 결과를 어떻게 쓰면 되나</h2>
+          <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
+            <p>
+              <strong className="text-gray-900">손익분기 상승폭이 작다면</strong> — 변동금리를 골라
+              얻는 할인폭이 얇다는 뜻입니다. 금리가 조금만 올라도 뒤집히므로, 상환 기간이 길다면
+              고정금리 쪽이 안전합니다.
+            </p>
+            <p>
+              <strong className="text-gray-900">손익분기 상승폭이 크다면</strong> — 그만큼 여유가
+              있습니다. 다만 30년 대출에서 그 정도 상승이 한 번도 없을지는 별개의 판단입니다.
+            </p>
+            <p>
+              <strong className="text-gray-900">상환 계획이 짧다면</strong> — 몇 년 안에 갚거나
+              갈아탈 예정이면 초기 금리가 낮은 변동금리가 유리한 경우가 많습니다. 위 계산기에서
+              대출기간을 실제 보유 예정 기간으로 줄여 보세요.
+            </p>
+            <p>
+              <strong className="text-gray-900">혼합형(MIX)도 선택지입니다</strong> — 처음 3~5년은
+              고정, 이후 변동으로 전환되는 상품입니다. 상승 시점을 고정 기간 종료 시점으로 맞춰
+              계산하면 대략의 감을 잡을 수 있습니다.
             </p>
           </div>
         </div>
-      </section>
 
-      {/* 주의사항 */}
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-8">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-800">
-            <p className="font-semibold mb-2">금리 선택 시 체크 포인트</p>
-            <ul className="text-amber-700 space-y-1">
-              <li>• 현재 <strong>기준금리 추세</strong>와 한국은행 전망 확인</li>
-              <li>• 고정금리와 변동금리의 <strong>금리 차이</strong>가 얼마인지 확인</li>
-              <li>• <strong>중도상환수수료</strong> 조건 비교 (고정금리가 더 높은 경우 많음)</li>
-              <li>• 변동금리는 <strong>금리 변동 주기</strong> 확인 (3개월, 6개월, 1년 등)</li>
-              <li>• 금리 전환 옵션이 있는지 확인</li>
-            </ul>
+        {/* 체크포인트 */}
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-800">
+              <p className="font-bold mb-2">계약 전 반드시 확인할 것</p>
+              <ul className="text-amber-700 space-y-1">
+                <li>• 변동금리의 <strong>금리 변동 주기</strong> (3개월·6개월·1년)</li>
+                <li>• 어떤 지표에 연동되는지 (COFIX·금융채 등)</li>
+                <li>• <strong>중도상환수수료</strong> — 고정금리 쪽이 더 높은 경우가 많습니다</li>
+                <li>• 변동 → 고정 <strong>전환 옵션</strong>이 있는지, 수수료는 얼마인지</li>
+                <li>• 우대금리 조건(급여이체·카드실적)과 유지 기간</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 면책 */}
-      <DisclaimerNotice message="본 시뮬레이터는 참고용이며, 실제 상환액은 대출 조건에 따라 달라질 수 있습니다. 금리 선택은 개인의 재정 상황과 시장 전망을 종합적으로 고려하여 결정하세요." />
+        <DisclaimerNotice message="본 계산기는 금융감독원 공시 금리를 기본값으로 사용하지만, 실제 적용 금리는 개인 신용도·담보·우대조건에 따라 달라집니다. 미래 금리 경로는 누구도 예측할 수 없으므로 결과는 참고용으로만 활용하세요." />
 
-      {/* 관련 도구 */}
-      <div className="bg-gray-50 rounded-lg p-4 border mt-6">
-        <p className="text-sm font-medium text-gray-700 mb-3">관련 도구</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Link
-            href="/calculator/loan-interest"
-            className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
-          >
-            <div>
-              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">대출 이자 계산기</p>
-              <p className="text-xs text-gray-500 mt-0.5">상환액 상세 계산</p>
-            </div>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
-          </Link>
-          <Link
-            href="/calculator/repayment-compare"
-            className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
-          >
-            <div>
-              <p className="font-medium text-sm text-gray-900 group-hover:text-primary">상환 방식 비교</p>
-              <p className="text-xs text-gray-500 mt-0.5">원리금 vs 원금균등</p>
-            </div>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary" />
-          </Link>
+        {/* 관련 도구 */}
+        <div className="bg-gray-50 rounded-2xl p-4 border">
+          <p className="text-sm font-medium text-gray-700 mb-3">관련 도구</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[
+              { href: '/compare/bank-rates', title: '은행별 금리 비교', desc: '실제 공시 상품 비교' },
+              { href: '/calculator/loan-interest', title: '대출 이자 계산기', desc: '상환액 상세 계산' },
+              { href: '/calculator/rate-change-impact', title: '금리 변동 영향', desc: '인상 시 부담 변화' },
+            ].map((tool) => (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                className="flex items-center justify-between p-3 bg-white rounded-xl border hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors group"
+              >
+                <div>
+                  <p className="font-medium text-sm text-gray-900 group-hover:text-indigo-700">
+                    {tool.title}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{tool.desc}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

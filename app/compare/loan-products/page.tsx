@@ -1,9 +1,31 @@
-'use client'
-
 import { Card, CardContent } from '@/components/ui/card'
-import { FileText, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Users, Home, Briefcase, Car, Search, HelpCircle } from 'lucide-react'
+import { FileText, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Users, Home, Briefcase, Car, Search, HelpCircle, SearchCheck } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+
+import snapshotJson from '@/data/finlife-offers.json'
+import type { OfferSnapshot } from '@/lib/finlife/snapshot'
+import { formatDisclosureMonth } from '@/lib/finlife/snapshot'
+import type { LoanProductType } from '@/lib/finlife/types'
+
+/**
+ * 이 페이지는 "어떤 종류의 대출이 필요한지" 고르는 입구다.
+ * 실제 금리 비교는 /compare/bank-rates 가 담당하므로, 각 유형 카드에서
+ * 그 상품종류로 필터된 비교표로 곧장 넘어갈 수 있게 연결한다.
+ * (중복된 비교 UI 를 하나 더 만들지 않기 위한 구조)
+ */
+const snapshot = snapshotJson as unknown as OfferSnapshot
+
+/** 공시 데이터가 있는 유형은 실제 최저금리·상품 수를 함께 보여준다 */
+function liveSummary(productType: LoanProductType) {
+  const rates = snapshot.offers
+    .filter((offer) => offer.productType === productType)
+    .map((offer) => offer.rateMin ?? offer.rateAvg)
+    .filter((rate): rate is number => typeof rate === 'number' && rate > 0)
+
+  if (rates.length === 0) return null
+  return { count: rates.length, min: Math.min(...rates) }
+}
 
 // 대출 유형별 안내
 const LOAN_TYPES = [
@@ -14,7 +36,8 @@ const LOAN_TYPES = [
     description: '담보 없이 신용으로 받는 대출',
     suitable: ['긴급 자금 필요', '소액 단기 대출', '담보 없는 경우'],
     checkPoints: ['금리가 상대적으로 높음', '신용점수에 영향', '한도 제한 있음'],
-    color: 'blue'
+    color: 'blue',
+    productType: 'credit' as LoanProductType,
   },
   {
     id: 'jeonse',
@@ -23,7 +46,8 @@ const LOAN_TYPES = [
     description: '전세보증금 마련을 위한 대출',
     suitable: ['전세 계약 예정', '무주택 세대주', '청년·신혼부부'],
     checkPoints: ['정부 지원 상품 확인', '보증료 발생', '무주택 조건 확인'],
-    color: 'green'
+    color: 'green',
+    productType: 'rent' as LoanProductType,
   },
   {
     id: 'mortgage',
@@ -32,7 +56,8 @@ const LOAN_TYPES = [
     description: '주택을 담보로 하는 장기 대출',
     suitable: ['주택 구입', '대환대출', '목돈 마련'],
     checkPoints: ['LTV·DTI·DSR 규제 확인', '장기 상환 계획', '고정/변동금리 선택'],
-    color: 'purple'
+    color: 'purple',
+    productType: 'mortgage' as LoanProductType,
   },
   {
     id: 'auto',
@@ -41,16 +66,21 @@ const LOAN_TYPES = [
     description: '차량 구입을 위한 할부/대출',
     suitable: ['신차·중고차 구입', '법인·개인'],
     checkPoints: ['할부/리스/렌트 비교', '중도상환수수료', '보험 필수 여부'],
-    color: 'orange'
-  }
+    color: 'orange',
+    // 금감원 통합 비교공시는 자동차대출을 다루지 않는다 → 비교표로 연결하지 않는다
+    productType: null,
+  },
 ]
 
-// 정부 지원 대출 안내
+/**
+ * 정부 지원 대출 — 기관 공식 사이트만 연결한다.
+ * 금리·한도는 수시로 바뀌므로 여기 적지 않고, 자격 판정은 자격 확인기로 넘긴다.
+ */
 const GOVERNMENT_LOANS = [
-  { name: '청년전용 버팀목전세대출', target: '만 19~34세 무주택 청년', site: 'https://nhuf.molit.go.kr' },
-  { name: '신혼부부 전세대출', target: '혼인 7년 이내 신혼부부', site: 'https://nhuf.molit.go.kr' },
-  { name: '특례보금자리론', target: '무주택 또는 1주택 실수요자', site: 'https://www.hf.go.kr' },
-  { name: '디딤돌대출', target: '무주택 서민·실수요자', site: 'https://www.hf.go.kr' },
+  { name: '청년전용 버팀목전세자금', target: '만 19~34세 무주택 청년', site: 'https://nhuf.molit.go.kr' },
+  { name: '신혼부부전용 전세자금', target: '혼인 7년 이내 신혼부부', site: 'https://nhuf.molit.go.kr' },
+  { name: '내집마련 디딤돌대출', target: '무주택 서민·실수요자 주택 구입', site: 'https://nhuf.molit.go.kr' },
+  { name: '보금자리론', target: '주택 구입 실수요자 (한국주택금융공사)', site: 'https://www.hf.go.kr' },
 ]
 
 // 공식 대출 비교 사이트
@@ -128,43 +158,78 @@ export default function LoanProductsPage() {
           <HelpCircle className="w-5 h-5 text-primary" />
           어떤 대출이 필요하신가요?
         </h2>
+        <p className="text-sm text-gray-500 mb-4">
+          유형을 고르면 실제 공시 금리 비교표로 이동합니다.
+          {formatDisclosureMonth(snapshot.disclosureMonths.mortgage)
+            ? ` 금리는 금융감독원 ${formatDisclosureMonth(snapshot.disclosureMonths.mortgage)} 공시 기준입니다.`
+            : ''}
+        </p>
         <div className="grid sm:grid-cols-2 gap-4">
-          {LOAN_TYPES.map((type) => (
-            <div key={type.id} className="bg-white rounded-lg border p-5 hover:shadow-sm transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-full bg-${type.color}-100 flex items-center justify-center text-${type.color}-600`}>
-                  {type.icon}
+          {LOAN_TYPES.map((type) => {
+            const live = type.productType ? liveSummary(type.productType) : null
+            return (
+              <div key={type.id} className="bg-white rounded-lg border p-5 hover:shadow-sm transition-shadow flex flex-col">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-full bg-${type.color}-100 flex items-center justify-center text-${type.color}-600`}>
+                    {type.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{type.name}</h3>
+                    <p className="text-xs text-gray-500">{type.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">{type.name}</h3>
-                  <p className="text-xs text-gray-500">{type.description}</p>
-                </div>
-              </div>
 
-              <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 mb-1">이런 분께 적합:</p>
-                <div className="flex flex-wrap gap-1">
-                  {type.suitable.map((s, i) => (
-                    <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      {s}
-                    </span>
-                  ))}
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-gray-700 mb-1">이런 분께 적합:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {type.suitable.map((s, i) => (
+                      <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-1">체크 포인트:</p>
+                  <ul className="text-xs text-gray-600 space-y-0.5">
+                    {type.checkPoints.map((point, i) => (
+                      <li key={i} className="flex items-start gap-1">
+                        <span className="text-primary">•</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 실제 비교표로 연결 — 이 페이지에 비교 UI 를 중복 구현하지 않는다 */}
+                <div className="mt-auto pt-3 border-t">
+                  {live ? (
+                    <Link
+                      href={`/compare/bank-rates?type=${type.productType}`}
+                      className="flex items-center justify-between group"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-indigo-700 group-hover:text-indigo-800">
+                          금리 비교하기
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          공시 {live.count}개 상품 · 최저 연 {live.min.toFixed(2)}%
+                        </p>
+                      </div>
+                      <span className="text-indigo-600 group-hover:translate-x-0.5 transition-transform">
+                        →
+                      </span>
+                    </Link>
+                  ) : (
+                    <p className="text-xs text-gray-400">
+                      금융감독원 통합 비교공시 대상이 아니어서 금리 비교표를 제공하지 않습니다
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <div>
-                <p className="text-xs font-medium text-gray-700 mb-1">체크 포인트:</p>
-                <ul className="text-xs text-gray-600 space-y-0.5">
-                  {type.checkPoints.map((point, i) => (
-                    <li key={i} className="flex items-start gap-1">
-                      <span className="text-primary">•</span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -176,9 +241,26 @@ export default function LoanProductsPage() {
         </h2>
         <div className="bg-green-50 border border-green-200 rounded-lg p-5 mb-4">
           <p className="text-sm text-green-800 mb-4">
-            정부 지원 대출은 일반 대출보다 <strong>1~3%p 낮은 금리</strong>가 적용됩니다.
-            자격 조건에 해당하는지 먼저 확인하세요.
+            정부 지원 대출은 시중 대출보다 낮은 금리가 적용되는 경우가 많습니다. 다만 소득·자산·
+            무주택 등 자격 요건이 있으니 <strong>해당되는지부터 확인</strong>하세요. 금리와 한도는
+            수시로 바뀌므로 아래 기관 공식 사이트에서 최신 조건을 보셔야 합니다.
           </p>
+
+          <Link
+            href="/policy/eligibility"
+            className="flex items-center justify-between p-3 mb-3 rounded-lg text-white group"
+            style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)' }}
+          >
+            <div className="flex items-center gap-2">
+              <SearchCheck className="w-4 h-4" />
+              <div>
+                <p className="font-semibold text-sm">내 조건으로 자격 확인하기</p>
+                <p className="text-xs text-indigo-100">나이·소득·자산을 넣으면 해당 제도를 찾아드립니다</p>
+              </div>
+            </div>
+            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+          </Link>
+
           <div className="space-y-3">
             {GOVERNMENT_LOANS.map((loan, index) => (
               <a

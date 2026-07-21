@@ -207,7 +207,7 @@ export default function OilShockKoreaStrategyPage() {
       </TrendWarn>
       <TrendUl>
         <li>고정금리 전환 시 중도상환수수료 계산 → 수수료보다 미래 금리 차이가 크면 전환 유리</li>
-        <li>안심전환대출·특례보금자리론 등 정책 고정금리 상품 잔여 한도 확인</li>
+        <li>보금자리론 등 정책 고정금리 상품의 현재 취급 여부·한도 확인 (한시 상품은 이미 종료된 경우가 많음)</li>
         <li>신규 대출 계획이 있다면 변동보다 고정 선택이 지금은 안전</li>
       </TrendUl>
 

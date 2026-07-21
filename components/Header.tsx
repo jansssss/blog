@@ -39,10 +39,10 @@ const OHYESS_NAV: NavItem[] = [
     label: '금융 비교',
     href: '/compare',
     subItems: [
-      { label: '은행별 금리 비교 방법', href: '/compare/bank-rates', description: '공식 채널로 정확한 금리 확인법' },
-      { label: '대출 상품 비교', href: '/compare/loan-products', description: '상품별 조건 비교' },
-      { label: '고정 vs 변동금리', href: '/compare/fixed-vs-variable', description: '금리 유형 비교' },
-      { label: '정책자금 비교', href: '/compare/policy-loans', description: '정부 지원 대출' },
+      { label: '은행별 금리 비교', href: '/compare/bank-rates', description: '금감원 공시 실데이터' },
+      { label: '고정 vs 변동금리', href: '/compare/fixed-vs-variable', description: '손익분기 계산' },
+      { label: '대출 종류 고르기', href: '/compare/loan-products', description: '유형별 특징 안내' },
+      { label: '정책자금 찾기', href: '/compare/policy-loans', description: '기관별 정부 지원 대출' },
     ]
   },
   {

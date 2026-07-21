@@ -3,9 +3,13 @@ import { TrendingUp, FileText, GitCompare, Landmark } from 'lucide-react'
 import Link from 'next/link'
 
 import snapshotJson from '@/data/finlife-offers.json'
+import { computeMarketRates } from '@/lib/finlife/market'
 import type { OfferSnapshot } from '@/lib/finlife/snapshot'
 
-const OFFER_COUNT = (snapshotJson as unknown as OfferSnapshot).offers.length
+const SNAPSHOT = snapshotJson as unknown as OfferSnapshot
+const OFFER_COUNT = SNAPSHOT.offers.length
+/** 주담대 고정 − 변동 금리차 (%p). 고정 vs 변동 카드 설명에 실측치를 쓴다 */
+const MORTGAGE_SPREAD = computeMarketRates(SNAPSHOT.offers, 'mortgage').spread
 
 export const metadata: Metadata = {
   title: '대출 비교 | 은행 금리·고정 vs 변동·정책대출 한눈에 비교 | ohyess',
@@ -40,21 +44,25 @@ const COMPARISONS: ComparisonEntry[] = [
     live: true
   },
   {
+    icon: <GitCompare className="w-5 h-5" />,
+    title: '고정 vs 변동금리',
+    description:
+      MORTGAGE_SPREAD !== null
+        ? `지금 변동이 ${MORTGAGE_SPREAD}%p 싼데, 얼마나 올라야 손해인지 계산`
+        : '변동금리가 얼마나 올라야 고정금리보다 불리해지는지 계산',
+    href: '/compare/fixed-vs-variable',
+    live: true
+  },
+  {
     icon: <FileText className="w-5 h-5" />,
-    title: '대출 상품 비교',
-    description: '다양한 대출 상품의 조건과 금리를 비교하세요',
+    title: '대출 종류 고르기',
+    description: '신용·전세·주담대 특징을 보고 해당 비교표로 이동',
     href: '/compare/loan-products'
   },
   {
-    icon: <GitCompare className="w-5 h-5" />,
-    title: '고정금리 vs 변동금리',
-    description: '두 가지 금리 유형의 장단점을 비교해보세요',
-    href: '/compare/fixed-vs-variable'
-  },
-  {
     icon: <Landmark className="w-5 h-5" />,
-    title: '정책자금 비교',
-    description: '정부 및 공공기관의 정책자금을 비교하세요',
+    title: '정책자금 찾기',
+    description: '기관별 정책자금 안내 · 자격 확인기 연결',
     href: '/compare/policy-loans'
   }
 ]
@@ -65,10 +73,12 @@ export default function ComparePage() {
       {/* Hero */}
       <div className="rounded-3xl bg-gradient-to-b from-blue-50/60 to-white border border-blue-100/60 px-8 py-12 text-center mb-10">
         <span className="inline-block px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full mb-5">
-          4가지 금융 비교
+          금융감독원 공시 {OFFER_COUNT}개 상품
         </span>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">금융 비교</h1>
-        <p className="text-gray-500 text-base max-w-md mx-auto">은행별·상품별 금리와 조건을 직접 비교하세요</p>
+        <p className="text-gray-500 text-base max-w-lg mx-auto">
+          금리 차이를 월상환액과 총이자로 환산해 보여드립니다. 실제 공시 데이터로 계산합니다.
+        </p>
       </div>
 
       {/* Grid */}

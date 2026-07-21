@@ -5,6 +5,7 @@ import DisclaimerNotice from '@/components/DisclaimerNotice'
 import BankRateComparison from '@/components/compare/BankRateComparison'
 import snapshotJson from '@/data/finlife-offers.json'
 import { formatDisclosureMonth, type OfferSnapshot } from '@/lib/finlife/snapshot'
+import type { LoanProductType } from '@/lib/finlife/types'
 
 /**
  * 공시 데이터는 월 1회 갱신되고 저장소에 커밋되므로 완전 정적으로 렌더링한다.
@@ -40,7 +41,20 @@ const BANK_SITES = [
   { name: 'K뱅크', url: 'https://www.kbanknow.com' },
 ]
 
-export default function BankRatesPage() {
+/** ?type= 로 넘어온 값이 실제 상품종류일 때만 받아들인다 */
+function parseProductType(value: string | string[] | undefined): LoanProductType {
+  const first = Array.isArray(value) ? value[0] : value
+  if (first === 'mortgage' || first === 'rent' || first === 'credit') return first
+  return 'mortgage'
+}
+
+export default async function BankRatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string | string[] }>
+}) {
+  const { type } = await searchParams
+  const initialProductType = parseProductType(type)
   const monthLabel = formatDisclosureMonth(snapshot.disclosureMonths.mortgage)
 
   return (
@@ -57,6 +71,7 @@ export default function BankRatesPage() {
       <BankRateComparison
         offers={snapshot.offers}
         disclosureMonths={snapshot.disclosureMonths}
+        initialProductType={initialProductType}
       />
 
       {/* ── 가이드 콘텐츠 ── */}

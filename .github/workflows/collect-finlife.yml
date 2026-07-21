@@ -1,0 +1,99 @@
+name: Collect FSS Loan Rates (금감원 금리 공시 수집)
+
+# 금융감독원 「금융상품 통합 비교공시」를 수집해 data/finlife-offers.json 에 커밋한다.
+# 공시는 월 1회 갱신되지만 갱신일이 일정하지 않아 주 1회 확인하고,
+# 실제로 내용이 바뀐 경우에만 커밋한다(= 커밋되면 Vercel 이 재배포).
+#
+# 필요한 시크릿: FSS_FINLIFE_API_KEY
+#   Settings → Secrets and variables → Actions → New repository secret
+#   키 발급: https://finlife.fss.or.kr → 오픈API → 인증키 신청
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 매주 월요일 KST 06:00 (UTC 21:00 일요일)
+    - cron: "0 21 * * 0"
+
+# 동시 실행 시 커밋이 충돌하지 않도록 직렬화
+concurrency:
+  group: collect-finlife
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect FSS loan rates
+        env:
+          FSS_FINLIFE_API_KEY: ${{ secrets.FSS_FINLIFE_API_KEY }}
+        run: |
+          if [ -z "$FSS_FINLIFE_API_KEY" ]; then
+            echo "::error::FSS_FINLIFE_API_KEY 시크릿이 설정되지 않았습니다."
+            echo "https://finlife.fss.or.kr 오픈API 에서 인증키를 발급받아 저장소 시크릿에 등록하세요."
+            exit 1
+          fi
+          npm run collect:finlife
+
+      # 수집 결과가 실제로 표시 가능한지 검증한다.
+      # 데이터가 깨진 채로 커밋되어 배포까지 흘러가는 것을 여기서 막는다.
+      - name: Verify snapshot
+        run: |
+          npx vitest run
+          npx tsc --noEmit
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/finlife-offers.json; then
+            echo "공시 데이터에 변경이 없습니다. 커밋을 건너뜁니다."
+            exit 0
+          fi
+
+          MONTH=$(node -p "require('./data/finlife-offers.json').disclosureMonths.mortgage || '알수없음'")
+          COUNT=$(node -p "require('./data/finlife-offers.json').offers.length")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/finlife-offers.json
+          git commit -m "Data: 금감원 금리 공시 갱신 (${MONTH} 기준, ${COUNT}개 상품)"
+          git push
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### 금감원 금리 공시 수집 결과"
+            if [ -f data/finlife-offers.json ]; then
+              node -e "
+                const s = require('./data/finlife-offers.json');
+                console.log('- 생성 시각: ' + s.generatedAt);
+                console.log('- 총 상품 수: ' + s.offers.length);
+                for (const [k, v] of Object.entries(s.counts)) {
+                  console.log('- ' + k + ': ' + v + '건 (공시월 ' + (s.disclosureMonths[k] || '-') + ')');
+                }
+                const failed = s.summaries.filter(x => x.errors.length);
+                if (failed.length) {
+                  console.log('');
+                  console.log('#### 실패한 권역');
+                  for (const f of failed) console.log('- ' + f.productType + ' / ' + f.finGroupCode + ': ' + f.errors.join('; '));
+                }
+              "
+            else
+              echo "- 스냅샷 파일이 생성되지 않았습니다."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

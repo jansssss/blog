@@ -2,6 +2,11 @@ import { Metadata } from 'next'
 import { TrendingUp, FileText, GitCompare, Landmark } from 'lucide-react'
 import Link from 'next/link'
 
+import snapshotJson from '@/data/finlife-offers.json'
+import type { OfferSnapshot } from '@/lib/finlife/snapshot'
+
+const OFFER_COUNT = (snapshotJson as unknown as OfferSnapshot).offers.length
+
 export const metadata: Metadata = {
   title: '대출 비교 | 은행 금리·고정 vs 변동·정책대출 한눈에 비교 | ohyess',
   description: '은행별 대출 금리, 고정금리 vs 변동금리, 주택담보·정책 대출 상품을 비교합니다. 금융감독원 공식 채널 활용법과 상품별 장단점을 정리했습니다.',
@@ -17,12 +22,22 @@ export const metadata: Metadata = {
   },
 }
 
-const COMPARISONS = [
+interface ComparisonEntry {
+  icon: React.ReactNode
+  title: string
+  description: string
+  href: string
+  /** 실제 공시 데이터를 다루는 페이지인지 (가이드 문서와 구분) */
+  live?: boolean
+}
+
+const COMPARISONS: ComparisonEntry[] = [
   {
     icon: <TrendingUp className="w-5 h-5" />,
-    title: '은행별 금리 비교 방법',
-    description: '공식 채널로 정확한 금리를 확인·비교하는 방법',
-    href: '/compare/bank-rates'
+    title: '은행별 금리 비교',
+    description: `금감원 공시 ${OFFER_COUNT}개 상품을 월상환액·총이자로 환산해 비교`,
+    href: '/compare/bank-rates',
+    live: true
   },
   {
     icon: <FileText className="w-5 h-5" />,
@@ -59,7 +74,12 @@ export default function ComparePage() {
       {/* Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {COMPARISONS.map((item) => (
-          <Link key={item.href} href={item.href} className="p-5 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all group">
+          <Link key={item.href} href={item.href} className="p-5 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all group relative">
+            {item.live && (
+              <span className="absolute top-3 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                실데이터
+              </span>
+            )}
             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-100 transition-colors">
               {item.icon}
             </div>

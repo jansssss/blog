@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Users, CheckCircle2, AlertTriangle, Info, ArrowLeft, ExternalLink, Home, GraduationCap, Briefcase, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import PolicyDataNotice from '@/components/policy/PolicyDataNotice'
 
 // 청년 정책 데이터
 interface YouthPolicy {
@@ -29,7 +30,7 @@ const YOUTH_POLICIES: YouthPolicy[] = [
     name: '청년전용 버팀목전세대출',
     provider: '주택도시기금',
     description: '청년층을 위한 저금리 전세자금 대출',
-    benefit: '연 1.5~2.9% 금리, 최대 2억원',
+    benefit: '연 2.2~3.3%, 최대 1.5억원 (만 25세 미만 단독세대주 1.2억원)',
     eligibility: ['만 19~34세', '무주택 세대주', '연소득 5천만원 이하', '순자산 3.45억원 이하'],
     howToApply: '주택도시기금 홈페이지 또는 기금수탁은행 방문',
     link: 'https://nhuf.molit.go.kr'
@@ -40,31 +41,33 @@ const YOUTH_POLICIES: YouthPolicy[] = [
     name: '청년 월세 지원',
     provider: '국토교통부',
     description: '저소득 청년의 월세 부담 경감',
-    benefit: '월 최대 20만원, 최대 12개월',
-    eligibility: ['만 19~34세', '독립거주 무주택 청년', '소득 기준 충족', '보증금 5천만원/월세 60만원 이하'],
+    benefit: '월 최대 20만원 × 최장 24개월 (생애 1회)',
+    eligibility: ['만 19~34세', '부모와 별도거주 무주택', '청년가구 중위소득 60% 이하', '재산 1.22억원 이하'],
     howToApply: '마이홈포털 또는 주민센터 신청',
     link: 'https://www.myhome.go.kr'
   },
   {
     id: 'youth-housing-fund',
     category: 'housing',
-    name: '청년우대형 주택청약종합저축',
-    provider: '은행권',
-    description: '청년 대상 우대금리 주택청약저축',
-    benefit: '연 최대 4.5% 금리 (일반 2.1%)',
-    eligibility: ['만 19~34세', '무주택세대주', '연소득 3,600만원 이하'],
-    howToApply: '시중은행 영업점 방문 가입',
+    name: '청년주택드림 청약통장',
+    provider: '국토교통부·은행권',
+    description: '청년 대상 우대금리 청약통장 (청년우대형 청약저축 후속)',
+    benefit: '우대금리 적용 + 청약 당첨 시 전용 대출 연계 — 최신 금리는 공식 확인 필요',
+    eligibility: ['만 19~34세', '무주택자', '연소득 요건'],
+    howToApply: '시중은행 영업점 또는 앱에서 가입',
+    link: 'https://nhuf.molit.go.kr'
   },
   // 금융
   {
     id: 'youth-hope-savings',
     category: 'finance',
-    name: '청년희망적금',
-    provider: '서민금융진흥원',
-    description: '청년 자산형성 지원 적금',
-    benefit: '정부 저축장려금 최대 36만원 + 비과세',
-    eligibility: ['만 19~34세', '개인소득 3,600만원 이하', '가구소득 중위 180% 이하'],
-    howToApply: '시중은행 앱/홈페이지 신청',
+    name: '청년미래적금',
+    provider: '금융위원회·서민금융진흥원',
+    description: '청년 자산형성 지원 적금 (청년희망적금·청년도약계좌 후속)',
+    benefit: '월 최대 50만원 납입, 3년 만기. 정부기여금 6~12% 매칭',
+    eligibility: ['만 19~34세', '총급여 7,500만원 이하', '가구소득 중위 180% 이하'],
+    howToApply: '취급은행 앱에서 신청 (연 1~2회 모집 기간에만 접수)',
+    link: 'https://www.fsc.go.kr/no010101/87158'
   },
   {
     id: 'youth-tomorrow-savings',
@@ -118,7 +121,7 @@ const YOUTH_POLICIES: YouthPolicy[] = [
     name: '취업 후 상환 학자금대출 (ICL)',
     provider: '한국장학재단',
     description: '졸업 후 소득 발생 시 상환',
-    benefit: '연 1.7% (2024년), 등록금+생활비',
+    benefit: '등록금+생활비 지원, 졸업 후 소득 발생 시 상환 — 금리는 학기별 공고',
     eligibility: ['대학(원)생', '학자금지원 8구간 이하', '만 35세 이하'],
     howToApply: '한국장학재단 홈페이지',
     link: 'https://www.kosaf.go.kr'
@@ -175,10 +178,9 @@ export default function YouthPolicyPage() {
         <p className="text-gray-600">
           청년을 위한 정부 및 공공기관의 금융 지원 제도
         </p>
-        <p className="text-xs text-gray-400 mt-2">
-          2026년 1월 기준 · 세부 조건은 변경될 수 있습니다
-        </p>
       </div>
+
+      <PolicyDataNotice scope="청년 대상 지원" />
 
       {/* 카테고리 선택 */}
       <div className="flex flex-wrap justify-center gap-2 mb-8">

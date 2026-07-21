@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Briefcase, CheckCircle2, Info, ArrowLeft, ExternalLink, Wallet, Building2, Shield, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import PolicyDataNotice from '@/components/policy/PolicyDataNotice'
 
 // 소상공인 정책 데이터
 interface SmallBizPolicy {
@@ -176,10 +177,9 @@ export default function SmallBusinessPolicyPage() {
         <p className="text-gray-600">
           소상공인과 자영업자를 위한 금융 지원 정책
         </p>
-        <p className="text-xs text-gray-400 mt-2">
-          2026년 1월 기준 · 세부 조건은 변경될 수 있습니다
-        </p>
       </div>
+
+      <PolicyDataNotice scope="소상공인·자영업자 지원" />
 
       {/* 소상공인 기준 안내 */}
       <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Building2, CheckCircle2, Info, ArrowLeft, ExternalLink, Wallet, Shield, Factory, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import PolicyDataNotice from '@/components/policy/PolicyDataNotice'
 
 // 중소기업 정책 데이터
 interface SMEPolicy {
@@ -186,10 +187,9 @@ export default function SMEPolicyPage() {
         <p className="text-gray-600">
           중소기업을 위한 정책자금 및 금융 지원
         </p>
-        <p className="text-xs text-gray-400 mt-2">
-          2026년 1월 기준 · 세부 조건은 변경될 수 있습니다
-        </p>
       </div>
+
+      <PolicyDataNotice scope="중소기업 정책자금" />
 
       {/* 중소기업 기준 안내 */}
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">

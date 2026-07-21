@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Home, CheckCircle2, Info, ArrowLeft, ExternalLink, Key, Building, Wallet, Users } from 'lucide-react'
 import Link from 'next/link'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import PolicyDataNotice from '@/components/policy/PolicyDataNotice'
 
 // 주거 정책 데이터
 interface HousingPolicy {
@@ -28,8 +29,8 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '버팀목전세대출',
     provider: '주택도시기금',
     description: '무주택 서민을 위한 전세자금 대출',
-    benefit: '연 2.1~3.0%, 수도권 최대 3억원',
-    eligibility: ['무주택세대주', '연소득 6천만원 이하', '순자산 3.61억원 이하'],
+    benefit: '연 2.5~3.5%, 수도권 1.2억원 (신혼·다자녀 2.5억원)',
+    eligibility: ['무주택세대주', '부부합산 연소득 5천만원 이하', '순자산 3.45억원 이하'],
     howToApply: '주택도시기금 홈페이지 또는 기금수탁은행',
     link: 'https://nhuf.molit.go.kr'
   },
@@ -39,7 +40,7 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '청년전용 버팀목전세대출',
     provider: '주택도시기금',
     description: '청년층 특별 우대 전세대출',
-    benefit: '연 1.5~2.9%, 최대 2억원',
+    benefit: '연 2.2~3.3%, 최대 1.5억원',
     eligibility: ['만 19~34세', '무주택', '연소득 5천만원 이하'],
     howToApply: '주택도시기금 홈페이지',
     link: 'https://nhuf.molit.go.kr'
@@ -50,8 +51,8 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '신혼부부전용 전세대출',
     provider: '주택도시기금',
     description: '신혼부부 우대 전세대출',
-    benefit: '연 1.5~2.7%, 수도권 최대 3억원',
-    eligibility: ['혼인 7년 이내', '무주택', '부부합산 연소득 6천만원 이하'],
+    benefit: '연 1.9~3.3%, 수도권 2.5억원 (그 외 1.6억원)',
+    eligibility: ['혼인 7년 이내', '무주택', '부부합산 연소득 7.5천만원 이하', '순자산 3.45억원 이하'],
     howToApply: '주택도시기금 홈페이지',
     link: 'https://nhuf.molit.go.kr'
   },
@@ -73,8 +74,8 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '청년 월세지원',
     provider: '국토교통부',
     description: '저소득 청년 월세 지원',
-    benefit: '월 최대 20만원, 12개월',
-    eligibility: ['만 19~34세', '독립거주 무주택', '소득 기준 충족'],
+    benefit: '월 최대 20만원 × 최장 24개월 (생애 1회)',
+    eligibility: ['만 19~34세', '부모와 별도거주 무주택', '청년가구 중위소득 60% 이하', '재산 1.22억원 이하'],
     howToApply: '마이홈포털 또는 주민센터',
     link: 'https://www.myhome.go.kr'
   },
@@ -84,7 +85,7 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '주거안정 월세대출',
     provider: '주택도시기금',
     description: '저소득층 월세 대출',
-    benefit: '월 60만원 이내, 연 1.5~2.5%',
+    benefit: '월 최대 60만원 (총 1,440만원), 우대형 연 1.3% / 일반형 연 1.8%',
     eligibility: ['무주택세대주', '연소득 5천만원 이하', '월세 60만원 이하'],
     howToApply: '주택도시기금 홈페이지',
     link: 'https://nhuf.molit.go.kr'
@@ -95,8 +96,8 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '주거급여',
     provider: '국토교통부',
     description: '저소득층 임차료/수선비 지원',
-    benefit: '지역별 최대 51만원/월',
-    eligibility: ['중위소득 47% 이하', '무주택 임차가구'],
+    benefit: '지역·가구원수별 기준임대료 내 임차료 지원 (2026년 인상)',
+    eligibility: ['소득인정액 중위소득 48% 이하', '임차가구는 임차급여, 자가는 수선유지급여'],
     howToApply: '주민센터 신청',
     link: 'https://www.bokjiro.go.kr'
   },
@@ -104,12 +105,12 @@ const HOUSING_POLICIES: HousingPolicy[] = [
   {
     id: 'special-bogeumjari',
     category: 'purchase',
-    name: '특례보금자리론',
+    name: '보금자리론',
     provider: '한국주택금융공사',
-    description: '실수요자 고정금리 장기 모기지',
-    benefit: '연 3.3~4.3%, 최대 5억원',
-    eligibility: ['무주택 또는 1주택자', '주택가격 9억 이하', '소득 요건'],
-    howToApply: '한국주택금융공사 또는 은행',
+    description: '실수요자 고정금리 장기 모기지 (특례보금자리론은 한시 운영 후 종료)',
+    benefit: '금리·한도는 공사 공고에 따라 변동 — 공식 사이트에서 확인 필요',
+    eligibility: ['무주택 또는 1주택자', '주택가격 요건', '소득 요건'],
+    howToApply: '한국주택금융공사 또는 취급은행',
     link: 'https://www.hf.go.kr'
   },
   {
@@ -118,8 +119,8 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '디딤돌대출',
     provider: '주택도시기금',
     description: '서민 주택구입자금 대출',
-    benefit: '연 2.45~3.55%, 최대 2.6억원',
-    eligibility: ['무주택세대주', '연소득 6천만원 이하', '주택가격 5억 이하'],
+    benefit: '연 2.85~4.15%, 일반 2억원 (생애최초 2.4억 / 신혼·2자녀 3.2억)',
+    eligibility: ['무주택세대주', '부부합산 연소득 6천만원 이하 (신혼 8.5천)', '순자산 5.11억원 이하', '주택가격 5억 이하'],
     howToApply: '주택도시기금 홈페이지',
     link: 'https://nhuf.molit.go.kr'
   },
@@ -129,7 +130,7 @@ const HOUSING_POLICIES: HousingPolicy[] = [
     name: '신혼부부전용 주택구입자금',
     provider: '주택도시기금',
     description: '신혼부부 주택구입 지원',
-    benefit: '연 1.85~2.7%, 최대 4억원',
+    benefit: '연 2.55~3.85%, 최대 3.2억원',
     eligibility: ['혼인 7년 이내', '무주택', '부부합산 연소득 8.5천만원 이하'],
     howToApply: '주택도시기금 홈페이지',
     link: 'https://nhuf.molit.go.kr'
@@ -209,10 +210,9 @@ export default function HousingPolicyPage() {
         <p className="text-gray-600">
           전세, 월세 등 주거 안정을 위한 금융 지원
         </p>
-        <p className="text-xs text-gray-400 mt-2">
-          2026년 1월 기준 · 세부 조건은 변경될 수 있습니다
-        </p>
       </div>
+
+      <PolicyDataNotice scope="전세·월세 등 주거 지원" />
 
       {/* 카테고리 선택 */}
       <div className="flex flex-wrap justify-center gap-2 mb-8">

@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
-import { Users, Briefcase, Building2, Home } from 'lucide-react'
+import { Users, Briefcase, Building2, Home, SearchCheck, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+
+import { ACTIVE_POLICIES } from '@/lib/policy/data'
 
 export const metadata: Metadata = {
   title: '금융 정책 안내 | 청년·소상공인·중소기업·주택 지원 정책 총정리 | ohyess',
@@ -53,6 +55,33 @@ export default function PolicyPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">정책 지원</h1>
         <p className="text-gray-500 text-base max-w-md mx-auto">청년·소상공인·중소기업·주거 금융 지원 제도를 확인하세요</p>
       </div>
+
+      {/* 자격 확인기 — 이 섹션의 주된 진입점 */}
+      <Link
+        href="/policy/eligibility"
+        className="block rounded-2xl p-6 sm:p-7 mb-6 text-white group"
+        style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)' }}
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+            <SearchCheck className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h2 className="font-bold text-lg">지원정책 자격 확인기</h2>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/20">공식출처 검증</span>
+            </div>
+            <p className="text-indigo-100 text-sm leading-relaxed">
+              나이·혼인·소득·자산·무주택 여부·지역을 입력하면 신청 가능한 제도를 찾아드립니다.
+              조건이 맞지 않으면 무엇이 걸리는지도 알려드립니다.
+            </p>
+            <p className="text-indigo-200 text-xs mt-2 inline-flex items-center gap-1">
+              {ACTIVE_POLICIES.length}개 제도 검증 완료
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </p>
+          </div>
+        </div>
+      </Link>
 
       {/* Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

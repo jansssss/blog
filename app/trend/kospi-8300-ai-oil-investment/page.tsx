@@ -78,7 +78,7 @@ export default function Kospi8300AiOilInvestmentPage() {
       <TrendInsight>
         코스피 8,300은 단순한 숫자 돌파가 아닙니다. 이 시점에서 시가총액 기준 코스피는
         프랑스 CAC40을 제치고 유럽 2위 증시(독일 DAX 제외 시 1위) 수준에 근접했습니다.
-        "중견 신흥국 증시"에서 "AI 인프라 공급국 증시"로의 리레이팅이 현재진행형입니다.
+        &ldquo;중견 신흥국 증시&rdquo;에서 &ldquo;AI 인프라 공급국 증시&rdquo;로의 리레이팅이 현재진행형입니다.
       </TrendInsight>
 
       {/* ─── 2. AI 인프라 투자 ─── */}
@@ -130,24 +130,24 @@ export default function Kospi8300AiOilInvestmentPage() {
       {/* ─── 3. 개인 체감 격차 ─── */}
       <TrendH2 id="ai-gap">수백조 투자에도 개인이 AI를 못 느끼는 이유</TrendH2>
       <TrendP>
-        "ChatGPT는 써봤는데 딱히 내 삶이 달라진 건 없어요."
+        &ldquo;ChatGPT는 써봤는데 딱히 내 삶이 달라진 건 없어요.&rdquo;
         이 말은 절반만 맞고 절반은 틀립니다. 맞는 부분은 <strong>현재 AI가 개인 일상보다
         기업 백엔드와 전문가 작업에 먼저 침투하고 있다</strong>는 것입니다.
-        틀린 부분은 "달라진 게 없다"는 체감이 영원히 지속될 것이라는 암묵적 가정입니다.
+        틀린 부분은 &ldquo;달라진 게 없다&rdquo;는 체감이 영원히 지속될 것이라는 암묵적 가정입니다.
       </TrendP>
 
       <TrendH3>왜 개인 체감이 느린가: 5가지 구조적 이유</TrendH3>
       <TrendUl>
         <li><strong>기업 채택이 소비자보다 먼저:</strong> 현재 AI ROI(투자수익률)가 가장 높은 영역은 코딩 자동화, 문서 요약, 콜센터 응답, 법률·의료 보조 등 전문가 업무입니다. 개인 사용자는 AI 서비스의 수혜를 간접적으로 받지만 직접 실감하기 어렵습니다.</li>
-        <li><strong>비용 장벽:</strong> GPT-4o·Claude 3.5·Gemini Advanced 등 진정한 성능을 내는 모델은 월 20~30달러 유료 구독이 필요합니다. 무료 버전은 성능이 제한되어 "AI가 별로구나"라는 오해를 만듭니다.</li>
+        <li><strong>비용 장벽:</strong> GPT-4o·Claude 3.5·Gemini Advanced 등 진정한 성능을 내는 모델은 월 20~30달러 유료 구독이 필요합니다. 무료 버전은 성능이 제한되어 &ldquo;AI가 별로구나&rdquo;라는 오해를 만듭니다.</li>
         <li><strong>러닝 커브:</strong> AI는 잘 쓰는 법을 배워야 잘 씁니다. 프롬프트 엔지니어링, 컨텍스트 설정, 검증 방법을 모르면 성능의 10%도 활용하지 못합니다.</li>
         <li><strong>킬러 앱 부재:</strong> 스마트폰에 카카오톡이 있었듯, AI에는 아직 전 국민이 매일 쓰는 단일 킬러 앱이 없습니다. 분산된 사용 사례가 임계 체감을 만들지 못합니다.</li>
         <li><strong>인프라-체감 시차:</strong> 현재 투자의 95%는 모델 학습(training)에 쏟리지만, 개인이 쓰는 것은 추론(inference)입니다. 학습 완료 후 제품화, 보급, 습관화까지 평균 2~5년의 시차가 존재합니다.</li>
       </TrendUl>
 
       <TrendWarn>
-        "AI를 못 느낀다"는 것이 "AI가 과대평가됐다"는 증거가 아닙니다.
-        2000년 닷컴 버블 당시에도 "인터넷으로 바뀐 게 없다"던 사람들이 있었지만,
+        &ldquo;AI를 못 느낀다&rdquo;는 것이 &ldquo;AI가 과대평가됐다&rdquo;는 증거가 아닙니다.
+        2000년 닷컴 버블 당시에도 &ldquo;인터넷으로 바뀐 게 없다&rdquo;던 사람들이 있었지만,
         2010년대의 스마트폰·앱 경제는 그 인터넷 인프라 위에서 탄생했습니다.
         체감의 부재는 때로 기회의 초입을 뜻합니다.
       </TrendWarn>
@@ -156,14 +156,14 @@ export default function Kospi8300AiOilInvestmentPage() {
       <TrendH2 id="railroad-analogy">철도·광통신이 먼저 깔리고 체감은 나중에: AI는 역사의 반복인가</TrendH2>
       <TrendP>
         기술 혁명은 항상 <strong>인프라 선행 → 버블 → 붕괴 → 실질 활용 폭발</strong>의 패턴을 반복해왔습니다.
-        경제학자 카를로타 페레스(Carlota Perez)는 이를 "기술 혁명의 서지(Surge)"라고 정의합니다.
+        경제학자 카를로타 페레스(Carlota Perez)는 이를 &ldquo;기술 혁명의 서지(Surge)&rdquo;라고 정의합니다.
         AI 현재 상황을 이 역사적 패턴과 비교하면 놀라운 유사점이 드러납니다.
       </TrendP>
 
       <TrendCaseBox title="철도 혁명 (1840년대 영국) — AI의 첫 번째 거울">
         <TrendUl>
           <li><strong>인프라 투자 단계 (1836~1846년):</strong> 영국 전역에 철도 건설 붐. 투자자들이 수익성 무관하게 철도 회사 주식을 사들였고 당시 GDP의 5~7%가 철도 투자에 집중됨</li>
-          <li><strong>버블과 붕괴 (1847년):</strong> 철도 주가가 60~70% 폭락. "철도는 사기였다"는 여론이 들끓음. 그러나 깔아놓은 선로는 그대로였음</li>
+          <li><strong>버블과 붕괴 (1847년):</strong> 철도 주가가 60~70% 폭락. &ldquo;철도는 사기였다&rdquo;는 여론이 들끓음. 그러나 깔아놓은 선로는 그대로였음</li>
           <li><strong>실질 활용 단계 (1850~1890년대):</strong> 철도가 도시 산업화를 가속, 우편·물류·여행 혁명 발생. 빅토리아 시대 영국의 경제 성장과 제국 확장을 떠받친 핵심 인프라가 됨</li>
           <li><strong>체감 시차:</strong> 인프라 투자 붐에서 전 국민이 일상에서 철도를 느끼기까지 약 20~30년</li>
           <li><strong>AI 대비:</strong> 현재 AI 데이터센터 투자 = 선로 깔기 단계. 아직 기차가 대중에게 달리기 전</li>
@@ -173,18 +173,18 @@ export default function Kospi8300AiOilInvestmentPage() {
       <TrendCaseBox title="광통신·인터넷 혁명 (1990년대) — AI의 두 번째 거울">
         <TrendUl>
           <li><strong>인프라 투자 단계 (1996~2000년):</strong> WorldCom, Global Crossing 등이 전 세계 해저·육상 광케이블을 수십조 원 규모로 매설. 나스닥이 5,000을 돌파함</li>
-          <li><strong>버블과 붕괴 (2000~2002년):</strong> 닷컴 버블 붕괴. 나스닥 78% 폭락. WorldCom·Enron 파산. "인터넷은 과대평가됐다"는 논문들이 쏟아짐</li>
+          <li><strong>버블과 붕괴 (2000~2002년):</strong> 닷컴 버블 붕괴. 나스닥 78% 폭락. WorldCom·Enron 파산. &ldquo;인터넷은 과대평가됐다&rdquo;는 논문들이 쏟아짐</li>
           <li><strong>실질 활용 단계 (2005~2010년대):</strong> 깔아놓은 광케이블 위에서 구글·유튜브·페이스북·아이폰·카카오가 탄생. 2020년대 인류의 일상 전체가 그 광케이블에 의존함</li>
-          <li><strong>체감 시차:</strong> 버블 붕괴 후 약 5~10년이 지나서야 전 국민이 "인터넷이 내 삶을 바꿨다"고 느끼기 시작</li>
+          <li><strong>체감 시차:</strong> 버블 붕괴 후 약 5~10년이 지나서야 전 국민이 &ldquo;인터넷이 내 삶을 바꿨다&rdquo;고 느끼기 시작</li>
           <li><strong>AI 대비:</strong> 현재 AI 데이터센터 = 광케이블 매설 단계. ChatGPT, Claude는 아직 초기 넷스케이프 브라우저 수준</li>
         </TrendUl>
       </TrendCaseBox>
 
       <TrendInsight>
-        역사의 패턴이 반복된다면 현재 AI 인프라 투자는 "버블"이면서 동시에 "미래 체감의 씨앗"입니다.
+        역사의 패턴이 반복된다면 현재 AI 인프라 투자는 &ldquo;버블&rdquo;이면서 동시에 &ldquo;미래 체감의 씨앗&rdquo;입니다.
         버블이 터지더라도 데이터센터는 사라지지 않습니다. 깔아놓은 인프라 위에서
         2030년대의 킬러 앱이 탄생할 것입니다. 투자자 관점에서 중요한 것은
-        "버블이냐 아니냐"보다 "내가 버블 꼭대기에 올라타는가, 인프라 수혜를 장기 보유하는가"입니다.
+        &ldquo;버블이냐 아니냐&rdquo;보다 &ldquo;내가 버블 꼭대기에 올라타는가, 인프라 수혜를 장기 보유하는가&rdquo;입니다.
       </TrendInsight>
 
       {/* ─── 5. AI 버블인가 이제 시작인가 ─── */}
@@ -194,7 +194,7 @@ export default function Kospi8300AiOilInvestmentPage() {
       <TrendUl>
         <li><strong>수익화 속도:</strong> OpenAI의 연매출은 2025년 약 130억 달러 수준으로 성장했지만, 연간 투자 지출(수백억 달러)과 비교하면 ROI 회수에 수십 년이 걸린다는 분석이 있습니다.</li>
         <li><strong>전력 제약:</strong> AI 데이터센터의 전력 수요가 폭발적으로 증가하고 있지만, 글로벌 전력망이 이를 따라가지 못하고 있습니다. 2026년 미국의 일부 데이터센터는 전력 공급 부족으로 건설이 중단되는 사례가 나타나고 있습니다.</li>
-        <li><strong>대체재 등장:</strong> 오픈소스 AI 모델(Meta Llama 4, Mistral 등)의 성능이 빠르게 따라오면서 "굳이 비싼 API를 써야 하나"라는 질문이 커지고 있습니다. 하드웨어 비용을 정당화하는 프리미엄 모델의 모트(해자)가 좁아질 수 있습니다.</li>
+        <li><strong>대체재 등장:</strong> 오픈소스 AI 모델(Meta Llama 4, Mistral 등)의 성능이 빠르게 따라오면서 &ldquo;굳이 비싼 API를 써야 하나&rdquo;라는 질문이 커지고 있습니다. 하드웨어 비용을 정당화하는 프리미엄 모델의 모트(해자)가 좁아질 수 있습니다.</li>
         <li><strong>엔비디아 집중 리스크:</strong> 현재 AI 인프라 투자의 수혜가 엔비디아에 극도로 집중되어 있습니다. AMD·인텔·커스텀 칩(TPU, Trainium)이 점유율을 잠식할 경우 밸류에이션 재조정이 올 수 있습니다.</li>
       </TrendUl>
 
@@ -208,17 +208,17 @@ export default function Kospi8300AiOilInvestmentPage() {
 
       <TrendCaseBox title="역사적 기술 혁명 vs AI 현재 단계 비교">
         <TrendUl>
-          <li><strong>1844년 전신(Telegraph):</strong> "뉴욕-워싱턴 선이 깔렸는데 내 삶이 뭐가 달라졌나?" → 20년 후 전국 네트워크, 주식 시장·신문 혁명</li>
-          <li><strong>1876년 전화:</strong> "부자들 장난감" 비아냥 → 50년 후 전 가정 보급, 기업과 가족 연결</li>
-          <li><strong>1995년 인터넷:</strong> "전화선으로 하는 이상한 것" → 15년 후 스마트폰·플랫폼 경제</li>
-          <li><strong>2023년 ChatGPT 출시:</strong> "신기한 챗봇" → ? → 현재 GPT-4o·Claude 4·Gemini 2.5 시대</li>
+          <li><strong>1844년 전신(Telegraph):</strong> &ldquo;뉴욕-워싱턴 선이 깔렸는데 내 삶이 뭐가 달라졌나?&rdquo; → 20년 후 전국 네트워크, 주식 시장·신문 혁명</li>
+          <li><strong>1876년 전화:</strong> &ldquo;부자들 장난감&rdquo; 비아냥 → 50년 후 전 가정 보급, 기업과 가족 연결</li>
+          <li><strong>1995년 인터넷:</strong> &ldquo;전화선으로 하는 이상한 것&rdquo; → 15년 후 스마트폰·플랫폼 경제</li>
+          <li><strong>2023년 ChatGPT 출시:</strong> &ldquo;신기한 챗봇&rdquo; → ? → 현재 GPT-4o·Claude 4·Gemini 2.5 시대</li>
           <li><strong>공통 패턴:</strong> 체감은 항상 기술보다 5~15년 늦게 왔습니다</li>
         </TrendUl>
       </TrendCaseBox>
 
       <TrendP>
-        결론적으로 AI는 "버블이면서 동시에 이제 시작"입니다. 단기 밸류에이션 거품이 낀 종목이 존재하고,
-        그 일부는 조정받을 것입니다. 동시에 AI 인프라 전체가 사라지거나 "무용지물이 됐다"는 결말은
+        결론적으로 AI는 &ldquo;버블이면서 동시에 이제 시작&rdquo;입니다. 단기 밸류에이션 거품이 낀 종목이 존재하고,
+        그 일부는 조정받을 것입니다. 동시에 AI 인프라 전체가 사라지거나 &ldquo;무용지물이 됐다&rdquo;는 결말은
         역사적으로 기술 혁명에서 한 번도 일어나지 않았습니다.
         중요한 것은 <strong>어느 계층(철도 회사 주식 vs 철도 위에서 만들어진 물류·제조업)에 투자하느냐</strong>입니다.
       </TrendP>
@@ -259,7 +259,7 @@ export default function Kospi8300AiOilInvestmentPage() {
 
       <TrendH3>시나리오 3 — 전면 확전·호르무즈 완전 봉쇄 (꼬리 위험)</TrendH3>
       <TrendP>
-        이란이 "순교자 전략"을 택해 호르무즈를 완전 봉쇄하거나,
+        이란이 &ldquo;순교자 전략&rdquo;을 택해 호르무즈를 완전 봉쇄하거나,
         이란의 핵무기 보유가 확인되어 이스라엘이 선제 핵 타격을 검토하는 시나리오입니다.
         전 세계 석유 공급 20%가 차단되면 유가 배럴당 $150~$200, 글로벌 경기침체 불가피합니다.
         <strong>확률 추정: 약 15%</strong>
@@ -274,7 +274,7 @@ export default function Kospi8300AiOilInvestmentPage() {
       {/* ─── 7. 유가 재고 바닥 ─── */}
       <TrendH2 id="oil-inventory">전 세계 유가 재고가 바닥나고 있다: 숫자로 보는 위기</TrendH2>
       <TrendP>
-        호르무즈 위기는 단지 "앞으로 막힐 수도 있다"는 미래 위험만이 아닙니다.
+        호르무즈 위기는 단지 &ldquo;앞으로 막힐 수도 있다&rdquo;는 미래 위험만이 아닙니다.
         현재 진행형으로 전 세계 전략비축유와 상업용 석유 재고가 빠르게 소진되고 있습니다.
       </TrendP>
 
@@ -305,7 +305,7 @@ export default function Kospi8300AiOilInvestmentPage() {
         재고 감소의 진짜 무서움은 유가 자체보다 <strong>유가 변동성</strong>입니다.
         재고가 충분할 때는 공급 충격이 와도 재고로 버틸 수 있어 가격이 완만하게 반응합니다.
         재고가 얇으면 작은 공급 충격에도 가격이 수직으로 뜁니다.
-        지금은 후자의 상황입니다. "뉴스 한 줄에 유가가 10달러 뛴다"는 시대가 되었습니다.
+        지금은 후자의 상황입니다. &ldquo;뉴스 한 줄에 유가가 10달러 뛴다&rdquo;는 시대가 되었습니다.
       </TrendInsight>
 
       {/* ─── 8. 통합 투자 전략 ─── */}
@@ -338,7 +338,7 @@ export default function Kospi8300AiOilInvestmentPage() {
         <li>반도체 집중 보유자: 전력·방산·통신 섹터로 일부 분산</li>
         <li>8,300 신규 진입 고민자: 전액 일시 투입 대신 3~6개월 분할 매수(DCA) 방식</li>
         <li>코스피 200 인덱스 ETF를 개별 종목 대신 활용해 종목 선택 오류 리스크 제거</li>
-        <li>손절 기준 미리 설정: 예를 들어 "7,500 이탈 시 20% 추가 익절"과 같은 룰을 감정 배제 후 사전 설정</li>
+        <li>손절 기준 미리 설정: 예를 들어 &ldquo;7,500 이탈 시 20% 추가 익절&rdquo;과 같은 룰을 감정 배제 후 사전 설정</li>
       </TrendUl>
 
       <TrendH3>전략 3 — 유가·지정학 헤지: 달러·금·에너지 3종 방어막</TrendH3>
@@ -355,7 +355,7 @@ export default function Kospi8300AiOilInvestmentPage() {
 
       <TrendH3>전략 4 — AI 체감 격차를 투자 기회로 바꾸는 방법</TrendH3>
       <TrendP>
-        "AI를 못 느낀다"는 개인들이 실제로 AI를 체감하게 되는 순간이 바로 투자 관점에서
+        &ldquo;AI를 못 느낀다&rdquo;는 개인들이 실제로 AI를 체감하게 되는 순간이 바로 투자 관점에서
         <strong>3계층(응용 서비스) 투자 타이밍</strong>입니다.
         킬러 앱이 등장하는 초기 신호는 다음과 같습니다.
       </TrendP>
@@ -378,7 +378,7 @@ export default function Kospi8300AiOilInvestmentPage() {
           <li><strong>문제:</strong> 집중도 과다, 유가 충격·전쟁 확전 시 단번에 30~40% 날릴 수 있는 구조</li>
           <li><strong>해결책:</strong> 초과 비중(목표 50% vs 현재 90%) 분만큼 3개월에 걸쳐 단계적 익절</li>
           <li>익절 자금의 절반은 전력·방산 섹터로, 나머지 절반은 달러·금 헤지 포지션으로 이전</li>
-          <li>남은 반도체 포지션의 손절 기준 설정: "삼성전자 20일 이평선 하향 이탈 시 30% 추가 익절"</li>
+          <li>남은 반도체 포지션의 손절 기준 설정: &ldquo;삼성전자 20일 이평선 하향 이탈 시 30% 추가 익절&rdquo;</li>
           <li><strong>핵심:</strong> +85% 수익의 절반이라도 안전하게 확보하는 것이 최우선</li>
         </TrendUl>
       </TrendCaseBox>
@@ -386,7 +386,7 @@ export default function Kospi8300AiOilInvestmentPage() {
       <TrendCaseBox title="사례 B — 코스피 8300 뉴스 보고 처음 투자를 결심한 J씨 (30대 직장인)">
         <TrendP>
           여유 자금 5,000만 원으로 코스피 8,300 돌파 뉴스를 보고 처음 증시 투자를 결심했습니다.
-          "지금 안 들어가면 더 오를 것 같다"는 FOMO(상실 공포)가 강한 상황입니다.
+          &ldquo;지금 안 들어가면 더 오를 것 같다&rdquo;는 FOMO(상실 공포)가 강한 상황입니다.
         </TrendP>
         <TrendUl>
           <li><strong>절대 하지 말 것:</strong> 5,000만 원 전액 일시 투입 — 역대 사상 최고치 국면에서 가장 위험한 선택</li>
@@ -394,7 +394,7 @@ export default function Kospi8300AiOilInvestmentPage() {
           <li>첫 달 투자 대상: 코스피 200 인덱스 ETF (KODEX 200, TIGER 200) — 개별 종목 리스크 없이 시장 전체에 참여</li>
           <li>-10% 조정 시 그 달 분할 매수 금액 2배로 증액하는 규칙을 미리 설정</li>
           <li>달러 예금 1,000만 원은 별도 유지: 유가 충격·원화 약세 헤지 + 심리적 안전판</li>
-          <li><strong>핵심:</strong> "얼마나"보다 "어떻게 나눠서"가 올바른 질문</li>
+          <li><strong>핵심:</strong> &ldquo;얼마나&rdquo;보다 &ldquo;어떻게 나눠서&rdquo;가 올바른 질문</li>
         </TrendUl>
       </TrendCaseBox>
 
@@ -457,7 +457,7 @@ export default function Kospi8300AiOilInvestmentPage() {
         그 서버 위에서 탄생한 새로운 산업이 이 시대를 정의할 것입니다.
       </TrendP>
       <TrendP>
-        지금 가장 위험한 두 가지 태도는 <strong>"전부 다 팔자"</strong>와 <strong>"전부 다 사자"</strong>입니다.
+        지금 가장 위험한 두 가지 태도는 <strong>&ldquo;전부 다 팔자&rdquo;</strong>와 <strong>&ldquo;전부 다 사자&rdquo;</strong>입니다.
         역사가 증명하는 생존 원칙은 분산·분할·헤지·원칙입니다.
         세 개의 거대한 물결이 동시에 밀려오는 지금, 서핑을 잘 하려면 파도를 느끼는 것보다
         균형을 유지하는 것이 먼저입니다.

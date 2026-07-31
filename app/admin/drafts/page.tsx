@@ -827,8 +827,8 @@ export default function AdminDraftsPage() {
           <h3 className="font-semibold mb-2">사용 방법</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• AI가 생성한 초안을 검토하고 편집할 수 있습니다.</li>
-            <li>• "편집" 버튼을 클릭하여 초안을 수정하세요.</li>
-            <li>• "에디터로 편집" 버튼을 누르면 에디터 페이지에서 최종 편집 후 발행할 수 있습니다.</li>
+            <li>• &ldquo;편집&rdquo; 버튼을 클릭하여 초안을 수정하세요.</li>
+            <li>• &ldquo;에디터로 편집&rdquo; 버튼을 누르면 에디터 페이지에서 최종 편집 후 발행할 수 있습니다.</li>
             <li>• 불필요한 초안은 선택 후 일괄 삭제할 수 있습니다.</li>
           </ul>
         </CardContent>

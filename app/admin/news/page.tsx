@@ -637,9 +637,9 @@ export default function AdminNewsPage() {
           <h3 className="font-semibold mb-2">사용 방법</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• RSS에서 자동으로 수집된 뉴스가 여기에 표시됩니다.</li>
-            <li>• "제외" 버튼을 클릭하면 해당 뉴스는 초안 생성 대상에서 제외됩니다.</li>
-            <li>• 초안이 생성되면 "초안 관리" 페이지에서 확인할 수 있습니다.</li>
-            <li>• "제외됨" 탭에서 전체 선택 후 일괄 삭제할 수 있습니다.</li>
+            <li>• &ldquo;제외&rdquo; 버튼을 클릭하면 해당 뉴스는 초안 생성 대상에서 제외됩니다.</li>
+            <li>• 초안이 생성되면 &ldquo;초안 관리&rdquo; 페이지에서 확인할 수 있습니다.</li>
+            <li>• &ldquo;제외됨&rdquo; 탭에서 전체 선택 후 일괄 삭제할 수 있습니다.</li>
           </ul>
         </CardContent>
       </Card>

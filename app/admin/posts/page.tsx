@@ -542,7 +542,7 @@ export default function AdminPostsPage() {
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• 모든 사이트의 게시글을 한 곳에서 관리할 수 있습니다.</li>
             <li>• 사이트 필터를 사용하여 오예스 또는 슈어라인 글만 볼 수 있습니다.</li>
-            <li>• "편집" 버튼을 클릭하면 에디터에서 해당 글을 수정할 수 있습니다.</li>
+            <li>• &ldquo;편집&rdquo; 버튼을 클릭하면 에디터에서 해당 글을 수정할 수 있습니다.</li>
             <li>• 지구본 아이콘을 클릭하여 공개/비공개 상태를 전환할 수 있습니다.</li>
           </ul>
         </CardContent>

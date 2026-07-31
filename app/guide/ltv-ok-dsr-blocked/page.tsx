@@ -95,13 +95,13 @@ export default function LtvOkDsrBlockedPage() {
       faqs={faqs}
       lastUpdated="2026년 6월"
     >
-      <H2 id="intro">"LTV 70%면 3.5억 아닌가요?" — 그 혼란의 이유</H2>
+      <H2 id="intro">&ldquo;LTV 70%면 3.5억 아닌가요?&rdquo; — 그 혼란의 이유</H2>
       <P>
         5억짜리 집을 보고 있었습니다. LTV 70%로 계산하니 최대 3억 5천만원을 빌릴 수 있을 것 같았습니다.
         그런데 은행에 가봤더니 한도가 1억 8천만원이라고 합니다.
       </P>
       <P>
-        이 상황에서 "은행이 틀린 건가?", "내가 뭔가 잘못 알고 있는 건가?" 하고 혼란스러워하는 분들이 많습니다.
+        이 상황에서 &ldquo;은행이 틀린 건가?&rdquo;, &ldquo;내가 뭔가 잘못 알고 있는 건가?&rdquo; 하고 혼란스러워하는 분들이 많습니다.
         둘 다 아닙니다. <strong>LTV와 DSR은 서로 독립적으로 한도를 제한하고, 둘 중 낮은 금액이 실제 한도</strong>가 됩니다.
         LTV가 3.5억을 허용해도 DSR 기준으로 1.8억밖에 안 되면, 1.8억이 한도입니다.
       </P>
@@ -120,7 +120,7 @@ export default function LtvOkDsrBlockedPage() {
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
           <p className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">LTV — 집 기준</p>
-          <p className="font-bold text-blue-900 mb-2">"이 담보가 얼마를 버틸 수 있나?"</p>
+          <p className="font-bold text-blue-900 mb-2">&ldquo;이 담보가 얼마를 버틸 수 있나?&rdquo;</p>
           <p className="text-sm text-gray-700 leading-relaxed">
             집값 × 규제 비율(40~70%) = LTV 한도.<br />
             집이 경매에 넘어갔을 때 은행이 회수할 수 있는 최대 금액을 의미합니다.
@@ -129,7 +129,7 @@ export default function LtvOkDsrBlockedPage() {
         </div>
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
           <p className="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-2">DSR — 소득 기준</p>
-          <p className="font-bold text-indigo-900 mb-2">"이 사람 소득으로 얼마를 감당할 수 있나?"</p>
+          <p className="font-bold text-indigo-900 mb-2">&ldquo;이 사람 소득으로 얼마를 감당할 수 있나?&rdquo;</p>
           <p className="text-sm text-gray-700 leading-relaxed">
             연 소득 × 40% = 연간 원리금 상한선.<br />
             신청자가 매달 갚을 수 있는 금액이 얼마인지를 봅니다.

@@ -287,7 +287,7 @@ export default function YouthPolicyPage() {
               청년 기준 확인
             </h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              정책마다 <strong className="text-gray-900">'청년' 기준이 다릅니다.</strong>
+              정책마다 <strong className="text-gray-900">&lsquo;청년&rsquo; 기준이 다릅니다.</strong>
               대부분 만 19~34세이지만, 일부는 만 15세부터, 일부는 만 39세까지 포함합니다.
               병역 이행자는 복무 기간만큼 연령을 추가로 인정받을 수 있습니다.
             </p>

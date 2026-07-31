@@ -241,7 +241,7 @@ export function AiReviewPanel({ review, reviewedAt, defaultExpanded = false }: A
                           [{sev.label}·{issue.category}] {issue.message}
                         </p>
                         {issue.evidence && (
-                          <p className="text-xs text-gray-500 italic truncate">"{issue.evidence}"</p>
+                          <p className="text-xs text-gray-500 italic truncate">&ldquo;{issue.evidence}&rdquo;</p>
                         )}
                         {issue.fix && (
                           <p className="text-xs text-gray-600">→ {issue.fix}</p>

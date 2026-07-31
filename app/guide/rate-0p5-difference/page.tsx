@@ -108,7 +108,7 @@ export default function Rate0p5DifferencePage() {
     >
       <H2 id="intro">0.5%, 정말 별거 아닌가?</H2>
       <P>
-        두 은행에서 금리 제안을 받았을 때 0.5% 차이를 보고 "별거 아니겠지"라고 넘어가기 쉽습니다.
+        두 은행에서 금리 제안을 받았을 때 0.5% 차이를 보고 &ldquo;별거 아니겠지&rdquo;라고 넘어가기 쉽습니다.
         연봉 기준으로 0.5%면 25만원이지만, 3억원 주담대 금리 0.5%는 이야기가 완전히 다릅니다.
       </P>
       <Callout color="amber">
@@ -116,7 +116,7 @@ export default function Rate0p5DifferencePage() {
         월 납입액 차이: {fmt(m45 - m40)}원/월<br />
         30년 총이자 차이: <strong>{fmt(diff / 10000)}만원</strong><br /><br />
         {fmt(diff / 10000)}만원은 중형 SUV 한 대 값입니다.
-        "별거 아닌" 0.5%가 30년 동안 만드는 차이입니다.
+        &ldquo;별거 아닌&rdquo; 0.5%가 30년 동안 만드는 차이입니다.
       </Callout>
 
       <H2 id="calc">내 대출 금액으로 직접 비교하기</H2>
@@ -179,9 +179,9 @@ export default function Rate0p5DifferencePage() {
       </P>
       <Callout color="blue">
         <strong>협상 실전 스크립트</strong><br />
-        "다른 은행에서 사전심사를 받아봤더니 이 금리로 나왔는데,
+        &ldquo;다른 은행에서 사전심사를 받아봤더니 이 금리로 나왔는데,
         여기서는 추가 우대금리 적용이 가능할까요?<br />
-        급여 이체와 신용카드 실적도 여기서 유지할 생각입니다."<br /><br />
+        급여 이체와 신용카드 실적도 여기서 유지할 생각입니다.&rdquo;<br /><br />
         구두로만 하지 말고 <strong>사전심사 결과서를 직접 보여주면</strong> 협상력이 높아집니다.
         담당자는 재량으로 0.1~0.2%p 추가 우대를 적용할 수 있는 경우가 있습니다.
       </Callout>

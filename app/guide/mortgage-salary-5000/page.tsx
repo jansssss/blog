@@ -117,7 +117,7 @@ export default function MortgageSalary5000Page() {
       </P>
       <MortgageCalcWidget />
 
-      <H2 id="income-trap">은행이 "연봉"을 계산하는 방식 — 생각과 다를 수 있다</H2>
+      <H2 id="income-trap">은행이 &ldquo;연봉&rdquo;을 계산하는 방식 — 생각과 다를 수 있다</H2>
       <P>
         계산기에 연봉을 입력할 때, 은행이 실제로 어떤 숫자를 사용하는지 알아야 정확한 결과를 볼 수 있습니다.
         은행은 실수령액이 아니라 <strong>세전 총급여</strong>를 기준으로 하지만, 그 인정 방식이 소득 종류마다 다릅니다.
@@ -156,7 +156,7 @@ export default function MortgageSalary5000Page() {
 
       <H2 id="timing">신용대출 상환 타이밍이 중요한 이유</H2>
       <P>
-        "신용대출을 갚고 다음 날 바로 주담대 신청하면 되는 거 아닌가?"라고 생각하기 쉽습니다.
+        &ldquo;신용대출을 갚고 다음 날 바로 주담대 신청하면 되는 거 아닌가?&rdquo;라고 생각하기 쉽습니다.
         실제로는 그렇지 않습니다. 완납이 DSR에 반영되기까지 시간이 걸립니다.
       </P>
       <Callout color="blue">
@@ -209,7 +209,7 @@ export default function MortgageSalary5000Page() {
         <strong>사전심사 전략</strong><br />
         • 시중은행(KB·신한·하나·우리), 인터넷은행(카카오·토스·케이), 지방은행 최소 3곳에 넣어보세요<br />
         • 사전심사는 신용점수에 거의 영향 없음 (대출 조회와 달리 연조회로 처리)<br />
-        • 가장 낮은 금리 제안을 받은 뒤, 다른 은행에 "더 낮은 곳이 있다"고 하면 추가 우대금리 협상 가능<br />
+        • 가장 낮은 금리 제안을 받은 뒤, 다른 은행에 &ldquo;더 낮은 곳이 있다&rdquo;고 하면 추가 우대금리 협상 가능<br />
         • 신용대출이 있다면 <strong>완납 예정임을 미리 알리면</strong> 완납 조건부 한도를 조회해주는 은행도 있습니다
       </Callout>
       <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600 mt-6">

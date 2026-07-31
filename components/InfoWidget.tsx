@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapPin, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react'
 
 // 기본 스타일 (밝은 파스텔 테마)
@@ -59,72 +59,8 @@ export default function InfoWidget({
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [stock, setStock] = useState<StockData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
 
-  useEffect(() => {
-    // 모바일 감지
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    // 초기 데이터 로드
-    const loadInitialData = async () => {
-      // localStorage에서 저장된 도시 불러오기
-      const savedCity = localStorage.getItem('selectedCity')
-      let cityToUse = selectedCity
-
-      if (savedCity) {
-        const city = CITIES.find(c => c.name === savedCity)
-        if (city) {
-          cityToUse = city
-          setSelectedCity(city)
-        }
-      }
-
-      // 모바일에서 위치 정보 시도
-      if (isMobile && 'geolocation' in navigator && !savedCity) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            fetchWeatherByCoords(position.coords.latitude, position.coords.longitude)
-          },
-          () => {
-            fetchWeather(cityToUse)
-          }
-        )
-      } else {
-        fetchWeather(cityToUse)
-      }
-
-      fetchStock()
-    }
-
-    loadInitialData()
-
-    // 5분마다 갱신 (코스피는 장 시간에만)
-    const interval = setInterval(() => {
-      fetchWeather(selectedCity)
-
-      // 코스피 장 시간 체크 (평일 09:00 ~ 16:00 KST)
-      const now = new Date()
-      const hour = now.getHours()
-      const day = now.getDay() // 0=일요일, 6=토요일
-      const isWeekday = day >= 1 && day <= 5
-      const isMarketHours = hour >= 9 && hour < 16
-
-      if (isWeekday && isMarketHours) {
-        fetchStock()
-      }
-    }, 5 * 60 * 1000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchWeatherByCoords = async (lat: number, lon: number) => {
+  const fetchWeatherByCoords = useCallback(async (lat: number, lon: number) => {
     try {
       const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || ''
       const response = await fetch(
@@ -145,9 +81,9 @@ export default function InfoWidget({
       console.error('Weather fetch error:', error)
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchWeather = async (city: typeof CITIES[0]) => {
+  const fetchWeather = useCallback(async (city: typeof CITIES[0]) => {
     try {
       const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || ''
       const response = await fetch(
@@ -168,9 +104,9 @@ export default function InfoWidget({
       console.error('Weather fetch error:', error)
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchStock = async () => {
+  const fetchStock = useCallback(async () => {
     try {
       // 서버사이드 API 사용 (CORS 문제 해결)
       const response = await fetch('/api/stock/kospi')
@@ -194,7 +130,49 @@ export default function InfoWidget({
       console.error('Stock fetch error:', error)
       setLoading(false)
     }
-  }
+  }, [])
+
+  // 최초 1회: 저장된 도시 복원 → 날씨·주가 로드
+  useEffect(() => {
+    const savedCity = localStorage.getItem('selectedCity')
+    const saved = savedCity ? CITIES.find((c) => c.name === savedCity) : undefined
+    if (saved) setSelectedCity(saved)
+
+    // 모바일 여부는 여기서 직접 읽는다. state 로 두면 이 effect 가 도는 시점에
+    // 아직 초기값(false)이라 위치 기반 분기가 영영 실행되지 않는다.
+    const isMobile = window.innerWidth < 768
+
+    if (isMobile && !saved && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => fetchWeatherByCoords(position.coords.latitude, position.coords.longitude),
+        () => fetchWeather(CITIES[0])
+      )
+    } else {
+      fetchWeather(saved ?? CITIES[0])
+    }
+
+    fetchStock()
+  }, [fetchWeather, fetchWeatherByCoords, fetchStock])
+
+  // 5분마다 갱신. selectedCity 가 바뀌면 타이머를 다시 걸어야 최신 도시를 조회한다.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchWeather(selectedCity)
+
+      // 코스피 장 시간 체크 (평일 09:00 ~ 16:00 KST)
+      const now = new Date()
+      const hour = now.getHours()
+      const day = now.getDay() // 0=일요일, 6=토요일
+      const isWeekday = day >= 1 && day <= 5
+      const isMarketHours = hour >= 9 && hour < 16
+
+      if (isWeekday && isMarketHours) {
+        fetchStock()
+      }
+    }, 5 * 60 * 1000)
+
+    return () => clearInterval(interval)
+  }, [selectedCity, fetchWeather, fetchStock])
 
   const handleCityChange = (city: typeof CITIES[0]) => {
     setSelectedCity(city)

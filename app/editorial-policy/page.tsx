@@ -153,7 +153,7 @@ export default async function EditorialPolicyPage() {
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <h4 className="font-semibold text-gray-900 mb-2">업데이트 기록</h4>
                 <p className="text-sm text-gray-700">
-                  중요한 콘텐츠 변경 사항은 페이지 하단에 '최종 업데이트 일자'를 표시하여
+                  중요한 콘텐츠 변경 사항은 페이지 하단에 &lsquo;최종 업데이트 일자&rsquo;를 표시하여
                   사용자가 정보의 최신성을 확인할 수 있도록 합니다.
                 </p>
               </div>

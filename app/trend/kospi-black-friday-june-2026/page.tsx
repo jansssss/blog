@@ -70,7 +70,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendInsight>
         하루 -6.6%는 숫자로 보면 단순해 보이지만, 이날 코스피 시가총액 상위 50개 종목 중
         단 2개만이 플러스를 기록했습니다. 방어주·배당주·금·달러 자산을 제외하면
-        사실상 전 업종이 동반 폭락한 "구별 없는 투매" 장세였습니다.
+        사실상 전 업종이 동반 폭락한 &ldquo;구별 없는 투매&rdquo; 장세였습니다.
         이런 패턴은 특정 악재가 아닌 <strong>유동성 위기·심리 붕괴·강제 청산</strong>이 복합 작용할 때 나타납니다.
       </TrendInsight>
 
@@ -87,18 +87,18 @@ export default function KospiBlackFridayJune2026Page() {
         공모가 기준 시가총액 약 3,500억 달러(약 490조 원)로, 상장일 기준으로는
         사우디 아람코 이후 인류 역사상 두 번째로 큰 IPO가 될 전망입니다.
         이를 앞두고 전 세계 주요 기관투자자들이 <strong>SpaceX 주식 배정을 받기 위한 현금 확보</strong> 목적으로
-        기존 보유 주식을 매도하는 "IPO 포지션 청산"을 단행했습니다.
+        기존 보유 주식을 매도하는 &ldquo;IPO 포지션 청산&rdquo;을 단행했습니다.
       </TrendP>
       <TrendP>
         외국인이 이날 코스피에서만 약 5조 3,000억 원을 순매도한 배경의 상당 부분이 여기에 있습니다.
         특히 유동성이 풍부하고 올 들어 큰 폭으로 오른 한국 반도체주는
-        "차익 실현 + IPO 자금 확보"에 가장 적합한 매도 대상이었습니다.
+        &ldquo;차익 실현 + IPO 자금 확보&rdquo;에 가장 적합한 매도 대상이었습니다.
       </TrendP>
 
       <TrendH3>원인 2 — 미국 연준 매파 발언: 금리 인하 기대 완전 후퇴</TrendH3>
       <TrendP>
-        6월 6일(금) 미국 장 마감 후, 연준 이사 2명이 연속으로 "인플레이션 재점화 우려로
-        연내 금리 인하가 어려울 수 있다"는 발언을 했습니다.
+        6월 6일(금) 미국 장 마감 후, 연준 이사 2명이 연속으로 &ldquo;인플레이션 재점화 우려로
+        연내 금리 인하가 어려울 수 있다&rdquo;는 발언을 했습니다.
         시장이 기대하던 9월 인하 가능성이 CME 페드워치 기준 52%에서 <strong>19%로 급락</strong>하면서
         글로벌 채권·주식 시장에 일제히 매도 압력이 가해졌습니다.
         고금리 장기화는 주식의 미래 가치를 할인하는 효과가 있어, 밸류에이션이 높은 성장주에 특히 치명적입니다.
@@ -115,7 +115,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendWarn>
         미확인 보도 하나에 시장이 이렇게 크게 반응한 이유는, 코스피 8,300이라는 고점 밸류에이션이
         AI 수요의 지속적 가속을 기정사실로 가격에 반영하고 있었기 때문입니다.
-        기대가 크면 실망의 낙폭도 큽니다. 이것이 "AI 버블" 논쟁의 핵심입니다.
+        기대가 크면 실망의 낙폭도 큽니다. 이것이 &ldquo;AI 버블&rdquo; 논쟁의 핵심입니다.
       </TrendWarn>
 
       <TrendH3>원인 4 — 레버리지 ETF·CFD 강제 청산 연쇄 폭발</TrendH3>
@@ -123,7 +123,7 @@ export default function KospiBlackFridayJune2026Page() {
         코스피 불장 기간 동안 2배·3배 레버리지 ETF와 CFD(차액결제거래) 잔고가
         역대 최고 수준으로 쌓여 있었습니다.
         지수가 -5%를 넘어서는 순간 이 레버리지 상품들의 마진콜과 강제 청산이 연쇄적으로 발동되면서
-        "하락이 하락을 낳는" 자기강화 메커니즘이 작동했습니다.
+        &ldquo;하락이 하락을 낳는&rdquo; 자기강화 메커니즘이 작동했습니다.
         오전 10시~11시 사이 낙폭이 특히 가팔랐던 것은 이 강제 청산 물량이 쏟아진 시간대입니다.
       </TrendP>
 
@@ -138,7 +138,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendInsight>
         다섯 가지 악재 중 어느 하나만 있었다면 시장은 -2~3% 수준의 조정으로 그쳤을 것입니다.
         그러나 독립적인 악재 5개가 <strong>같은 거래일에 동시에</strong> 나타나면서 서로의 효과를 증폭시켰습니다.
-        이를 시장에서는 "상관관계 1" 충격이라 부릅니다 — 모든 자산이 동시에 같은 방향으로 움직이는 순간.
+        이를 시장에서는 &ldquo;상관관계 1&rdquo; 충격이라 부릅니다 — 모든 자산이 동시에 같은 방향으로 움직이는 순간.
         역설적이게도 이런 날은 패닉과 기회가 공존하는 날이기도 합니다.
       </TrendInsight>
 
@@ -172,7 +172,7 @@ export default function KospiBlackFridayJune2026Page() {
         실제 원하는 배정량을 받을 수 있습니다.
       </TrendP>
       <TrendP>
-        이 과정에서 "무엇을 팔 것인가"는 명확합니다. 올해 가장 많이 오른 시장의 주식들입니다.
+        이 과정에서 &ldquo;무엇을 팔 것인가&rdquo;는 명확합니다. 올해 가장 많이 오른 시장의 주식들입니다.
         코스피는 연초 대비 +60% 이상 상승한 세계 최고 수익률 증시였습니다.
         차익 실현과 IPO 자금 확보를 동시에 달성할 수 있는 <strong>최적의 매도 대상</strong>이었습니다.
       </TrendP>
@@ -207,7 +207,7 @@ export default function KospiBlackFridayJune2026Page() {
       {/* ─── 4. IT버블 비교 ─── */}
       <TrendH2 id="it-bubble-comparison">IT 버블 붕괴와 비교: 유사점 4가지, 결정적 차이점 5가지</TrendH2>
       <TrendP>
-        2000년 3월 나스닥이 5,048을 고점으로 붕괴하기 시작한 "닷컴 버블"은
+        2000년 3월 나스닥이 5,048을 고점으로 붕괴하기 시작한 &ldquo;닷컴 버블&rdquo;은
         이후 2년 반 동안 78%가 하락해 지수가 1,100까지 내려갔습니다.
         그 과정에서 수백만 명의 투자자가 전 재산에 가까운 손실을 입었습니다.
         지금 코스피 폭락이 IT버블 붕괴의 재현인지 아닌지는 가장 중요한 질문입니다.
@@ -217,7 +217,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendCaseBox title="IT버블 2000 vs 코스피 불장 2026 — 유사점">
         <TrendUl>
           <li><strong>① 단기 급등:</strong> 나스닥은 1999~2000년 1년간 +85% 급등. 코스피는 2025년 말~2026년 5월 5개월간 +66% 급등. 상승 속도 면에서 유사</li>
-          <li><strong>② 기술 테마 집중:</strong> 2000년은 "인터넷". 2026년은 "AI·반도체". 단일 테마에 자금이 몰려 밸류에이션 이상 과열</li>
+          <li><strong>② 기술 테마 집중:</strong> 2000년은 &ldquo;인터넷&rdquo;. 2026년은 &ldquo;AI·반도체&rdquo;. 단일 테마에 자금이 몰려 밸류에이션 이상 과열</li>
           <li><strong>③ 레버리지 누적:</strong> 2000년 닷컴 버블 당시 마진(신용)거래 잔고 사상 최고. 2026년 코스피 레버리지 ETF·CFD 잔고 사상 최고</li>
           <li><strong>④ 개인 투자자 급증:</strong> 2000년 미국 개인 투자 계좌 수 폭증. 2026년 코스피 개인 계좌 신규 개설 역대 최고 기록(2025년 4분기)</li>
         </TrendUl>
@@ -235,8 +235,8 @@ export default function KospiBlackFridayJune2026Page() {
       </TrendCaseBox>
 
       <TrendInsight>
-        IT버블 붕괴의 핵심은 "수익이 없는 기업들의 고밸류에이션"이었습니다.
-        현재 코스피 폭락의 핵심은 "수익이 있는 기업들의 단기 과열 조정"입니다.
+        IT버블 붕괴의 핵심은 &ldquo;수익이 없는 기업들의 고밸류에이션&rdquo;이었습니다.
+        현재 코스피 폭락의 핵심은 &ldquo;수익이 있는 기업들의 단기 과열 조정&rdquo;입니다.
         이 차이가 IT버블(-78%, 2.5년)과 현재 상황의 결정적 차이를 만듭니다.
         건강한 조정은 30~40%까지도 가지만, 그것이 IT버블처럼 기업 자체가 사라지는 붕괴와는 다릅니다.
         <strong>오늘의 폭락은 IT버블 붕괴보다 2018년 반도체 수퍼사이클 조정이나 2022년 금리 인상 충격에 가깝습니다.</strong>
@@ -246,8 +246,8 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendH2 id="correction-or-crash">건강한 조정인가, 버블 붕괴의 시작인가: 3가지 판단 기준</TrendH2>
       <TrendP>
         이번 폭락을 어떻게 정의하느냐가 대처 전략의 핵심을 결정합니다.
-        "건강한 조정"이라면 보유하거나 추가 매수가 정답이고,
-        "버블 붕괴 시작"이라면 일부 익절이나 현금 확보가 정답입니다.
+        &ldquo;건강한 조정&rdquo;이라면 보유하거나 추가 매수가 정답이고,
+        &ldquo;버블 붕괴 시작&rdquo;이라면 일부 익절이나 현금 확보가 정답입니다.
         세 가지 판단 기준으로 현재 상황을 평가할 수 있습니다.
       </TrendP>
 
@@ -263,8 +263,8 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendH3>기준 2 — 외국인 매도의 성격</TrendH3>
       <TrendP>
         외국인 매도에는 두 종류가 있습니다.
-        "구조적 이탈"은 한국 시장 자체를 포기하는 것이고,
-        "전술적 이탈"은 특정 이벤트(SpaceX IPO 등)나 단기 위험 회피를 위한 일시적 이탈입니다.
+        &ldquo;구조적 이탈&rdquo;은 한국 시장 자체를 포기하는 것이고,
+        &ldquo;전술적 이탈&rdquo;은 특정 이벤트(SpaceX IPO 등)나 단기 위험 회피를 위한 일시적 이탈입니다.
         이날 외국인이 가장 많이 판 종목은 삼성전자·SK하이닉스·POSCO홀딩스 등 시가총액 상위 유동성 우량주입니다.
         정리·구조조정이 아닌 <strong>현금화 목적의 매도 패턴</strong>으로, 전술적 이탈에 가깝습니다.
         <strong>→ 조정에 가깝습니다.</strong>
@@ -286,7 +286,7 @@ export default function KospiBlackFridayJune2026Page() {
           <li><strong>외국인 이탈 성격:</strong> 전술적 이탈 → 건강한 조정 우세</li>
           <li><strong>신용 시장 반응:</strong> 정상 범위 → 건강한 조정 우세</li>
           <li><strong>종합 판정:</strong> <strong>현재는 IT버블 붕괴보다 건강한 조정에 가깝습니다.</strong> 단, AI 반도체 수요 둔화가 공식 확인되거나 연준이 금리 인상으로 방향을 전환할 경우 성격이 달라질 수 있습니다.</li>
-          <li><strong>주의:</strong> "건강한 조정"도 추가 하락 여지가 있습니다. 7,200~7,000까지의 추가 조정 가능성을 배제하지 않습니다.</li>
+          <li><strong>주의:</strong> &ldquo;건강한 조정&rdquo;도 추가 하락 여지가 있습니다. 7,200~7,000까지의 추가 조정 가능성을 배제하지 않습니다.</li>
         </TrendUl>
       </TrendCaseBox>
 
@@ -304,14 +304,14 @@ export default function KospiBlackFridayJune2026Page() {
         코로나 충격 최저점(2020년 3월 19일)에 팔았다면, 이후 2년간 +80% 상승을 놓쳤습니다.
         2022년 금리 인상 충격 저점에 팔았다면, 2023~2024년 반등을 놓쳤습니다.
         폭락 당일의 감정적 매도는 손실을 확정짓고 반등을 포기하는 행위입니다.
-        <strong>단, 이것은 "펀더멘털이 살아있다"는 전제 하에서입니다.</strong>
+        <strong>단, 이것은 &ldquo;펀더멘털이 살아있다&rdquo;는 전제 하에서입니다.</strong>
       </TrendP>
 
       <TrendH3>원칙 2 — 레버리지 포지션은 즉시 검토</TrendH3>
       <TrendP>
         2배·3배 레버리지 ETF나 CFD를 보유 중이라면 이번이 점검 타이밍입니다.
         레버리지 상품은 추가 하락 시 손실이 기하급수적으로 커지며,
-        장기 보유 시 "변동성 감소 효과(Volatility Decay)"로 원금이 구조적으로 녹습니다.
+        장기 보유 시 &ldquo;변동성 감소 효과(Volatility Decay)&rdquo;로 원금이 구조적으로 녹습니다.
         목표 수익률을 달성했다면 이 기회에 일반 ETF나 개별주로 전환하는 것을 검토하십시오.
       </TrendP>
 
@@ -321,15 +321,15 @@ export default function KospiBlackFridayJune2026Page() {
         예를 들어 현재 주가 대비 +5% 반등 시 보유량의 10~15%를 익절하는 규칙을
         감정 배제 상태에서 미리 설정해두는 것입니다.
         현금을 확보해두면 추가 하락 시 재매수 실탄이 생기고,
-        심리적으로도 "전부 잃으면 어떡하지"라는 공포를 줄일 수 있습니다.
+        심리적으로도 &ldquo;전부 잃으면 어떡하지&rdquo;라는 공포를 줄일 수 있습니다.
       </TrendP>
 
       <TrendCaseBox title="사례 A — AI·반도체 집중 보유자 K씨 (현재 수익 +50%)">
         <TrendUl>
           <li><strong>현황:</strong> 삼성전자·SK하이닉스 중심, 수익률 +50%, 포트폴리오 90% 국내 주식</li>
-          <li><strong>감정:</strong> "이러다 다 날리는 거 아닌가" 공황 상태</li>
+          <li><strong>감정:</strong> &ldquo;이러다 다 날리는 거 아닌가&rdquo; 공황 상태</li>
           <li><strong>하지 말 것:</strong> 오늘 전부 매도 → 역사적으로 최악의 타이밍</li>
-          <li><strong>해야 할 것:</strong> 반등 시 20~30% 분할 익절로 현금 확보. 손절 기준 사전 설정(예: "종가 기준 7,000 이탈 시 추가 20% 익절")</li>
+          <li><strong>해야 할 것:</strong> 반등 시 20~30% 분할 익절로 현금 확보. 손절 기준 사전 설정(예: &ldquo;종가 기준 7,000 이탈 시 추가 20% 익절&rdquo;)</li>
           <li><strong>재확인:</strong> 삼성전자·SK하이닉스 기업 펀더멘털 변화 없음 → 보유 원칙 유지</li>
           <li><strong>핵심:</strong> 오늘의 패닉이 6개월 후 최악의 판단이 될 수 있습니다</li>
         </TrendUl>
@@ -338,7 +338,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendCaseBox title="사례 B — 평단가 8,000대 고점 진입자 M씨 (현재 손실 -5~7%)">
         <TrendUl>
           <li><strong>현황:</strong> 5월 말~6월 초 KOSPI 200 ETF 매입, 현재 -5~7% 손실</li>
-          <li><strong>감정:</strong> "들어가자마자 폭락, 손절해야 하나"</li>
+          <li><strong>감정:</strong> &ldquo;들어가자마자 폭락, 손절해야 하나&rdquo;</li>
           <li><strong>하지 말 것:</strong> 지금 손절 → 이 수준은 건강한 조정 범위. 추격 손절은 최저점 매도로 이어질 수 있음</li>
           <li><strong>해야 할 것:</strong> 추가 현금 여력이 있다면 현재 수준에서 20~30% 추가 매입(평단가 낮추기)</li>
           <li><strong>손절 기준:</strong> 코스피 7,000 이탈 시 보유량 30% 익절. 그 전까지는 보유</li>
@@ -349,7 +349,7 @@ export default function KospiBlackFridayJune2026Page() {
       {/* ─── 7. 미진입자 전략 ─── */}
       <TrendH2 id="entry-opportunity">아직 못 들어간 사람들: 지금이 진입 기회인가</TrendH2>
       <TrendP>
-        "내가 8,300에 못 들어간 게 다행이었나, 아니면 지금 7,600이 기회인가?"
+        &ldquo;내가 8,300에 못 들어간 게 다행이었나, 아니면 지금 7,600이 기회인가?&rdquo;
         이것이 이번 폭락에서 미진입자들이 가장 많이 묻는 질문입니다.
         결론부터 말하면 <strong>조건부 진입 기회이며, 전부 다 사는 것은 여전히 위험합니다.</strong>
       </TrendP>
@@ -365,7 +365,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendH3>왜 전부 다 사면 위험한가</TrendH3>
       <TrendUl>
         <li><strong>추가 하락 가능성:</strong> 7,600이 저점이라는 보장이 없습니다. 이번 폭락의 원인 중 연준·이란·AI 수요 우려는 해소되지 않았습니다. 7,200~7,000 추가 조정 가능성이 30~40%로 평가됩니다.</li>
-        <li><strong>SpaceX 상장 전 불확실성:</strong> 6월 18일 전까지 기관들의 추가 매도가 간헐적으로 나올 수 있습니다. "V자 반등"보다 "바닥 다지기"가 더 현실적인 그림입니다.</li>
+        <li><strong>SpaceX 상장 전 불확실성:</strong> 6월 18일 전까지 기관들의 추가 매도가 간헐적으로 나올 수 있습니다. &ldquo;V자 반등&rdquo;보다 &ldquo;바닥 다지기&rdquo;가 더 현실적인 그림입니다.</li>
         <li><strong>심리적 체력 소모:</strong> 지금 전부 넣으면 추가 -5% 하락 시 감정적 패닉 매도로 이어질 수 있습니다. 분할 매수가 심리적 탄성을 보장합니다.</li>
       </TrendUl>
 
@@ -375,13 +375,13 @@ export default function KospiBlackFridayJune2026Page() {
           <li><strong>2단계 — 6월 18일 SpaceX 상장 이후 (시장 반응 확인 후):</strong> 추가 30% 진입. SpaceX 상장 자체가 성공적이라면 기관 매도 압력 해소 → 매수 타이밍. 실패하거나 추가 악재 시 대기</li>
           <li><strong>3단계 — 연준 입장 명확화 이후 (7월 FOMC 후):</strong> 남은 40% 진입 여부 결정. 금리 인하 시그널 확인되면 전체 진입. 매파 기조 강화 시 대기</li>
           <li><strong>손절 기준 사전 설정:</strong> 코스피 7,000 종가 이탈 시 1단계 진입분의 50% 손절 처리. 감정이 아닌 룰로 움직이기</li>
-          <li><strong>절대 하지 말 것:</strong> "지금 무조건 사야 해" 또는 "무조건 기다려야 해" — 둘 다 극단. 분할이 정답</li>
+          <li><strong>절대 하지 말 것:</strong> &ldquo;지금 무조건 사야 해&rdquo; 또는 &ldquo;무조건 기다려야 해&rdquo; — 둘 다 극단. 분할이 정답</li>
         </TrendUl>
       </TrendCaseBox>
 
       <TrendInsight>
-        "공포에 사고 탐욕에 팔아라(Warren Buffett)"는 이번 같은 날 가장 많이 인용됩니다.
-        그러나 이 격언이 작동하는 전제는 <strong>"사는 기업의 펀더멘털이 살아있을 때"</strong>입니다.
+        &ldquo;공포에 사고 탐욕에 팔아라(Warren Buffett)&rdquo;는 이번 같은 날 가장 많이 인용됩니다.
+        그러나 이 격언이 작동하는 전제는 <strong>&ldquo;사는 기업의 펀더멘털이 살아있을 때&rdquo;</strong>입니다.
         현재 코스피 핵심 기업들의 펀더멘털이 살아있다는 판단이 맞다면,
         오늘의 공포는 조건부 기회입니다. 단, 분할로, 원칙 있게.
       </TrendInsight>
@@ -395,7 +395,7 @@ export default function KospiBlackFridayJune2026Page() {
         <li>레버리지 ETF·CFD 보유 시 강제 청산 마진 수준 즉시 점검</li>
         <li>반등 시 분할 익절 기준 사전 설정 (예: +5% 시 10% 익절 등)</li>
         <li>현금 비율이 10% 미만이면 반등 시 일부 익절로 현금 확보</li>
-        <li>손절 기준 명문화: "코스피 7,000 이탈 시 XX% 정리" 형태로 룰 설정</li>
+        <li>손절 기준 명문화: &ldquo;코스피 7,000 이탈 시 XX% 정리&rdquo; 형태로 룰 설정</li>
         <li>포트폴리오 전체 비중 재점검: 반도체 집중 과다 시 방산·배당·달러 자산으로 분산 검토</li>
       </TrendUl>
 
@@ -419,7 +419,7 @@ export default function KospiBlackFridayJune2026Page() {
       <TrendH2 id="conclusion">결론: 오늘의 폭락이 묻는 진짜 질문</TrendH2>
       <TrendP>
         2026년 6월 8일의 코스피 대폭락은 검은 월요일로 기억될 하루입니다.
-        그러나 역사를 돌아보면 "검은 날"들은 종종 위대한 매수 기회였습니다.
+        그러나 역사를 돌아보면 &ldquo;검은 날&rdquo;들은 종종 위대한 매수 기회였습니다.
         1987년 블랙 먼데이, 2008년 리먼 사태, 2020년 코로나 충격 — 그 모든 폭락 이후 시장은 회복했습니다.
       </TrendP>
       <TrendP>
@@ -430,8 +430,8 @@ export default function KospiBlackFridayJune2026Page() {
         이것이 이번 폭락을 IT버블 붕괴가 아닌 건강한 조정으로 보는 근거입니다.
       </TrendP>
       <TrendP>
-        오늘의 폭락이 당신에게 묻는 진짜 질문은 "팔까 말까"가 아닙니다.
-        <strong>"당신의 투자 원칙이 무엇인가"</strong>입니다.
+        오늘의 폭락이 당신에게 묻는 진짜 질문은 &ldquo;팔까 말까&rdquo;가 아닙니다.
+        <strong>&ldquo;당신의 투자 원칙이 무엇인가&rdquo;</strong>입니다.
         원칙이 있는 사람은 오늘이 점검의 날이고, 원칙이 없는 사람은 오늘이 공황의 날입니다.
         SpaceX 상장이 끝나고, 연준의 방향이 명확해지고, 이란 협상이 진전될 때
         시장은 다시 방향을 찾을 것입니다. 그 날을 위한 실탄을 지금 아끼십시오.

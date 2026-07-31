@@ -437,7 +437,7 @@ export default function LoanInterestCalculatorPage() {
         {/* 2. 원리금균등 vs 원금균등 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
           <h2 className="text-lg font-bold mb-1 text-gray-900">원리금균등 vs 원금균등 — 실제 차이는 얼마나 될까?</h2>
-          <p className="text-sm text-gray-500 mb-5">많은 분이 "원리금균등이 편하지만 이자를 더 낸다"는 걸 알면서도 얼마나 더 내는지는 모릅니다. 구체적으로 계산해봤습니다.</p>
+          <p className="text-sm text-gray-500 mb-5">많은 분이 &ldquo;원리금균등이 편하지만 이자를 더 낸다&rdquo;는 걸 알면서도 얼마나 더 내는지는 모릅니다. 구체적으로 계산해봤습니다.</p>
           <div className="space-y-4 text-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

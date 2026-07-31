@@ -368,7 +368,7 @@ export default function DsrDtiLtvCalculatorPage() {
         {/* 1. DSR 높게 나왔을 때 실제 전략 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
           <h2 className="text-lg font-bold mb-1 text-gray-900">DSR이 40%를 넘었다면 — 실제로 낮추는 방법</h2>
-          <p className="text-sm text-gray-500 mb-5">단순히 "대출 줄이거나 소득 올리면 된다"는 정보는 어디에나 있습니다. 실제로 어떤 선택이 DSR에 얼마나 영향을 주는지 살펴봅니다.</p>
+          <p className="text-sm text-gray-500 mb-5">단순히 &ldquo;대출 줄이거나 소득 올리면 된다&rdquo;는 정보는 어디에나 있습니다. 실제로 어떤 선택이 DSR에 얼마나 영향을 주는지 살펴봅니다.</p>
           <div className="space-y-4 text-sm">
             <div className="border border-gray-100 rounded-xl p-4">
               <p className="font-bold text-gray-800 mb-2">① 기존 대출 중 어떤 걸 먼저 갚아야 할까?</p>

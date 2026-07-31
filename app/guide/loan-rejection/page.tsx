@@ -151,7 +151,7 @@ export default function LoanRejectionPage() {
 
       <H2 id="checkreason">거절 이유 정확히 파악하는 법</H2>
       <Ul>
-        <li><strong className="font-semibold">은행 담당자에게 직접 문의:</strong> 법적으로 거절 사유 고지 의무 있음. "어떤 부분이 문제인가요?"라고 명확히 물어보세요</li>
+        <li><strong className="font-semibold">은행 담당자에게 직접 문의:</strong> 법적으로 거절 사유 고지 의무 있음. &ldquo;어떤 부분이 문제인가요?&rdquo;라고 명확히 물어보세요</li>
         <li><strong className="font-semibold">신용점수 조회:</strong> KCB(올크레딧·카카오페이), NICE(나이스평가정보·토스)에서 무료 조회. 점수와 등급, 부정 요소 확인</li>
         <li><strong className="font-semibold">DSR 자체 계산:</strong> 기존 모든 대출의 월 원리금 합계 ÷ 월소득 × 100. 40% 초과 여부 직접 계산</li>
         <li><strong className="font-semibold">신용정보 열람:</strong> 금융거래 연체·연체 해제 이력, 채무 조정 이력 확인 (금융감독원 금융소비자정보포털)</li>

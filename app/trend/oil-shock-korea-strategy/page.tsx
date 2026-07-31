@@ -82,7 +82,7 @@ export default function OilShockKoreaStrategyPage() {
 
       <TrendWarn>
         <strong>핵심 위험:</strong> 2022~2023년의 인플레이션 사이클이 완전히 진정되지 않은 상태에서
-        에너지 공급 충격이 재발하면, 중앙은행들은 "금리 인하 → 물가 안정" 양자택일의 딜레마에 빠집니다.
+        에너지 공급 충격이 재발하면, 중앙은행들은 &ldquo;금리 인하 → 물가 안정&rdquo; 양자택일의 딜레마에 빠집니다.
         이는 경기침체와 고물가가 동시에 오는 <strong>스태그플레이션</strong> 리스크를 높입니다.
       </TrendWarn>
 
@@ -120,7 +120,7 @@ export default function OilShockKoreaStrategyPage() {
       </TrendP>
       <TrendInsight>
         한국은행이 금리를 동결하거나 다시 올리면 부동산 시장과 가계부채 문제가 악화되고,
-        금리를 계속 내리면 물가가 자극됩니다. 이 "인플레이션 vs 경기침체" 딜레마는
+        금리를 계속 내리면 물가가 자극됩니다. 이 &ldquo;인플레이션 vs 경기침체&rdquo; 딜레마는
         2023년 이후 가장 심각한 수준으로 복귀할 수 있습니다.
       </TrendInsight>
 
@@ -224,7 +224,7 @@ export default function OilShockKoreaStrategyPage() {
         <li><strong>성장주·기술주 비중 축소:</strong> 금리 하락 기대가 꺾이면 고PER 성장주는 밸류에이션 압박</li>
       </TrendUl>
       <TrendInsight>
-        인플레이션 헤지 자산을 지금 당장 '몰빵'하라는 게 아닙니다. 지금까지 현금·예금 위주로만
+        인플레이션 헤지 자산을 지금 당장 &lsquo;몰빵&rsquo;하라는 게 아닙니다. 지금까지 현금·예금 위주로만
         보유했다면, 일부를 실물 자산 성격의 자산으로 점진적으로 이동시키는 <strong>포트폴리오 리밸런싱</strong>이
         필요한 시점이라는 의미입니다.
       </TrendInsight>

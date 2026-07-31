@@ -286,7 +286,7 @@ export default function DsrDtiLtvGuidePage() {
 
       <H2 id="ltv-ok-dsr-blocked">LTV는 남는데 DSR에서 막히는 이유</H2>
       <P>
-        "LTV 70%면 3.5억은 빌릴 수 있다고 했는데 실제 심사에서 1.8억밖에 안 나왔다"는 경우가
+        &ldquo;LTV 70%면 3.5억은 빌릴 수 있다고 했는데 실제 심사에서 1.8억밖에 안 나왔다&rdquo;는 경우가
         많습니다. 이것은 LTV와 DSR이 각각 다른 축에서 대출 한도를 제한하기 때문입니다.
       </P>
       <Ul>

@@ -26,14 +26,15 @@ const tocItems = [
 
 const ctas = [
   { label: '대출 이자 계산기', href: '/calculator/loan-interest', description: '금리·금액·기간 입력으로 월 납입액과 총이자 즉시 계산' },
-  { label: 'DSR·DTI·LTV 계산기', href: '/calculator/dsr-dti-ltv', description: '내 소득·부채 기준 주담대 한도 확인' },
+  { label: '금리 변동 영향 계산기', href: '/calculator/rate-change-impact', description: '0.5%p가 아닌 내 상황의 금리차를 넣어 월납입액 변화 확인' },
+  { label: '대출 갈아타기 손익 계산기', href: '/calculator/refinancing', description: '이미 대출이 있다면 — 수수료 빼고 실제 절감액과 손익분기점' },
 ]
 
 const relatedGuides = [
   { title: 'DSR·DTI·LTV 뜻과 차이 완전 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도를 결정하는 3가지 규제 지표 완전 정리' },
   { title: 'LTV는 남는데 DSR에서 막히는 이유', href: '/guide/ltv-ok-dsr-blocked', description: '한도 확보 후 금리 협상이 중요한 이유' },
   { title: '연봉 5,000만원 신용대출 있으면 주담대 한도는?', href: '/guide/mortgage-salary-5000', description: 'DSR 기준 주담대 한도 실전 계산' },
-  { title: '자동차 할부가 주담대 한도를 줄이는 이유', href: '/guide/car-loan-dsr-impact', description: '한도 확보 전에 알아야 할 기존 부채 영향' },
+  { title: '금리 인상기 대출 전략', href: '/guide/rate-strategy', description: '금리가 오르는 국면에서 고정·변동을 고르는 기준' },
 ]
 
 const faqs = [

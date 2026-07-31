@@ -37,6 +37,11 @@ const ctas = [
     href: '/calculator/loan-limit',
     description: '소득·부채·담보 기준 실제 한도 확인',
   },
+  {
+    label: '비상자금 계산기',
+    href: '/calculator/emergency-fund',
+    description: '체크 4번 — 대출 전 확보해야 할 비상자금 규모 산출',
+  },
 ]
 
 const relatedGuides = [
@@ -56,9 +61,9 @@ const relatedGuides = [
     description: '신용점수 올리는 방법과 금리 영향',
   },
   {
-    title: '상환방식 완전 비교',
-    href: '/guide/repayment-types',
-    description: '원리금균등·원금균등·만기일시 비교',
+    title: '대출 거절 이유와 극복 전략',
+    href: '/guide/loan-rejection',
+    description: '체크리스트를 놓쳐 거절됐을 때 되돌리는 방법',
   },
 ]
 
@@ -137,7 +142,7 @@ export default function LoanChecklistGuidePage() {
       title="대출 신청 전 필수 체크리스트 — 놓치면 후회하는 10가지"
       description="대출 신청 전 반드시 확인해야 할 신용·소득·한도 파악, 상품 비교 포인트, 계약서 필수 확인 항목을 직장인·자영업자 실전 사례와 함께 완전히 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"
@@ -172,6 +177,19 @@ export default function LoanChecklistGuidePage() {
         주택담보대출이라면 해당 주택의 공시가격·KB시세를 확인하고, 현재 규제 지역 여부에
         따른 LTV 한도를 미리 계산해두세요. 예상 한도를 먼저 알아야 부족분을 어떻게 채울지
         플랜B를 준비할 수 있습니다.
+      </P>
+      <H3>체크 4: 비상자금이 남아 있는지 확인</H3>
+      <P>
+        가장 많이 빠뜨리는 항목입니다. 보유 현금을 전부 계약금·중도금에 넣고 대출을 최대로
+        받으면, 대출 실행 직후부터 완충 장치가 없는 상태가 됩니다. 이직·질병·금리 인상 중
+        하나만 겹쳐도 연체로 이어지고, 연체는 신용점수 하락 → 금리 인상 → 상환 부담 증가로
+        연쇄됩니다.
+      </P>
+      <P>
+        대출 실행 후에도 <strong className="font-semibold">월 고정지출의 3~6개월치</strong>는
+        현금이나 즉시 인출 가능한 예금으로 남겨두는 것이 안전선입니다. 맞벌이이고 소득이
+        안정적이면 3개월치, 외벌이·프리랜서·자영업이라면 6개월치 이상을 권장합니다. 이
+        금액을 확보할 수 없다면 대출 규모나 매수 시점을 조정하는 편이 낫습니다.
       </P>
 
       <H2 id="comparison">상품 비교 포인트 7가지</H2>

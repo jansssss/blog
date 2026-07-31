@@ -29,6 +29,11 @@ const tocItems = [
 
 const ctas = [
   {
+    label: '금리 변동 영향 계산기',
+    href: '/calculator/rate-change-impact',
+    description: '금리가 1%p 더 오르면 내 월납입액이 얼마가 되는지 먼저 확인',
+  },
+  {
     label: '대출 갈아타기 손익 계산기',
     href: '/calculator/refinancing',
     description: '수수료 차감 후 실제 절감액·손익분기점 계산',
@@ -98,7 +103,7 @@ export default function RateStrategyGuidePage() {
       title="금리 인상기 대출 전략 — 고정·변동 선택부터 갈아타기까지"
       description="금리가 오를 때 내 대출에 미치는 영향, 고정·변동금리 선택 기준, 대환대출 타이밍과 손익 계산, 금리 인하 요구권 활용법을 실전 사례로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

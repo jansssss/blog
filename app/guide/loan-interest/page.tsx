@@ -37,6 +37,11 @@ const ctas = [
     href: '/calculator/rate-change-impact',
     description: '금리 1%p 오를 때 추가 이자 부담 확인',
   },
+  {
+    label: '원리금 vs 원금균등 비교 계산기',
+    href: '/calculator/repayment-compare',
+    description: '상환 방식만 바꿔도 총이자가 얼마나 줄어드는지 비교',
+  },
 ]
 
 const relatedGuides = [
@@ -56,9 +61,9 @@ const relatedGuides = [
     description: '대출 일찍 갚을 때 내는 수수료 계산법',
   },
   {
-    title: '대출 전 필수 체크리스트',
-    href: '/guide/loan-checklist',
-    description: '대출 신청 전 반드시 확인해야 할 항목',
+    title: '금리 인상기 대출 전략',
+    href: '/guide/rate-strategy',
+    description: '금리가 오를 때 이자 부담을 줄이는 고정·변동 선택 전략',
   },
 ]
 
@@ -131,7 +136,7 @@ export default function LoanInterestGuidePage() {
       title="대출이자 계산법 완전 정리 — 왜 이자가 다르게 나올까"
       description="원리금균등·원금균등·만기일시 상환 방식별 이자 계산 공식, 변동금리와 고정금리의 차이, 직장인과 자영업자의 실전 사례 2개를 통해 대출이자 계산의 구조를 완전히 이해합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

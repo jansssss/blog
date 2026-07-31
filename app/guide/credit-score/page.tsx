@@ -36,6 +36,11 @@ const ctas = [
     href: '/calculator/loan-interest',
     description: '신용점수 개선 후 금리로 이자 차이 계산',
   },
+  {
+    label: '금리 변동 영향 계산기',
+    href: '/calculator/rate-change-impact',
+    description: '신용점수 등급이 바뀌어 금리가 0.5%p 달라지면 월납입액이 얼마나 변하는지',
+  },
 ]
 
 const relatedGuides = [
@@ -50,9 +55,9 @@ const relatedGuides = [
     description: '상환방식·금리 유형별 이자 계산법',
   },
   {
-    title: '중도상환수수료 완전 정리',
-    href: '/guide/early-repayment-fee',
-    description: '대출 조기 상환 시 수수료 계산과 절약 전략',
+    title: '대출 거절 이유와 극복 전략',
+    href: '/guide/loan-rejection',
+    description: '신용점수가 낮아 거절됐을 때 다시 승인받는 순서',
   },
   {
     title: '대출 전 필수 체크리스트',
@@ -130,7 +135,7 @@ export default function CreditScoreGuidePage() {
       title="신용점수 완전 정리 — 점수 올리는 현실적인 방법과 대출 금리 영향"
       description="신용점수 체계(KCB·NICE), 점수에 영향을 미치는 요소, 실제로 점수를 올리는 현실적인 방법, 신용점수별 대출 금리 차이를 직장인·자영업자 사례로 완전히 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

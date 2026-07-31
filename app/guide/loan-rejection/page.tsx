@@ -35,6 +35,11 @@ const ctas = [
     description: '현재 조건에서 가능한 대출 한도 미리 계산',
   },
   {
+    label: 'DSR·DTI·LTV 계산기',
+    href: '/calculator/dsr-dti-ltv',
+    description: '거절 1순위 사유 — 내 DSR이 40%를 넘는지 먼저 확인',
+  },
+  {
     label: '대출 이자 계산기',
     href: '/calculator/loan-interest',
     description: '상환 가능한 금액 역산 계산',
@@ -106,7 +111,7 @@ export default function LoanRejectionPage() {
       title="대출 거절 이유와 극복 전략 — 거절 후 재신청 성공 완전 가이드"
       description="대출 심사에서 거절되는 5가지 핵심 이유를 파악하고, 신용점수·DSR·소득 증빙을 개선해 재신청 성공률을 높이는 실전 전략을 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

@@ -50,7 +50,7 @@ const relatedGuides = [
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '3가지 지표로 실제 대출 한도 계산하는 법' },
   { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', description: '전세대출 종류·조건·한도 완전 가이드' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등·원금균등·만기일시 총이자 비교' },
-  { title: '중도상환수수료 완전 정리', href: '/guide/early-repayment-fee', description: '중도상환 시 수수료 아끼는 법' },
+  { title: '금리 인상기 대출 전략', href: '/guide/rate-strategy', description: '주담대 고정·변동 선택과 갈아타기 타이밍 판단' },
 ]
 
 const faqs = [
@@ -120,7 +120,7 @@ export default function MortgageLoanGuidePage() {
       title="주택담보대출 완전 정리 — 한도·금리·절차 한 번에 이해하기"
       description="주택담보대출의 종류부터 실제 대출 한도 계산(LTV·DSR·DTI), 은행별 금리 비교 방법, 신청·실행 7단계 절차까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

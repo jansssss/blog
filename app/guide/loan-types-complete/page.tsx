@@ -38,12 +38,17 @@ const ctas = [
     href: '/calculator/loan-interest',
     description: '금리·기간별 총이자 즉시 계산',
   },
+  {
+    label: '원리금 vs 원금균등 비교 계산기',
+    href: '/calculator/repayment-compare',
+    description: '대출 종류를 정했다면 상환 방식별 총이자까지 비교',
+  },
 ]
 
 const relatedGuides = [
   { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', description: '주담대 한도·금리·절차 상세 가이드' },
   { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', description: '전세대출 종류·보증·사기 예방 완전 가이드' },
-  { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 핵심 지표' },
+  { title: '대출 보증보험 완전 정리', href: '/guide/loan-guarantee', description: '보증서가 있어야 열리는 대출 종류와 보증료 구조' },
   { title: '신용점수 완전 정리', href: '/guide/credit-score', description: '대출 금리를 낮추는 신용점수 관리법' },
 ]
 
@@ -85,7 +90,7 @@ export default function LoanTypesCompletePage() {
       title="대출 종류 완전 가이드 — 목적·금리·조건별 한눈에 비교"
       description="신용대출·주택담보대출·전세대출·사업자대출·정책금융까지 한국의 모든 대출 종류를 목적, 금리 수준, 자격 조건별로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

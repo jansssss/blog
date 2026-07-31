@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "check:sitemap": "node scripts/check-sitemap-coverage.mjs",
     "collect:finlife": "tsx scripts/collect-finlife.ts"
   },
   "dependencies": {

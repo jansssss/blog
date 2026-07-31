@@ -26,6 +26,7 @@ const tocItems = [
 
 const ctas = [
   { label: 'DSR·DTI·LTV 계산기', href: '/calculator/dsr-dti-ltv', description: '내 소득·기존 대출로 DSR 한도와 주담대 한도 계산' },
+  { label: '대출 한도 시뮬레이터', href: '/calculator/loan-limit', description: 'LTV 기준 한도와 DSR 기준 한도 중 실제로 얼마가 나오는지 확인' },
   { label: '대출 이자 계산기', href: '/calculator/loan-interest', description: '월 납입액과 총이자 확인' },
 ]
 

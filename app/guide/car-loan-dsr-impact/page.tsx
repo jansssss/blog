@@ -26,7 +26,8 @@ const tocItems = [
 
 const ctas = [
   { label: 'DSR·DTI·LTV 계산기', href: '/calculator/dsr-dti-ltv', description: '자동차 할부 포함해서 내 DSR과 주담대 한도 확인' },
-  { label: '대출 이자 계산기', href: '/calculator/loan-interest', description: '월 납입액과 총이자 즉시 계산' },
+  { label: '대출 한도 시뮬레이터', href: '/calculator/loan-limit', description: '할부를 완납하면 주담대 한도가 얼마나 늘어나는지 비교' },
+  { label: '중도상환 vs 유지 비교 계산기', href: '/calculator/prepayment-comparison', description: '할부를 미리 완납하는 게 이득인지 숫자로 판단' },
 ]
 
 const relatedGuides = [

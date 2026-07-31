@@ -29,9 +29,19 @@ const tocItems = [
 
 const ctas = [
   {
-    label: '전세대출 이자 계산기',
+    label: '대출 이자 계산기',
     href: '/calculator/loan-interest',
-    description: '전세대출 월납입 이자 계산',
+    description: '보증료까지 더한 실질 부담을 월납입액으로 환산',
+  },
+  {
+    label: '대출 한도 시뮬레이터',
+    href: '/calculator/loan-limit',
+    description: '보증서를 활용했을 때 확보되는 대출 한도 확인',
+  },
+  {
+    label: 'DSR·DTI·LTV 계산기',
+    href: '/calculator/dsr-dti-ltv',
+    description: '보증부 대출도 DSR에 잡힌다 — 내 여유분 먼저 확인',
   },
 ]
 
@@ -85,7 +95,7 @@ export default function LoanGuaranteePage() {
       title="대출 보증보험 완전 정리 — HUG·HF·SGI 비교와 활용 전략"
       description="전세보증보험·대출보증서의 구조, HUG·HF·SGI 3대 보증 기관 비교, 보증료 계산법, 전세 사기 방어 활용법까지 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

@@ -38,6 +38,11 @@ const ctas = [
     href: '/calculator/loan-limit',
     description: '소득·부채·담보 입력으로 실제 한도 즉시 확인',
   },
+  {
+    label: '월 상환 부담 체감 계산기',
+    href: '/calculator/repayment-burden',
+    description: 'DSR 40%를 통과해도 실제 생활에서 감당 가능한 수준인지 확인',
+  },
 ]
 
 const relatedGuides = [
@@ -57,9 +62,9 @@ const relatedGuides = [
     description: '자동차 할부가 DSR에 미치는 영향과 한도 감소 계산',
   },
   {
-    title: '대출이자 계산법 완전 정리',
-    href: '/guide/loan-interest',
-    description: '상환방식·금리 유형별 이자 계산법 실전 정리',
+    title: '대출 거절 이유와 극복 전략',
+    href: '/guide/loan-rejection',
+    description: 'DSR 초과로 거절됐을 때 한도를 되찾는 실전 순서',
   },
 ]
 

@@ -37,6 +37,11 @@ const ctas = [
     href: '/calculator/repayment-burden',
     description: '소득 대비 월납입 부담 비율 확인',
   },
+  {
+    label: '대출 이자 계산기',
+    href: '/calculator/loan-interest',
+    description: '선택한 상환 방식으로 월납입액·총이자 최종 확인',
+  },
 ]
 
 const relatedGuides = [
@@ -139,7 +144,7 @@ export default function RepaymentTypesGuidePage() {
       title="원리금균등·원금균등·만기일시 상환방식 완전 비교"
       description="3가지 대출 상환 방식의 월납입액·총이자·현금흐름 차이를 실전 사례와 비교표로 완전히 정리하고, 내 상황에 맞는 선택 기준을 제시합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

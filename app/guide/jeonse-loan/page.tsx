@@ -34,11 +34,21 @@ const ctas = [
     href: '/calculator/loan-interest',
     description: '전세대출 이자 월납입액 즉시 계산',
   },
+  {
+    label: '대출 한도 시뮬레이터',
+    href: '/calculator/loan-limit',
+    description: '내 소득으로 전세보증금 중 얼마까지 대출이 나오는지 확인',
+  },
+  {
+    label: '월 상환 부담 체감 계산기',
+    href: '/calculator/repayment-burden',
+    description: '전세대출 월 이자가 소득 대비 감당 가능한 수준인지 진단',
+  },
 ]
 
 const relatedGuides = [
   { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', description: '매매 전환 시 필요한 주담대 가이드' },
-  { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 핵심 지표' },
+  { title: '대출 보증보험 완전 정리', href: '/guide/loan-guarantee', description: '전세대출에 반드시 필요한 HUG·HF 보증 구조와 보증료' },
   { title: '신용점수 완전 정리', href: '/guide/credit-score', description: '전세대출 금리를 낮추는 신용점수 관리법' },
   { title: '대출 전 필수 체크리스트', href: '/guide/loan-checklist', description: '대출 신청 전 반드시 확인해야 할 항목' },
 ]
@@ -106,7 +116,7 @@ export default function JeonseLoangGuidePage() {
       title="전세대출 완전 정리 — 종류·한도·보증·사기 예방까지"
       description="버팀목대출부터 시중은행 전세대출까지 3가지 경로 비교, 한도 계산 구조, 보증 기관 선택법, 전세 사기 예방 체크리스트를 2026년 기준으로 완전 정리합니다."
       tocItems={tocItems}
-      ctas={[]}
+      ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
       lastUpdated="2026년 6월"

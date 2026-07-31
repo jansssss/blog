@@ -1,7 +1,9 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import RateCompareWidget from './RateCompareWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '주담대 금리 0.5% 차이, 총이자 얼마나 달라질까? — 협상 전략까지 | ohyess',
@@ -165,7 +167,15 @@ export default function Rate0p5DifferencePage() {
       <H3>① 사전심사를 여러 곳에 넣고 비교 협상한다</H3>
       <P>
         가장 효과적인 방법입니다. 시중은행·인터넷은행·지방은행 3곳 이상에 사전심사를 넣어보면
-        같은 조건에서 0.3~0.7%p 차이가 나는 경우가 흔합니다.
+        같은 조건에서 0.3~0.7%p 차이가 나는 경우가 흔합니다. 어느 은행에 넣을지 고를 때는{' '}
+        <Link
+          href="/compare/bank-rates"
+          className="text-blue-600 font-semibold underline underline-offset-2 hover:text-blue-700"
+        >
+          은행별 금리 비교
+        </Link>
+        에서 금융감독원 공시 기준 실제 취급 금리를 먼저 확인하세요. 협상 자리에서 기준선으로
+        삼을 숫자가 있어야 &ldquo;다른 곳은 이만큼 나왔다&rdquo;는 말에 근거가 생깁니다.
       </P>
       <Callout color="blue">
         <strong>협상 실전 스크립트</strong><br />
@@ -247,6 +257,7 @@ export default function Rate0p5DifferencePage() {
         <p>• 원리금균등 상환(PMT 공식) 기준 / 거치기간 없음<br />
         • 실제 총이자는 금리 변동(변동금리), 중도 상환 여부에 따라 다를 수 있습니다</p>
       </div>
+      <HubBacklink hub="refinancing-guide" />
     </GuideLayout>
   )
 }

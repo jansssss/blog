@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import EarlyRepaymentWidget from './EarlyRepaymentWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '중도상환수수료 완전 정리 — 계산 공식·면제 조건·절약 전략 | ohyess 가이드',
@@ -270,6 +271,7 @@ export default function EarlyRepaymentFeeGuidePage() {
         중도상환 vs 유지 비교 계산기를 활용하면 본인 상황에서 수수료와 잔여 이자 절감액을
         즉시 비교할 수 있습니다.
       </P>
+      <HubBacklink hub="refinancing-guide" />
     </GuideLayout>
   )
 }

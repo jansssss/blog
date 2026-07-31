@@ -291,6 +291,7 @@ export default function RefinancingGuideHubPage() {
             { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '수수료 공식, 면제 조건, 절약 전략 상세 가이드', type: 'guide' },
             { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '갈아탈 때 어떤 금리 유형으로 갈아탈지 기준', type: 'guide' },
             { href: '/guide/loan-interest', emoji: '📚', title: '대출 이자 완전 정복', desc: '금리별 이자 차이와 상환 방식별 총비용 비교', type: 'guide' },
+            { href: '/guide/rate-0p5-difference', emoji: '🔍', title: '금리 0.5% 차이, 총이자 얼마나 다를까', desc: '갈아탈 가치가 있는 금리차인지 판단하는 기준', type: 'guide' },
           ].map(({ href, emoji, title, desc, type }) => (
             <Link key={href} href={href}
               className="group flex items-start gap-3 p-4 bg-white hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl shadow-sm transition-all">

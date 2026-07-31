@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
 import RateStrategyWidget from './RateStrategyWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '금리 인상기 대출 전략 완전 정리 | ohyess 가이드',
@@ -177,6 +179,18 @@ export default function RateStrategyGuidePage() {
         <li>금리 변동 리스크를 수용할 수 있는 여유 자금 보유자</li>
       </Ul>
       <P>
+        두 조건 중 어디에 해당하는지 애매하다면{' '}
+        <Link
+          href="/compare/fixed-vs-variable"
+          className="text-blue-600 font-semibold underline underline-offset-2 hover:text-blue-700"
+        >
+          고정 vs 변동 손익분기 비교
+        </Link>
+        에서 금융감독원 공시 평균 금리로 &ldquo;변동금리가 얼마나 올라야 고정금리보다
+        손해가 되는지&rdquo;를 직접 계산해볼 수 있습니다. 손익분기 상승폭이 클수록 변동금리를
+        택할 여유가 크다는 뜻입니다.
+      </P>
+      <P>
         <strong className="font-semibold text-gray-900">실용적 조언:</strong> 장기 주담대라면 고정금리 안정성을 선택하고, 단기 신용대출이나 전세대출은 변동이 더 유연합니다. 금리 유형보다 중요한 것은 상환 가능한 범위 내에서 대출을 받는 것입니다.
       </P>
 
@@ -253,6 +267,7 @@ export default function RateStrategyGuidePage() {
           <li><strong>결론: 고금리 부채 우선 상환이 항상 최우선 전략</strong></li>
         </Ul>
       </CaseBox>
+      <HubBacklink hub="refinancing-guide" />
     </GuideLayout>
   )
 }

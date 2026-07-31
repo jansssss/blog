@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import CarLoanCalcWidget from './CarLoanCalcWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '자동차 할부가 주담대 한도를 줄이는 이유 — 완납해야 할까? | ohyess',
@@ -209,6 +210,7 @@ export default function CarLoanDsrImpactPage() {
         <p className="font-semibold text-gray-700 mb-2 text-xs">📌 참고</p>
         <p>이 페이지의 계산은 기본 DSR·원리금균등 상환 기준의 참고용 추정치입니다. 자동차 할부 DSR 반영 여부 및 잔여기간 처리 방식은 금융기관마다 다를 수 있으므로 심사 전 반드시 확인하세요.</p>
       </div>
+      <HubBacklink hub="dsr-guide" />
     </GuideLayout>
   )
 }

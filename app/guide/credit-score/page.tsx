@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import CreditScoreWidget from './CreditScoreWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '신용점수 완전 정리 — 점수 올리는 현실적인 방법과 대출 금리 영향 | ohyess 가이드',
@@ -356,6 +357,7 @@ export default function CreditScoreGuidePage() {
         신용점수 900점대와 600점대의 10년 총이자 차이가 2,400만원입니다. 신용점수 관리가
         단순한 습관이 아니라 수천만원의 재산을 지키는 전략임을 이 숫자가 증명합니다.
       </P>
+      <HubBacklink hub="mortgage-preparation" />
     </GuideLayout>
   )
 }

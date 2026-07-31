@@ -49,7 +49,7 @@ export const OHYESS_ROUTES: StaticRoute[] = [
 
   // 허브 (토픽 클러스터 진입점)
   { path: '/hub/dsr-guide', lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.9 },
-  { path: '/hub/refinancing-guide', lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/hub/refinancing-guide', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/hub/mortgage-preparation', lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.8 },
 
   // 계산기

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
 import GuaranteeFeeWidget from './GuaranteeFeeWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '대출 보증보험 완전 정리 | ohyess 가이드',
@@ -217,6 +218,7 @@ export default function LoanGuaranteePage() {
         <li><strong className="font-semibold">등기부등본 선순위 채권 확인:</strong> [전세금 + 선순위채권] ÷ 시세 ≤ 80%여야 안전권</li>
         <li><strong className="font-semibold">갱신 시 재가입 잊지 않기:</strong> 계약 연장 시 기존 보증은 자동 연장되지 않는 경우 있음. 반드시 확인</li>
       </Ul>
+      <HubBacklink hub="mortgage-preparation" />
     </GuideLayout>
   )
 }

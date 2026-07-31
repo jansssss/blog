@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
 import LoanRejectionWidget from './LoanRejectionWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '대출 거절 이유와 극복 전략 완전 정리 | ohyess 가이드',
@@ -249,6 +250,7 @@ export default function LoanRejectionPage() {
           <li><strong>결론: 장기적으로 성실 신고가 대출 한도를 높이는 유일한 방법</strong></li>
         </Ul>
       </CaseBox>
+      <HubBacklink hub="mortgage-preparation" />
     </GuideLayout>
   )
 }

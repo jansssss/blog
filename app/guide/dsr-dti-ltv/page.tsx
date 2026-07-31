@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: 'DTI란? DSR·DTI·LTV 뜻과 차이 완전 정리 | ohyess 가이드',
@@ -385,6 +386,7 @@ export default function DsrDtiLtvGuidePage() {
         별도 기준이 적용됩니다. 자격 요건에 해당된다면 정책 대출을 먼저 활용해 이자 부담을
         낮추고 DSR 여유분을 남겨두는 전략이 유효합니다.
       </P>
+      <HubBacklink hub="dsr-guide" />
     </GuideLayout>
   )
 }

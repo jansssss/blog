@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import MortgageCalcWidget from './MortgageCalcWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '연봉 5,000만원 신용대출 있으면 주담대 한도는? — DSR 계산 완전 해설 | ohyess',
@@ -215,6 +216,7 @@ export default function MortgageSalary5000Page() {
         <p className="font-semibold text-gray-700 mb-2 text-xs">📌 참고</p>
         <p>이 페이지의 계산은 기본 DSR·원리금균등 상환 기준의 참고용 추정치입니다. 스트레스 DSR 적용, 소득 인정 방식, 금융기관 내부 심사 기준에 따라 실제 한도는 달라질 수 있습니다.</p>
       </div>
+      <HubBacklink hub="dsr-guide" />
     </GuideLayout>
   )
 }

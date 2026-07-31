@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import LoanInterestGuideWidget from './LoanInterestGuideWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '대출이자 계산법 완전 정리 | ohyess 가이드',
@@ -346,6 +347,7 @@ export default function LoanInterestGuidePage() {
         줄면 이후 발생하는 이자도 함께 줄어듭니다. 수수료 없는 중도상환 한도(통상 연 최대
         20~30%)를 활용하면 별도 비용 없이 이자를 절약할 수 있습니다.
       </P>
+      <HubBacklink hub="refinancing-guide" />
     </GuideLayout>
   )
 }

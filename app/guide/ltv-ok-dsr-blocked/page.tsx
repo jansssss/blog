@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import LtvDsrCalcWidget from './LtvDsrCalcWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: 'LTV는 남는데 DSR에서 막히는 이유 — 스트레스 DSR까지 완전 해설 | ohyess',
@@ -226,6 +227,7 @@ export default function LtvOkDsrBlockedPage() {
         <p className="font-semibold text-gray-700 mb-2 text-xs">📌 참고</p>
         <p>이 페이지의 계산은 기본 DSR 기준의 참고용 추정치입니다. 스트레스 DSR 적용, 지역 규제 변경, 소득 인정 방식, 금융기관 내부 심사 기준에 따라 실제 한도는 달라질 수 있습니다.</p>
       </div>
+      <HubBacklink hub="dsr-guide" />
     </GuideLayout>
   )
 }

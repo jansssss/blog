@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import RepaymentTypesWidget from './RepaymentTypesWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '원리금균등·원금균등·만기일시 상환방식 완전 비교 | ohyess 가이드',
@@ -295,6 +296,7 @@ export default function RepaymentTypesGuidePage() {
         <li>단기 자금 조달 후 빠른 상환을 계획하는 경우</li>
         <li>다른 투자 수익률이 대출이자보다 확실히 높은 경우</li>
       </Ul>
+      <HubBacklink hub="mortgage-preparation" />
     </GuideLayout>
   )
 }

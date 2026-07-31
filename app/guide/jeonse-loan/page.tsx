@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
@@ -150,6 +151,16 @@ export default function JeonseLoangGuidePage() {
         <li>한도: 수도권 3억원, 지방 2억원 (전세금의 80% 이내)</li>
         <li>보증: 주택도시보증공사(HUG) 또는 주택금융공사(HF)</li>
       </Ul>
+      <P>
+        버팀목은 소득·자산·무주택 요건을 모두 충족해야 하고 기준이 해마다 바뀝니다.{' '}
+        <Link
+          href="/policy/housing"
+          className="text-blue-600 font-semibold underline underline-offset-2 hover:text-blue-700"
+        >
+          주거 지원 정책자금 정리
+        </Link>
+        에서 현재 기준과 확인 시점을 함께 확인하세요.
+      </P>
       <H3>② 주택금융공사(HF) 전세대출</H3>
       <Ul>
         <li>대상: 무주택자 (소득 제한 없음)</li>

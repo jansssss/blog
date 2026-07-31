@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import GuideLayout from '@/components/guide/GuideLayout'
 import GeminiImage from '@/components/GeminiImage'
 import LoanTypeFinderWidget from './LoanTypeFinderWidget'
+import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
   title: '대출 종류 완전 가이드 | ohyess 가이드',
@@ -151,6 +153,18 @@ export default function LoanTypesCompletePage() {
         <li><strong className="font-semibold">버팀목 전세대출:</strong> 무주택 세대주 전세. 연소득 5천만원 이하. 금리 연 1.8~2.9%</li>
         <li><strong className="font-semibold">청년 전세대출:</strong> 만 19~34세 청년. 연소득 5천만원 이하. 금리 연 1.5~2.1%</li>
       </Ul>
+      <P>
+        정책 대출은 종류마다 나이·소득·자산·무주택 요건이 달라 목록만 봐서는 내가 되는지
+        판단하기 어렵습니다.{' '}
+        <Link
+          href="/policy/eligibility"
+          className="text-blue-600 font-semibold underline underline-offset-2 hover:text-blue-700"
+        >
+          정책자금 자격 확인기
+        </Link>
+        에 조건을 입력하면 해당·확인필요·미해당으로 나눠 판정하고, 미달인 경우 어떤 항목이
+        얼마나 모자란지도 함께 보여줍니다.
+      </P>
 
       <H2 id="business">사업자·프리랜서 대출</H2>
       <H3>사업자 대출 종류</H3>
@@ -181,6 +195,7 @@ export default function LoanTypesCompletePage() {
           </div>
         ))}
       </div>
+      <HubBacklink hub="mortgage-preparation" />
     </GuideLayout>
   )
 }

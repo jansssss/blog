@@ -385,24 +385,24 @@ html {
  * 계산기 페이지들은 각자 <style> 블록에서 input[type=range] 를 8px 트랙 /
  * 20px thumb 으로 그린다. 마우스엔 충분하지만 손가락엔 작다.
  * 그 인라인 <style> 은 globals.css 보다 뒤에 오므로 같은 특이도로는
- * 이기지 못한다. `html` 을 앞에 붙여 특이도를 한 단계 올린다. */
+ * 이기지 못한다. `html` 을 앞에 붙여 특이도를 한 단계 올린다.
+ *
+ * 트랙 높이(8px)는 건드리지 않는다. padding + background-clip: content-box 로
+ * 히트 영역을 넓히는 방법을 쓰면 안 된다 — 각 슬라이더가 인라인
+ * style={{ background: 'linear-gradient(...)' }} 로 트랙을 칠하는데,
+ * `background` 는 단축 속성이라 background-clip 을 border-box 로 되돌리고
+ * 인라인 스타일이 우선하므로 요소 전체(36px)가 트랙처럼 칠해진다.
+ * 손가락 대응은 thumb 확대만으로 가져간다. */
 @media (pointer: coarse) {
-  html input[type='range'] {
-    /* 히트 영역을 36px 로 넓히되, 트랙 그라디언트는 가운데 8px 에만
-     * 그려지도록 content-box 로 클립한다 (box-sizing: border-box 기준) */
-    height: 36px;
-    padding: 14px 0;
-    background-clip: content-box;
-  }
   html input[type='range']::-webkit-slider-thumb {
-    width: 28px;
-    height: 28px;
-    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.18);
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
   }
   html input[type='range']::-moz-range-thumb {
-    width: 28px;
-    height: 28px;
-    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.18);
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
   }
 }
 

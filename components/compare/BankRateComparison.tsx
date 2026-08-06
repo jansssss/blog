@@ -32,6 +32,7 @@ import {
   type RepayMethod,
   type SortKey,
 } from '@/lib/finlife/compare'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import { formatDisclosureMonth } from '@/lib/finlife/snapshot'
 import { CREDIT_SCORE_BANDS, type LoanOffer, type LoanProductType } from '@/lib/finlife/types'
 
@@ -646,6 +647,13 @@ export default function BankRateComparison({
                   </div>
                 </div>
               </div>
+
+              <MobileResultBar
+                items={[
+                  { label: '최저 금리', value: `연 ${best.rate.toFixed(2)}%` },
+                  { label: '총이자', value: formatMoneyShort(best.totalInterest), tone: 'warning' },
+                ]}
+              />
 
               {/* 핵심 인사이트: 상하위 격차 */}
               {spread && spread.gap > 0 && (

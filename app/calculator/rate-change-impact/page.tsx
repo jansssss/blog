@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -183,14 +184,14 @@ export default function RateChangeImpactCalculatorPage() {
           </div>
 
           {/* KPI 3개 시나리오 */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {scenarios.map(s => (
-              <div key={s.label} className={`rounded-xl p-4 border ${
+              <div key={s.label} className={`rounded-xl p-3 sm:p-4 border ${
                 s.delta < 0 ? 'bg-emerald-50 border-emerald-100' :
                 s.delta === 0 ? 'bg-indigo-50 border-indigo-100' :
                 'bg-red-50 border-red-100'
               }`}>
-                <p className={`text-xs mb-1 font-semibold ${
+                <p className={`text-[11px] sm:text-xs mb-1 font-semibold ${
                   s.delta < 0 ? 'text-emerald-600' : s.delta === 0 ? 'text-indigo-600' : 'text-red-500'
                 }`}>{s.label} ({s.rate.toFixed(1)}%)</p>
                 <p className={`text-sm font-bold leading-tight ${
@@ -204,6 +205,13 @@ export default function RateChangeImpactCalculatorPage() {
               </div>
             ))}
           </div>
+
+          <MobileResultBar
+            items={[
+              { label: `월 상환액 (${rate.toFixed(1)}%)`, value: fmtWon(base.monthly) },
+              { label: '총 이자', value: fmtWon(base.totalInterest), tone: 'warning' },
+            ]}
+          />
 
           {/* 바 차트 */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

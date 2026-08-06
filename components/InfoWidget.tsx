@@ -194,12 +194,14 @@ export default function InfoWidget({
   return (
     <div className={`w-full bg-gradient-to-r ${gradient} border-b ${borderColor}`}>
       <div className="container py-2 px-3">
+        {/* 두 pill 을 flex-shrink-0 으로 두면 360px 화면에서 폭이 넘친다.
+         * min-w-0 로 줄어들 수 있게 하고, 좁을 때는 습도를 감춘다. */}
         <div className="flex items-center justify-between gap-2">
           {/* 날씨 정보 */}
-          <div className="relative flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
+          <div className="relative flex items-center gap-1.5 sm:gap-2 backdrop-blur-sm bg-white/60 px-2 sm:px-3 py-1.5 rounded-full shadow-sm min-w-0">
             <button
               onClick={() => setShowCitySelector(!showCitySelector)}
-              className="flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-primary transition-colors shrink-0"
             >
               <MapPin className="w-3 h-3" />
               <span>{selectedCity.name}</span>
@@ -208,13 +210,13 @@ export default function InfoWidget({
 
             <div className="h-3 w-px bg-gray-300 hidden sm:block" />
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl">{weather?.icon}</span>
-              <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-lg sm:text-xl">{weather?.icon}</span>
+              <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold text-gray-900 leading-tight">
                   {weather?.temp}°C
                 </span>
-                <span className="text-[10px] text-gray-500 leading-tight">
+                <span className="text-[10px] text-gray-500 leading-tight hidden sm:block">
                   습도 {weather?.humidity}%
                 </span>
               </div>
@@ -239,26 +241,26 @@ export default function InfoWidget({
           </div>
 
           {/* 코스피 정보 */}
-          <div className="flex items-center gap-2 backdrop-blur-sm bg-white/60 px-3 py-1.5 rounded-full shadow-sm flex-shrink-0">
-            <span className="text-xs font-medium text-gray-600">
+          <div className="flex items-center gap-1.5 sm:gap-2 backdrop-blur-sm bg-white/60 px-2 sm:px-3 py-1.5 rounded-full shadow-sm min-w-0">
+            <span className="text-xs font-medium text-gray-600 shrink-0">
               코스피
             </span>
 
-            <div className="h-3 w-px bg-gray-300" />
+            <div className="h-3 w-px bg-gray-300 shrink-0" />
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-gray-900">
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+              <span className="text-sm font-bold text-gray-900 truncate">
                 {stock?.value.toLocaleString()}
               </span>
               {stock && stock.change > 0 ? (
-                <div className="flex items-center gap-0.5 text-red-600">
+                <div className="flex items-center gap-0.5 text-red-600 shrink-0">
                   <TrendingUp className="w-3 h-3" />
                   <span className="text-xs font-medium">
                     +{stock.changePercent}%
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-0.5 text-blue-600">
+                <div className="flex items-center gap-0.5 text-blue-600 shrink-0">
                   <TrendingDown className="w-3 h-3" />
                   <span className="text-xs font-medium">
                     {stock?.changePercent}%

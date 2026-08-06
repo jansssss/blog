@@ -117,7 +117,7 @@ export default function CarLoanDsrImpactPage() {
       <P>
         모든 자동차 관련 납입이 DSR에 들어가는 건 아닙니다. 어떤 방식으로 차를 구매했느냐에 따라 달라집니다.
       </P>
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

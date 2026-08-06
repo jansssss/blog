@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Cell, ReferenceLine,
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 import { epiTotalInterest } from '@/lib/calculators'
@@ -270,6 +271,18 @@ export default function DsrDtiLtvCalculatorPage() {
             </div>
           </div>
 
+          <MobileResultBar
+            items={[
+              { label: 'DSR', value: `${result.dsr.toFixed(1)}%`, tone: result.dsr > 40 ? 'danger' : 'positive' },
+              { label: 'DTI', value: `${result.dti.toFixed(1)}%`, tone: result.dti > 50 ? 'danger' : 'positive' },
+              {
+                label: 'LTV',
+                value: propVal > 0 ? `${result.ltv.toFixed(1)}%` : '—',
+                tone: propVal > 0 && result.ltv > 70 ? 'danger' : 'positive',
+              },
+            ]}
+          />
+
           {/* 게이지 3개 */}
           <RatioGauge label="DSR — 총부채원리금상환비율" value={result.dsr} limit={40} color="#6366f1" subLabel="모든 대출 원리금 ÷ 연 소득" />
           <RatioGauge label="DTI — 총부채상환비율" value={result.dti} limit={50} color="#3b82f6" subLabel="신규 원리금 + 기타 이자 ÷ 연 소득" />
@@ -386,7 +399,7 @@ export default function DsrDtiLtvCalculatorPage() {
             </div>
             <div className="border border-gray-100 rounded-xl p-4">
               <p className="font-bold text-gray-800 mb-2">③ 소득 증빙 — 어떤 소득이 인정되나</p>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto table-scroll">
                 <table className="w-full text-xs mt-2">
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400">

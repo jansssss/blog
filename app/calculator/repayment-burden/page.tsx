@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -150,20 +151,31 @@ export default function RepaymentBurdenCalculatorPage() {
           </div>
 
           {/* KPI 3개 */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl p-4 bg-emerald-50 border border-emerald-100">
-              <p className="text-xs text-emerald-600 mb-1">가용 소득</p>
-              <p className="text-base font-bold text-emerald-800 leading-tight">{fmtWon(result.available)}</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="rounded-xl p-3 sm:p-4 bg-emerald-50 border border-emerald-100">
+              <p className="text-[11px] sm:text-xs text-emerald-600 mb-1">가용 소득</p>
+              <p className="text-sm sm:text-base font-bold text-emerald-800 leading-tight">{fmtWon(result.available)}</p>
             </div>
-            <div className="rounded-xl p-4 bg-red-50 border border-red-100">
-              <p className="text-xs text-red-500 mb-1">월 상환액</p>
-              <p className="text-base font-bold text-red-700 leading-tight">{fmtWon(repayment)}</p>
+            <div className="rounded-xl p-3 sm:p-4 bg-red-50 border border-red-100">
+              <p className="text-[11px] sm:text-xs text-red-500 mb-1">월 상환액</p>
+              <p className="text-sm sm:text-base font-bold text-red-700 leading-tight">{fmtWon(repayment)}</p>
             </div>
-            <div className="rounded-xl p-4 bg-amber-50 border border-amber-100">
-              <p className="text-xs text-amber-600 mb-1">고정지출</p>
-              <p className="text-base font-bold text-amber-800 leading-tight">{fmtWon(expenses)}</p>
+            <div className="rounded-xl p-3 sm:p-4 bg-amber-50 border border-amber-100">
+              <p className="text-[11px] sm:text-xs text-amber-600 mb-1">고정지출</p>
+              <p className="text-sm sm:text-base font-bold text-amber-800 leading-tight">{fmtWon(expenses)}</p>
             </div>
           </div>
+
+          <MobileResultBar
+            items={[
+              {
+                label: '상환 비중',
+                value: `${result.ratio.toFixed(1)}%`,
+                tone: result.status === 'stable' ? 'positive' : result.status === 'caution' ? 'warning' : 'danger',
+              },
+              { label: '가용 소득', value: fmtWon(result.available) },
+            ]}
+          />
 
           {/* 파이 차트 — 소득 구성 */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

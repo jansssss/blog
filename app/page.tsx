@@ -9,6 +9,7 @@ import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
 import { BookOpen, ArrowRight, HelpCircle, ChevronRight } from 'lucide-react'
 import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
+import MobileCollapse from '@/components/MobileCollapse'
 
 const FEATURED_QUESTIONS = [
   {
@@ -137,6 +138,11 @@ export default async function HomePage({
         {/* 인라인 대출 이자 계산기 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && <HomeLoanCalculator />}
 
+        {/* 빠른 도구 바로가기 (ohyess.kr 전용)
+         *  모바일 진입점은 계산기 하나로 좁힌다. 검색 유입이 계산기 페이지로
+         *  들어오므로 홈에서도 같은 동선을 위에 둔다. */}
+        {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
+
         {/* 주담대 준비 허브 카드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (
           <section className="mb-8">
@@ -175,13 +181,13 @@ export default async function HomePage({
           </section>
         )}
 
-        {/* 빠른 도구 바로가기 (ohyess.kr 전용) */}
-        {site?.domain === 'ohyess.kr' && <QuickToolsSection />}
-
-        {/* 자주 묻는 대출 질문 (ohyess.kr 전용) */}
+        {/* 자주 묻는 대출 질문 (ohyess.kr 전용) — 모바일에서는 접어 둔다 */}
         {site?.domain === 'ohyess.kr' && (
-          <section className="mb-8">
-            <div className="flex items-center gap-2 mb-3">
+          <MobileCollapse
+            title="자주 묻는 대출 질문"
+            hint="계산기가 포함된 질문 4가지"
+          >
+            <div className="hidden lg:flex items-center gap-2 mb-3">
               <HelpCircle className="w-4 h-4 text-indigo-500" />
               <h2 className="text-sm font-bold text-gray-800">자주 묻는 대출 질문</h2>
               <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-semibold">계산기 포함</span>
@@ -204,12 +210,15 @@ export default async function HomePage({
                 </Link>
               ))}
             </div>
-          </section>
+          </MobileCollapse>
         )}
 
-        {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
+        {/* 핵심 금융 가이드 (ohyess.kr 전용) — 모바일에서는 접어 둔다 */}
         {site?.domain === 'ohyess.kr' && (
-          <section className="mb-8">
+          <MobileCollapse
+            title="핵심 금융 가이드"
+            hint="공식자료 기반 실전 가이드 8편"
+          >
             <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-2xl p-5">
               {/* 섹션 헤더 */}
               <div className="flex items-center justify-between mb-4">
@@ -245,7 +254,7 @@ export default async function HomePage({
                 ))}
               </div>
             </div>
-          </section>
+          </MobileCollapse>
         )}
 
         {/* Blog Posts Grid - 최신 사례글 */}

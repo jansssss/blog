@@ -188,7 +188,7 @@ export default function JeonseLoangGuidePage() {
       </P>
 
       <H2 id="guarantee">보증 기관 3곳 비교</H2>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

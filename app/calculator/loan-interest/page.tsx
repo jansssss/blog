@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
 
@@ -262,6 +263,14 @@ export default function LoanInterestCalculatorPage() {
           />
         </div>
 
+        {/* 모바일: 슬라이더 조작 중에도 핵심 수치가 하단에 붙어 있게 한다 */}
+        <MobileResultBar
+          items={[
+            { label: '월 납입액', value: `${fmt(emiMonthlyPayment)}원` },
+            { label: '총 이자', value: `${fmtShort(emiTotalInterest)}원`, tone: 'warning' },
+          ]}
+        />
+
         {/* 파이 차트 + 부담도 */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
           <p className="text-sm font-bold text-gray-700 mb-4">원금 vs 이자 구성</p>
@@ -439,7 +448,7 @@ export default function LoanInterestCalculatorPage() {
           <h2 className="text-lg font-bold mb-1 text-gray-900">원리금균등 vs 원금균등 — 실제 차이는 얼마나 될까?</h2>
           <p className="text-sm text-gray-500 mb-5">많은 분이 &ldquo;원리금균등이 편하지만 이자를 더 낸다&rdquo;는 걸 알면서도 얼마나 더 내는지는 모릅니다. 구체적으로 계산해봤습니다.</p>
           <div className="space-y-4 text-sm">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto table-scroll">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 text-gray-400 text-xs">

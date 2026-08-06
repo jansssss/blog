@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
@@ -237,6 +238,21 @@ export default function RefinancingCalculatorPage() {
               color={beValid && result.breakEven <= months / 2 ? 'indigo' : 'amber'}
             />
           </div>
+
+          <MobileResultBar
+            items={[
+              {
+                label: isProfit ? '순 절감액' : '순 손실액',
+                value: `${isProfit ? '+' : ''}${fmtShort(result.netProfit)}`,
+                tone: isProfit ? 'positive' : 'warning',
+              },
+              {
+                label: '손익분기점',
+                value: beValid ? `${result.breakEven}개월` : '기간 초과',
+                tone: beValid ? 'default' : 'warning',
+              },
+            ]}
+          />
 
           {/* 총 상환 비용 비교 차트 */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

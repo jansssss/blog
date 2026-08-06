@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import CalcMeta from '@/components/CalcMeta'
 import Link from 'next/link'
 
@@ -256,6 +257,17 @@ export default function PrepaymentFeeCalculatorPage() {
           이자 절감액 {fmtWon(result.interestSavings)} − 수수료 {fmtWon(result.prepaymentFee)}
         </p>
       </div>
+
+      <MobileResultBar
+        items={[
+          {
+            label: isProfit ? '순 절감액' : '순 손실액',
+            value: `${isProfit ? '+' : '-'}${fmtWon(Math.abs(result.netSavings))}`,
+            tone: isProfit ? 'positive' : 'warning',
+          },
+          { label: '중도상환수수료', value: fmtWon(result.prepaymentFee), tone: 'danger' },
+        ]}
+      />
 
       {/* ─── KPI 카드 3개 ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">

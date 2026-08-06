@@ -143,7 +143,7 @@ export default function LtvOkDsrBlockedPage() {
         둘 다 충족해야 실제로 쓸 수 있습니다.
       </P>
       <H3>어떤 경우 LTV가 먼저 막히고, 어떤 경우 DSR이 먼저 막히나</H3>
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

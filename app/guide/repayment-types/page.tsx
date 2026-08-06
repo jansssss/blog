@@ -232,7 +232,7 @@ export default function RepaymentTypesGuidePage() {
       <H2 id="cases">실전 사례 2개</H2>
       <CaseBox title="사례 1 — 직장인 E씨: 주택담보대출 3억 · 연 3.8% · 30년">
         <P>부부 합산 연봉 8천만원의 맞벌이 E씨 부부는 아파트 구입을 위해 주담대 3억을 30년으로 신청했습니다. 원리금균등과 원금균등을 고민 중입니다.</P>
-        <div className="overflow-x-auto mb-4">
+        <div className="overflow-x-auto mb-4 table-scroll">
           <table className="w-full text-sm border-collapse">
             <thead className="bg-white">
               <tr>

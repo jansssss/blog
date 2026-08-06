@@ -110,7 +110,7 @@ export default function CapitalGainsTaxPage() {
       <TrendP>
         비과세 특례를 받지 못하는 1가구 2주택자가 조정대상지역 주택을 양도하면 중과세가 부과됩니다. 2023년 말까지는 한시적 완화가 있었지만, 2024년 이후부터는 원칙적 중과세율이 다시 적용됩니다.
       </TrendP>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-slate-800 text-white">
             <tr>

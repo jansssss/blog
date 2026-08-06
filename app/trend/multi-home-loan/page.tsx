@@ -66,7 +66,7 @@ export default function MultiHomeLoanPage() {
       <TrendP>
         2주택 이상 보유자에 대한 주담대 원칙적 금지는 2020년부터 단계적으로 강화됐습니다. 현재는 다음과 같은 구조입니다.
       </TrendP>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-slate-800 text-white">
             <tr>

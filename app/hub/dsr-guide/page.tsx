@@ -128,7 +128,7 @@ export default function DsrGuideHubPage() {
             <h2 className="text-white text-lg font-bold">DSR vs DTI vs LTV — 세 가지 규제 한눈에 보기</h2>
           </div>
           <div className="bg-white p-5 space-y-4">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto table-scroll">
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-50">

@@ -148,7 +148,7 @@ export default function MortgageLoanGuidePage() {
         주택담보대출은 크게 <strong className="font-semibold text-gray-900">은행권 주담대</strong>와{' '}
         <strong className="font-semibold text-gray-900">정책 주담대</strong>로 나뉩니다. 두 경로의 한도·금리·조건이 상이하므로, 자신에게 유리한 경로를 먼저 파악하는 것이 중요합니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

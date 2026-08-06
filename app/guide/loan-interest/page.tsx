@@ -234,7 +234,7 @@ export default function LoanInterestGuidePage() {
         같은 원금·금리·기간이라도 상환 방식에 따라 총 납입 이자는 크게 달라집니다. 아래 표는
         3천만원, 연 6%, 36개월 기준 비교입니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

@@ -124,7 +124,7 @@ export default function RateStrategyGuidePage() {
       <P>
         한국은행이 기준금리를 0.25%p 올릴 때마다 변동금리 대출자는 실질적인 이자 부담이 늘어납니다. 1억원 대출 기준으로 계산하면 이 영향이 명확해집니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

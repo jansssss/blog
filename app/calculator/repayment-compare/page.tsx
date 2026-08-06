@@ -8,6 +8,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 import { pmt as libPmt, epiTotalInterest, calcEP as libCalcEP } from '@/lib/calculators'
@@ -280,6 +281,13 @@ export default function RepaymentComparePage() {
             </div>
           </div>
 
+          <MobileResultBar
+            items={[
+              { label: '원리금균등 월', value: fmtWon(epi.monthly) },
+              { label: '원금균등 이자절감', value: fmtWon(saved), tone: 'positive' },
+            ]}
+          />
+
           {/* ─── 인사이트 배너 ────────────────────────────────────── */}
           <div
             className="rounded-2xl p-4 mb-8 flex items-center gap-4"
@@ -371,7 +379,7 @@ export default function RepaymentComparePage() {
           </div>
 
           {showSchedule && (
-            <div className="overflow-x-auto border rounded-xl mb-8">
+            <div className="overflow-x-auto border rounded-xl mb-8 table-scroll">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-slate-50 dark:bg-slate-800">
@@ -474,7 +482,7 @@ export default function RepaymentComparePage() {
             </div>
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
               <h3 className="font-semibold text-amber-900 mb-2">⚠️ 두 방식의 주요 차이</h3>
-              <div className="overflow-x-auto mt-2">
+              <div className="overflow-x-auto mt-2 table-scroll">
                 <table className="w-full text-xs border">
                   <thead className="bg-white">
                     <tr>

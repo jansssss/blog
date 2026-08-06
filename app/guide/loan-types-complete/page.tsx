@@ -109,7 +109,7 @@ export default function LoanTypesCompletePage() {
       <P>
         대출은 크게 <strong className="font-semibold">담보 유무</strong>와 <strong className="font-semibold">재원 출처</strong>로 분류합니다. 담보가 있으면 금리가 낮고, 정책 재원이면 민간보다 저렴합니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

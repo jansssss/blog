@@ -118,7 +118,7 @@ export default function LoanGuaranteePage() {
       </P>
 
       <H2 id="institutions">3대 보증 기관 비교 (HUG·HF·SGI)</H2>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

@@ -122,7 +122,7 @@ export default function MortgageSalary5000Page() {
         계산기에 연봉을 입력할 때, 은행이 실제로 어떤 숫자를 사용하는지 알아야 정확한 결과를 볼 수 있습니다.
         은행은 실수령액이 아니라 <strong>세전 총급여</strong>를 기준으로 하지만, 그 인정 방식이 소득 종류마다 다릅니다.
       </P>
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -122,15 +123,22 @@ export default function EmergencyFundCalculatorPage() {
           </div>
 
           {/* 3단계 카드 */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {tiers.map(t => (
-              <div key={t.label} className={`rounded-xl p-4 border ${t.bg}`}>
-                <p className={`text-xs font-semibold mb-1 ${t.text.replace('800', '600')}`}>{t.label}</p>
-                <p className={`text-base font-bold leading-tight ${t.text}`}>{fmtWon(t.value)}</p>
-                <p className={`text-[11px] mt-1 ${t.text.replace('800', '500')}`}>{t.sub}</p>
+              <div key={t.label} className={`rounded-xl p-3 sm:p-4 border ${t.bg}`}>
+                <p className={`text-[11px] sm:text-xs font-semibold mb-1 ${t.text.replace('800', '600')}`}>{t.label}</p>
+                <p className={`text-sm sm:text-base font-bold leading-tight ${t.text}`}>{fmtWon(t.value)}</p>
+                <p className={`text-[10px] sm:text-[11px] mt-1 ${t.text.replace('800', '500')}`}>{t.sub}</p>
               </div>
             ))}
           </div>
+
+          <MobileResultBar
+            items={[
+              { label: '6개월 권장', value: fmtWon(result.six), tone: 'positive' },
+              { label: '3개월 최소', value: fmtWon(result.three) },
+            ]}
+          />
 
           {/* 목표 달성 진행 바 */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

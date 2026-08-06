@@ -130,7 +130,7 @@ export default function Rate0p5DifferencePage() {
       <P>
         3억원 대출에서 금리 4.0% vs 4.5% 차이가 상환기간에 따라 얼마나 달라지는지 봅니다.
       </P>
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>
@@ -194,7 +194,7 @@ export default function Rate0p5DifferencePage() {
       <P>
         우대금리 조건표를 보면 항목이 많지만, 실질적으로 적용받기 어렵거나 이미 기본 금리에 포함된 것들이 있습니다.
       </P>
-      <div className="overflow-x-auto mb-4">
+      <div className="overflow-x-auto mb-4 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

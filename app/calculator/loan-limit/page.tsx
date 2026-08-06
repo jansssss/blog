@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import MortgagePrepHubCTA from '@/components/MortgagePrepHubCTA'
 import Link from 'next/link'
 import { DSR_REGULATION, formatKoreanDate } from '@/lib/regulations'
@@ -307,6 +308,13 @@ export default function LoanLimitSimulatorPage() {
           원리금균등 상환 기준 &nbsp;·&nbsp; 금리 {rate.toFixed(1)}% &nbsp;·&nbsp; {period / 12}년
         </p>
       </div>
+
+      <MobileResultBar
+        items={[
+          { label: '대출 가능 금액', value: fmtWon(result.loanLimit) },
+          { label: '월 상환 가능', value: fmtWon(result.maxMonthly) },
+        ]}
+      />
 
       {/* DSR 게이지 + 월 소득 분배 */}
       <div className="grid sm:grid-cols-2 gap-4 mb-5">

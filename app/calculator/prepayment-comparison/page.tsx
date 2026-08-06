@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import DisclaimerNotice from '@/components/DisclaimerNotice'
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import Link from 'next/link'
 
 /* ─── 유틸 ─────────────────────────────────────────────────── */
@@ -185,6 +186,17 @@ export default function PrepaymentComparisonCalculatorPage() {
               </p>
             </div>
           </div>
+
+          <MobileResultBar
+            items={[
+              {
+                label: isProfit ? '순 절감액' : '순 손실액',
+                value: `${isProfit ? '+' : '-'}${fmtWon(Math.abs(result.netBenefit))}`,
+                tone: isProfit ? 'positive' : 'warning',
+              },
+              { label: '이자 절감액', value: fmtWon(result.interestSaved) },
+            ]}
+          />
 
           {/* 바 차트 */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

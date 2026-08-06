@@ -12,6 +12,7 @@ import {
   YAxis,
 } from 'recharts'
 
+import MobileResultBar from '@/components/calculators/MobileResultBar'
 import type { MarketRates } from '@/lib/finlife/market'
 import {
   buildScenarioCurve,
@@ -301,6 +302,20 @@ export default function FixedVariableSimulator({ options }: { options: MarketOpt
             </>
           )}
         </div>
+
+        <MobileResultBar
+          items={[
+            {
+              label: '손익분기',
+              value: breakEven.alreadyWorse
+                ? '지금도 고정 유리'
+                : breakEven.deltaPoints === null
+                ? '뒤집히지 않음'
+                : `+${breakEven.deltaPoints.toFixed(2)}%p`,
+            },
+            { label: '고정 총이자', value: formatKRW(result.fixed.totalInterest) },
+          ]}
+        />
 
         {/* 지금 설정한 시나리오 */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">

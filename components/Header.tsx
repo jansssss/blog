@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { SiteTheme } from '@/lib/site'
 
@@ -72,14 +73,13 @@ const OHYESS_NAV: NavItem[] = [
 ]
 
 export default function Header({ siteTheme, siteName }: HeaderProps) {
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null)
 
   // 테마에서 값 추출
   const headerTitle = siteTheme?.header?.title || siteName || 'ohyess'
-  const primaryColor = siteTheme?.brand?.primaryColor || '#111827'
-  const accentColor = siteTheme?.brand?.accentColor || '#2563EB'
 
   const navItems: NavItem[] = OHYESS_NAV
 
@@ -88,17 +88,44 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
     setMobileSubmenuOpen(null)
   }
 
-  const handleMouseEnter = (label: string) => {
-    setOpenDropdown(label)
-  }
+  /** 페이지가 바뀌면 시트를 닫는다 (Link 클릭 외 뒤로가기 등도 포함) */
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setMobileSubmenuOpen(null)
+  }, [pathname])
 
-  const handleMouseLeave = () => {
-    setOpenDropdown(null)
-  }
+  /** 현재 보고 있는 섹션의 하위 메뉴는 펼친 상태로 연다 */
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const current = navItems.find(
+      (item) => item.subItems && pathname.startsWith(item.href)
+    )
+    if (current) setMobileSubmenuOpen(current.label)
+    // navItems 는 모듈 상수라 재생성되지 않는다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileMenuOpen, pathname])
 
-  const toggleMobileSubmenu = (label: string) => {
-    setMobileSubmenuOpen(mobileSubmenuOpen === label ? null : label)
-  }
+  /** 전체화면 시트가 열려 있는 동안 배경 스크롤을 잠근다 */
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = original
+    }
+  }, [mobileMenuOpen])
+
+  /** ESC 로 닫기 */
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMobileMenu()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mobileMenuOpen])
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -126,18 +153,23 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* ── 데스크탑 네비게이션 ────────────────────────────────────
+         *  드롭다운은 조건부 렌더가 아니라 CSS 로 감춘다. 조건부로 만들면
+         *  하위 링크가 초기 HTML 에 아예 존재하지 않아 내부 링크로 세어지지
+         *  않는다. */}
         <nav className="ml-auto hidden md:flex items-center space-x-1">
           {navItems.map((item) => (
             <div
               key={item.label}
               className="relative"
-              onMouseEnter={() => item.subItems && handleMouseEnter(item.label)}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={() => item.subItems && setOpenDropdown(item.label)}
+              onMouseLeave={() => setOpenDropdown(null)}
             >
               <Link
                 href={item.href}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors hover:text-primary rounded-md hover:bg-accent"
+                className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-primary ${
+                  isActive(item.href) ? 'text-primary' : ''
+                }`}
               >
                 {item.label}
                 {item.subItems && (
@@ -145,9 +177,14 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
                 )}
               </Link>
 
-              {/* Dropdown Menu */}
-              {item.subItems && openDropdown === item.label && (
-                <div className="absolute top-full left-0 pt-1 z-50">
+              {item.subItems && (
+                <div
+                  className={`absolute top-full left-0 pt-1 z-50 transition-opacity duration-150 ${
+                    openDropdown === item.label
+                      ? 'opacity-100 visible'
+                      : 'opacity-0 invisible pointer-events-none'
+                  }`}
+                >
                   <div className="bg-white rounded-lg shadow-lg border py-2 min-w-[220px]">
                     {item.subItems.map((subItem) => (
                       <Link
@@ -165,19 +202,15 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
                         )}
                       </Link>
                     ))}
-                    {(item.label === '계산기' || item.label === '가이드') && (
-                      <>
-                        <div className="border-t my-1"></div>
-                        <Link
-                          href={item.href}
-                          className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                        >
-                          <span className="block text-sm font-medium text-primary">
-                            전체 {item.label} 보기 →
-                          </span>
-                        </Link>
-                      </>
-                    )}
+                    <div className="border-t my-1" />
+                    <Link
+                      href={item.href}
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="block text-sm font-medium text-primary">
+                        전체 {item.label} 보기 →
+                      </span>
+                    </Link>
                   </div>
                 </div>
               )}
@@ -185,71 +218,102 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
           ))}
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* 모바일 메뉴 버튼 — 44px 터치 타깃 */}
         <button
-          className="ml-auto md:hidden p-2 hover:bg-accent rounded-md transition-colors"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="메뉴 열기"
+          className="ml-auto md:hidden -mr-2 w-11 h-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-nav"
         >
-          {mobileMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background">
-          <nav className="container py-4 flex flex-col">
-            {navItems.map((item) => (
-              <div key={item.label}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => toggleMobileSubmenu(item.label)}
-                      className="flex items-center justify-between w-full text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
-                    >
-                      {item.label}
-                      <ChevronDown className={`w-4 h-4 transition-transform ${mobileSubmenuOpen === item.label ? 'rotate-180' : ''}`} />
-                    </button>
-                    {mobileSubmenuOpen === item.label && (
-                      <div className="pl-4 pb-2 space-y-1">
-                        <Link
-                          href={item.href}
-                          className="block text-sm text-primary font-medium py-2 px-2 rounded-md hover:bg-accent"
-                          onClick={closeMobileMenu}
-                        >
-                          전체 보기
-                        </Link>
-                        {item.subItems.map((subItem) => (
-                          <Link
-                            key={subItem.href}
-                            href={subItem.href}
-                            className="block text-sm text-gray-600 py-2 px-2 rounded-md hover:bg-accent hover:text-gray-900"
-                            onClick={closeMobileMenu}
-                          >
-                            {subItem.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
+      {/* ── 모바일 전체화면 시트 ───────────────────────────────────
+       *  닫혀 있어도 마크업은 그대로 남긴다. `hidden` 으로만 감추므로
+       *  하위 링크 전부가 모든 페이지의 HTML 에 포함된다. */}
+      <div
+        id="mobile-nav"
+        className={`md:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-background overflow-y-auto overscroll-contain ${
+          mobileMenuOpen ? 'block' : 'hidden'
+        }`}
+      >
+        <nav
+          className="container py-3 flex flex-col"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}
+        >
+          {navItems.map((item) => {
+            const expanded = mobileSubmenuOpen === item.label
+
+            if (!item.subItems) {
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className={`flex items-center min-h-[52px] px-3 text-base font-semibold rounded-xl transition-colors hover:bg-accent ${
+                    isActive(item.href) ? 'text-primary' : 'text-gray-800'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            }
+
+            return (
+              <div key={item.label} className="border-b border-gray-100 last:border-0">
+                <button
+                  type="button"
+                  onClick={() => setMobileSubmenuOpen(expanded ? null : item.label)}
+                  aria-expanded={expanded}
+                  className={`flex items-center justify-between w-full min-h-[52px] px-3 text-base font-semibold rounded-xl transition-colors hover:bg-accent ${
+                    isActive(item.href) ? 'text-primary' : 'text-gray-800'
+                  }`}
+                >
+                  {item.label}
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                <div className={`pb-2 ${expanded ? 'block' : 'hidden'}`}>
                   <Link
                     href={item.href}
-                    className="block text-sm font-medium transition-colors hover:text-primary py-3 px-2 rounded-md hover:bg-accent"
                     onClick={closeMobileMenu}
+                    className="flex items-center min-h-[44px] pl-6 pr-3 text-sm font-semibold text-primary rounded-xl hover:bg-accent"
                   >
-                    {item.label}
+                    전체 {item.label} 보기 →
                   </Link>
-                )}
+                  {item.subItems.map((subItem) => (
+                    <Link
+                      key={subItem.href}
+                      href={subItem.href}
+                      onClick={closeMobileMenu}
+                      className={`flex flex-col justify-center min-h-[48px] py-1.5 pl-6 pr-3 rounded-xl hover:bg-accent transition-colors ${
+                        isActive(subItem.href) ? 'bg-accent' : ''
+                      }`}
+                    >
+                      <span
+                        className={`text-sm font-medium leading-snug ${
+                          isActive(subItem.href) ? 'text-primary' : 'text-gray-700'
+                        }`}
+                      >
+                        {subItem.label}
+                      </span>
+                      {subItem.description && (
+                        <span className="text-xs text-gray-400 leading-snug mt-0.5">
+                          {subItem.description}
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            ))}
-          </nav>
-        </div>
-      )}
+            )
+          })}
+        </nav>
+      </div>
     </header>
   )
 }

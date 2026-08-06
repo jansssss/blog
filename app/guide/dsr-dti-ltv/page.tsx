@@ -169,7 +169,7 @@ export default function DsrDtiLtvGuidePage() {
         있습니다. 다만 규제 지역과 주택 보유 수에 따라 LTV 한도가 달라집니다.
       </P>
       <H3>규제 지역별 주요 LTV 한도 (2024년 기준)</H3>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>
@@ -251,7 +251,7 @@ export default function DsrDtiLtvGuidePage() {
       <P>
         DSR과 DTI는 모두 소득 대비 부채 비율을 측정하지만, 기타 대출을 처리하는 방식이 다릅니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

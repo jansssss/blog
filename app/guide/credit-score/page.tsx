@@ -155,7 +155,7 @@ export default function CreditScoreGuidePage() {
         NICE평가정보입니다. 둘 다 1~1000점 만점 체계를 사용하며, 점수가 높을수록
         신용도가 좋습니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>
@@ -315,7 +315,7 @@ export default function CreditScoreGuidePage() {
         신용점수가 대출 금리에 미치는 영향을 구체적으로 살펴보겠습니다. 아래는 동일 조건(1억,
         10년, 신용대출)에서의 금리 비교 예시입니다.
       </P>
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 table-scroll">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-50">
             <tr>

@@ -7,7 +7,7 @@ import { ChevronRight, Home } from 'lucide-react'
 // 경로별 한글 레이블 매핑
 const PATH_LABELS: Record<string, string> = {
   // 메인 카테고리
-  'calculator': '계산기',
+  'calculator': '금융 도구',
   'compare': '금융 비교',
   'policy': '정책 지원',
   'guide': '금융 가이드',

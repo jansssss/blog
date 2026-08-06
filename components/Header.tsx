@@ -26,7 +26,7 @@ interface HeaderProps {
 // ohyess 사이트용 네비게이션 (하위 메뉴 포함)
 const OHYESS_NAV: NavItem[] = [
   {
-    label: '계산기',
+    label: '금융 도구',
     href: '/calculator',
     subItems: [
       { label: '대출 이자 계산기', href: '/calculator/loan-interest', description: '예상 이자 계산' },
@@ -68,8 +68,6 @@ const OHYESS_NAV: NavItem[] = [
       { label: '대출 체크리스트', href: '/guide/loan-checklist', description: '신청 전 반드시 확인할 항목' },
     ],
   },
-  { label: '블로그', href: '/blog' },
-  { label: '소개', href: '/about' },
 ]
 
 export default function Header({ siteTheme, siteName }: HeaderProps) {

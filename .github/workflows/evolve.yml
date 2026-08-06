@@ -8,8 +8,10 @@ on:
         required: false
         default: false
         type: boolean
-  schedule:
-    - cron: "0 0 * * 1"   # KST 월요일 09:00 (UTC 일요일 00:00)
+  # [중단됨 2026-08-06] 자동 스케줄 실행 중단. 수동 실행(workflow_dispatch)만 가능.
+  # 재개하려면 아래 2줄의 주석을 해제하면 된다.
+  # schedule:
+  #   - cron: "0 0 * * 1"   # KST 월요일 09:00 (UTC 일요일 00:00)
 
 jobs:
   evolve:

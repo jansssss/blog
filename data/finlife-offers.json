@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T07:09:15.877Z",
+  "generatedAt": "2026-08-06T05:54:15.020Z",
   "disclosureMonths": {
     "mortgage": "202607",
     "rent": "202607",
@@ -8,7 +8,7 @@
   "counts": {
     "mortgage": 143,
     "rent": 90,
-    "credit": 103
+    "credit": 105
   },
   "summaries": [
     {
@@ -55,7 +55,7 @@
       "productType": "credit",
       "finGroupCode": "030300",
       "fetchedPages": 1,
-      "offerCount": 32,
+      "offerCount": 34,
       "disclosureMonth": "202607",
       "errors": []
     },
@@ -1973,6 +1973,43 @@
       }
     },
     {
+      "id": "credit:0010471:760101:_:_:_:1:A",
+      "productType": "credit",
+      "disclosureMonth": "202607",
+      "companyCode": "0010471",
+      "companyName": "페퍼저축은행",
+      "finGroupCode": "030300",
+      "finGroupName": "저축은행",
+      "productCode": "760101",
+      "productName": "개인신용대출",
+      "joinWay": [
+        "영업점",
+        "스마트폰",
+        "모집인",
+        "전화(텔레뱅킹)"
+      ],
+      "incidentalExpense": null,
+      "earlyRepayFee": null,
+      "delinquentRate": null,
+      "loanLimit": null,
+      "repayType": null,
+      "rateType": null,
+      "collateralType": null,
+      "creditProductType": "일반신용대출",
+      "rateMin": 15.35,
+      "rateMax": 17.04,
+      "rateAvg": 16.82,
+      "creditScoreRates": {
+        "crdt_grad_1": 15.35,
+        "crdt_grad_4": 16.41,
+        "crdt_grad_5": 17.04,
+        "crdt_grad_6": 16.54,
+        "crdt_grad_10": 15.62,
+        "crdt_grad_11": null,
+        "crdt_grad_12": null
+      }
+    },
+    {
       "id": "credit:0010477:760261,820021:_:_:_:1:A",
       "productType": "credit",
       "disclosureMonth": "202607",
@@ -3232,6 +3269,44 @@
         "crdt_grad_10": 17.47,
         "crdt_grad_11": null,
         "crdt_grad_12": 18.09
+      }
+    },
+    {
+      "id": "credit:0013351:761110:_:_:_:1:A",
+      "productType": "credit",
+      "disclosureMonth": "202607",
+      "companyCode": "0013351",
+      "companyName": "OK저축은행",
+      "finGroupCode": "030300",
+      "finGroupName": "저축은행",
+      "productCode": "761110",
+      "productName": "개인신용대출",
+      "joinWay": [
+        "인터넷",
+        "스마트폰",
+        "모집인",
+        "전화(텔레뱅킹)",
+        "기타"
+      ],
+      "incidentalExpense": null,
+      "earlyRepayFee": null,
+      "delinquentRate": null,
+      "loanLimit": null,
+      "repayType": null,
+      "rateType": null,
+      "collateralType": null,
+      "creditProductType": "일반신용대출",
+      "rateMin": 14.75,
+      "rateMax": 18.99,
+      "rateAvg": 15.63,
+      "creditScoreRates": {
+        "crdt_grad_1": 15.04,
+        "crdt_grad_4": 14.75,
+        "crdt_grad_5": 15.44,
+        "crdt_grad_6": 16.47,
+        "crdt_grad_10": 17.65,
+        "crdt_grad_11": null,
+        "crdt_grad_12": 18.99
       }
     },
     {
@@ -7404,7 +7479,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 국민주택채권 매입비용 : 대출금액 X  120% X 1% X 채권할인율\n\n3. 화재보험료 (아파트외 물건지에 한함)",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.66%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.62%",
       "delinquentRate": "대출금리+연3%",
       "loanLimit": "담보인정비율(LTV) 최대 70%",
       "repayType": "분할상환방식",
@@ -7413,7 +7488,7 @@
       "creditProductType": null,
       "rateMin": 4.89,
       "rateMax": 6.1,
-      "rateAvg": 4.6,
+      "rateAvg": 4.59,
       "creditScoreRates": null
     },
     {
@@ -7431,7 +7506,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 국민주택채권 매입비용 : 대출금액 X  120% X 1% X 채권할인율\n\n3. 화재보험료 (아파트외 물건지에 한함)",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.66%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.62%",
       "delinquentRate": "대출금리+연3%",
       "loanLimit": "담보인정비율(LTV) 최대 70%",
       "repayType": "분할상환방식",
@@ -7440,7 +7515,7 @@
       "creditProductType": null,
       "rateMin": 5.39,
       "rateMax": 7.59,
-      "rateAvg": 4.79,
+      "rateAvg": 4.78,
       "creditScoreRates": null
     },
     {
@@ -7458,7 +7533,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 국민주택채권 매입비용 : 대출금액 X  120% X 1% X 채권할인율\n\n3. 화재보험료 (아파트외 물건지에 한함)",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.66%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.62%",
       "delinquentRate": "대출금리+연3%",
       "loanLimit": "담보인정비율(LTV) 최대 70%",
       "repayType": "분할상환방식",
@@ -7467,7 +7542,7 @@
       "creditProductType": null,
       "rateMin": 4.89,
       "rateMax": 6.11,
-      "rateAvg": 4.84,
+      "rateAvg": 4.83,
       "creditScoreRates": null
     },
     {
@@ -7485,7 +7560,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 국민주택채권 매입비용 : 대출금액 X  120% X 1% X 채권할인율\n\n3. 화재보험료 (아파트외 물건지에 한함)",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.66%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.62%",
       "delinquentRate": "대출금리+연3%",
       "loanLimit": "담보인정비율(LTV) 최대 70%",
       "repayType": "분할상환방식",
@@ -9784,7 +9859,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.05%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.02%",
       "delinquentRate": "대출금리+연3%\n(최고:연15%)",
       "loanLimit": "최대 5억원",
       "repayType": "만기일시상환방식",
@@ -9811,7 +9886,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 주택신보보증료",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.05%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.02%",
       "delinquentRate": "대출금리+연3%\n(최고:연15%)",
       "loanLimit": "최대 4.44억원",
       "repayType": "만기일시상환방식",
@@ -9838,7 +9913,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 질권설정에 대한 통지비용 : 40,000원",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.05%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.02%",
       "delinquentRate": "대출금리+연3%\n(최고:연15%)",
       "loanLimit": "최대 5억원",
       "repayType": "만기일시상환방식",
@@ -9865,7 +9940,7 @@
         "모집인"
       ],
       "incidentalExpense": "1. 인지세 : 해당세액의 50%\n\n2. 주택신보보증료",
-      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.05%",
+      "earlyRepayFee": "중도상환금액 X 수수료율* X (대출잔여일수 / 대출기간)\n\n* 취급 후 3년 이내 0.02%",
       "delinquentRate": "대출금리+연3%\n(최고:연15%)",
       "loanLimit": "최대 4.5억원",
       "repayType": "만기일시상환방식",

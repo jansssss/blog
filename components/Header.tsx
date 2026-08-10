@@ -126,6 +126,10 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
+    /* 시트는 header 밖에 둔다. header 의 backdrop-filter 가 자손 fixed 요소의
+     * 컨테이닝 블록이 되어, 안에 두면 top-16/bottom-0 이 64px 짜리 header 박스
+     * 기준으로 계산돼 높이 0 이 된다(= 열려도 안 보임). */
+    <>
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="ohyess-logo group" onClick={closeMobileMenu}>
@@ -227,6 +231,7 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
           {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
+    </header>
 
       {/* ── 모바일 전체화면 시트 ───────────────────────────────────
        *  닫혀 있어도 마크업은 그대로 남긴다. `hidden` 으로만 감추므로
@@ -312,6 +317,6 @@ export default function Header({ siteTheme, siteName }: HeaderProps) {
           })}
         </nav>
       </div>
-    </header>
+    </>
   )
 }

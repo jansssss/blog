@@ -1,6 +1,6 @@
-# GSC 일일 개선 에이전트
+# GSC 검색 유입 개선 에이전트
 
-매일 아침 09:10에 Google Search Console 데이터를 분석해서
+매주 화요일 09:10에 Google Search Console 데이터를 분석해서
 **유입 형태 · 유입 검색어 · 충족되지 않은 사용자 니즈**를 파악하고,
 그에 맞는 개선안을 **코드로 직접 반영**한 뒤 데스크톱 알림으로 보고한다.
 
@@ -21,8 +21,8 @@
 
 ```
 reports/gsc/
-  2026-08-17.json      당일 리포트 (기계 판독용, 에이전트가 읽음)
-  2026-08-17.md        당일 리포트 (사람 판독용)
+  2026-08-17.json      리포트 (기계 판독용, 에이전트가 읽음)
+  2026-08-17.md        리포트 (사람 판독용)
   latest.json/.md      최신 리포트 사본
   agent-2026-08-20.md  에이전트 보고 원문
   action-log.md        누적 조치 이력 (중복 개선 방지)
@@ -64,7 +64,7 @@ powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -Ski
 그 방식으로 새로 발급받아도 된다 (`client_secret.json` 은 필요).
 
 > **주의 — 두 PC에 모두 등록하지 말 것.**
-> 양쪽이 09:10에 각자 코드를 고치면 서로 다른 변경이 생겨 커밋이 충돌한다.
+> 양쪽이 화요일 09:10에 각자 코드를 고치면 서로 다른 변경이 생겨 커밋이 충돌한다.
 > **주로 쓰는 PC 한 대에만 등록**하고, 다른 쪽에서는 필요할 때 수동 실행하는 편이 낫다.
 > 이미 등록해버렸다면 `register-gsc-daily.ps1 -Unregister` 로 해제한다.
 
@@ -76,36 +76,60 @@ powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -Ski
 powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1
 ```
 
-매일 09:10 실행으로 등록된다.
+기본값은 **매주 화요일 09:10, 최근 14일 구간** 분석이다.
 
 | 명령 | 동작 |
 |---|---|
 | `register-gsc-daily.ps1` | 등록 (이미 있으면 교체) |
-| `register-gsc-daily.ps1 -At "08:30"` | 실행 시각 변경 |
+| `register-gsc-daily.ps1 -DayOfWeek Thursday` | 실행 요일 변경 |
+| `register-gsc-daily.ps1 -At "09:40"` | 실행 시각 변경 |
+| `register-gsc-daily.ps1 -Days 28` | 분석 구간 변경 |
+| `register-gsc-daily.ps1 -Daily -Days 7` | 매일 실행으로 전환 |
 | `register-gsc-daily.ps1 -Weekdays` | 평일(월~금)만 실행 |
 | `register-gsc-daily.ps1 -RunNow` | 등록된 작업을 지금 한 번 실행 |
 | `register-gsc-daily.ps1 -Unregister` | 등록 해제 |
 
-### 실행 조건 — 놓치면 그날은 건너뛴다
+> 스크립트 이름의 `daily` 는 최초 설계의 흔적이다. 실행 주기는 등록 옵션이 정한다.
+
+### 왜 매일이 아니라 주 1회인가
+
+트래픽이 적은 동안은 주 1회가 맞다. 세 가지 이유가 있다.
+
+1. **SEO 피드백 루프가 느리다.** 제목·콘텐츠를 바꾸면 구글이 재크롤링하고 순위에
+   반영하기까지 며칠~몇 주 걸린다. 매일 손대면 어떤 변경이 효과가 있었는지
+   영영 귀속시킬 수 없다. 바꾸고 → 기다리고 → 결과를 보는 주기가 필요하다.
+2. **리포트가 누적 구간을 본다.** 14일 구간을 매일 돌리면 연속 실행이 13일치를
+   공유한다. 같은 데이터를 놓고 매일 새 개선거리를 찾으려 들게 된다.
+3. **표본이 늘어난다.** 실측 기준 7일 87노출 → 14일 122노출로 늘고,
+   탐지되는 기회도 `CTR갭 0·스트라이킹 2` → `CTR갭 1·스트라이킹 3` 으로 늘었다.
+
+**매일로 전환할 시점** — 일간 클릭이 두 자리로 올라와 하루치만으로도 노이즈와
+신호가 구분될 때. 그때는 구간도 7일로 줄이는 편이 급상승 검색어를 빨리 잡는다.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1 -Daily -Days 7
+```
+
+### 실행 조건 — 놓치면 그 주는 건너뛴다
 
 | 상황 | 동작 |
 |---|---|
-| PC 켜짐 + 로그인 상태 | 09:10 실행 |
-| PC 꺼짐 / 절전 / 로그아웃 | **그날은 건너뜀.** 다음 날 09:10을 기다린다 |
+| PC 켜짐 + 로그인 상태 | 화요일 09:10 실행 |
+| PC 꺼짐 / 절전 / 로그아웃 | **그 주는 건너뜀.** 다음 주 화요일을 기다린다 |
 | 09:10 이후 뒤늦게 부팅 | 실행하지 않음 (따라잡기 없음) |
 | 실행 중 실패 | 재시도하지 않음. 로그에만 남는다 |
 
 `StartWhenAvailable`(놓친 실행 따라잡기)과 `WakeToRun`(절전 해제)을 모두 끈 상태다.
-아침에 켜두는 날만 돌리고, 안 켠 날은 그냥 넘어가는 동작을 의도한 것이다.
+켜둔 날만 돌리고, 안 켠 날은 그냥 넘어가는 동작을 의도한 것이다.
 
-뒤늦게라도 그날 분석을 돌리고 싶으면 수동 실행하면 된다:
+건너뛴 주를 뒤늦게 돌리려면 수동 실행하면 된다:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1 -RunNow
 ```
 
-데이터가 하루 비어도 문제되지 않는다. 리포트는 항상 **최근 7일 누적**을 보므로
-하루 건너뛰어도 다음 실행이 그 기간을 포함해서 분석한다.
+한 주를 통째로 걸러도 데이터는 잃지 않는다. GSC 쪽에 계속 쌓이고 우리는 조회만
+하므로, 다음 실행이 **최근 14일 누적**을 그대로 포함해서 분석한다.
 
 ---
 
@@ -121,14 +145,14 @@ powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -Ski
 # 코드 변경 없이 분석·제안만 확인 (Edit/Write 도구 차단)
 powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -DryRun
 
-# 분석 구간 변경 (기본 7일)
+# 분석 구간 변경 (기본 14일)
 powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -Days 28
 ```
 
 리포트만 따로 만들려면:
 
 ```bash
-python -m scripts.analytics.gsc_daily_insight --days 7
+python -m scripts.analytics.gsc_daily_insight --days 14
 python -m scripts.analytics.gsc_daily_insight --days 28 --min-impressions 10
 ```
 
@@ -191,7 +215,7 @@ vercel.json  tsconfig.json  CLAUDE.md
 | `npx tsc --noEmit` | 되돌림 |
 | `npm test` (178개, 계산 로직 커버) | 되돌림 |
 
-하나라도 걸리면 **그날 변경 전체를 자동으로 되돌리고** 실패 알림을 보낸다 (exit 2).
+하나라도 걸리면 **그 회차 변경 전체를 자동으로 되돌리고** 실패 알림을 보낸다 (exit 2).
 실행 전부터 변경돼 있던 파일은 되돌림 대상에서 제외하므로, 작업 중이던 내용이 날아가지 않는다.
 
 ### 3겹 — 에이전트 지침의 판단 가드레일
@@ -200,11 +224,11 @@ vercel.json  tsconfig.json  CLAUDE.md
 - **기존 콘텐츠 삭제 금지** — 지워야 한다고 판단되면 보고만 하고 사용자에게 맡김
 - **평균 순위 10위 이내 페이지의 title·h1 은 수정 금지** — 통하고 있는 것을 망치지 않는다
 - **테스트를 고쳐서 통과시키지 않는다** — 테스트가 실패하면 변경이 틀린 것
-- 하루 1~3건만, 근거 수치 없는 변경 금지
+- 한 회차 1~3건만, 근거 수치 없는 변경 금지
 
 ### 그래도 마음에 안 들면
 
-에이전트 변경분은 매일 패치로 저장된다.
+에이전트 변경분은 실행할 때마다 패치로 저장된다.
 
 ```powershell
 reports\gsc\patches\YYYY-MM-DD.patch

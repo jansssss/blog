@@ -8,7 +8,7 @@
   3) 결과 요약을 데스크톱 알림 + 로그로 전달 (커밋/푸시는 하지 않음)
 
 .PARAMETER Days
-  분석 구간 길이 (기본 7일)
+  분석 구간 길이 (기본 14일). 스케줄 등록 시 register-gsc-daily.ps1 이 값을 넘긴다.
 
 .PARAMETER SkipAgent
   리포트만 만들고 에이전트는 실행하지 않는다 (동작 확인용)
@@ -18,7 +18,7 @@
 #>
 [CmdletBinding()]
 param(
-    [int]$Days = 7,
+    [int]$Days = 14,
     [switch]$SkipAgent,
     [switch]$DryRun
 )

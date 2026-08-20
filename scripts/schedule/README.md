@@ -31,6 +31,45 @@ reports/gsc/
 
 ---
 
+## 다른 PC에서 세팅 (집 ↔ 회사)
+
+git 으로 따라오는 것과 아닌 것이 나뉜다. **아래 4개는 PC마다 직접 해야 한다.**
+
+| 항목 | git 동기화 | 조치 |
+|---|:---:|---|
+| 분석 스크립트 · 러너 · 등록 스크립트 | ✅ | 없음 |
+| `.claude/agents/` 에이전트 지침 | ✅ | 없음 |
+| `.claude/agent-memory/` 누적 지식 | ✅ | 없음 |
+| `.claude/settings.local.json` | ❌ | 머신별 권한 캐시. 그대로 두면 된다 |
+| **`.env.local`** | ❌ | 기존 PC에서 복사 (`GSC_SITE_URL` 등) |
+| **`scripts/credentials/`** | ❌ | `client_secret.json` · `token.json` 복사 |
+| **작업 스케줄러 등록** | ❌ | 아래 등록 명령 실행 |
+| **Claude Code 로그인** | ❌ | 해당 PC에서 한 번 로그인 |
+
+```bash
+git pull
+npm ci
+pip install -r scripts/requirements.txt
+# .env.local 과 scripts/credentials/ 를 기존 PC에서 복사
+powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1
+```
+
+동작 확인:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\schedule\run-gsc-daily.ps1 -SkipAgent
+```
+
+`credentials/` 를 복사하지 않고 터미널에서 직접 실행하면 브라우저 OAuth 인증이 열리므로,
+그 방식으로 새로 발급받아도 된다 (`client_secret.json` 은 필요).
+
+> **주의 — 두 PC에 모두 등록하지 말 것.**
+> 양쪽이 09:10에 각자 코드를 고치면 서로 다른 변경이 생겨 커밋이 충돌한다.
+> **주로 쓰는 PC 한 대에만 등록**하고, 다른 쪽에서는 필요할 때 수동 실행하는 편이 낫다.
+> 이미 등록해버렸다면 `register-gsc-daily.ps1 -Unregister` 로 해제한다.
+
+---
+
 ## 등록
 
 ```powershell

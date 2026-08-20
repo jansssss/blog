@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//f/개인/tesla/tesla-quote-app/**)",
+      "Read(//f/개인/ework/src/**)",
+      "Bash(ls f:/개인/tesla/tesla-quote-app/app/subsidy/[region]/)",
+      "Bash(cat f:/개인/tesla/tesla-quote-app/app/subsidy/[region]/page.js)",
+      "Read(//f/개인/ework/**)",
+      "WebFetch(domain:www.fsc.go.kr)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(git commit -m ' *)",
+      "Bash(python -c ' *)",
+      "Bash(iconv -f cp949 -t utf-8)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f,encoding='utf-8'\\).read\\(\\)\\) for f in ['scripts/pipeline/finance.py','scripts/pipeline/columnist.py','scripts/main.py','scripts/pipeline/reviewer.py']]; print\\('AST OK'\\)\")",
+      "Bash(cd \"f:/개인/blog\" && echo \"=== .env.local keys ===\" && sed 's/=.*/=***/' .env.local && echo \"=== .env.example ===\" && cat .env.example 2>/dev/null | head -40)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.dependencies,null,1\\)\\)\")",
+      "Bash(curl -s -m 20 \"https://finlife.fss.or.kr/finlifeapi/mortgageLoanProductsSearch.json?auth=test&topFinGrpNo=020000&pageNo=1\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -m 20 \"https://finlife.fss.or.kr/finlifeapi/mortgageLoanProductsSearch.json?auth=test&topFinGrpNo=020000&pageNo=1\")",
+      "Bash(node -e ' *)",
+      "Bash(NEXT_PUBLIC_SUPABASE_ANON_KEY=\"dummy\" npm run build)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3111/compare/bank-rates)",
+      "Read(//tmp/**)",
+      "WebFetch(domain:nhuf.molit.go.kr)",
+      "WebFetch(domain:www.kinfa.or.kr)",
+      "Bash(curl -s http://localhost:3112/policy/eligibility -o __TRACKED_VAR__/elig.html)",
+      "Bash(curl -s http://localhost:3112/policy)",
+      "Bash(grep -o -E \"\\(Error|error\\)[^<]{0,200}\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(npx kill-port *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(git merge *)",
+      "Bash(curl -s http://localhost:3111/compare/fixed-vs-variable)",
+      "Bash(grep -vE \"^\\\\s*$\")",
+      "Bash(curl -s \"http://localhost:3111/compare/bank-rates?type=rent\")",
+      "Bash(curl -s http://localhost:3111/compare)",
+      "Bash(curl -s http://localhost:3111/compare/loan-products)",
+      "Bash(curl -s http://localhost:3111/compare/policy-loans)",
+      "Bash(pkill -f \"next start\")"
+    ],
+    "additionalDirectories": [
+      "f:\\개인\\blog"
+    ]
+  }
+}

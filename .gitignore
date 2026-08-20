@@ -91,3 +91,6 @@ __pycache__/
 # Local agent tooling
 .claude/
 .omc/
+
+# GSC 일일 리포트 (로컬 산출물)
+reports/gsc/

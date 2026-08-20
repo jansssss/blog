@@ -26,6 +26,28 @@ except ImportError:
 _SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
 
 
+def load_credentials(client_secret_path: str, token_path: str) -> "Credentials":
+    """저장된 토큰을 읽고, 없거나 만료됐으면 갱신/재인증한다.
+
+    GSCCollector 외에 gsc_daily_insight 등 다른 GSC 소비자도 동일 자격증명을 쓴다.
+    """
+    from pathlib import Path
+
+    creds = None
+    token_file = Path(token_path)
+    if token_file.exists():
+        creds = Credentials.from_authorized_user_file(token_path, _SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, _SCOPES)
+            creds = flow.run_local_server(port=0)
+        token_file.parent.mkdir(parents=True, exist_ok=True)
+        token_file.write_text(creds.to_json(), encoding="utf-8")
+    return creds
+
+
 class GSCCollector:
     """
     GSC Search Analytics → Supabase upsert
@@ -75,20 +97,7 @@ class GSCCollector:
         )
 
     def _get_credentials(self, client_secret_path: str, token_path: str) -> Credentials:
-        from pathlib import Path
-        creds = None
-        token_file = Path(token_path)
-        if token_file.exists():
-            creds = Credentials.from_authorized_user_file(token_path, _SCOPES)
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, _SCOPES)
-                creds = flow.run_local_server(port=0)
-            token_file.parent.mkdir(parents=True, exist_ok=True)
-            token_file.write_text(creds.to_json(), encoding="utf-8")
-        return creds
+        return load_credentials(client_secret_path, token_path)
 
     def collect_and_save(self) -> int:
         """GSC 데이터를 수집하고 Supabase에 저장. 저장된 행 수 반환."""

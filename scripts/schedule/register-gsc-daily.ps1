@@ -18,7 +18,7 @@
 
 .EXAMPLE
   # 트래픽이 늘어난 뒤 매일 실행으로 전환 (구간도 7일로)
-  powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1 -Daily -Days 7
+  powershell -ExecutionPolicy Bypass -File scripts\schedule\register-gsc-daily.ps1 -Daily -Days 14
 
 .EXAMPLE
   # 평일만 매일
@@ -33,7 +33,7 @@
 param(
     [string]$TaskName = 'ohyess-gsc-daily',
     [string]$At = '09:10',
-    [int]$Days = 14,
+    [int]$Days = 28,
     [ValidateSet('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')]
     [string]$DayOfWeek = 'Monday',
     [switch]$Daily,
@@ -139,7 +139,7 @@ Register-ScheduledTask `
     -Trigger $trigger `
     -Settings $settings `
     -Principal $principal `
-    -Description 'ohyess.kr — 매일 GSC 유입 분석 후 개선안을 코드로 반영하고 알림 (커밋은 사용자가 직접)' | Out-Null
+    -Description 'ohyess.kr — GSC 관찰·판정·결정 루프 (커밋은 사용자가 직접)' | Out-Null
 
 Write-Host ""
 Write-Host "[OK] 작업 '$TaskName' 등록 완료 — $scheduleLabel 실행" -ForegroundColor Green

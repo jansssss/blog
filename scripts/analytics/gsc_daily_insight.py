@@ -12,12 +12,13 @@ Supabase 없이 단독 동작한다 (수집 파이프라인 scripts/evolve.py �
 
 Usage:
   python -m scripts.analytics.gsc_daily_insight
-  python -m scripts.analytics.gsc_daily_insight --days 7 --out reports/gsc
+  python -m scripts.analytics.gsc_daily_insight --days 28 --out reports/gsc
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import defaultdict
 from datetime import date, timedelta
@@ -28,6 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from scripts.pipeline.config import load_config
 from scripts.analytics.gsc_collector import load_credentials
+from scripts.analytics import gsc_state as st
+from scripts.analytics import llm_client
 
 # GSC 데이터 확정 지연 (오늘 기준 며칠 전까지가 신뢰 가능한 데이터인가)
 _DATA_LAG_DAYS = 3
@@ -107,6 +110,58 @@ def scan_site_routes(project_root: Path) -> list[str]:
         segments = [s for s in rel.split("/") if not (s.startswith("(") and s.endswith(")"))]
         routes.append("/" + "/".join(segments))
     return sorted(set(routes))
+
+
+_TITLE_RE = re.compile(r"title:\s*['\"`](.+?)['\"`]", re.S)
+_HEADING_RE = re.compile(r"<h[123][^>]*>([^<{]{2,80})</h[123]>")
+
+
+def scan_site_pages(project_root: Path, limit_per_page: int = 8) -> list[dict]:
+    """라우트별 제목·주요 헤딩을 뽑는다.
+
+    '이 검색어에 대한 답이 우리 사이트에 있는가'를 판정하려면 경로 목록만으로는
+    부족하다 — 페이지가 실제로 무엇을 다루는지 알아야 한다. layout.tsx 의 metadata
+    title 과 page.tsx 의 h1~h3 텍스트면 그 판정에 충분하다.
+    """
+    app_dir = project_root / "app"
+    if not app_dir.exists():
+        return []
+
+    out: list[dict] = []
+    for page in app_dir.rglob("page.tsx"):
+        rel = page.relative_to(app_dir).parent.as_posix()
+        if rel == ".":
+            path = "/"
+        else:
+            segments = [s for s in rel.split("/") if not (s.startswith("(") and s.endswith(")"))]
+            path = "/" + "/".join(segments)
+        # 동적 라우트·관리자 화면은 검색 유입 대조 대상이 아니다
+        if "[" in path or path.startswith(("/admin", "/api")):
+            continue
+
+        try:
+            body = page.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        title = ""
+        layout = page.parent / "layout.tsx"
+        for src in (layout, page):
+            if not title and src.exists():
+                try:
+                    m = _TITLE_RE.search(src.read_text(encoding="utf-8", errors="replace"))
+                except OSError:
+                    m = None
+                if m:
+                    title = m.group(1).strip()
+        headings = []
+        for m in _HEADING_RE.finditer(body):
+            h = " ".join(m.group(1).split())
+            if h and h not in headings:
+                headings.append(h)
+            if len(headings) >= limit_per_page:
+                break
+        out.append({"path": path, "title": title, "headings": headings})
+    return sorted(out, key=lambda r: r["path"])
 
 
 class GSCInsight:
@@ -209,6 +264,102 @@ class GSCInsight:
             "opportunities": self._opportunities(q_now, qp_rows),
             "page_opportunities": self._page_opportunities(p_now, p_prev),
             "site_routes": scan_site_routes(project_root),
+            "anomaly": self._anomaly(start, end),
+            "coverage": self._coverage(q_now, project_root),
+            "loop_state": self._loop_state(project_root),
+        }
+
+    def _anomaly(self, start: date, end: date) -> dict:
+        """최근 7일 vs 직전 7일. 28일 창은 급변을 평균으로 덮어버리므로 따로 본다.
+
+        급변은 '이번 회차에 반드시 사람이 봐야 하는가'를 가르는 신호라서,
+        느린 추세와 분리해 두는 편이 판단에 훨씬 쓸모 있다.
+        """
+        a_end = end
+        a_start = a_end - timedelta(days=6)
+        b_end = a_start - timedelta(days=1)
+        b_start = b_end - timedelta(days=6)
+
+        recent = self._totals(self._agg(self._query(["query"], a_start, a_end)))
+        prior = self._totals(self._agg(self._query(["query"], b_start, b_end)))
+
+        def ratio(cur: float, prev: float) -> float | None:
+            if not prev:
+                return None
+            return round((cur - prev) / prev, 3)
+
+        imp_change = ratio(recent["impressions"], prior["impressions"])
+        flags = []
+        if imp_change is not None and abs(imp_change) >= 0.40:
+            flags.append(f"7일 노출 {imp_change * 100:+.0f}% 급변")
+        if prior["clicks"] >= 3 and recent["clicks"] == 0:
+            flags.append("클릭이 0으로 소멸")
+        if prior["impressions"] >= 20 and recent["impressions"] == 0:
+            flags.append("노출이 0으로 소멸 — 색인 이탈 가능성")
+
+        return {
+            "recent_7d": {"start": a_start.isoformat(), "end": a_end.isoformat(), **recent},
+            "prior_7d": {"start": b_start.isoformat(), "end": b_end.isoformat(), **prior},
+            "impressions_change": imp_change,
+            "flags": flags,
+        }
+
+    def _coverage(self, now: dict, project_root: Path) -> dict:
+        """'답이 우리 사이트에 있는데 못 찾은 것' vs '아예 없는 것' 구분.
+
+        이 구분이 처방을 완전히 갈라놓는다 — 전자는 랭킹·동선 문제이고
+        후자는 콘텐츠 공백이다. 규칙으로는 판별할 수 없어 LLM 을 쓰며,
+        키가 없으면 판정 없이 재료(페이지 목록)만 넘겨 에이전트가 직접 보게 한다.
+        """
+        pages = scan_site_pages(project_root)
+        queries = [q for q, v in sorted(now.items(), key=lambda kv: -kv[1]["impressions"])
+                   if v["impressions"] >= self.min_impressions][:60]
+
+        if not llm_client.is_available():
+            return {
+                "available": False,
+                "reason": llm_client.unavailable_reason(),
+                "site_pages": pages,
+                "assessed_queries": queries,
+                "verdicts": {},
+            }
+
+        print(f"[INSIGHT] 커버리지 판정 중 (검색어 {len(queries)}개 × 페이지 {len(pages)}개)...", flush=True)
+        verdicts = llm_client.assess_coverage(queries, pages)
+        counts = {"covered": 0, "partial": 0, "missing": 0}
+        for v in verdicts.values():
+            counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
+        return {
+            "available": True,
+            "site_pages": pages,
+            "assessed_queries": queries,
+            "verdicts": verdicts,
+            "counts": counts,
+        }
+
+    @staticmethod
+    def _loop_state(project_root: Path) -> dict:
+        """진행 중인 실험·동결 대상·판정 대기. 리포트만 보고 같은 곳을 또 건드리는
+        사고를 막으려면 이 정보가 리포트 안에 함께 있어야 한다."""
+        decisions = st.load_decisions(project_root)
+        changed = st.backfill_deployed_at(project_root, decisions)
+        for d in changed:
+            st.save_decision(project_root, d)
+        today = date.today()
+        st.refresh_statuses(decisions, today)
+        can_new, note = st.can_open_new(decisions)
+        return {
+            "open_experiments": [
+                {"id": d.get("id"), "grade": d.get("grade"), "status": d.get("status"),
+                 "hypothesis": d.get("hypothesis"),
+                 "deployed_at": d.get("deployed_at"), "evaluate_at": d.get("evaluate_at")}
+                for d in st.open_experiments(decisions)
+            ],
+            "verdict_due": [d.get("id") for d in decisions if d.get("status") == st.STATUS_DUE],
+            "frozen": st.frozen_targets(decisions, today),
+            "can_open_new_decision": can_new,
+            "quota_note": note,
+            "max_new_decisions_per_run": st.MAX_NEW_DECISIONS_PER_RUN,
         }
 
     # ---------- 섹션별 분석 ----------
@@ -381,7 +532,14 @@ class GSCInsight:
         ]
 
     def _opportunities(self, now: dict, qp_rows: list[dict]) -> dict:
-        """행동 가능한 개선 기회 4종."""
+        """관측된 신호 4종.
+
+        여기서는 **처방하지 않는다.** 예전에는 각 항목에 action_hint 로
+        "제목을 고쳐라" 같은 지시를 박아 넣었는데, 그러면 판단이 파이썬 임계값
+        안에서 끝나 버리고 LLM 은 룩업 테이블 실행기로 전락한다.
+        이 함수의 책임은 '무엇이 관측됐는가'까지다. '왜 그런가'와 '무엇을 할 것인가'는
+        데이터를 다 보고 나서 에이전트가 정한다.
+        """
         # 검색어 -> 최다 노출 랜딩 페이지 매핑
         best_page: dict[str, tuple[str, int]] = {}
         for row in qp_rows:
@@ -409,35 +567,40 @@ class GSCInsight:
                 "landing_page": landing,
             }
 
-            # 1) 순위는 괜찮은데 클릭이 기대치 이하 -> 제목/메타 문제
+            # 1) 순위 대비 클릭이 기대치 이하
             if imp >= min_imp and pos <= 15 and ctr < expected_ctr(pos) * 0.6:
                 ctr_gap.append({
                     **base,
                     "expected_ctr": round(expected_ctr(pos), 4),
-                    "action_hint": "제목/메타디스크립션 재작성 — 검색어를 제목 앞부분에 노출",
+                    "observation": (
+                        f"순위 {pos:.1f}위의 기대 CTR 은 {expected_ctr(pos) * 100:.1f}% 인데 "
+                        f"실제는 {ctr * 100:.2f}%"
+                    ),
                 })
 
-            # 2) 4~20위 = 조금만 보강하면 상위 진입
+            # 2) 4~20위 구간
             if imp >= min_imp and 4.0 <= pos <= 20.0:
                 striking.append({
                     **base,
-                    "action_hint": "랜딩 페이지에 이 검색어 전용 섹션·FAQ 추가로 관련성 강화",
+                    "observation": f"1페이지 경계({pos:.1f}위) — 노출 {imp}",
                 })
 
-            # 3) 노출은 되는데 클릭 0 -> 검색 의도와 페이지 불일치 (순위 문제와 구분)
+            # 3) 노출은 되는데 클릭 0
             if imp >= min_imp and clicks == 0:
-                reason = (
-                    "순위가 낮아 클릭 기회 자체가 없음 — 콘텐츠 깊이·내부링크 보강"
-                    if pos > 20
-                    else "노출 순위는 확보됐으나 클릭 없음 — 제목/스니펫이 의도와 불일치"
-                )
-                zero_click.append({**base, "action_hint": reason})
+                zero_click.append({
+                    **base,
+                    "observation": (
+                        f"노출 {imp}, 클릭 0, 순위 {pos:.1f}위"
+                        + ("(20위 밖 — 클릭 기회 자체가 희박한 구간)" if pos > 20
+                           else "(20위 안 — 노출은 확보된 구간)")
+                    ),
+                })
 
-            # 4) 랜딩이 홈/목록 페이지 -> 이 주제 전용 페이지가 없음
+            # 4) 랜딩이 홈/목록 페이지
             if imp >= min_imp and landing in _LISTING_PATHS:
                 content_gap.append({
                     **base,
-                    "action_hint": "전용 상세 페이지(계산기/가이드) 신설 후보",
+                    "observation": f"랜딩이 목록/홈({landing}) — 구글이 전용 페이지를 고르지 못함",
                 })
 
         for bucket in (ctr_gap, striking, zero_click, content_gap):
@@ -472,7 +635,7 @@ class GSCInsight:
             if imp >= min_imp and pos > 20:
                 buried.append({
                     **base,
-                    "action_hint": "수요 대비 순위 미달 — 검색어 타겟 섹션 추가·내부링크 유입 강화",
+                    "observation": f"노출 {imp}인데 순위 {pos:.1f}위 — 2페이지 밖",
                 })
 
             # 순위는 확보했는데 클릭이 기대치 이하
@@ -480,7 +643,7 @@ class GSCInsight:
                 ctr_gap.append({
                     **base,
                     "expected_ctr": round(expected_ctr(pos), 4),
-                    "action_hint": "metadata title/description 재작성",
+                    "observation": f"순위 {pos:.1f}위 확보, CTR {ctr * 100:.2f}% (기대 {expected_ctr(pos) * 100:.1f}%)",
                 })
 
             # 지난 구간 대비 클릭 하락
@@ -490,7 +653,7 @@ class GSCInsight:
                     **base,
                     "clicks_prev": p["clicks"],
                     "click_drop": p["clicks"] - clicks,
-                    "action_hint": "콘텐츠 신선도 갱신(최신 수치·날짜) 검토",
+                    "observation": f"클릭 {p['clicks']} → {clicks} 로 하락",
                 })
 
         buried.sort(key=lambda r: -r["impressions"])
@@ -530,10 +693,58 @@ def render_markdown(r: dict) -> str:
     add(f"- 비교 구간: {pw['start']} ~ {pw['end']}")
     add("")
 
+    # 루프 상태를 맨 앞에 둔다 — 무엇을 건드리면 안 되는지가 다른 무엇보다 먼저다.
+    loop = r.get("loop_state") or {}
+    if loop:
+        add("## 0. 루프 상태")
+        add("")
+        add(f"- {loop.get('quota_note', '')}")
+        if loop.get("verdict_due"):
+            add(f"- **판정 기일 도래: {', '.join(loop['verdict_due'])}**")
+        for e in loop.get("open_experiments") or []:
+            add(f"  - `{e['id']}` [{e.get('grade')}] {e.get('status')} "
+                f"— 배포 {e.get('deployed_at') or '대기'} / 판정 {e.get('evaluate_at') or '미정'}")
+        fz = loop.get("frozen") or {}
+        if fz.get("pages") or fz.get("queries"):
+            add("- 🔒 **수정 금지 대상**: "
+                + ", ".join(f"`{k}`(~{v})" for k, v in
+                            list((fz.get("pages") or {}).items())[:10]))
+        add("")
+
+    anomaly = r.get("anomaly") or {}
+    if anomaly.get("flags"):
+        add("## 0-1. 급변 감지 (최근 7일)")
+        add("")
+        for f in anomaly["flags"]:
+            add(f"- ⚠️ {f}")
+        rc, pr = anomaly["recent_7d"], anomaly["prior_7d"]
+        add(f"- 최근 7일 노출 {rc['impressions']} / 클릭 {rc['clicks']} "
+            f"↔ 직전 7일 노출 {pr['impressions']} / 클릭 {pr['clicks']}")
+        add("")
+
     if cur["impressions"] == 0:
         add("> ⚠️ 이 구간에 노출 데이터가 없습니다. GSC 색인 상태 또는 사이트 속성 설정을 확인하세요.")
         add("")
         return "\n".join(lines)
+
+    cov = r.get("coverage") or {}
+    if cov.get("available") and cov.get("verdicts"):
+        counts = cov.get("counts") or {}
+        add("## 0-2. 커버리지 — 답이 사이트에 있었는가")
+        add("")
+        add(f"- 답이 있음(covered) {counts.get('covered', 0)} · "
+            f"부분적(partial) {counts.get('partial', 0)} · "
+            f"없음(missing) {counts.get('missing', 0)}")
+        add("")
+        add("| 검색어 | 판정 | 최적 페이지 | 근거 |")
+        add("|---|---|---|---|")
+        for q, v in list(cov["verdicts"].items())[:20]:
+            add(f"| {q} | {v['verdict']} | {v.get('best_page') or '—'} | {v.get('why', '')} |")
+        add("")
+    elif cov and not cov.get("available"):
+        add(f"> ℹ️ 커버리지 자동 판정 비활성 ({cov.get('reason', '')}) — "
+            f"에이전트가 site_pages 를 직접 읽고 판단해야 합니다.")
+        add("")
 
     add("## 1. 요약")
     add("")
@@ -653,10 +864,10 @@ def render_markdown(r: dict) -> str:
             add("해당 없음")
             add("")
             continue
-        add("| 페이지 | 타입 | 노출 | 클릭 | CTR | 순위 | 조치 |")
+        add("| 페이지 | 타입 | 노출 | 클릭 | CTR | 순위 | 관측 |")
         add("|---|---|---:|---:|---:|---:|---|")
         for o in rows[:10]:
-            add(f"| {o['path']} | {o['page_type']} | {o['impressions']} | {o['clicks']} | {_pct(o['ctr'])} | {o['position']} | {o['action_hint']} |")
+            add(f"| {o['path']} | {o['page_type']} | {o['impressions']} | {o['clicks']} | {_pct(o['ctr'])} | {o['position']} | {o.get('observation', '')} |")
         add("")
 
     return "\n".join(lines)
@@ -664,7 +875,8 @@ def render_markdown(r: dict) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="ohyess.kr GSC 일일 인사이트 리포트")
-    p.add_argument("--days", type=int, default=7, help="분석 구간 길이 (일, 기본 7)")
+    # 28일: 현재 트래픽에서 14일 창은 노출 ~87 로 잡음이 신호를 덮는다.
+    p.add_argument("--days", type=int, default=28, help="분석 구간 길이 (일, 기본 28)")
     p.add_argument("--out", default="reports/gsc", help="리포트 출력 디렉터리")
     p.add_argument(
         "--min-impressions",

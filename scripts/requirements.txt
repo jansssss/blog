@@ -6,3 +6,8 @@ google-api-python-client>=2.100.0
 google-auth>=2.23.0
 google-auth-httplib2>=0.1.1
 google-auth-oauthlib>=1.1.0
+
+# GSC 개선 루프의 배치 의미 판단용 (선택적)
+#   - 검색어 의도 분류, "답이 사이트에 있는가" 커버리지 대조
+#   - ANTHROPIC_API_KEY 가 없으면 규칙 기반으로 자동 강등되므로 없어도 파이프라인은 돈다
+anthropic>=0.40.0

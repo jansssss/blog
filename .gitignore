@@ -98,4 +98,13 @@ __pycache__/
 .omc/
 
 # GSC 일일 리포트 (로컬 산출물)
-reports/gsc/
+# 리포트·로그는 재생성 가능하므로 제외하되,
+# state/ 는 루프의 기억이라 반드시 추적한다 —
+# 배포일 역추적이 git 히스토리에 의존하고, PC 간 동기화도 여기로 이뤄진다.
+reports/gsc/*
+!reports/gsc/state/
+reports/gsc/state/*
+!reports/gsc/state/goals.md
+!reports/gsc/state/beliefs.md
+!reports/gsc/state/verdicts.md
+!reports/gsc/state/decisions/

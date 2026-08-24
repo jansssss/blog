@@ -33,13 +33,35 @@ def load_credentials(client_secret_path: str, token_path: str) -> "Credentials":
     """
     from pathlib import Path
 
+    import os
+
+    # CI(GitHub Actions)에는 브라우저가 없다. 여기서 대화형 플로우로 빠지면
+    # run_local_server() 가 콜백을 기다리며 잡 타임아웃(기본 6시간)까지 매달린다.
+    # 실패하려면 빨리, 그리고 원인을 말하면서 실패해야 한다.
+    non_interactive = bool(os.getenv("CI") or os.getenv("GSC_NON_INTERACTIVE"))
+
     creds = None
     token_file = Path(token_path)
     if token_file.exists():
         creds = Credentials.from_authorized_user_file(token_path, _SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except Exception as exc:
+                if non_interactive:
+                    raise RuntimeError(
+                        "[GSC] 토큰 갱신 실패 — 비대화형 환경이라 재인증할 수 없습니다.\n"
+                        f"  원인: {exc}\n"
+                        "  로컬에서 재인증한 뒤 scripts/credentials/token.json 내용을\n"
+                        "  GitHub Secret 'GSC_TOKEN_JSON' 에 다시 넣으세요."
+                    ) from exc
+                raise
+        elif non_interactive:
+            raise RuntimeError(
+                "[GSC] 사용 가능한 refresh_token 이 없습니다 — 비대화형 환경에서는 재인증 불가.\n"
+                "  로컬에서 인증한 뒤 token.json 을 GitHub Secret 'GSC_TOKEN_JSON' 에 넣으세요."
+            )
         else:
             flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, _SCOPES)
             creds = flow.run_local_server(port=0)

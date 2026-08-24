@@ -35,6 +35,8 @@ concurrency:
 jobs:
   observe:
     runs-on: ubuntu-latest
+    # 방어선. 정상 회차는 2분이면 끝난다 — 이보다 오래 걸리면 무언가 매달려 있는 것이다.
+    timeout-minutes: 20
 
     steps:
       - name: Checkout

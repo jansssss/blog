@@ -159,7 +159,6 @@ Write-Host "  로그   : $(Join-Path $RepoRoot 'reports\gsc\logs')"
 Write-Host "  놓친 실행: 다음 부팅 때 따라잡음 (StartWhenAvailable)"
 Write-Host "  절전 상태: 깨워서 실행 (WakeToRun) — 전원이 꺼져 있으면 불가"
 Write-Host "  실행 한도: 3시간 / 실패 시 15분 간격 3회 재시도"
-Write-Host "  관측(Tier 1)은 GitHub Actions 에서도 매주 돌아 PC 와 무관하게 기록됩니다"
 Write-Host ""
 Write-Host "지금 한 번 테스트하려면:" -ForegroundColor Cyan
 Write-Host "  powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" -RunNow"

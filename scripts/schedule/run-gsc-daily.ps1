@@ -226,6 +226,12 @@ if ($LASTEXITCODE -ne 0) {
     Write-Log "판정 근거 산출 실패 (exit $LASTEXITCODE) — 이번 회차는 관찰만 수행합니다" 'WARN'
 }
 
+# 이번 회차 관측을 압축해 state/observations/ 에 남긴다.
+# 리포트 원본은 git 에서 제외돼 있어, 이걸 안 남기면 지난 회차들이 어땠는지가
+# 아무 데도 안 남는다. 나중에 에이전트가 스냅샷 하나가 아니라 추이를 읽게 하려는 것.
+& $pythonExe.Source -m scripts.analytics.gsc_evaluate --record-observation 2>&1 |
+    ForEach-Object { Write-Log $_ }
+
 $statusJson = & $pythonExe.Source -m scripts.analytics.gsc_evaluate --status 2>&1 | Select-Object -Last 1
 $status = $null
 try { $status = $statusJson | ConvertFrom-Json } catch {

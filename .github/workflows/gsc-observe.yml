@@ -1,0 +1,132 @@
+# GSC 주간 관측 (Tier 1) — 클라우드에서 항상 돈다.
+#
+# 로컬 러너(run-gsc-daily.ps1)는 외장하드에 있는 저장소를 쓰고 PC 가 켜져 있어야만
+# 실행된다. 그래서 "판단·코드수정"(Tier 2)만 로컬에 두고, "관측·판정근거 산출"(Tier 1)은
+# 여기로 옮긴다. PC 를 몇 주 못 켜도 시계열이 끊기지 않는다.
+#
+# 여기서 하는 일:
+#   1) GSC 리포트 생성 (28일 창)
+#   2) 결정의 배포일을 git 히스토리에서 역추적하고 판정 기일을 갱신
+#   3) 관측 요약을 state/observations/ 에 커밋 → 나중에 에이전트가 시계열로 읽는다
+#
+# 여기서 하지 않는 일: 판단, 코드 수정. 그건 로컬 Tier 2 의 몫이다.
+
+name: GSC Weekly Observation
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "분석 구간 (일)"
+        required: false
+        default: "28"
+  schedule:
+    # 매주 화요일 KST 08:40 (UTC 월요일 23:40) — 로컬 러너(09:10)보다 30분 먼저 돌아
+    # PC 가 켜져 있으면 최신 리포트를 그대로 이어받게 한다.
+    - cron: "40 23 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gsc-observe
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # 배포일 역추적이 git log 전체를 훑으므로 얕은 클론이면 안 된다
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write GSC credentials
+        env:
+          GSC_CLIENT_SECRET_JSON: ${{ secrets.GSC_CLIENT_SECRET_JSON }}
+          GSC_TOKEN_JSON: ${{ secrets.GSC_TOKEN_JSON }}
+        shell: bash
+        run: |
+          mkdir -p scripts/credentials
+          printf '%s' "$GSC_CLIENT_SECRET_JSON" > scripts/credentials/client_secret.json
+          printf '%s' "$GSC_TOKEN_JSON"         > scripts/credentials/token.json
+
+      - name: Write environment file
+        env:
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        shell: bash
+        run: |
+          printf 'GSC_SITE_URL=%s\n' "$GSC_SITE_URL" >> .env
+          # 선택적. 없으면 커버리지 판정이 규칙 기반으로 자동 강등된다.
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY" >> .env
+          fi
+
+      - name: Generate report
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -m scripts.analytics.gsc_daily_insight --days "${{ inputs.days || '28' }}"
+
+      - name: Evaluate due decisions & backfill deploy dates
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -m scripts.analytics.gsc_evaluate
+
+      - name: Record observation
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -m scripts.analytics.gsc_evaluate --record-observation
+
+      - name: Summarize to job log
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("reports/gsc/latest.json")
+          if not p.exists():
+              print("리포트 없음"); raise SystemExit(0)
+          r = json.loads(p.read_text(encoding="utf-8"))
+          s = r["summary"]["current"]
+          print(f"클릭 {s['clicks']} / 노출 {s['impressions']} / "
+                f"CTR {s['ctr']*100:.2f}% / 평균순위 {s['position']:.1f}")
+          for f in (r.get("anomaly") or {}).get("flags") or []:
+              print(f"급변: {f}")
+          loop = r.get("loop_state") or {}
+          print(f"판정 대기: {loop.get('verdict_due') or '없음'}")
+          print(f"열린 실험: {[e['id'] for e in loop.get('open_experiments') or []] or '없음'}")
+          PY
+
+      - name: Commit state changes
+        shell: bash
+        run: |
+          # 커밋 대상은 루프의 기억뿐이다. 리포트 원본·로그는 .gitignore 로 제외돼 있다.
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/gsc/state/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "Data: GSC 주간 관측 기록 ($(date -u +%Y-%m-%d))
+
+          클라우드 Tier 1 자동 실행. 관측 요약과 결정 상태(배포일 역추적·판정 기일)만 갱신한다.
+          판단·코드 수정은 로컬 Tier 2 에서 수행한다."
+          # 그 사이 다른 푸시가 있었으면 재시도
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && \
+            git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            echo "푸시 재시도 $i"
+            sleep 5
+          done
+          exit 1

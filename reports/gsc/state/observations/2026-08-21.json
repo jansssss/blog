@@ -1,0 +1,192 @@
+{
+  "recorded_at": "2026-08-24",
+  "generated_for": "2026-08-21",
+  "window": {
+    "start": "2026-07-25",
+    "end": "2026-08-21",
+    "days": 28
+  },
+  "summary": {
+    "clicks": 0,
+    "impressions": 252,
+    "ctr": 0.0,
+    "position": 36.59126984126984,
+    "query_count": 123
+  },
+  "delta_pct": {
+    "clicks": -100.0,
+    "impressions": 20.0,
+    "query_count": 7.0
+  },
+  "anomaly_flags": [],
+  "top_queries": [
+    {
+      "query": "dsr 계산기",
+      "impressions": 24,
+      "clicks": 0,
+      "position": 30.5,
+      "intent": "계산"
+    },
+    {
+      "query": "갈아타기 계산기",
+      "impressions": 12,
+      "clicks": 0,
+      "position": 8.8,
+      "intent": "계산"
+    },
+    {
+      "query": "dsr계산기",
+      "impressions": 8,
+      "clicks": 0,
+      "position": 32.1,
+      "intent": "계산"
+    },
+    {
+      "query": "dti 계산기",
+      "impressions": 8,
+      "clicks": 0,
+      "position": 29.1,
+      "intent": "계산"
+    },
+    {
+      "query": "dti 뜻",
+      "impressions": 7,
+      "clicks": 0,
+      "position": 32.1,
+      "intent": "정의개념"
+    },
+    {
+      "query": "ltv dti 뜻",
+      "impressions": 7,
+      "clicks": 0,
+      "position": 35.9,
+      "intent": "정의개념"
+    },
+    {
+      "query": "dti",
+      "impressions": 6,
+      "clicks": 0,
+      "position": 39.8,
+      "intent": "기타"
+    },
+    {
+      "query": "dti 란",
+      "impressions": 6,
+      "clicks": 0,
+      "position": 33.5,
+      "intent": "기타"
+    },
+    {
+      "query": "ltv dti dsr 계산",
+      "impressions": 6,
+      "clicks": 0,
+      "position": 29.0,
+      "intent": "계산"
+    },
+    {
+      "query": "ltv 뜻",
+      "impressions": 6,
+      "clicks": 0,
+      "position": 48.5,
+      "intent": "정의개념"
+    }
+  ],
+  "top_pages": [
+    {
+      "path": "/blog/dsr-salary-home-loan-limit",
+      "impressions": 19,
+      "clicks": 3,
+      "position": 7.3
+    },
+    {
+      "path": "/blog/car-installment-mortgage-limit",
+      "impressions": 10,
+      "clicks": 2,
+      "position": 7.3
+    },
+    {
+      "path": "/guide/repayment-types",
+      "impressions": 22,
+      "clicks": 1,
+      "position": 32.3
+    },
+    {
+      "path": "/guide/loan-guarantee",
+      "impressions": 20,
+      "clicks": 1,
+      "position": 26.6
+    },
+    {
+      "path": "/guide/loan-checklist",
+      "impressions": 12,
+      "clicks": 1,
+      "position": 6.3
+    },
+    {
+      "path": "/blog/78829a03-a239-449a-8281-d4eb6e497ae6",
+      "impressions": 10,
+      "clicks": 1,
+      "position": 16.1
+    },
+    {
+      "path": "/guide/mortgage-loan",
+      "impressions": 5,
+      "clicks": 1,
+      "position": 32.4
+    },
+    {
+      "path": "/calculator/loan-interest",
+      "impressions": 99,
+      "clicks": 0,
+      "position": 44.1
+    },
+    {
+      "path": "/guide/dsr-dti-ltv",
+      "impressions": 85,
+      "clicks": 0,
+      "position": 36.6
+    },
+    {
+      "path": "/calculator/dsr-dti-ltv",
+      "impressions": 76,
+      "clicks": 0,
+      "position": 24.3
+    }
+  ],
+  "intent_breakdown": [
+    {
+      "intent": "계산",
+      "impressions": 146,
+      "queries": 64
+    },
+    {
+      "intent": "기타",
+      "impressions": 56,
+      "queries": 30
+    },
+    {
+      "intent": "정의개념",
+      "impressions": 28,
+      "queries": 8
+    },
+    {
+      "intent": "한도금리",
+      "impressions": 13,
+      "queries": 13
+    },
+    {
+      "intent": "비교",
+      "impressions": 8,
+      "queries": 7
+    },
+    {
+      "intent": "자격조건",
+      "impressions": 1,
+      "queries": 1
+    }
+  ],
+  "loop": {
+    "verdict_due": [],
+    "open_experiments": []
+  }
+}

@@ -115,14 +115,23 @@ if ($Weekdays) {
     $scheduleLabel = "매주 $DayOfWeek $At"
 }
 
-# StartWhenAvailable 을 켜지 않는다 — PC가 꺼져 있어 09:10 을 놓치면
-# 나중에 따라잡지 않고 그날은 통째로 건너뛰고 다음 날 정시를 기다린다.
-# 배터리 상태로는 실행을 막지 않는다 (노트북 사용 고려).
+# 저장소가 외장하드(USB)에 있고 PC 가 항상 켜져 있지도 않다 — 결번을 전제로 설정한다.
+#
+# StartWhenAvailable: 놓친 회차를 다음 부팅 때 따라잡는다. 판정 일정이 날짜 기반이라
+#   늦게 돌아도 판정은 사라지지 않고 미뤄질 뿐이며, 오히려 표본이 커진다.
+# WakeToRun: 절전 상태면 깨워서 실행한다 (전원이 꺼져 있으면 당연히 불가).
+# ExecutionTimeLimit 3시간: Tier 2 에이전트 회차가 30분을 넘기는 일이 흔하다.
+#   1시간 한도면 검증·되돌림 단계 전에 강제 종료되어 반쪽 변경이 남을 수 있다.
+# RestartCount: 외장하드가 아직 안 붙었거나 네트워크가 늦게 올라오는 경우를 위한 재시도.
 $settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
     -RunOnlyIfNetworkAvailable `
-    -ExecutionTimeLimit (New-TimeSpan -Hours 1) `
+    -StartWhenAvailable `
+    -WakeToRun `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 3) `
+    -RestartCount 3 `
+    -RestartInterval (New-TimeSpan -Minutes 15) `
     -MultipleInstances IgnoreNew
 
 # 알림이 보이도록 로그온 세션에서 실행 (S4U/서비스 세션이면 토스트가 안 뜬다)
@@ -147,7 +156,10 @@ Write-Host "  분석 구간: 최근 ${Days}일"
 Write-Host "  러너   : $RunnerPath"
 Write-Host "  작업경로: $RepoRoot"
 Write-Host "  로그   : $(Join-Path $RepoRoot 'reports\gsc\logs')"
-Write-Host "  놓친 실행: 따라잡지 않음 (PC가 꺼져 있었다면 그 주는 건너뜀)"
+Write-Host "  놓친 실행: 다음 부팅 때 따라잡음 (StartWhenAvailable)"
+Write-Host "  절전 상태: 깨워서 실행 (WakeToRun) — 전원이 꺼져 있으면 불가"
+Write-Host "  실행 한도: 3시간 / 실패 시 15분 간격 3회 재시도"
+Write-Host "  관측(Tier 1)은 GitHub Actions 에서도 매주 돌아 PC 와 무관하게 기록됩니다"
 Write-Host ""
 Write-Host "지금 한 번 테스트하려면:" -ForegroundColor Cyan
 Write-Host "  powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" -RunNow"

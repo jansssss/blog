@@ -326,6 +326,57 @@ def build_status(project_root: Path, today: date | None = None) -> dict:
     }
 
 
+def record_observation(project_root: Path, today: date | None = None) -> Path | None:
+    """이번 회차 관측을 압축해 state/observations/ 에 남긴다.
+
+    리포트 원본(latest.json)은 용량이 커서 git 에 넣지 않는다. 하지만 PC 가 꺼져 있어
+    로컬 회차가 오래 건너뛰어지면 "그동안 무슨 일이 있었는가"를 아무도 모르게 된다.
+    클라우드에서 매주 이 요약만 커밋해 두면, 나중에 PC 를 켰을 때 에이전트가
+    **시계열**을 읽을 수 있다 — 지금 스냅샷 하나보다 훨씬 나은 판단 재료다.
+    """
+    today = today or date.today()
+    latest = project_root / "reports" / "gsc" / "latest.json"
+    if not latest.exists():
+        print("[EVAL] latest.json 이 없어 관측 기록을 건너뜁니다", flush=True)
+        return None
+
+    r = json.loads(latest.read_text(encoding="utf-8"))
+    s = r.get("summary") or {}
+
+    def trim(rows, keys, limit=10):
+        out = []
+        for row in (rows or [])[:limit]:
+            out.append({k: row.get(k) for k in keys})
+        return out
+
+    record = {
+        "recorded_at": today.isoformat(),
+        "generated_for": r.get("generated_for"),
+        "window": r.get("window"),
+        "summary": s.get("current"),
+        "delta_pct": s.get("delta_pct"),
+        "anomaly_flags": (r.get("anomaly") or {}).get("flags") or [],
+        "top_queries": trim(r.get("top_queries"),
+                            ["query", "impressions", "clicks", "position", "intent"]),
+        "top_pages": trim(r.get("top_pages"),
+                          ["path", "impressions", "clicks", "position"]),
+        "intent_breakdown": trim(r.get("intent_breakdown"),
+                                 ["intent", "impressions", "queries"], limit=8),
+        "loop": {
+            "verdict_due": (r.get("loop_state") or {}).get("verdict_due") or [],
+            "open_experiments": [e.get("id") for e in
+                                 ((r.get("loop_state") or {}).get("open_experiments") or [])],
+        },
+    }
+
+    obs_dir = st.state_dir(project_root) / "observations"
+    obs_dir.mkdir(exist_ok=True)
+    path = obs_dir / f"{r.get('generated_for') or today.isoformat()}.json"
+    path.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[EVAL] 관측 기록 저장: {path}", flush=True)
+    return path
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="GSC 결정 판정 근거 생성")
     p.add_argument("--status", action="store_true",
@@ -338,6 +389,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--days", type=int, default=28, help="스냅샷 구간 길이 (기본 28)")
     p.add_argument("--mark-deep-run", action="store_true",
                    help="이번 회차를 심층 실행으로 기록 (러너가 호출)")
+    p.add_argument("--record-observation", action="store_true",
+                   help="latest.json 을 압축해 state/observations/ 에 기록 (클라우드 관측용)")
     return p
 
 
@@ -346,6 +399,9 @@ def main() -> int:
     config = load_config()
     root = config.project_root
     today = date.today()
+
+    if args.record_observation:
+        return 0 if record_observation(root, today) else 1
 
     if args.mark_deep_run:
         (st.state_dir(root) / "last-tier2.txt").write_text(today.isoformat(), encoding="utf-8")

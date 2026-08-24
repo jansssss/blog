@@ -159,6 +159,31 @@ Write-Log "===== GSC 일일 루틴 시작 (repo: $RepoRoot) ====="
 Set-Location $RepoRoot
 $env:PYTHONIOENCODING = 'utf-8'
 
+# ---------------------------------------------------------------- 0. 원격 동기화
+#
+# 클라우드 Tier 1(gsc-observe.yml)이 매주 관측 기록과 결정 상태를 main 에 커밋한다.
+# 그걸 먼저 받아오지 않으면 로컬이 낡은 상태로 판단하고, 나중에 푸시할 때 충돌한다.
+# 작업 트리가 깨끗할 때만 당긴다 — 미커밋 변경이 있으면 건드리지 않는 편이 안전하다.
+try {
+    & git -C $RepoRoot fetch origin --quiet 2>&1 | Out-Null
+    $behind = (& git -C $RepoRoot rev-list --count HEAD..'@{u}' 2>$null)
+    if ($behind -and [int]$behind -gt 0) {
+        $dirty = @(& git -C $RepoRoot status --porcelain --untracked-files=no)
+        if ($dirty.Count -eq 0) {
+            & git -C $RepoRoot pull --ff-only --quiet 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "원격에서 ${behind}개 커밋 동기화 완료"
+            } else {
+                Write-Log "동기화 실패 (fast-forward 불가) — 낡은 상태로 진행합니다" 'WARN'
+            }
+        } else {
+            Write-Log "원격이 ${behind}개 앞서 있으나 미커밋 변경 $($dirty.Count)건이 있어 동기화를 건너뜁니다" 'WARN'
+        }
+    }
+} catch {
+    Write-Log "원격 동기화 시도 실패: $($_.Exception.Message)" 'WARN'
+}
+
 $pythonExe = (Get-Command python -ErrorAction SilentlyContinue)
 if (-not $pythonExe) { $pythonExe = (Get-Command py -ErrorAction SilentlyContinue) }
 if (-not $pythonExe) {

@@ -10,45 +10,9 @@ import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
 import { BookOpen, ArrowRight, HelpCircle, ChevronRight } from 'lucide-react'
 import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
 import MobileCollapse from '@/components/MobileCollapse'
+import { getFeaturedQuestions, getHomeGuideItems, isNewGuide } from '@/lib/guide-content'
 
-const FEATURED_QUESTIONS = [
-  {
-    q: '월급 5천이면 주담대 얼마까지?',
-    hint: '소득별 한도 + DSR 즉시 계산',
-    href: '/guide/mortgage-salary-5000',
-    emoji: '🏠',
-  },
-  {
-    q: '자동차 할부, 주담대 한도 얼마나 깎여?',
-    hint: '할부 금액별 감소분 계산',
-    href: '/guide/car-loan-dsr-impact',
-    emoji: '🚗',
-  },
-  {
-    q: 'LTV는 되는데 왜 대출이 안 될까?',
-    hint: 'LTV·DSR 동시 비교 + 실제 한도',
-    href: '/guide/ltv-ok-dsr-blocked',
-    emoji: '🔒',
-  },
-  {
-    q: '금리 0.5% 차이, 실제로 얼마나 달라?',
-    hint: '금액·기간별 총이자 비교 계산',
-    href: '/guide/rate-0p5-difference',
-    emoji: '📊',
-  },
-]
-
-const HOME_GUIDE_ITEMS = [
-  { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', desc: '한도·금리·절차 한 번에 이해하기' },
-  { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', desc: '대출 한도 결정 3가지 핵심 지표' },
-  { title: '마이너스통장 DSR 계산', href: '/guide/credit-line-dsr', desc: '잔액 0원·약정 한도 반영 방식' },
-  { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', desc: '상환방식·금리 유형별 이자 차이' },
-  { title: '상환방식 완전 비교', href: '/guide/repayment-types', desc: '원리금균등 vs 원금균등 총이자 차이' },
-  { title: '중도상환수수료 정리', href: '/guide/early-repayment-fee', desc: '수수료 계산·면제 조건·절약 전략' },
-  { title: '대출 전 체크리스트', href: '/guide/loan-checklist', desc: '놓치면 후회하는 10가지 확인 항목' },
-  { title: '자동차 할부 DSR 영향', href: '/guide/car-loan-dsr-impact', desc: '할부가 대출 한도를 깎는 구조' },
-  { title: '금리 0.5% 차이 계산', href: '/guide/rate-0p5-difference', desc: '금액·기간별 총이자 차이 비교' },
-]
+const FEATURED_QUESTIONS = getFeaturedQuestions()
 
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
@@ -63,6 +27,7 @@ export default async function HomePage({
   const selectedCategory = params.category || null
   const postsPerPage = 3  // 홈페이지에서는 3개만 표시
   const offset = (currentPage - 1) * postsPerPage
+  const homeGuideItems = getHomeGuideItems()
 
   // 현재 사이트 정보 조회
   const site = await getCurrentSite()
@@ -218,7 +183,7 @@ export default async function HomePage({
         {site?.domain === 'ohyess.kr' && (
           <MobileCollapse
             title="핵심 금융 가이드"
-            hint="공식자료 기반 실전 가이드 9편"
+            hint={`공식자료 기반 실전 가이드 ${homeGuideItems.length}편`}
           >
             <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-2xl p-5">
               {/* 섹션 헤더 */}
@@ -241,16 +206,28 @@ export default async function HomePage({
               </div>
               {/* 가이드 카드 그리드 */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                {HOME_GUIDE_ITEMS.map((g) => (
+                {homeGuideItems.map((g) => (
                   <Link
                     key={g.href}
                     href={g.href}
                     className="group block p-3 bg-white hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-200 rounded-xl transition-all shadow-sm"
                   >
-                    <p className="text-xs font-semibold text-gray-800 leading-snug mb-1 group-hover:text-indigo-700 transition-colors">
-                      {g.title}
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-indigo-700 transition-colors">
+                        {g.homeTitle ?? g.title}
+                      </p>
+                      {isNewGuide(g) && (
+                        <span
+                          aria-label="새 콘텐츠"
+                          className="shrink-0 text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded-full bg-rose-500 text-white"
+                        >
+                          NEW
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-400 leading-tight">
+                      {g.homeDescription ?? g.description}
                     </p>
-                    <p className="text-[11px] text-gray-400 leading-tight">{g.desc}</p>
                   </Link>
                 ))}
               </div>

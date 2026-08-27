@@ -205,7 +205,7 @@ export default async function HomePage({
                 </Link>
               </div>
               {/* 가이드 카드 그리드 */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {homeGuideItems.map((g) => (
                   <Link
                     key={g.href}

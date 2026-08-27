@@ -25,10 +25,16 @@ describe('guide content registry', () => {
     expect(guides[0].href).toBe('/guide/credit-line-dsr')
   })
 
-  it('caps the homepage and does not duplicate a new evergreen guide', () => {
-    const guides = getHomeGuideItems(new Date('2026-08-28T00:00:00Z'))
-    expect(guides).toHaveLength(HOME_GUIDE_LIMIT)
-    expect(new Set(guides.map((guide) => guide.href)).size).toBe(HOME_GUIDE_LIMIT)
-    expect(guides[0].href).toBe('/guide/credit-line-dsr')
+  it('shows 12 unique homepage guides while keeping overflow items in the guide index', () => {
+    const now = new Date('2026-08-28T00:00:00Z')
+    const homeGuides = getHomeGuideItems(now)
+    const indexGuides = getGuideIndexItems(now)
+
+    expect(HOME_GUIDE_LIMIT).toBe(12)
+    expect(homeGuides).toHaveLength(HOME_GUIDE_LIMIT)
+    expect(new Set(homeGuides.map((guide) => guide.href)).size).toBe(HOME_GUIDE_LIMIT)
+    expect(homeGuides[0].href).toBe('/guide/credit-line-dsr')
+    expect(indexGuides.length).toBeGreaterThan(homeGuides.length)
+    expect(indexGuides.every((guide) => STATIC_GUIDES.includes(guide))).toBe(true)
   })
 })

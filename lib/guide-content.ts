@@ -1,7 +1,7 @@
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export const NEW_GUIDE_WINDOW_DAYS = 21
-export const HOME_GUIDE_LIMIT = 9
+export const HOME_GUIDE_LIMIT = 12
 
 type GuideStyle = {
   cardBg: string
@@ -370,12 +370,15 @@ export function getHomeGuideItems(
   now: Date = new Date(),
   limit: number = HOME_GUIDE_LIMIT,
 ): StaticGuide[] {
-  const recent = getGuideIndexItems(now).filter((guide) => isNewGuide(guide, now))
+  const indexItems = getGuideIndexItems(now)
+  const published = indexItems.filter((guide) => guide.publishedAt)
   const evergreen = STATIC_GUIDES
     .filter((guide) => guide.homeRank !== undefined)
     .sort((a, b) => (a.homeRank ?? Number.MAX_SAFE_INTEGER) - (b.homeRank ?? Number.MAX_SAFE_INTEGER))
 
-  return [...new Map([...recent, ...evergreen].map((guide) => [guide.href, guide])).values()].slice(0, limit)
+  return [
+    ...new Map([...published, ...evergreen, ...indexItems].map((guide) => [guide.href, guide])).values(),
+  ].slice(0, limit)
 }
 
 export function getFeaturedQuestions() {

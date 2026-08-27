@@ -32,6 +32,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '마이너스통장 DSR 계산법', href: '/guide/credit-line-dsr', description: '잔액 0원·일부 사용·한도 감액 때 주담대 한도가 달라지는 구조' },
   { title: 'DSR·DTI·LTV 뜻과 차이 완전 정리', href: '/guide/dsr-dti-ltv', description: 'DTI란 무엇인지, DSR과 DTI 차이, LTV 뜻까지' },
   { title: 'LTV는 남는데 DSR에서 막히는 이유', href: '/guide/ltv-ok-dsr-blocked', description: '은행에서 한도가 생각보다 적게 나온 진짜 이유' },
   { title: '자동차 할부가 주담대 한도를 줄이는 이유', href: '/guide/car-loan-dsr-impact', description: '차 할부 하나가 집 살 수 있는 가격을 1억 낮추는 구조' },

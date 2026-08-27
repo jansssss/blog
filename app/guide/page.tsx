@@ -1,10 +1,23 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 import { getCurrentSiteId } from '@/lib/site'
 import { BookOpen, ArrowRight } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: '금융 가이드 | 대출·DSR·금리·상환 전략 | ohyess',
+  description:
+    '공식 자료와 계산 사례를 바탕으로 대출 한도, DSR, 금리, 상환 방식과 주택담보대출 준비 과정을 설명하는 실전 금융 가이드입니다.',
+  alternates: { canonical: '/guide' },
+  openGraph: {
+    title: '금융 가이드 | ohyess',
+    description: '공식 자료와 직접 계산으로 확인하는 대출·DSR·금리 실전 가이드',
+    type: 'website',
+  },
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,6 +48,18 @@ const STATIC_GUIDES = [
     tagColor: 'bg-purple-100 text-purple-700',
     hoverBg: 'hover:bg-purple-100/60',
     hoverBorder: 'hover:border-l-purple-500',
+  },
+  {
+    title: '마이너스통장 DSR 계산법',
+    href: '/guide/credit-line-dsr',
+    description: '잔액이 0원이어도 약정 한도가 반영되는 이유와 주담대 한도 차이를 내 숫자로 계산합니다.',
+    tag: '대출 한도',
+    icon: '🏦',
+    cardBg: 'bg-indigo-50/60',
+    borderAccent: 'border-l-indigo-400',
+    tagColor: 'bg-indigo-100 text-indigo-700',
+    hoverBg: 'hover:bg-indigo-100/60',
+    hoverBorder: 'hover:border-l-indigo-500',
   },
   {
     title: '상환방식 완전 비교',
@@ -203,7 +228,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
       {/* Hero Section */}
       <div className="rounded-3xl bg-gradient-to-b from-blue-50/60 to-white border border-blue-100/60 px-8 py-12 text-center mb-10">
         <span className="inline-block px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full mb-5">
-          12가지 완전 정리 가이드
+          13가지 완전 정리 가이드
         </span>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">금융 가이드</h1>
         <p className="text-gray-500 text-base max-w-md mx-auto">

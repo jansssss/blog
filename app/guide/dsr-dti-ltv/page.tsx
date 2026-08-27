@@ -48,6 +48,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '마이너스통장은 잔액 0원이어도 DSR에 잡힐까?',
+    href: '/guide/credit-line-dsr',
+    description: '약정 한도 반영 방식과 주담대 한도 감소분을 직접 계산',
+  },
+  {
     title: '연봉 5,000만원 신용대출 3,000만원 있으면 주담대 한도는?',
     href: '/guide/mortgage-salary-5000',
     description: '신용대출 월 납입액별·금리별 주담대 한도 실전 비교',

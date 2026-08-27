@@ -15,6 +15,7 @@ export interface ContentTrustHeaderProps {
 
 // 허용된 공식 기관 도메인
 const ALLOWED_DOMAINS = [
+  'fsc.go.kr',      // 금융위원회
   'fss.or.kr',      // 금융감독원
   'korea.kr',       // 금융위원회
   'nhuf.molit.go.kr', // 주택도시기금

@@ -300,6 +300,7 @@ export default function DsrGuideHubPage() {
             { href: '/guide/dsr-dti-ltv', emoji: '📚', title: 'DSR·DTI·LTV 완전 정복', desc: '계산 구조부터 2025년 스트레스 DSR까지 상세 가이드', type: 'guide' },
             { href: '/guide/ltv-ok-dsr-blocked', emoji: '🚧', title: 'LTV는 OK인데 DSR에 막힌다면', desc: '두 규제를 동시에 충족하는 실전 전략', type: 'guide' },
             { href: '/guide/mortgage-salary-5000', emoji: '🏠', title: '연봉 5000만원 주담대 한도', desc: '소득별 DSR 기준 실제 대출 가능 금액 시뮬레이션', type: 'guide' },
+            { href: '/guide/credit-line-dsr', emoji: '🏦', title: '마이너스통장과 DSR', desc: '잔액 0원이어도 한도가 반영되는 이유와 한도 감소 계산', type: 'guide' },
             { href: '/guide/car-loan-dsr-impact', emoji: '🚗', title: '자동차 대출과 DSR 영향', desc: '카론이 주담대 한도에 미치는 실제 영향 수치', type: 'guide' },
           ].map(({ href, emoji, title, desc, type }) => (
             <Link key={href} href={href}

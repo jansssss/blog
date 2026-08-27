@@ -66,6 +66,7 @@ export const OHYESS_ROUTES: StaticRoute[] = [
 
   // 가이드 — 2026-07-31 계산기 내부 링크 전면 재배선
   { path: '/guide/car-loan-dsr-impact', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/guide/credit-line-dsr', lastModified: '2026-08-27', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/credit-score', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/dsr-dti-ltv', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/early-repayment-fee', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },

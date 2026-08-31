@@ -28,6 +28,7 @@ export default async function HomePage({
   const postsPerPage = 3  // 홈페이지에서는 3개만 표시
   const offset = (currentPage - 1) * postsPerPage
   const homeGuideItems = getHomeGuideItems()
+  const newGuideCount = homeGuideItems.filter((guide) => isNewGuide(guide)).length
 
   // 현재 사이트 정보 조회
   const site = await getCurrentSite()
@@ -179,38 +180,44 @@ export default async function HomePage({
           </MobileCollapse>
         )}
 
-        {/* 핵심 금융 가이드 (ohyess.kr 전용) — 모바일에서는 접어 둔다 */}
+        {/* 핵심 금융 가이드 (ohyess.kr 전용) */}
         {site?.domain === 'ohyess.kr' && (
-          <MobileCollapse
-            title="핵심 금융 가이드"
-            hint={`공식자료 기반 실전 가이드 ${homeGuideItems.length}편`}
-          >
-            <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-2xl p-5">
-              {/* 섹션 헤더 */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center">
+          <section className="mb-8">
+            <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 border border-indigo-100 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
                     <BookOpen className="w-4 h-4 text-indigo-600" />
                   </div>
-                  <div>
-                    <h2 className="text-sm font-bold text-gray-900 leading-tight">핵심 금융 가이드</h2>
-                    <p className="text-[11px] text-gray-500 leading-tight">공식자료 기반 실전 금융 가이드</p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-gray-900 leading-tight">핵심 금융 가이드</h2>
+                      {newGuideCount > 0 && (
+                        <span
+                          aria-label={`새 금융 가이드 ${newGuideCount}개`}
+                          className="shrink-0 inline-flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 text-[9px] font-black tracking-wide text-white shadow-sm"
+                        >
+                          NEW <span className="font-bold">{newGuideCount}</span>
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-500 leading-tight truncate">공식자료 기반 실전 금융 가이드</p>
                   </div>
                 </div>
                 <Link
                   href="/guide"
-                  className="text-[11px] text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg"
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg shrink-0"
                 >
                   전체 보기 <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
-              {/* 가이드 카드 그리드 */}
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {homeGuideItems.map((g) => (
+                {homeGuideItems.map((g, index) => (
                   <Link
                     key={g.href}
                     href={g.href}
-                    className="group block p-3 bg-white hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-200 rounded-xl transition-all shadow-sm"
+                    className={`group p-3 bg-white hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-200 rounded-xl transition-all shadow-sm ${index >= 4 ? 'hidden md:block' : 'block'}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <p className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-indigo-700 transition-colors">
@@ -231,23 +238,44 @@ export default async function HomePage({
                   </Link>
                 ))}
               </div>
+              <Link
+                href="/guide"
+                className="md:hidden mt-3 flex items-center justify-center gap-1 rounded-xl border border-indigo-100 bg-white/80 py-2.5 text-xs font-semibold text-indigo-700"
+              >
+                나머지 가이드도 보기 <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-          </MobileCollapse>
+          </section>
         )}
 
         {/* Blog Posts Grid - 최신 사례글 */}
         <section>
-          <h2 className="mb-6 text-xl font-bold">최신 사례글</h2>
+          <h2 className="mb-3 md:mb-6 text-xl font-bold">최신 사례글</h2>
         {posts && posts.length > 0 ? (
           <>
-            <div className="blog-grid-md3 grid gap-6 grid-cols-1 md:grid-cols-3">
+            <div className="md:hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={post.slug ? `/blog/${post.slug}` : `/blog/${post.id}`}
+                  className="group flex items-center gap-2 px-4 py-3.5 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-800 group-hover:text-indigo-700">
+                    {post.title}
+                  </span>
+                  <ChevronRight className="w-4 h-4 shrink-0 text-gray-300 group-hover:text-indigo-500" />
+                </Link>
+              ))}
+            </div>
+
+            <div className="blog-grid-md3 hidden gap-6 md:grid md:grid-cols-3">
               {posts.map((post) => (
                 <BlogCard key={post.id} post={post} />
               ))}
             </div>
 
             {/* 더보기 버튼 */}
-            <div className="mt-8 flex justify-center gap-3 flex-wrap">
+            <div className="mt-5 md:mt-8 flex justify-center gap-3 flex-wrap">
               <Link href="/blog">
                 <Button variant="outline">
                   블로그 전체 보기

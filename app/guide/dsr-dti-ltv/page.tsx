@@ -48,6 +48,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '1주택자 전세대출 DSR은 얼마가 반영될까?',
+    href: '/guide/jeonse-loan-dsr',
+    description: '수도권·규제지역 적용 조건과 연 이자 반영액 계산',
+  },
+  {
     title: '마이너스통장은 잔액 0원이어도 DSR에 잡힐까?',
     href: '/guide/credit-line-dsr',
     description: '약정 한도 반영 방식과 주담대 한도 감소분을 직접 계산',
@@ -93,7 +98,7 @@ const faqs = [
   {
     question: '전세자금대출도 DSR에 포함되나요?',
     answer:
-      '보증기관(HUG·SGI·HF) 보증 전세자금대출은 DSR 산정에서 제외됩니다. 다만 개인 전세대출(비보증)은 DSR에 포함될 수 있습니다. 본인 대출의 보증 여부를 금융사에서 확인하는 것이 좋습니다.',
+      '2025년 10월 29일부터 1주택자가 수도권·규제지역에서 신규로 받는 일반 전세대출은 연 이자상환분이 DSR에 반영됩니다. 무주택자와 버팀목·지자체 협약 같은 정책 목적 전세대출, 시행 전 기존 계약에는 예외가 있으므로 주택 수·임차 지역·신청일·상품 성격을 함께 확인해야 합니다.',
   },
   {
     question: '마이너스통장도 DSR 계산에 들어가나요?',
@@ -151,14 +156,15 @@ export default function DsrDtiLtvGuidePage() {
       ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
-      lastUpdated="2026년 6월"
+      lastUpdated="2026년 8월"
       publishedAt="2026년 3월"
-      reviewedAt="2026년 6월"
-      referenceDate="2026년 6월 기준"
+      reviewedAt="2026년 8월 31일"
+      referenceDate="2026년 8월 31일 기준"
       appliesTo="주택담보대출·신용대출·DSR 규제 적용 대출"
       sources={[
         { label: '금융위원회 — DSR 규제 고시', href: 'https://www.korea.kr/policy/financialView.do?newsId=148930490' },
-        { label: '금융감독원 — 가계대출 건전성 관리', href: 'https://www.fss.or.kr/fss/main/contents.do?menuNo=200465' },
+        { label: '금융위원회 — 1주택자 전세대출 DSR 시행안', href: 'https://www.fsc.go.kr/po010101/85432?srchCtgry=1' },
+        { label: '금융위원회 — 전세대출 DSR 공식 FAQ', href: 'https://www.fsc.go.kr/po020201/85518?curPage=1' },
       ]}
     >
       <H2 id="ltv">LTV란? — 담보 가치 기준 대출 한도</H2>
@@ -247,9 +253,10 @@ export default function DsrDtiLtvGuidePage() {
         <li>자동차 할부금·학자금 대출 원리금</li>
       </Ul>
       <P>
-        전세자금대출(보증기관 보증 시)과 햇살론·새희망홀씨 등 일부 정책 서민 대출은 DSR
-        산정에서 제외됩니다. 이 점을 활용해 정책 대출을 먼저 받고 은행 대출 여력을 확보하는
-        전략도 있습니다.
+        전세자금대출은 차주 조건에 따라 다르게 봐야 합니다. 2025년 10월 29일부터 1주택자가
+        수도권·규제지역에서 신규로 받는 일반 전세대출은 <strong>원금이 아닌 연 이자상환분</strong>이
+        DSR에 반영됩니다. 무주택자와 버팀목·지자체 협약 같은 정책 목적 전세대출, 시행 전 기존
+        계약은 예외가 있으므로 상품명만으로 포함 여부를 단정하면 안 됩니다.
       </P>
 
       <H2 id="dsr-vs-dti">DSR과 DTI의 차이는 무엇인가?</H2>

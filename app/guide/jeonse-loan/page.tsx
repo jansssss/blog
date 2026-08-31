@@ -48,10 +48,10 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '1주택자 전세대출 DSR 적용 계산', href: '/guide/jeonse-loan-dsr', description: '수도권·규제지역 적용 조건과 연 이자 반영액 계산' },
   { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', description: '매매 전환 시 필요한 주담대 가이드' },
   { title: '대출 보증보험 완전 정리', href: '/guide/loan-guarantee', description: '전세대출에 반드시 필요한 HUG·HF 보증 구조와 보증료' },
   { title: '신용점수 완전 정리', href: '/guide/credit-score', description: '전세대출 금리를 낮추는 신용점수 관리법' },
-  { title: '대출 전 필수 체크리스트', href: '/guide/loan-checklist', description: '대출 신청 전 반드시 확인해야 할 항목' },
 ]
 
 const faqs = [

@@ -29,7 +29,7 @@ const jsonLd = {
       inLanguage: 'ko',
       publisher: { '@type': 'Organization', name: 'ohyess', url: 'https://www.ohyess.kr' },
       datePublished: '2026-07-01',
-      dateModified: '2026-07-01',
+      dateModified: '2026-08-31',
     },
     {
       '@type': 'FAQPage',
@@ -298,6 +298,7 @@ export default function DsrGuideHubPage() {
             { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 계산기', desc: '소득과 기존 부채 → 내 DSR 비율과 대출 한도 즉시 계산', type: 'calc' },
             { href: '/calculator/loan-limit', emoji: '💰', title: '대출 한도 계산기', desc: 'DSR 40% 역산 — 내가 받을 수 있는 최대 대출 금액', type: 'calc' },
             { href: '/guide/dsr-dti-ltv', emoji: '📚', title: 'DSR·DTI·LTV 완전 정복', desc: '계산 구조부터 2025년 스트레스 DSR까지 상세 가이드', type: 'guide' },
+            { href: '/guide/jeonse-loan-dsr', emoji: '🔑', title: '1주택자 전세대출 DSR', desc: '수도권·규제지역에서 연 이자만 반영하는 조건과 예외', type: 'guide' },
             { href: '/guide/ltv-ok-dsr-blocked', emoji: '🚧', title: 'LTV는 OK인데 DSR에 막힌다면', desc: '두 규제를 동시에 충족하는 실전 전략', type: 'guide' },
             { href: '/guide/mortgage-salary-5000', emoji: '🏠', title: '연봉 5000만원 주담대 한도', desc: '소득별 DSR 기준 실제 대출 가능 금액 시뮬레이션', type: 'guide' },
             { href: '/guide/credit-line-dsr', emoji: '🏦', title: '마이너스통장과 DSR', desc: '잔액 0원이어도 한도가 반영되는 이유와 한도 감소 계산', type: 'guide' },

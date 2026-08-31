@@ -41,14 +41,14 @@ export const COMMON_ROUTES: StaticRoute[] = [
  */
 export const OHYESS_ROUTES: StaticRoute[] = [
   // 섹션 인덱스
-  { path: '/guide', lastModified: '2026-07-31', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/guide', lastModified: '2026-08-31', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/calculator', lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/compare', lastModified: '2026-07-21', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/policy', lastModified: '2026-07-21', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/trend', lastModified: '2026-03-18', changeFrequency: 'weekly', priority: 0.8 },
 
   // 허브 (토픽 클러스터 진입점)
-  { path: '/hub/dsr-guide', lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/hub/dsr-guide', lastModified: '2026-08-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/hub/refinancing-guide', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/hub/mortgage-preparation', lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.8 },
 
@@ -68,11 +68,12 @@ export const OHYESS_ROUTES: StaticRoute[] = [
   { path: '/guide/car-loan-dsr-impact', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/credit-line-dsr', lastModified: '2026-08-27', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/credit-score', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
-  { path: '/guide/dsr-dti-ltv', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/guide/dsr-dti-ltv', lastModified: '2026-08-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/early-repayment-fee', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
-  { path: '/guide/jeonse-loan', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/guide/jeonse-loan', lastModified: '2026-08-31', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/guide/jeonse-loan-dsr', lastModified: '2026-08-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/loan-checklist', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
-  { path: '/guide/loan-guarantee', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/guide/loan-guarantee', lastModified: '2026-08-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/loan-interest', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/loan-rejection', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/guide/loan-types-complete', lastModified: '2026-07-31', changeFrequency: 'monthly', priority: 0.9 },

@@ -47,9 +47,9 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '1주택자 전세대출 DSR 적용 계산', href: '/guide/jeonse-loan-dsr', description: '보증 여부가 아닌 주택 수·지역·상품으로 적용 여부 판단' },
   { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', description: '전세대출 종류·한도·절차 완전 가이드' },
   { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', description: '주담대 한도·금리·절차 완전 가이드' },
-  { title: '대출 전 필수 체크리스트', href: '/guide/loan-checklist', description: '대출 전 반드시 확인할 항목' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 핵심 지표' },
 ]
 

@@ -265,7 +265,7 @@ export default function RefinancingGuideHubPage() {
                 { icon: '⚠️', title: '금리만 보고 갈아타면 손해', desc: '낮은 금리에도 잔여 기간이 짧거나 수수료가 크면 손해입니다. 반드시 손익 계산 후 결정하세요.' },
                 { icon: '⚠️', title: '변동금리로 갈아타면 금리 리스크 발생', desc: '금리가 다시 오르면 월 납입액이 늘어납니다. 갈아타는 시점의 금리 방향성을 함께 고려하세요.' },
                 { icon: '⚠️', title: '새 대출 심사가 부결될 수 있다', desc: '소득 변화, 신용점수 하락, DSR 초과 등으로 새 대출이 거절될 수 있습니다. 사전 한도 조회로 확인하세요.' },
-                { icon: '💡', title: '갈아타기 없이도 금리 인하를 요구할 수 있다', desc: '금리인하요구권을 활용하면 기존 대출 은행에서도 금리를 낮출 수 있습니다. 갈아타기 전에 먼저 시도해보세요.' },
+                { icon: '💡', title: '갈아타기 없이도 금리 인하를 요구할 수 있다', desc: '신용상태가 개선됐다면 금리인하요구권을 먼저 신청하고, 거절되거나 인하 폭이 작을 때 갈아타기 비용을 비교하세요.' },
               ].map((item) => (
                 <div key={item.title} className="flex gap-3 p-3 rounded-xl bg-gray-50 items-start">
                   <span className="text-base shrink-0">{item.icon}</span>
@@ -288,6 +288,7 @@ export default function RefinancingGuideHubPage() {
             { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '기존·신규 금리 입력 → 순절감액과 손익분기점 즉시 산출', type: 'calc' },
             { href: '/calculator/prepayment-fee', emoji: '💰', title: '중도상환수수료 계산기', desc: '잔액·수수료율·잔여기간으로 정확한 수수료 계산', type: 'calc' },
             { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '갈아탄 후 신규 금리로 월 납입액과 총이자 확인', type: 'calc' },
+            { href: '/guide/rate-reduction-request', emoji: '📉', title: '금리인하요구권 신청 방법', desc: '갈아타기 전 기존 은행에서 금리를 낮출 수 있는지 먼저 확인', type: 'guide' },
             { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '수수료 공식, 면제 조건, 절약 전략 상세 가이드', type: 'guide' },
             { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '갈아탈 때 어떤 금리 유형으로 갈아탈지 기준', type: 'guide' },
             { href: '/guide/loan-interest', emoji: '📚', title: '대출 이자 완전 정복', desc: '금리별 이자 차이와 상환 방식별 총비용 비교', type: 'guide' },

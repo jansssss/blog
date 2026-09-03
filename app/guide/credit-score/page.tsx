@@ -46,9 +46,9 @@ const ctas = [
 
 const relatedGuides = [
   {
-    title: 'DSR·DTI·LTV 완전 정리',
-    href: '/guide/dsr-dti-ltv',
-    description: '소득·자산 기준 실제 대출 한도 계산법',
+    title: '금리인하요구권 신청 방법',
+    href: '/guide/rate-reduction-request',
+    description: '신용점수 상승 후 금리 재심사를 요청하는 순서',
   },
   {
     title: '대출이자 계산법 완전 정리',

@@ -53,6 +53,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '금리인하요구권 신청 방법', href: '/guide/rate-reduction-request', description: '조건·증빙·거절 대응과 2026 자동신청' },
   { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', description: '금리와 이자의 기본 계산 구조 이해' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등·원금균등·만기일시 비교' },
   { title: '중도상환수수료 완전 정리', href: '/guide/early-repayment-fee', description: '중도상환 비용 계산과 면제 조건' },
@@ -68,7 +69,7 @@ const faqs = [
   {
     question: '금리 인하 요구권은 언제, 얼마나 자주 신청할 수 있나요?',
     answer:
-      '법적으로 연 2회(6개월 간격) 신청할 수 있습니다. 신용점수 상승, 승진·소득 증가, 부채 감소, 우량 거래 실적 축적 등 신용도 개선 사유가 있어야 합니다. 성공 시 보통 0.1~0.5%p 인하 효과를 기대할 수 있습니다.',
+      '법령상 연 2회나 6개월 간격으로 제한되지 않습니다. 금융위원회는 신용상태가 개선됐다면 신청 횟수·시점과 관계없이 권리를 행사할 수 있다고 안내합니다. 연 2회는 금융회사의 정기 안내 횟수입니다. 다만 금리 인하 여부와 폭은 금융회사가 개선된 신용상태와 내부 금리 기준을 심사해 결정합니다.',
   },
   {
     question: '금리 인하 사이클이 오면 변동금리가 유리한가요?',
@@ -108,7 +109,15 @@ export default function RateStrategyGuidePage() {
       ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
-      lastUpdated="2026년 6월"
+      lastUpdated="2026년 9월"
+      reviewedAt="2026년 9월 1일"
+      referenceDate="2026년 9월 1일 기준"
+      appliesTo="고정·변동금리 선택, 대환대출, 금리인하요구, 중도상환"
+      sources={[
+        { label: '한국은행 — 기준금리', href: 'https://www.bok.or.kr/portal/singl/baseRate/list.do?dataStat=totalData&menuNo=200656' },
+        { label: '국가법령정보센터 — 은행법 시행령 제18조의4', href: 'https://law.go.kr/LSW/lumLsLinkPop.do?chrClsCd=010202&lspttninfSeq=151463' },
+        { label: '금융위원회 — 금리인하요구제도 운영 개선방안', href: 'https://www.fsc.go.kr/po010101/76792' },
+      ]}
     >
       <GeminiImage
         src="/images/guide/rate-strategy.png"
@@ -137,27 +146,29 @@ export default function RateStrategyGuidePage() {
           <tbody>
             <tr>
               <td className="border border-gray-200 px-3 py-3">1억원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right">+2,083원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right">+8,333원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right">+100,000원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right">+20,833원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right">+83,333원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right">+1,000,000원</td>
             </tr>
             <tr className="bg-orange-50">
               <td className="border border-gray-200 px-3 py-3 font-medium">3억원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right">+6,250원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-orange-700">+25,000원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-orange-700">+300,000원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right">+62,500원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-orange-700">+250,000원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-orange-700">+3,000,000원</td>
             </tr>
             <tr>
               <td className="border border-gray-200 px-3 py-3 font-medium">5억원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right">+10,417원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-red-700">+41,667원</td>
-              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-red-700">+500,000원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right">+104,167원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-red-700">+416,667원</td>
+              <td className="border border-gray-200 px-3 py-3 text-right font-semibold text-red-700">+5,000,000원</td>
             </tr>
           </tbody>
         </table>
       </div>
       <P>
-        3억원 변동금리 대출자가 금리 1%p 인상을 경험하면 월 2.5만원, 연간 30만원의 추가 부담이 발생합니다. 금리가 2%p 오르면 연간 60만원 추가로 납부해야 합니다.
+        위 표는 대출 잔액이 그대로라는 가정의 단순 이자 환산입니다. 3억원 대출의 금리가 1%p 오르면 월 25만원,
+        연간 300만원에 해당합니다. 원리금균등·원금균등 대출의 실제 월납입액 변화는 남은 기간과 상환 일정에 따라
+        달라지므로 계산기로 다시 확인해야 합니다.
       </P>
 
       <H2 id="fixed-vs-variable">고정 vs 변동: 지금 선택 기준</H2>
@@ -216,55 +227,63 @@ export default function RateStrategyGuidePage() {
 
       <H2 id="rate-reduction">금리 인하 요구권 완전 활용법</H2>
       <P>
-        금리 인하 요구권은 금융소비자보호법에 명시된 법적 권리입니다. 신용 상태가 개선되면 은행에 금리 인하를 요구할 수 있고, 은행은 10영업일 이내 심사 결과를 통보해야 합니다.
+        금리인하요구권은 은행법 등 업권별 법률에 근거한 권리입니다. 대출 실행 후 신용상태가 개선되고 그 변화가
+        이용 중인 대출 금리에 영향을 줄 수 있다면 금융회사에 금리를 다시 심사해달라고 요구할 수 있습니다.
+        은행은 자료 보완 기간을 제외하고 10영업일 이내에 수용 여부와 사유를 알려야 합니다.
       </P>
       <H3>금리 인하 요구 가능 사유</H3>
       <Ul>
-        <li>신용점수 상승 (보통 50점 이상 상승 시 효과적)</li>
-        <li>소득 증가 (근로소득·사업소득 증가 확인서 제출)</li>
-        <li>부채 감소 (기존 대출 상환으로 DSR 개선)</li>
-        <li>취업·승진·정규직 전환 (직업 안정성 향상)</li>
-        <li>담보 가치 상승 (주택 가격 상승 감정서 제출)</li>
+        <li>취업·승진·이직·전문자격 취득 등으로 소득이나 직업 안정성이 개선된 경우</li>
+        <li>금융자산·재산이 증가하거나 기존 대출을 상환해 부채가 감소한 경우</li>
+        <li>개인신용평점 또는 금융회사 내부신용등급이 상승한 경우</li>
+        <li>개인사업자의 매출·이익·재무상태가 개선된 경우</li>
       </Ul>
       <H3>신청 방법 (3단계)</H3>
       <div className="space-y-2 mb-4">
-        {['은행 앱 또는 영업점 방문 → "금리 인하 요구권 신청" 메뉴 선택', '소득 증가 증빙 서류 또는 신용점수 확인서 첨부', '10영업일 이내 결과 수령. 인하 거절 시 사유 서면 통보 의무'].map((text, i) => (
+        {['대출이 대상인지 확인한 뒤 은행 앱·인터넷뱅킹·영업점에서 신청', '금융회사가 인정하는 소득·재산·부채·신용도 개선 자료 제출', '10영업일 이내 결과와 사유 확인 후 변경 금리·적용일 재확인'].map((text, i) => (
           <div key={i} className="flex gap-2 text-sm text-gray-700">
             <span className="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
             <span>{text}</span>
           </div>
         ))}
       </div>
+      <P>
+        신청 횟수와 자동신청 이용법, 거절 후 확인할 정보는{' '}
+        <Link href="/guide/rate-reduction-request" className="font-semibold text-indigo-600 hover:underline">
+          금리인하요구권 신청 가이드
+        </Link>
+        에서 단계별로 확인할 수 있습니다.
+      </P>
 
       <H2 id="prepayment">중도상환으로 이자 부담 줄이기</H2>
       <P>
         금리가 높은 시기일수록 원금을 빠르게 줄이는 것이 이자를 낮추는 가장 확실한 방법입니다. 연말 성과급, 인센티브, 세금 환급금이 생기면 중도상환을 적극 활용하세요.
       </P>
       <Ul>
-        <li><strong className="font-semibold">연 10~20% 중도상환 면제:</strong> 대부분의 주담대는 연간 대출 잔액의 10~20% 한도 내 무수수료 중도상환 허용</li>
-        <li><strong className="font-semibold">3년 후 전액 상환:</strong> 중도상환수수료 면제 기간(보통 3년) 이후에는 수수료 없이 전액 상환 가능</li>
-        <li><strong className="font-semibold">이자 절감 효과:</strong> 5억 대출, 연 4.5%, 잔여 20년 기준 — 1억 중도상환 시 총이자 약 9,000만원 절감</li>
+        <li><strong className="font-semibold">부분상환 면제 한도:</strong> 일부 상품은 연간 일정 비율까지 수수료를 면제하지만 비율은 약정마다 다름</li>
+        <li><strong className="font-semibold">수수료 부과기간:</strong> 대출 실행 후 일정 기간이 지나면 면제되는 상품이 많으므로 계약서의 종료일 확인</li>
+        <li><strong className="font-semibold">이자 절감 효과:</strong> 같은 금액이라도 상환 시점이 빠르고 남은 기간이 길수록 이자 절감액이 커짐</li>
       </Ul>
 
       <H2 id="cases">실전 사례 2개</H2>
       <CaseBox title="사례 1 — 변동금리 대출자, 금리 1.5%p 인상 후 대응 전략">
         <P>주담대 3억, 변동금리 연 3.2% → 4.7%로 인상. 잔여 기간 18년.</P>
         <Ul>
-          <li>월납입 증가분: 3억 × 1.5% ÷ 12 = 월 37,500원 추가</li>
+          <li>단순 이자 증가분: 3억 × 1.5% ÷ 12 = 월 375,000원</li>
           <li>고정금리 대환 검토: 현재 고정금리 4.3% 제안 → 변동(4.7%) 대비 0.4%p 낮음</li>
           <li>대환 비용 계산: 중도상환수수료(1%) 300만 + 부대비용 50만 = 350만원</li>
-          <li>월 절감액: 3억 × 0.4% ÷ 12 = 1만원 → 손익분기 350개월(29년) → 대환 비효율</li>
-          <li><strong>결론: 금리 인하 요구권 신청 후 소득 증빙으로 0.2%p 인하 달성이 더 효과적</strong></li>
+          <li>단순 월 절감액: 3억 × 0.4% ÷ 12 = 10만원 → 비용 손익분기 약 35개월</li>
+          <li><strong>결론: 잔여 18년보다 손익분기가 짧지만 실제 상환표·변동 위험까지 비교한 뒤 결정</strong></li>
         </Ul>
       </CaseBox>
       <CaseBox title="사례 2 — 연말 성과급 5천만원, 중도상환 활용 전략">
         <P>신용대출 7,000만원(연 6.5%) + 주담대 2억(연 4.2%) 보유. 성과급 5천만원 수령.</P>
         <Ul>
-          <li>신용대출 7천만원 먼저 상환: 연이자 455만원 → 전액 소멸</li>
-          <li>잔여 성과급 없음 → 주담대는 유지</li>
-          <li>DSR 개선 효과: 신용대출 상환으로 DSR 15%p 감소</li>
-          <li>이후 금리 인하 요구권 신청: 부채 감소 사유로 0.3%p 인하 요청</li>
-          <li><strong>결론: 고금리 부채 우선 상환이 항상 최우선 전략</strong></li>
+          <li>신용대출에 5천만원 부분상환 → 잔액 2천만원</li>
+          <li>단순 연이자 감소분: 5천만원 × 6.5% = 연 325만원</li>
+          <li>중도상환수수료와 비상자금 필요액을 빼고 실제 상환금액 결정</li>
+          <li>부채 감소가 내부신용등급에 반영됐는지 확인한 뒤 금리인하요구 검토</li>
+          <li><strong>결론: 금리가 높은 부채부터 줄이되 수수료·유동성·금리인하 가능성을 함께 비교</strong></li>
         </Ul>
       </CaseBox>
       <HubBacklink hub="refinancing-guide" />

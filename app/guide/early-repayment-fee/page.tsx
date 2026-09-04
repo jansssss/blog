@@ -46,6 +46,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '대출 청약철회권 14일',
+    href: '/guide/loan-cooling-off',
+    description: '대출 실행 직후라면 일반 중도상환과 비용·기록 비교',
+  },
+  {
     title: '대출이자 계산법 완전 정리',
     href: '/guide/loan-interest',
     description: '이자 계산 공식과 금리 유형별 차이 정리',

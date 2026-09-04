@@ -17,6 +17,7 @@ export interface ContentTrustHeaderProps {
 const ALLOWED_DOMAINS = [
   'fsc.go.kr',      // 금융위원회
   'fss.or.kr',      // 금융감독원
+  'law.go.kr',      // 국가법령정보센터
   'korea.kr',       // 금융위원회
   'nhuf.molit.go.kr', // 주택도시기금
   'hug.go.kr',      // 주택도시보증공사 HUG

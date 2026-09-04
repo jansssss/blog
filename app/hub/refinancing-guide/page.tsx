@@ -29,7 +29,7 @@ const jsonLd = {
       inLanguage: 'ko',
       publisher: { '@type': 'Organization', name: 'ohyess', url: 'https://www.ohyess.kr' },
       datePublished: '2026-07-01',
-      dateModified: '2026-07-01',
+      dateModified: '2026-09-04',
     },
     {
       '@type': 'FAQPage',
@@ -289,6 +289,7 @@ export default function RefinancingGuideHubPage() {
             { href: '/calculator/prepayment-fee', emoji: '💰', title: '중도상환수수료 계산기', desc: '잔액·수수료율·잔여기간으로 정확한 수수료 계산', type: 'calc' },
             { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '갈아탄 후 신규 금리로 월 납입액과 총이자 확인', type: 'calc' },
             { href: '/guide/rate-reduction-request', emoji: '📉', title: '금리인하요구권 신청 방법', desc: '갈아타기 전 기존 은행에서 금리를 낮출 수 있는지 먼저 확인', type: 'guide' },
+            { href: '/guide/loan-cooling-off', emoji: '↩️', title: '대출 청약철회권 14일', desc: '실행 직후라면 중도상환보다 철회가 유리한지 비용 비교', type: 'guide' },
             { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '수수료 공식, 면제 조건, 절약 전략 상세 가이드', type: 'guide' },
             { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '갈아탈 때 어떤 금리 유형으로 갈아탈지 기준', type: 'guide' },
             { href: '/guide/loan-interest', emoji: '📚', title: '대출 이자 완전 정복', desc: '금리별 이자 차이와 상환 방식별 총비용 비교', type: 'guide' },

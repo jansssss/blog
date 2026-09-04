@@ -1,6 +1,3 @@
-import BlogCard from '@/components/BlogCard'
-import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
 import InfoWidget from '@/components/InfoWidget'
@@ -17,22 +14,12 @@ const FEATURED_QUESTIONS = getFeaturedQuestions()
 // ISR 설정 (60초마다 재검증)
 export const revalidate = 60
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; category?: string }>
-}) {
-  const params = await searchParams
-  const currentPage = Number(params.page) || 1
-  const selectedCategory = params.category || null
-  const postsPerPage = 3  // 홈페이지에서는 3개만 표시
-  const offset = (currentPage - 1) * postsPerPage
+export default async function HomePage() {
   const homeGuideItems = getHomeGuideItems()
   const newGuideCount = homeGuideItems.filter((guide) => isNewGuide(guide)).length
 
   // 현재 사이트 정보 조회
   const site = await getCurrentSite()
-  const siteId = site?.id
 
   // 위젯 스타일 (사이트 테마에서 가져오거나 기본값 사용)
   const widgetStyle = {
@@ -41,46 +28,9 @@ export default async function HomePage({
   }
   const widgetType = site?.theme_json?.widget?.type || 'weather-stock'
 
-  // 카테고리별 쿼리 생성 (site_id 필터 강제)
-  let postsQuery = supabase
-    .from('posts')
-    .select('*')
-    .eq('published', true)
-
-  let countQuery = supabase
-    .from('posts')
-    .select('*', { count: 'exact', head: true })
-    .eq('published', true)
-
-  // site_id 필터 적용 (필수)
-  if (siteId) {
-    postsQuery = postsQuery.eq('site_id', siteId)
-    countQuery = countQuery.eq('site_id', siteId)
-  }
-
-  // 카테고리 필터 적용
-  if (selectedCategory) {
-    postsQuery = postsQuery.eq('category', selectedCategory)
-    countQuery = countQuery.eq('category', selectedCategory)
-  }
-
-  // 병렬로 데이터 가져오기 (성능 개선)
-  const [
-    { count },
-    { data: posts },
-    { data: categories }
-  ] = await Promise.all([
-    countQuery,
-    postsQuery.order('published_at', { ascending: false }).range(offset, offset + postsPerPage - 1),
-    supabase.from('categories').select('name').order('name')
-  ])
-
-  // Phase 1: 홈페이지에서는 페이지네이션 제거 (첫 페이지만 표시)
-
   // 사이트별 메인 페이지 텍스트 (theme_json에서 가져오거나 기본값 사용)
   const heroTitle = site?.theme_json?.homepage?.heroTitle || '모두의 궁금증을 해결하기위한 생활정보 블로그'
   const heroSubtitle = site?.theme_json?.homepage?.heroSubtitle || '금융, 세금, 대출, AI 등 다양한 주제의 전문 콘텐츠를 만나보세요'
-  const sectionTitleLatest = site?.theme_json?.homepage?.sectionTitleLatest || '최신 게시글'
 
   return (
     <>
@@ -247,53 +197,6 @@ export default async function HomePage({
             </div>
           </section>
         )}
-
-        {/* Blog Posts Grid - 최신 사례글 */}
-        <section>
-          <h2 className="mb-3 md:mb-6 text-xl font-bold">최신 사례글</h2>
-        {posts && posts.length > 0 ? (
-          <>
-            <div className="md:hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100">
-              {posts.map((post) => (
-                <Link
-                  key={post.id}
-                  href={post.slug ? `/blog/${post.slug}` : `/blog/${post.id}`}
-                  className="group flex items-center gap-2 px-4 py-3.5 hover:bg-gray-50 transition-colors"
-                >
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-800 group-hover:text-indigo-700">
-                    {post.title}
-                  </span>
-                  <ChevronRight className="w-4 h-4 shrink-0 text-gray-300 group-hover:text-indigo-500" />
-                </Link>
-              ))}
-            </div>
-
-            <div className="blog-grid-md3 hidden gap-6 md:grid md:grid-cols-3">
-              {posts.map((post) => (
-                <BlogCard key={post.id} post={post} />
-              ))}
-            </div>
-
-            {/* 더보기 버튼 */}
-            <div className="mt-5 md:mt-8 flex justify-center gap-3 flex-wrap">
-              <Link href="/blog">
-                <Button variant="outline">
-                  블로그 전체 보기
-                </Button>
-              </Link>
-              <Link href="/guide">
-                <Button variant="outline">
-                  금융 가이드 보기
-                </Button>
-              </Link>
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">작성된 글이 없습니다.</p>
-          </div>
-        )}
-      </section>
       </div>
     </>
   )

@@ -178,7 +178,7 @@ export default function GuideLayout({
       {/* FAQ */}
       <section className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-5">자주 묻는 질문</h2>
-        <FAQ items={faqs} />
+        <FAQ items={faqs} emitSchema={!pageUrl} />
       </section>
 
       {/* 관련 가이드 */}

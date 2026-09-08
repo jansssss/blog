@@ -47,8 +47,8 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '주담대 방공제·MCI·MCG 계산', href: '/guide/mortgage-mci-mcg', description: 'LTV 한도에서 빠지는 소액임차보증금과 보완 방법' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '3가지 지표로 실제 대출 한도 계산하는 법' },
-  { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', description: '전세대출 종류·조건·한도 완전 가이드' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등·원금균등·만기일시 총이자 비교' },
   { title: '금리 인상기 대출 전략', href: '/guide/rate-strategy', description: '주담대 고정·변동 선택과 갈아타기 타이밍 판단' },
 ]

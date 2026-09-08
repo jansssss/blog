@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/JsonLd'
 export const metadata: Metadata = {
   title: 'DSR 40% 완전 정복 — 내 대출 한도 계산법과 규제 전략 총정리 | ohyess',
   description:
-    'DSR 40% 규제 구조, 스트레스 DSR 3단계, 내 DSR 직접 계산하는 방법, DSR 낮추는 전략 4가지까지. 2025년 현행 기준으로 실전 수치와 함께 정리합니다.',
+    'DSR 40% 규제 구조와 대출 한도 역산 방법을 정리합니다. 지역·금리 유형별 가산폭은 2026년 하반기 스트레스 DSR 계산기로 확인하세요.',
   keywords: ['DSR 계산기', 'DSR 40%', '대출 한도 계산', '스트레스 DSR', '내 DSR 계산'],
   alternates: { canonical: '/hub/dsr-guide' },
   openGraph: {
@@ -29,7 +29,7 @@ const jsonLd = {
       inLanguage: 'ko',
       publisher: { '@type': 'Organization', name: 'ohyess', url: 'https://www.ohyess.kr' },
       datePublished: '2026-07-01',
-      dateModified: '2026-08-31',
+      dateModified: '2026-09-08',
     },
     {
       '@type': 'FAQPage',
@@ -47,7 +47,7 @@ const jsonLd = {
           name: '스트레스 DSR이란 무엇인가요?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '스트레스 DSR은 변동금리 대출에 금리 상승 시나리오를 가산해 계산하는 방식입니다. 2025년 7월부터 3단계가 적용되어 은행권 변동금리 대출에는 최대 +1.5%p를 더한 금리로 DSR을 계산합니다.',
+            text: '스트레스 DSR은 실제 약정금리에 심사용 가산폭을 더해 원리금과 한도를 계산하는 방식입니다. 2026년 하반기 변동형 주담대 참고값은 수도권·규제지역 3%p, 지방 비규제지역 0.75%p이며 혼합형·주기형은 만기 대비 고정기간에 따라 다릅니다. 가산폭은 실제 납부금리에 더하지 않습니다.',
           },
         },
         {
@@ -109,7 +109,7 @@ export default function DsrGuideHubPage() {
           {[
             { icon: '🏦', title: '은행권 DSR 40%', desc: '시중은행·지방은행·인터넷은행. 모든 대출 원리금 합계가 연 소득의 40% 이하여야 대출 가능.' },
             { icon: '🏢', title: '2금융권 DSR 50%', desc: '저축은행·카드사·캐피털·보험사. 한도가 10%p 더 완화되지만 금리가 높습니다.' },
-            { icon: '⚡', title: '스트레스 DSR 3단계', desc: '2025년 7월부터 변동금리에 최대 +1.5%p 가산 계산. 한도가 더 줄어듭니다.' },
+            { icon: '⚡', title: '스트레스 DSR', desc: '2026년 하반기 변동형 주담대 참고값: 수도권·규제지역 +3%p, 지방 비규제 +0.75%p.' },
           ].map((item) => (
             <div key={item.title} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
               <div className="text-xl mb-2">{item.icon}</div>
@@ -169,15 +169,15 @@ export default function DsrGuideHubPage() {
       <section id="stress" className="mb-10 scroll-mt-20">
         <div className="rounded-2xl overflow-hidden border border-amber-200">
           <div className="px-5 py-4" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-            <p className="text-amber-100 text-[10px] font-bold uppercase tracking-widest mb-1">2025년 7월~ 적용</p>
+            <p className="text-amber-100 text-[10px] font-bold uppercase tracking-widest mb-1">2026년 하반기 기준 · 9월 8일 스트레스 DSR 부분 검토</p>
             <h2 className="text-white text-lg font-bold">스트레스 DSR 3단계 — 변동금리 한도가 더 줄었다</h2>
           </div>
           <div className="bg-white p-5 space-y-4">
             <div className="grid grid-cols-3 gap-3 text-center">
               {[
-                { step: '1단계', period: '2024.2~', rate: '+0.38%p', cls: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
-                { step: '2단계', period: '2024.9~', rate: '+0.75%p', cls: 'bg-orange-50 border-orange-200 text-orange-700' },
-                { step: '3단계', period: '2025.7~', rate: '+1.5%p', cls: 'bg-red-50 border-red-200 text-red-700' },
+                { step: '수도권·규제', period: '변동형 주담대', rate: '+3.0%p', cls: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
+                { step: '지방 비규제', period: '변동형 주담대', rate: '+0.75%p', cls: 'bg-orange-50 border-orange-200 text-orange-700' },
+                { step: '만기까지 고정', period: '주담대', rate: '+0%p', cls: 'bg-red-50 border-red-200 text-red-700' },
               ].map((s) => (
                 <div key={s.step} className={`rounded-xl border p-4 ${s.cls}`}>
                   <p className="text-[10px] font-bold mb-1">{s.step}</p>
@@ -190,10 +190,12 @@ export default function DsrGuideHubPage() {
             <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
               <p className="text-xs font-bold text-amber-700 mb-2">📌 실제 영향 예시</p>
               <p className="text-xs text-amber-800 leading-relaxed">
-                변동금리 3.5% 대출, 스트레스 DSR 3단계 적용 시 <strong>3.5% + 1.5% = 5.0%</strong>로 DSR을 계산합니다.
+                수도권·규제지역 변동형 주담대의 약정금리가 3.5%라면, 가산폭 3%p를 적용한 예시에서 <strong>3.5% + 3%p = 6.5%</strong>로 DSR을 계산합니다.
                 실제 납부 금리보다 높은 금리로 한도를 계산하므로 대출 가능 금액이 줄어듭니다.
-                <strong>고정금리는 스트레스 DSR 미적용</strong> — 같은 소득으로 더 높은 한도가 나올 수 있습니다.
+                <strong>5년 고정 혼합형·주기형은 만기까지 고정된 대출과 다릅니다.</strong> 고정기간과 만기에 따라 가산폭을 확인해야 합니다.
               </p>
+              <Link href="/guide/stress-dsr#calculator" className="mt-3 inline-block text-sm font-bold text-indigo-700 underline">지역·금리 유형별 스트레스 DSR 실시간 계산 →</Link>
+              <p className="mt-2 text-xs text-amber-800">근거: <a href="https://better.fsc.go.kr/fsc_new/status/adminMap/OpertnDetail.do?muNo=145&postNo=4215&stNo=11" className="underline" target="_blank" rel="noopener noreferrer">금융위원회 2026년 하반기 행정지도</a>. 경과규정과 은행별 심사 조건은 별도 확인하세요.</p>
             </div>
           </div>
         </div>
@@ -297,7 +299,8 @@ export default function DsrGuideHubPage() {
           {[
             { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 계산기', desc: '소득과 기존 부채 → 내 DSR 비율과 대출 한도 즉시 계산', type: 'calc' },
             { href: '/calculator/loan-limit', emoji: '💰', title: '대출 한도 계산기', desc: 'DSR 40% 역산 — 내가 받을 수 있는 최대 대출 금액', type: 'calc' },
-            { href: '/guide/dsr-dti-ltv', emoji: '📚', title: 'DSR·DTI·LTV 완전 정복', desc: '계산 구조부터 2025년 스트레스 DSR까지 상세 가이드', type: 'guide' },
+            { href: '/guide/stress-dsr', emoji: '🧮', title: '스트레스 DSR 계산기·6가지 예시', desc: '2026년 하반기 지역·금리 유형별 한도 실시간 비교', type: 'guide' },
+            { href: '/guide/dsr-dti-ltv', emoji: '📚', title: 'DSR·DTI·LTV 완전 정복', desc: '대출 규제의 계산 구조와 소득·담보 기준 차이', type: 'guide' },
             { href: '/guide/jeonse-loan-dsr', emoji: '🔑', title: '1주택자 전세대출 DSR', desc: '수도권·규제지역에서 연 이자만 반영하는 조건과 예외', type: 'guide' },
             { href: '/guide/ltv-ok-dsr-blocked', emoji: '🚧', title: 'LTV는 OK인데 DSR에 막힌다면', desc: '두 규제를 동시에 충족하는 실전 전략', type: 'guide' },
             { href: '/guide/mortgage-salary-5000', emoji: '🏠', title: '연봉 5000만원 주담대 한도', desc: '소득별 DSR 기준 실제 대출 가능 금액 시뮬레이션', type: 'guide' },

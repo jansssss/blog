@@ -32,10 +32,11 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '스트레스 DSR로 줄어드는 한도 계산', href: '/guide/stress-dsr', description: '2026년 하반기 지역·금리 유형별 가산폭과 실시간 예시' },
+  { title: '주담대 방공제·MCI·MCG 계산', href: '/guide/mortgage-mci-mcg', description: 'DSR 외에 담보 한도를 줄이는 소액임차보증금 공제 확인' },
   { title: 'DSR·DTI·LTV 뜻과 차이 완전 정리', href: '/guide/dsr-dti-ltv', description: 'DTI란 무엇인지, DSR과 DTI 차이, LTV 뜻까지 완전 정리' },
   { title: '연봉 5,000만원 신용대출 있으면 주담대 한도는?', href: '/guide/mortgage-salary-5000', description: '기존 부채가 한도를 얼마나 줄이는지 구체적 계산' },
   { title: '자동차 할부가 주담대 한도를 줄이는 이유', href: '/guide/car-loan-dsr-impact', description: '차 할부 하나가 살 수 있는 집 가격을 1억 낮추는 구조' },
-  { title: '주담대 금리 0.5% 차이, 총이자 얼마나 다를까', href: '/guide/rate-0p5-difference', description: '한도 확보 후 금리 협상이 중요한 이유' },
 ]
 
 const faqs = [

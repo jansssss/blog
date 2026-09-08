@@ -32,11 +32,12 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '연봉별 스트레스 DSR 실시간 계산', href: '/guide/stress-dsr', description: '연봉 5천·7천·1억원, 기존 부채와 금리 유형에 따른 한도 비교' },
+  { title: '주담대 방공제·MCI·MCG 계산', href: '/guide/mortgage-mci-mcg', description: 'DSR 계산보다 실제 한도가 적을 때 확인할 담보 공제' },
   { title: '마이너스통장 DSR 계산법', href: '/guide/credit-line-dsr', description: '잔액 0원·일부 사용·한도 감액 때 주담대 한도가 달라지는 구조' },
   { title: 'DSR·DTI·LTV 뜻과 차이 완전 정리', href: '/guide/dsr-dti-ltv', description: 'DTI란 무엇인지, DSR과 DTI 차이, LTV 뜻까지' },
   { title: 'LTV는 남는데 DSR에서 막히는 이유', href: '/guide/ltv-ok-dsr-blocked', description: '은행에서 한도가 생각보다 적게 나온 진짜 이유' },
   { title: '자동차 할부가 주담대 한도를 줄이는 이유', href: '/guide/car-loan-dsr-impact', description: '차 할부 하나가 집 살 수 있는 가격을 1억 낮추는 구조' },
-  { title: '주담대 금리 0.5% 차이, 총이자 얼마나 다를까', href: '/guide/rate-0p5-difference', description: '한도 확보 후 금리 협상이 중요한 이유' },
 ]
 
 const faqs = [

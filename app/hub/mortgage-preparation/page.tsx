@@ -535,9 +535,9 @@ export default function MortgagePreparationHubPage() {
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">관련 가이드</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
+            { label: '주담대 방공제·MCI·MCG 계산', href: '/guide/mortgage-mci-mcg' },
             { label: '주택담보대출 완전 정리', href: '/guide/mortgage-loan' },
             { label: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv' },
-            { label: '상환방식 비교 완전 정리', href: '/guide/repayment-types' },
             { label: '중도상환수수료 완전 정리', href: '/guide/early-repayment-fee' },
           ].map((g) => (
             <Link key={g.href} href={g.href}

@@ -122,6 +122,34 @@ const STYLES = {
 // 정적 가이드의 단일 관리 원본입니다. 새 가이드는 이 배열에 한 번만 등록합니다.
 export const STATIC_GUIDES: readonly StaticGuide[] = [
   {
+    title: '스트레스 DSR 계산기·연봉별 예시',
+    homeTitle: '스트레스 DSR 실시간 계산',
+    href: '/guide/stress-dsr',
+    description: '2026년 하반기 지역·금리 유형별 스트레스 DSR과 주담대 한도를 실시간 계산하고 6가지 예시를 비교합니다.',
+    homeDescription: '연봉·지역·금리 유형별 한도 비교',
+    tag: '실시간 계산',
+    icon: '🧮',
+    cluster: '대출 한도',
+    indexOrder: 1,
+    publishedAt: '2026-09-08',
+    reviewedAt: '2026-09-08',
+    ...STYLES.indigo,
+  },
+  {
+    title: '주담대 방공제·MCI·MCG 계산',
+    homeTitle: '주담대 방공제 계산',
+    href: '/guide/mortgage-mci-mcg',
+    description: 'LTV 한도에서 지역별 소액임차보증금이 빠지는 이유와 MCI·MCG로 보완할 때의 비용·제한을 계산합니다.',
+    homeDescription: '지역별 공제액·MCI·MCG 선택 기준',
+    tag: '주담대 한도',
+    icon: '🏘️',
+    cluster: '주택담보대출',
+    indexOrder: 2,
+    publishedAt: '2026-09-07',
+    reviewedAt: '2026-09-07',
+    ...STYLES.violet,
+  },
+  {
     title: '대출 청약철회권 14일',
     homeTitle: '대출 청약철회권 14일',
     href: '/guide/loan-cooling-off',
@@ -130,7 +158,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '대출 취소',
     icon: '↩️',
     cluster: '신용·심사',
-    indexOrder: 1,
+    indexOrder: 3,
     publishedAt: '2026-09-04',
     reviewedAt: '2026-09-04',
     ...STYLES.rose,
@@ -144,7 +172,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '금리 절약',
     icon: '📉',
     cluster: '금리·상환',
-    indexOrder: 2,
+    indexOrder: 4,
     publishedAt: '2026-09-01',
     reviewedAt: '2026-09-01',
     ...STYLES.amber,
@@ -158,7 +186,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '전세 DSR',
     icon: '🔑',
     cluster: '전세·보증',
-    indexOrder: 3,
+    indexOrder: 5,
     publishedAt: '2026-08-31',
     reviewedAt: '2026-08-31',
     ...STYLES.emerald,
@@ -172,7 +200,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '대출 한도',
     icon: '🏦',
     cluster: '대출 한도',
-    indexOrder: 4,
+    indexOrder: 6,
     publishedAt: '2026-08-27',
     reviewedAt: '2026-08-27',
     homeRank: 3,
@@ -187,7 +215,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '소득별 한도',
     icon: '🏠',
     cluster: '주택담보대출',
-    indexOrder: 5,
+    indexOrder: 7,
     featuredQuestion: {
       rank: 1,
       question: '월급 5천이면 주담대 얼마까지?',
@@ -205,7 +233,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '기존 부채',
     icon: '🚗',
     cluster: '대출 한도',
-    indexOrder: 6,
+    indexOrder: 8,
     homeRank: 8,
     featuredQuestion: {
       rank: 2,
@@ -222,7 +250,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '한도 진단',
     icon: '🔒',
     cluster: '대출 한도',
-    indexOrder: 7,
+    indexOrder: 9,
     featuredQuestion: {
       rank: 3,
       question: 'LTV는 되는데 왜 대출이 안 될까?',
@@ -239,7 +267,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '금리 비교',
     icon: '📊',
     cluster: '금리·상환',
-    indexOrder: 8,
+    indexOrder: 10,
     homeRank: 9,
     featuredQuestion: {
       rank: 4,
@@ -257,7 +285,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '대출 기초',
     icon: '💰',
     cluster: '금리·상환',
-    indexOrder: 9,
+    indexOrder: 11,
     homeRank: 4,
     ...STYLES.blue,
   },
@@ -269,7 +297,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '대출 한도',
     icon: '📊',
     cluster: '대출 한도',
-    indexOrder: 10,
+    indexOrder: 12,
     homeRank: 2,
     ...STYLES.purple,
   },
@@ -281,7 +309,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '상환 전략',
     icon: '🔄',
     cluster: '금리·상환',
-    indexOrder: 11,
+    indexOrder: 13,
     homeRank: 5,
     ...STYLES.green,
   },
@@ -294,7 +322,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '비용 절약',
     icon: '✂️',
     cluster: '금리·상환',
-    indexOrder: 12,
+    indexOrder: 14,
     homeRank: 6,
     ...STYLES.orange,
   },
@@ -305,7 +333,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '신용 관리',
     icon: '⭐',
     cluster: '신용·심사',
-    indexOrder: 13,
+    indexOrder: 15,
     ...STYLES.teal,
   },
   {
@@ -317,7 +345,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '실전 가이드',
     icon: '✅',
     cluster: '신용·심사',
-    indexOrder: 14,
+    indexOrder: 16,
     homeRank: 7,
     ...STYLES.rose,
   },
@@ -329,7 +357,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '주담대',
     icon: '🏠',
     cluster: '주택담보대출',
-    indexOrder: 15,
+    indexOrder: 17,
     homeRank: 1,
     ...STYLES.indigo,
   },
@@ -340,7 +368,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '전세 대출',
     icon: '🔑',
     cluster: '전세·보증',
-    indexOrder: 16,
+    indexOrder: 18,
     ...STYLES.emerald,
   },
   {
@@ -350,7 +378,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '금리 전략',
     icon: '📈',
     cluster: '금리·상환',
-    indexOrder: 17,
+    indexOrder: 19,
     ...STYLES.amber,
   },
   {
@@ -360,7 +388,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '대출 종류',
     icon: '📋',
     cluster: '신용·심사',
-    indexOrder: 18,
+    indexOrder: 20,
     ...STYLES.sky,
   },
   {
@@ -370,7 +398,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '보증 보험',
     icon: '🛡️',
     cluster: '전세·보증',
-    indexOrder: 19,
+    indexOrder: 21,
     ...STYLES.violet,
   },
   {
@@ -380,7 +408,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     tag: '거절 극복',
     icon: '💪',
     cluster: '신용·심사',
-    indexOrder: 20,
+    indexOrder: 22,
     ...STYLES.pink,
   },
 ]
@@ -433,4 +461,15 @@ export function getFeaturedQuestions() {
       href: guide.href,
       emoji: guide.featuredQuestion!.emoji,
     }))
+}
+
+/** 정적 가이드도 사이트 검색에서 발견되도록 단일 레지스트리를 검색한다. */
+export function searchStaticGuides(query: string, now: Date = new Date()): StaticGuide[] {
+  const normalize = (text: string) => text.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '')
+  const terms = query.split(/[\s#]+/).map(normalize).filter(Boolean)
+  if (terms.length === 0) return []
+  return getGuideIndexItems(now).filter(guide => {
+    const haystack = normalize([guide.title, guide.homeTitle, guide.description, guide.homeDescription, guide.tag, guide.cluster].join(' '))
+    return terms.every(term => haystack.includes(term))
+  })
 }

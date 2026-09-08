@@ -47,6 +47,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '2026 스트레스 DSR 실시간 계산기', href: '/guide/stress-dsr', description: '수도권·지방, 변동·혼합·주기형과 연봉별 6가지 한도 예시' },
   {
     title: '1주택자 전세대출 DSR은 얼마가 반영될까?',
     href: '/guide/jeonse-loan-dsr',

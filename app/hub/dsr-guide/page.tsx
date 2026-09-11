@@ -299,6 +299,7 @@ export default function DsrGuideHubPage() {
           {[
             { href: '/calculator/dsr-dti-ltv', emoji: '📋', title: 'DSR·DTI·LTV 계산기', desc: '소득과 기존 부채 → 내 DSR 비율과 대출 한도 즉시 계산', type: 'calc' },
             { href: '/calculator/loan-limit', emoji: '💰', title: '대출 한도 계산기', desc: 'DSR 40% 역산 — 내가 받을 수 있는 최대 대출 금액', type: 'calc' },
+            { href: '/guide/dsr-income-proof', emoji: '📄', title: 'DSR 인정소득·소득증빙', desc: '이직·사업·부업 소득을 은행이 얼마로 보는지 확인', type: 'guide' },
             { href: '/guide/stress-dsr', emoji: '🧮', title: '스트레스 DSR 계산기·6가지 예시', desc: '2026년 하반기 지역·금리 유형별 한도 실시간 비교', type: 'guide' },
             { href: '/guide/dsr-dti-ltv', emoji: '📚', title: 'DSR·DTI·LTV 완전 정복', desc: '대출 규제의 계산 구조와 소득·담보 기준 차이', type: 'guide' },
             { href: '/guide/jeonse-loan-dsr', emoji: '🔑', title: '1주택자 전세대출 DSR', desc: '수도권·규제지역에서 연 이자만 반영하는 조건과 예외', type: 'guide' },

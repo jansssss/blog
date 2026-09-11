@@ -152,7 +152,7 @@ export default function StressDsrGuide() {
 
     <Section id="checklist" title="주담대 한도가 부족할 때, 은행에 확인할 5가지">
       <ol className="list-decimal space-y-3 pl-5 text-[15px] leading-relaxed text-gray-700">
-        <li>인정소득과 기존 부채의 DSR 산입액을 각각 받습니다. 연봉과 통장 출금액만으로 계산한 값과 비교합니다.</li>
+        <li><Link className="text-indigo-700 underline" href="/guide/dsr-income-proof">인정소득과 증빙 방식</Link>, 기존 부채의 DSR 산입액을 각각 받습니다. 연봉과 통장 출금액만으로 계산한 값과 비교합니다.</li>
         <li>담보주택의 수도권·규제지역 여부, 실행일, 계약일에 따른 경과규정을 확인합니다.</li>
         <li>변동형·혼합형·주기형별 실제 약정금리와 가산폭을 받아 같은 만기로 비교합니다.</li>
         <li>기존 부채 상환이나 한도 축소 전후를 계산합니다. 상환에 쓴 돈만큼 잔금 자기자금도 줄어드는 점을 함께 봅니다.</li>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import GuideLayout from '@/components/guide/GuideLayout'
 import MortgageCalcWidget from './MortgageCalcWidget'
 import HubBacklink from '@/components/HubBacklink'
@@ -149,6 +150,11 @@ export default function MortgageSalary5000Page() {
           </tbody>
         </table>
       </div>
+      <P>
+        이직·신규취업·사업·부업처럼 소득 이력이 짧거나 여러 개라면,
+        <Link href="/guide/dsr-income-proof" className="font-semibold text-indigo-600 hover:underline"> DSR 인정소득·소득증빙 가이드</Link>에서
+        1년 미만 연환산, 2개년 평균, 건강보험료 추정과 배우자 합산 조건을 먼저 확인하세요.
+      </P>
       <Callout color="blue">
         <strong>올해 연봉이 올랐다면 — 심사 시점이 중요합니다</strong><br />
         은행은 보통 직전 연도 원천징수영수증을 기준으로 심사합니다.

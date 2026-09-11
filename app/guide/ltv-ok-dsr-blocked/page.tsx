@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import GuideLayout from '@/components/guide/GuideLayout'
 import LtvDsrCalcWidget from './LtvDsrCalcWidget'
 import HubBacklink from '@/components/HubBacklink'
@@ -203,6 +204,10 @@ export default function LtvOkDsrBlockedPage() {
         <strong>③ 스트레스 DSR 가산율</strong> — 은행별 가산율 적용 방식이 약간씩 다름<br />
         <strong>④ 마이너스통장 반영 비율</strong> — 한도 전액 반영 vs 일부만 반영하는 은행도 있음
       </Callout>
+      <P>
+        특히 이직자·사업자·프리랜서는 <Link href="/guide/dsr-income-proof" className="font-semibold text-indigo-600 hover:underline">DSR 인정소득 산정과 준비서류</Link>를
+        확인해 계산기에 넣은 연봉과 은행의 인정 연소득부터 맞춰야 합니다.
+      </P>
       <P>
         이 때문에 <strong>최소 3곳에 사전심사를 넣어 비교</strong>하는 것이 필수입니다.
         사전심사는 신용점수에 거의 영향을 주지 않습니다.

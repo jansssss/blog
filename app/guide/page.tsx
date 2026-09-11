@@ -114,8 +114,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
                 className={`group block border-l-4 rounded-xl p-5 border border-gray-100 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${guide.cardBg} ${guide.borderAccent} ${guide.hoverBg} ${guide.hoverBorder}`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base leading-none">{guide.icon}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${guide.tagColor}`}>
                       {guide.tag}
                     </span>

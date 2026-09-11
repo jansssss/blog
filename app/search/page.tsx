@@ -2,9 +2,9 @@ import { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
 import BlogCard from '@/components/BlogCard'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Flame } from 'lucide-react'
 import { getHostFromRequest, normalizeDomain } from '@/lib/site'
-import { searchStaticGuides, isNewGuide } from '@/lib/guide-content'
+import { searchStaticGuides, isGscHitGuide, isNewGuide } from '@/lib/guide-content'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -69,7 +69,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {guides.map(guide => (
               <Link key={guide.href} href={guide.href} className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-5 transition hover:border-indigo-300 hover:bg-indigo-50">
-                <div className="mb-2 flex items-center gap-2 text-xs text-indigo-700"><span>{guide.tag}</span>{isNewGuide(guide) && <span className="rounded bg-indigo-600 px-1.5 py-0.5 text-white">NEW</span>}</div>
+                <div className="mb-2 flex items-center gap-2 text-xs text-indigo-700">
+                  <span>{guide.tag}</span>
+                  {isNewGuide(guide) && <span className="rounded bg-rose-500 px-1.5 py-0.5 font-bold text-white">NEW</span>}
+                  {isGscHitGuide(guide) && (
+                    <span
+                      aria-label="GSC 성과 우수 콘텐츠"
+                      title={`GSC ${guide.gscHit?.asOf} · ${guide.gscHit?.clicks}클릭/${guide.gscHit?.impressions}노출`}
+                      className="inline-flex items-center gap-0.5 rounded bg-amber-500 px-1.5 py-0.5 font-bold text-white"
+                    >
+                      <Flame className="h-3 w-3" aria-hidden="true" /> HIT
+                    </span>
+                  )}
+                </div>
                 <h3 className="mb-2 font-bold text-gray-900">{guide.title}</h3>
                 <p className="text-sm leading-relaxed text-gray-600">{guide.description}</p>
               </Link>

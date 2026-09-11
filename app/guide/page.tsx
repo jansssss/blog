@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 import { getCurrentSiteId } from '@/lib/site'
-import { BookOpen, ArrowRight } from 'lucide-react'
-import { getGuideIndexItems, isNewGuide } from '@/lib/guide-content'
+import { BookOpen, ArrowRight, Flame } from 'lucide-react'
+import { getGuideIndexItems, isGscHitGuide, isNewGuide } from '@/lib/guide-content'
 
 export const metadata: Metadata = {
   title: '금융 가이드 | 대출·DSR·금리·상환 전략 | ohyess',
@@ -106,6 +106,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {staticGuides.map((guide) => {
             const isNew = isNewGuide(guide)
+            const isHit = isGscHitGuide(guide)
             return (
               <Link
                 key={guide.href}
@@ -124,6 +125,15 @@ export default async function GuidePage({ searchParams }: PageProps) {
                         className="text-[10px] font-black tracking-wide px-2 py-0.5 rounded-full bg-rose-500 text-white shadow-sm"
                       >
                         NEW
+                      </span>
+                    )}
+                    {isHit && (
+                      <span
+                        aria-label="GSC 성과 우수 콘텐츠"
+                        title={`GSC ${guide.gscHit?.asOf} · ${guide.gscHit?.clicks}클릭/${guide.gscHit?.impressions}노출`}
+                        className="inline-flex items-center gap-0.5 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-black tracking-wide text-white shadow-sm"
+                      >
+                        <Flame className="h-3 w-3" aria-hidden="true" /> HIT
                       </span>
                     )}
                   </div>

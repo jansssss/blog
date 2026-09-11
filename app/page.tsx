@@ -4,10 +4,10 @@ import InfoWidget from '@/components/InfoWidget'
 import InterestRateWidget from '@/components/InterestRateWidget'
 import QuickToolsSection from '@/components/QuickToolsSection'
 import { getCurrentSite, DEFAULT_WIDGET_STYLE } from '@/lib/site'
-import { BookOpen, ArrowRight, HelpCircle, ChevronRight } from 'lucide-react'
+import { BookOpen, ArrowRight, HelpCircle, ChevronRight, Flame } from 'lucide-react'
 import HomeLoanCalculator from '@/components/calculators/HomeLoanCalculator'
 import MobileCollapse from '@/components/MobileCollapse'
-import { getFeaturedQuestions, getHomeGuideItems, isNewGuide } from '@/lib/guide-content'
+import { getFeaturedQuestions, getHomeGuideItems, isGscHitGuide, isNewGuide } from '@/lib/guide-content'
 
 const FEATURED_QUESTIONS = getFeaturedQuestions()
 
@@ -17,6 +17,7 @@ export const revalidate = 60
 export default async function HomePage() {
   const homeGuideItems = getHomeGuideItems()
   const newGuideCount = homeGuideItems.filter((guide) => isNewGuide(guide)).length
+  const hitGuideCount = homeGuideItems.filter(isGscHitGuide).length
 
   // 현재 사이트 정보 조회
   const site = await getCurrentSite()
@@ -142,12 +143,24 @@ export default async function HomePage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h2 className="text-sm font-bold text-gray-900 leading-tight">핵심 금융 가이드</h2>
-                      {newGuideCount > 0 && (
-                        <span
-                          aria-label={`새 금융 가이드 ${newGuideCount}개`}
-                          className="shrink-0 inline-flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 text-[9px] font-black tracking-wide text-white shadow-sm"
-                        >
-                          NEW <span className="font-bold">{newGuideCount}</span>
+                      {(newGuideCount > 0 || hitGuideCount > 0) && (
+                        <span className="flex shrink-0 items-center gap-1">
+                          {newGuideCount > 0 && (
+                            <span
+                              aria-label={`48시간 이내 새 금융 가이드 ${newGuideCount}개`}
+                              className="inline-flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 text-[9px] font-black tracking-wide text-white shadow-sm"
+                            >
+                              NEW <span className="font-bold">{newGuideCount}</span>
+                            </span>
+                          )}
+                          {hitGuideCount > 0 && (
+                            <span
+                              aria-label={`GSC 성과 우수 금융 가이드 ${hitGuideCount}개`}
+                              className="inline-flex items-center gap-0.5 rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-black tracking-wide text-white shadow-sm"
+                            >
+                              <Flame className="h-2.5 w-2.5" aria-hidden="true" /> HIT {hitGuideCount}
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
@@ -173,14 +186,25 @@ export default async function HomePage() {
                       <p className="text-xs font-semibold text-gray-800 leading-snug group-hover:text-indigo-700 transition-colors">
                         {g.homeTitle ?? g.title}
                       </p>
-                      {isNewGuide(g) && (
-                        <span
-                          aria-label="새 콘텐츠"
-                          className="shrink-0 text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded-full bg-rose-500 text-white"
-                        >
-                          NEW
-                        </span>
-                      )}
+                      <span className="flex shrink-0 items-center gap-1">
+                        {isNewGuide(g) && (
+                          <span
+                            aria-label="48시간 이내 새 콘텐츠"
+                            className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-white"
+                          >
+                            NEW
+                          </span>
+                        )}
+                        {isGscHitGuide(g) && (
+                          <span
+                            aria-label="GSC 성과 우수 콘텐츠"
+                            title={`GSC ${g.gscHit?.asOf} · ${g.gscHit?.clicks}클릭/${g.gscHit?.impressions}노출`}
+                            className="inline-flex items-center gap-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-white"
+                          >
+                            <Flame className="h-2.5 w-2.5" aria-hidden="true" /> HIT
+                          </span>
+                        )}
+                      </span>
                     </div>
                     <p className="text-[11px] text-gray-400 leading-tight">
                       {g.homeDescription ?? g.description}

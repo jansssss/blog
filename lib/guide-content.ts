@@ -1,7 +1,9 @@
-const DAY_MS = 24 * 60 * 60 * 1000
+const HOUR_MS = 60 * 60 * 1000
 
-export const NEW_GUIDE_WINDOW_DAYS = 21
+export const NEW_GUIDE_WINDOW_HOURS = 48
 export const HOME_GUIDE_LIMIT = 12
+export const GSC_HIT_MIN_CLICKS = 2
+export const GSC_HIT_MIN_CTR = 0.1
 
 type GuideStyle = {
   cardBg: string
@@ -22,8 +24,14 @@ export type StaticGuide = GuideStyle & {
   cluster: '대출 한도' | '주택담보대출' | '금리·상환' | '신용·심사' | '전세·보증'
   indexOrder: number
   publishedAt?: `${number}-${number}-${number}`
+  publishedAtTime?: `${number}-${number}-${number}T${string}`
   reviewedAt?: `${number}-${number}-${number}`
   homeRank?: number
+  gscHit?: {
+    asOf: `${number}-${number}-${number}`
+    clicks: number
+    impressions: number
+  }
   featuredQuestion?: {
     rank: number
     question: string
@@ -132,6 +140,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     cluster: '대출 한도',
     indexOrder: 1,
     publishedAt: '2026-09-11',
+    publishedAtTime: '2026-09-11T11:10:02+09:00',
     reviewedAt: '2026-09-11',
     ...STYLES.blue,
   },
@@ -413,6 +422,8 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
     icon: '🛡️',
     cluster: '전세·보증',
     indexOrder: 22,
+    // GSC 28일 창(2026-08-12~09-08): 5노출·2클릭·CTR 40%
+    gscHit: { asOf: '2026-09-08', clicks: 2, impressions: 5 },
     ...STYLES.violet,
   },
   {
@@ -428,6 +439,7 @@ export const STATIC_GUIDES: readonly StaticGuide[] = [
 ]
 
 function publishedTime(guide: StaticGuide): number {
+  if (guide.publishedAtTime) return Date.parse(guide.publishedAtTime)
   return guide.publishedAt ? Date.parse(`${guide.publishedAt}T00:00:00+09:00`) : 0
 }
 
@@ -436,7 +448,14 @@ export function isNewGuide(guide: StaticGuide, now: Date = new Date()): boolean 
   if (!published) return false
 
   const age = now.getTime() - published
-  return age >= 0 && age < NEW_GUIDE_WINDOW_DAYS * DAY_MS
+  return age >= 0 && age < NEW_GUIDE_WINDOW_HOURS * HOUR_MS
+}
+
+export function isGscHitGuide(guide: StaticGuide): boolean {
+  const hit = guide.gscHit
+  if (!hit || hit.impressions <= 0) return false
+
+  return hit.clicks >= GSC_HIT_MIN_CLICKS && hit.clicks / hit.impressions >= GSC_HIT_MIN_CTR
 }
 
 export function getGuideIndexItems(now: Date = new Date()): StaticGuide[] {
@@ -456,12 +475,13 @@ export function getHomeGuideItems(
 ): StaticGuide[] {
   const indexItems = getGuideIndexItems(now)
   const published = indexItems.filter((guide) => guide.publishedAt)
+  const hits = indexItems.filter(isGscHitGuide)
   const evergreen = STATIC_GUIDES
     .filter((guide) => guide.homeRank !== undefined)
     .sort((a, b) => (a.homeRank ?? Number.MAX_SAFE_INTEGER) - (b.homeRank ?? Number.MAX_SAFE_INTEGER))
 
   return [
-    ...new Map([...published, ...evergreen, ...indexItems].map((guide) => [guide.href, guide])).values(),
+    ...new Map([...published, ...hits, ...evergreen, ...indexItems].map((guide) => [guide.href, guide])).values(),
   ].slice(0, limit)
 }
 

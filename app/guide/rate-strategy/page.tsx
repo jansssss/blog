@@ -53,6 +53,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '대출금리 산정내역서 읽는 법', href: '/guide/loan-rate-statement', description: '기준·가산·우대금리와 재산정 주기 비교' },
   { title: '대출 청약철회권 14일', href: '/guide/loan-cooling-off', description: '실행 직후 취소와 중도상환 비용 비교' },
   { title: '금리인하요구권 신청 방법', href: '/guide/rate-reduction-request', description: '조건·증빙·거절 대응과 2026 자동신청' },
   { title: '대출이자 계산법 완전 정리', href: '/guide/loan-interest', description: '금리와 이자의 기본 계산 구조 이해' },

@@ -11,6 +11,7 @@ import {
 
 const creditLineGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/credit-line-dsr')!
 const incomeProofGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/dsr-income-proof')!
+const loanRateStatementGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/loan-rate-statement')!
 const loanGuaranteeGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/loan-guarantee')!
 
 describe('guide content registry', () => {
@@ -23,6 +24,8 @@ describe('guide content registry', () => {
   it('uses the exact publication timestamp when it is available', () => {
     expect(isNewGuide(incomeProofGuide, new Date('2026-09-13T11:10:01+09:00'))).toBe(true)
     expect(isNewGuide(incomeProofGuide, new Date('2026-09-13T11:10:02+09:00'))).toBe(false)
+    expect(isNewGuide(loanRateStatementGuide, new Date('2026-09-16T10:19:33+09:00'))).toBe(true)
+    expect(isNewGuide(loanRateStatementGuide, new Date('2026-09-16T10:19:34+09:00'))).toBe(false)
   })
 
   it('marks only registry entries that clear the GSC click and CTR thresholds as hits', () => {

@@ -23,6 +23,7 @@ const ALLOWED_DOMAINS = [
   'hug.go.kr',      // 주택도시보증공사 HUG
   'hf.go.kr',       // 한국주택금융공사 HF
   'kbstar.com',     // KB국민은행
+  'kfb.or.kr',      // 은행연합회 소비자포털
   'kif.re.kr',      // 한국금융연구원: 은행연합회 공식 자료 게재
   'bok.or.kr',      // 한국은행
   'molit.go.kr',    // 국토교통부

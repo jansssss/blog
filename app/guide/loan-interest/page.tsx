@@ -47,6 +47,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '대출금리 산정내역서 읽는 법',
+    href: '/guide/loan-rate-statement',
+    description: '기준·가산·우대금리와 COFIX 재산정 주기 확인',
+  },
+  {
     title: '금리인하요구권 신청 방법',
     href: '/guide/rate-reduction-request',
     description: '현재 대출 금리를 낮춰 이자 부담을 줄이는 절차',

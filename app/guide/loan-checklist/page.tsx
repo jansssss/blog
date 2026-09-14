@@ -46,6 +46,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '대출금리 산정내역서 읽는 법',
+    href: '/guide/loan-rate-statement',
+    description: '광고금리와 확정금리 차이를 항목별로 확인',
+  },
+  {
     title: '대출 청약철회권 14일',
     href: '/guide/loan-cooling-off',
     description: '실행 후 취소 기한과 반환비용 확인',

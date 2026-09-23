@@ -53,6 +53,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '대출 인지세·주담대 부대비용', href: '/guide/loan-additional-costs', description: '대환 때 더할 인지세·채권·말소비용 계산' },
   { title: '대출금리 산정내역서 읽는 법', href: '/guide/loan-rate-statement', description: '기준·가산·우대금리와 재산정 주기 비교' },
   { title: '대출 청약철회권 14일', href: '/guide/loan-cooling-off', description: '실행 직후 취소와 중도상환 비용 비교' },
   { title: '금리인하요구권 신청 방법', href: '/guide/rate-reduction-request', description: '조건·증빙·거절 대응과 2026 자동신청' },
@@ -213,18 +214,22 @@ export default function RateStrategyGuidePage() {
       </P>
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5 text-sm text-blue-900">
         <strong>대환 손익분기점 공식:</strong><br />
-        중도상환수수료 + 새 대출 부대비용 ÷ (월 절감 이자) = 손익분기 개월 수<br />
+        (중도상환수수료 + 새 대출 부대비용) ÷ 월 절감 이자 = 손익분기 개월 수<br />
         <span className="text-blue-600 text-xs mt-1 block">결과가 대출 잔여 기간보다 짧아야 대환이 유리</span>
       </div>
       <H3>대환 시 발생하는 비용 항목</H3>
       <Ul>
-        <li><strong className="font-semibold">중도상환수수료:</strong> 잔여 대출금의 0.5~1.4% (은행권 기준, 3년 이내 상환 시)</li>
-        <li><strong className="font-semibold">근저당 말소·설정 비용:</strong> 주담대 대환 시 약 30~80만원 (법무사 비용 포함)</li>
-        <li><strong className="font-semibold">취급 수수료:</strong> 새 금융사에 따라 0~20만원</li>
-        <li><strong className="font-semibold">인지세:</strong> 대출금액에 따라 15만~35만원</li>
+        <li><strong className="font-semibold">중도상환수수료:</strong> 기존 약정의 수수료율·체감식·면제일로 계산</li>
+        <li><strong className="font-semibold">담보 비용:</strong> 기존 근저당 말소비용과 새 국민주택채권 실제 할인비용을 견적으로 확인</li>
+        <li><strong className="font-semibold">상품별 비용:</strong> 보험·보증·감정 비용의 부과 여부와 부담 주체 확인</li>
+        <li>
+          <strong className="font-semibold">인지세:</strong> 5천만원 이하는 비과세, 그 초과 구간의 총세액은 7만·15만·35만원.
+          50% 분담 계약이면 고객 몫은 절반입니다. <Link href="/guide/loan-additional-costs" className="font-semibold text-blue-700 underline">비용표 보기</Link>
+        </li>
       </Ul>
       <P>
-        예시: 3억 대출, 중도상환수수료 1.0%, 주담대 → 총비용 약 400만원. 월 이자 절감액이 20만원이라면 20개월(약 1.7년) 후 손익분기. 잔여 기간이 10년 이상이라면 충분히 유리합니다.
+        예시: 3억원 대출의 중도상환수수료가 300만원이고 새 대출 부대비용 견적이 55만원이라면 초기비용은 355만원입니다.
+        월 이자 절감액이 20만원이면 단순 손익분기점은 약 18개월입니다. 부대비용 55만원은 설명용 가정이며 실제 견적을 넣어 다시 계산해야 합니다.
       </P>
 
       <H2 id="rate-reduction">금리 인하 요구권 완전 활용법</H2>

@@ -288,6 +288,7 @@ export default function RefinancingGuideHubPage() {
             { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '기존·신규 금리 입력 → 순절감액과 손익분기점 즉시 산출', type: 'calc' },
             { href: '/calculator/prepayment-fee', emoji: '💰', title: '중도상환수수료 계산기', desc: '잔액·수수료율·잔여기간으로 정확한 수수료 계산', type: 'calc' },
             { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '갈아탄 후 신규 금리로 월 납입액과 총이자 확인', type: 'calc' },
+            { href: '/guide/loan-additional-costs', emoji: '🧾', title: '대출 인지세·주담대 부대비용', desc: '새 대출 인지세·채권·말소비용을 실제 견적으로 합산', type: 'guide' },
             { href: '/guide/rate-reduction-request', emoji: '📉', title: '금리인하요구권 신청 방법', desc: '갈아타기 전 기존 은행에서 금리를 낮출 수 있는지 먼저 확인', type: 'guide' },
             { href: '/guide/loan-rate-statement', emoji: '🧾', title: '대출금리 산정내역서 읽는 법', desc: '기준·가산·우대금리와 재산정 주기를 같은 조건으로 비교', type: 'guide' },
             { href: '/guide/loan-cooling-off', emoji: '↩️', title: '대출 청약철회권 14일', desc: '실행 직후라면 중도상환보다 철회가 유리한지 비용 비교', type: 'guide' },

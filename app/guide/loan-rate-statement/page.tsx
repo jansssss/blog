@@ -115,6 +115,7 @@ export default function LoanRateStatementGuide() {
         { label: '금리 변동 영향 계산기', href: '/calculator/rate-change-impact', description: '다음 재산정 때 금리가 바뀌는 경우 부담 비교' },
       ]}
       relatedGuides={[
+        { title: '대출 인지세·주담대 부대비용', href: '/guide/loan-additional-costs', description: '인지세·채권·담보비용까지 더해 총비용 비교' },
         { title: '대출이자 계산법', href: '/guide/loan-interest', description: '확정 금리를 상환방식별 월납입액으로 바꾸는 법' },
         { title: '금리 0.5% 차이 계산', href: '/guide/rate-0p5-difference', description: '금리 차이가 총이자에 미치는 영향 확인' },
         { title: '금리인하요구권 신청', href: '/guide/rate-reduction-request', description: '소득·신용상태 개선 후 가산금리 재심사 요청' },
@@ -247,7 +248,10 @@ export default function LoanRateStatementGuide() {
           <li>기준금리의 이름·수치·기준일·만기와 <strong>다음 재산정일</strong>을 적습니다.</li>
           <li>가산금리와 우대·전결금리를 분리하고, 우대조건별 할인 폭을 받습니다.</li>
           <li>우대조건을 하나도 못 지킬 때와 실제 지킬 조건만 남겼을 때 금리를 각각 계산합니다.</li>
-          <li>중도상환수수료, 인지세·담보비용, 고정기간 종료 후 조건을 금리와 함께 비교합니다.</li>
+          <li>
+            중도상환수수료와 <Link href="/guide/loan-additional-costs" className="font-semibold text-indigo-700 underline">인지세·담보비용</Link>,
+            고정기간 종료 후 조건을 금리와 함께 비교합니다.
+          </li>
           <li>신규·갱신·연장이라면 산정내역서를 받고 기초정보 오류와 2026년 은행법 적용 여부를 확인합니다.</li>
         </ul>
         <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm leading-relaxed text-indigo-950">

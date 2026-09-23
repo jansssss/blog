@@ -46,6 +46,11 @@ const ctas = [
 
 const relatedGuides = [
   {
+    title: '대출 인지세·주담대 부대비용 계산',
+    href: '/guide/loan-additional-costs',
+    description: '실행일에 낼 세금·채권·담보비용과 부담 주체 확인',
+  },
+  {
     title: '대출금리 산정내역서 읽는 법',
     href: '/guide/loan-rate-statement',
     description: '광고금리와 확정금리 차이를 항목별로 확인',
@@ -225,8 +230,8 @@ export default function LoanChecklistGuidePage() {
           vs 원금균등 중 선택 가능 상품인지 확인.
         </li>
         <li>
-          <strong className="font-semibold">부대 비용</strong>: 주담대의 경우 감정평가료·인지세·
-          등기 비용 등 부대 비용이 상당합니다. 총 비용 기준으로 비교하세요.
+          <strong className="font-semibold">부대 비용</strong>: 주담대의 경우 인지세·국민주택채권·
+          등기·감정 관련 비용을 고객 부담과 금융기관 부담으로 나눠 총비용을 비교하세요.
         </li>
         <li>
           <strong className="font-semibold">우대 금리 조건</strong>: 급여 이체·자동이체·
@@ -262,8 +267,8 @@ export default function LoanChecklistGuidePage() {
           등 약정한 방식이 계약서에 명확히 기재되어 있는지
         </li>
         <li>
-          <strong className="font-semibold">부대 비용 내역</strong>: 인지세·저당권 설정비·
-          감정평가료 등 부대 비용이 항목별로 명시되어 있는지
+          <strong className="font-semibold">부대 비용 내역</strong>: 인지세·국민주택채권·저당권 설정·말소·
+          감정평가료가 항목별로 명시되고 부담 주체가 구분되어 있는지
         </li>
       </Ul>
       <P>

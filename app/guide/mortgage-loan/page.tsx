@@ -47,6 +47,7 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '대출 인지세·주담대 부대비용', href: '/guide/loan-additional-costs', description: '실행일 인지세·채권·등기비용과 부담 주체' },
   { title: '주담대 방공제·MCI·MCG 계산', href: '/guide/mortgage-mci-mcg', description: 'LTV 한도에서 빠지는 소액임차보증금과 보완 방법' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '3가지 지표로 실제 대출 한도 계산하는 법' },
   { title: '상환방식 완전 비교', href: '/guide/repayment-types', description: '원리금균등·원금균등·만기일시 총이자 비교' },
@@ -244,8 +245,8 @@ export default function MortgageLoanGuidePage() {
           { step: '2', title: '대출 신청 (1일)', desc: '신청서 작성, 소득 서류(근로소득원천징수영수증·건강보험료 납부확인서) 제출' },
           { step: '3', title: '담보 감정 (3~5일)', desc: '은행 지정 감정평가사가 주택 가치 평가. 감정가가 매매가보다 낮을 수 있음' },
           { step: '4', title: '심사 및 승인 (3~7일)', desc: 'DSR·DTI·LTV 종합 심사. 추가 서류 요청 가능' },
-          { step: '5', title: '대출 약정 체결 (1일)', desc: '금리·상환 방식·기간 최종 확정. 인지세·근저당 설정비 납부' },
-          { step: '6', title: '근저당 설정 등기 (3~5일)', desc: '법무사가 주택에 근저당 설정. 등록면허세·법무사 수수료 발생' },
+          { step: '5', title: '대출 약정 체결 (1일)', desc: '금리·상환 방식·기간을 확정하고 인지세 등 고객 부담 비용명세 확인' },
+          { step: '6', title: '근저당 설정 등기 (3~5일)', desc: '법무사가 근저당을 설정. 설정비·국민주택채권·감정비의 부담 주체는 상품설명서로 확인' },
           { step: '7', title: '대출 실행 (1일)', desc: '잔금 지급일 또는 약정일에 대출금 입금' },
         ].map(({ step, title, desc }) => (
           <div key={step} className="flex gap-3">

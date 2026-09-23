@@ -12,7 +12,9 @@ import {
 const creditLineGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/credit-line-dsr')!
 const incomeProofGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/dsr-income-proof')!
 const loanRateStatementGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/loan-rate-statement')!
+const loanAdditionalCostsGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/loan-additional-costs')!
 const loanGuaranteeGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/loan-guarantee')!
+const mortgageMciMcgGuide = STATIC_GUIDES.find((guide) => guide.href === '/guide/mortgage-mci-mcg')!
 
 describe('guide content registry', () => {
   it('marks a guide as new for exactly 48 hours and expires the badge afterwards', () => {
@@ -26,10 +28,13 @@ describe('guide content registry', () => {
     expect(isNewGuide(incomeProofGuide, new Date('2026-09-13T11:10:02+09:00'))).toBe(false)
     expect(isNewGuide(loanRateStatementGuide, new Date('2026-09-16T10:19:33+09:00'))).toBe(true)
     expect(isNewGuide(loanRateStatementGuide, new Date('2026-09-16T10:19:34+09:00'))).toBe(false)
+    expect(isNewGuide(loanAdditionalCostsGuide, new Date('2026-10-01T11:07:33+09:00'))).toBe(true)
+    expect(isNewGuide(loanAdditionalCostsGuide, new Date('2026-10-01T11:07:34+09:00'))).toBe(false)
   })
 
   it('marks only registry entries that clear the GSC click and CTR thresholds as hits', () => {
-    expect(isGscHitGuide(loanGuaranteeGuide)).toBe(true)
+    expect(isGscHitGuide(loanGuaranteeGuide)).toBe(false)
+    expect(isGscHitGuide(mortgageMciMcgGuide)).toBe(true)
     expect(isGscHitGuide(creditLineGuide)).toBe(false)
   })
 
@@ -58,6 +63,6 @@ describe('guide content registry', () => {
 
   it('promotes a GSC hit into the homepage guide set', () => {
     const homeGuides = getHomeGuideItems(new Date('2026-09-20T00:00:00+09:00'))
-    expect(homeGuides.some((guide) => guide.href === loanGuaranteeGuide.href)).toBe(true)
+    expect(homeGuides.some((guide) => guide.href === mortgageMciMcgGuide.href)).toBe(true)
   })
 })

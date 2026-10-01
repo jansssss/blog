@@ -5,12 +5,12 @@ import RepaymentTypesWidget from './RepaymentTypesWidget'
 import HubBacklink from '@/components/HubBacklink'
 
 export const metadata: Metadata = {
-  title: '원리금균등·원금균등·만기일시 상환방식 완전 비교 | ohyess 가이드',
+  title: '대출 상환방식 비교 — 원리금균등 vs 원금균등 vs 만기일시 | ohyess',
   description:
-    '3가지 대출 상환 방식의 월납입액·총이자·현금흐름 차이를 실전 사례와 비교표로 완전히 정리합니다. 내 상황에 맞는 상환 방식 선택 기준을 제시합니다.',
+    '월 납입액이 일정해야 하면 원리금균등, 총이자를 줄이려면 원금균등이 기본입니다. 만기일시의 만기 원금 위험까지 같은 조건으로 비교합니다.',
   openGraph: {
-    title: '대출 상환방식 완전 비교 — 원리금균등 vs 원금균등 vs 만기일시',
-    description: '3가지 상환 방식의 총이자·월납입액·현금흐름 차이를 실전 사례로 완전 정리',
+    title: '대출 상환방식 비교 — 원리금균등 vs 원금균등 vs 만기일시',
+    description: '월 부담·총이자·만기 원금 위험을 같은 대출 조건으로 비교합니다.',
     type: 'article',
   },
   alternates: {
@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   },
 }
 
+const hfScheduleUrl = 'https://www.hf.go.kr/ko/sub01/sub01_06_03.do'
+const hfFormsUrl = 'https://www.hf.go.kr/ko/sub04/sub04_10_01.do?article.offset=0&articleLimit=10&articleNo=600477&mode=view'
+
 const tocItems = [
+  { id: 'answer', label: '즉답: 월 부담·총이자·만기 위험 비교' },
   { id: 'equal-payment', label: '원리금균등상환 — 매달 같은 금액' },
   { id: 'principal-reduction', label: '원금균등상환 — 매달 줄어드는 납입액' },
   { id: 'bullet-repayment', label: '만기일시상환 — 이자만 내다 만기에 정산' },
@@ -72,12 +76,12 @@ const faqs = [
   {
     question: '원리금균등과 원금균등 중 어떤 방식이 총이자가 더 적게 나오나요?',
     answer:
-      '원금균등상환이 총이자가 더 적습니다. 원금균등은 매달 동일한 원금을 갚기 때문에 대출 잔액이 더 빨리 줄어들고, 그만큼 이자 계산의 기준이 되는 원금도 빨리 감소합니다. 같은 조건에서 원금균등은 원리금균등보다 총이자가 5~15% 정도 적게 나옵니다.',
+      '같은 원금·금리·기간이라면 원금균등상환의 총이자가 더 적습니다. 다만 차이는 금리와 기간에 따라 달라지므로 고정 비율로 단정할 수 없습니다. 이 페이지의 1억원·연 4.5%·20년 예시에서는 원금균등이 원리금균등보다 총이자가 약 665만원 적습니다.',
   },
   {
     question: '원금균등상환의 초기 납입액이 얼마나 더 많은가요?',
     answer:
-      '대출 첫 달 기준으로 원금균등이 원리금균등보다 5~8% 정도 더 많습니다. 예를 들어 원리금균등 월납입이 100만원이라면 원금균등 첫 달은 약 105~108만원 수준입니다. 이 차이는 시간이 지날수록 줄어들어 대출 후반부에는 원금균등 납입액이 더 적어집니다.',
+      '금리와 기간에 따라 다릅니다. 1억원·연 4.5%·20년 예시에서는 원리금균등 월납입액이 약 63만3천원이고 원금균등 첫 달은 약 79만2천원으로 약 15만9천원 많습니다. 원금균등 납입액은 이후 매달 줄어듭니다.',
   },
   {
     question: '만기일시상환은 어떤 경우에 선택하는 건가요?',
@@ -142,14 +146,35 @@ export default function RepaymentTypesGuidePage() {
   return (
     <GuideLayout
       pageUrl="/guide/repayment-types"
-      title="원리금균등·원금균등·만기일시 상환방식 완전 비교"
-      description="3가지 대출 상환 방식의 월납입액·총이자·현금흐름 차이를 실전 사례와 비교표로 완전히 정리하고, 내 상황에 맞는 선택 기준을 제시합니다."
+      title="대출 상환방식 비교 — 원리금균등 vs 원금균등 vs 만기일시"
+      description="월 납입액의 안정성, 총이자, 만기 원금 위험을 같은 대출 조건으로 비교하고 내 현금흐름에 맞는 선택 기준을 확인하세요."
       tocItems={tocItems}
       ctas={ctas}
       relatedGuides={relatedGuides}
       faqs={faqs}
-      lastUpdated="2026년 6월"
+      lastUpdated="2026년 10월 1일"
+      reviewedAt="2026년 10월 1일"
+      referenceDate="2026년 10월 1일 계산·공식 출처 재검토"
+      appliesTo="원리금균등·원금균등·만기일시 상환을 선택할 수 있는 대출"
+      sources={[
+        { label: '한국주택금융공사 — 월별상환원리금·상환방법 안내', href: hfScheduleUrl },
+        { label: '한국주택금융공사 — 보금자리론 신청 서식(2026.8.20)', href: hfFormsUrl },
+      ]}
     >
+      <section id="answer" className="scroll-mt-20 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 mb-6">
+        <h2 className="mb-3 text-lg font-bold text-indigo-950">먼저 결론: 월 부담은 원리금균등, 총이자는 원금균등, 만기 원금 위험은 만기일시가 가장 큽니다.</h2>
+        <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
+          <table className="w-full min-w-[640px] text-sm text-gray-700">
+            <thead className="bg-gray-50"><tr><th className="px-3 py-3 text-left">방식</th><th className="px-3 py-3 text-left">월 부담</th><th className="px-3 py-3 text-left">총이자</th><th className="px-3 py-3 text-left">핵심 위험</th></tr></thead>
+            <tbody>
+              <tr className="border-t"><th scope="row" className="px-3 py-3 text-left font-semibold">원리금균등</th><td className="px-3 py-3">매달 거의 일정</td><td className="px-3 py-3">원금균등보다 큼</td><td className="px-3 py-3">초기에 원금이 천천히 감소</td></tr>
+              <tr className="border-t bg-gray-50/60"><th scope="row" className="px-3 py-3 text-left font-semibold">원금균등</th><td className="px-3 py-3">첫 달이 가장 크고 감소</td><td className="px-3 py-3 font-semibold text-emerald-700">세 방식 중 가장 적음</td><td className="px-3 py-3">초기 월납입 부담</td></tr>
+              <tr className="border-t"><th scope="row" className="px-3 py-3 text-left font-semibold">만기일시</th><td className="px-3 py-3">매달 이자만 납부</td><td className="px-3 py-3">세 방식 중 가장 큼</td><td className="px-3 py-3 font-semibold text-rose-700">만기에 원금 전액 마련</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-indigo-950">실제 선택 가능 여부와 월별 일수 계산은 상품별 약정이 우선입니다. 아래 계산기에 원금·금리·기간을 넣어 같은 조건으로 비교하세요.</p>
+      </section>
       <P>
         대출 상담을 받다 보면 창구 직원이 으레 묻습니다. &ldquo;원리금균등이요, 원금균등이요?&rdquo;
         이 질문이 단순해 보이지만, 선택에 따라 총 납입 이자가 수백만원씩 달라집니다. 세 가지
@@ -188,7 +213,7 @@ export default function RepaymentTypesGuidePage() {
       <Highlight>
         <strong className="font-semibold">예시:</strong> 같은 조건(1억, 4.5%, 20년) 원금균등상환
         시 — 첫 달 납입 791,667원(원금 416,667 + 이자 375,000). 마지막 달 납입 417,823원. 총이자
-        원리금균등 대비 약 580만원 절약.
+        원리금균등 대비 약 665만원 절약.
       </Highlight>
 
       <H2 id="bullet-repayment">만기일시상환 — 이자만 내다 만기에 원금 한 번에</H2>
@@ -244,36 +269,36 @@ export default function RepaymentTypesGuidePage() {
             <tbody>
               <tr>
                 <td className="border border-gray-200 px-3 py-2 text-gray-700">첫 달 납입액</td>
-                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,400,000원</td>
-                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,783,000원</td>
+                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,397,900원</td>
+                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,783,300원</td>
               </tr>
               <tr className="bg-gray-50">
                 <td className="border border-gray-200 px-3 py-2 text-gray-700">20년 후 납입액</td>
-                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">1,400,000원(고정)</td>
-                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,182,000원</td>
+                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,397,900원(고정)</td>
+                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 1,150,000원</td>
               </tr>
               <tr>
                 <td className="border border-gray-200 px-3 py-2 text-gray-700">총 납입 이자</td>
-                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 2억 440만원</td>
-                <td className="border border-gray-200 px-3 py-2 text-right font-semibold text-blue-700">약 1억 7,140만원</td>
+                <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">약 2억 323만원</td>
+                <td className="border border-gray-200 px-3 py-2 text-right font-semibold text-blue-700">약 1억 7,148만원</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <P>원금균등 선택 시 총이자 약 3,300만원 절약입니다. 초기 납입액 차이가 월 38만원 정도인데, 이 부담을 감당할 수 있다면 30년 장기로는 원금균등이 훨씬 유리합니다.</P>
+        <P>원금균등 선택 시 총이자는 약 3,176만원 적습니다. 초기 납입액 차이가 약 38만5천원이므로, 절감액만 보지 말고 첫 달 부담을 감당할 수 있는지 함께 확인해야 합니다.</P>
       </CaseBox>
       <CaseBox title="사례 2 — 자영업자 F씨: 사업자금 5천만원 · 연 5.5% · 5년 · 1년 거치">
         <P>창업 2년차 자영업자 F씨는 장비 구입을 위해 5천만원을 빌렸습니다. 매출 안정화까지 1년 거치를 요청했습니다.</P>
         <Ul>
           <li>거치기간(12개월): 월이자만 = 5천만원 × 5.5% ÷ 12 = 229,167원</li>
-          <li>상환기간(48개월, 원리금균등): 월납입 약 1,159,000원</li>
-          <li>총이자: 거치분(2,750,000) + 상환분 이자 ≒ 약 9,332,000원</li>
-          <li>거치 없이 60개월 원리금균등 시 총이자: 약 7,540,000원</li>
+          <li>상환기간(48개월, 원리금균등): 월납입 약 1,162,824원</li>
+          <li>총이자: 거치분 2,750,000원 + 상환분 약 5,815,541원 = 약 8,565,541원</li>
+          <li>거치 없이 60개월 원리금균등 시 총이자: 약 7,303,487원</li>
         </Ul>
         <P>
-          1년 거치로 인한 추가 이자는 약 1,790,000원입니다. 사업 초기 현금 흐름이 절박했다면
-          감수할 수 있는 비용이지만, 거치기간을 6개월로 줄이는 것만으로도 약 900만원의 추가 이자를
-          절반으로 줄일 수 있었습니다.
+          1년 거치로 인한 추가 이자는 약 1,262,000원입니다. 사업 초기 현금 흐름이 절박했다면
+          감수할 수 있는 비용이지만, 거치 여부를 결정할 때는 초기 12개월의 낮은 납입액과 이후
+          약 116만원으로 뛰는 월납입액을 함께 비교해야 합니다.
         </P>
       </CaseBox>
 

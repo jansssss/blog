@@ -127,9 +127,21 @@ export function calcMaxLoan(
 
 // ─── 중도상환수수료 ───────────────────────────────────────────────────────────
 
-/** 중도상환수수료 */
-export function calcPrepaymentFee(prepayAmount: number, feeRate: number): number {
-  return prepayAmount * (feeRate / 100)
+/**
+ * 중도상환수수료
+ *
+ * remainingChargeRatio는 약정상 수수료 부과기간 중 남은 비율이다.
+ * 실행일을 모르면 1을 사용해 계약 수수료율을 전부 적용한 상한을 보여준다.
+ */
+export function calcPrepaymentFee(
+  prepayAmount: number,
+  feeRate: number,
+  remainingChargeRatio = 1,
+): number {
+  const safeAmount = Math.max(0, prepayAmount)
+  const safeRate = Math.max(0, feeRate)
+  const safeRatio = Math.min(1, Math.max(0, remainingChargeRatio))
+  return safeAmount * (safeRate / 100) * safeRatio
 }
 
 /**

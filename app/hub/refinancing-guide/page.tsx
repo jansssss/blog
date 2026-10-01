@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/JsonLd'
 export const metadata: Metadata = {
   title: '주담대 갈아타기 완전 정복 — 언제, 어떻게, 얼마나 이득인지 총정리 | ohyess',
   description:
-    '주담대 갈아타기 손익 계산 공식, 중도상환수수료와 이자 절감 비교, 손익분기점 월수 계산, 갈아타기 유리한 조건까지. 2025년 현행 기준으로 실전 수치와 함께 정리합니다.',
+    '주담대 갈아타기 손익 계산 공식, 중도상환수수료와 부대비용, 손익분기점 월수와 계획 보유기간을 2026년 기준으로 비교합니다.',
   keywords: ['주담대 갈아타기', '대출 갈아타기', '갈아타기 손익 계산', '중도상환수수료', '금리 갈아타기'],
   alternates: { canonical: '/hub/refinancing-guide' },
   openGraph: {
@@ -29,7 +29,7 @@ const jsonLd = {
       inLanguage: 'ko',
       publisher: { '@type': 'Organization', name: 'ohyess', url: 'https://www.ohyess.kr' },
       datePublished: '2026-07-01',
-      dateModified: '2026-09-14',
+      dateModified: '2026-10-01',
     },
     {
       '@type': 'FAQPage',
@@ -39,7 +39,7 @@ const jsonLd = {
           name: '주담대 갈아타기가 유리한 조건은 무엇인가요?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '일반적으로 ①금리 차이가 0.5%p 이상이고, ②중도상환수수료 면제 기간이 경과했거나 수수료 금액보다 이자 절감액이 크고, ③잔여 대출 기간이 3년 이상 남아 있을 때 갈아타기가 유리합니다. 손익분기점 월수가 24개월 이내라면 갈아탈 가치가 있습니다.',
+            text: '고정된 금리 차이나 기간만으로 판단하지 않습니다. 기존·신규 대출의 같은 기간 총이자 차이에서 중도상환수수료와 인지세·설정·말소비용을 뺀 순절감액이 양수이고, 손익분기점이 실제 보유 계획보다 짧아야 유리합니다.',
           },
         },
         {
@@ -47,7 +47,7 @@ const jsonLd = {
           name: '갈아타기 손익 계산 공식은 무엇인가요?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '순절감액 = 이자 절감액(기존 대출 잔여 이자 - 신규 대출 이자) - 중도상환수수료입니다. 손익분기점 월수 = 중도상환수수료 ÷ 월 이자 절감액으로 계산합니다. 손익분기점 월수가 잔여 대출 기간보다 짧아야 갈아타기가 이득입니다.',
+            text: '순절감액 = 기존 대출 잔여 이자 - 신규 대출 이자 - 중도상환수수료 - 신규 부대비용입니다. 손익분기점 월수는 초기비용을 월 절감액으로 나누며, 그 기간이 실제 보유 계획보다 짧아야 합니다.',
           },
         },
         {
@@ -55,7 +55,7 @@ const jsonLd = {
           name: '갈아타기 시 중도상환수수료는 얼마인가요?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '중도상환수수료 = 잔여대출액 × 수수료율 × (잔존기간/약정기간)입니다. 수수료율은 대출 종류와 금융기관에 따라 다르며 보통 0.5~1.5% 수준입니다. 대출 실행 후 3년이 지나면 수수료가 면제되는 경우가 많습니다.',
+            text: '기간 체감식 계약은 중도상환금액 × 계약 수수료율 × 남은 수수료 부과기간 비율로 추정합니다. 남은 대출 만기가 아니라 계약서의 수수료 부과기간을 쓰며, 정확한 값은 금융기관 앱의 오늘자 중도상환예상금액으로 확인합니다.',
           },
         },
       ],
@@ -107,9 +107,9 @@ export default function RefinancingGuideHubPage() {
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">갈아타기 유불리 판단 기준</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: '📉', title: '금리 차이 0.5%p 이상', desc: '금리 차이가 0.5%p 미만이면 제반 비용(인지세, 근저당 설정비 등)을 고려했을 때 이득이 미미합니다.' },
-            { icon: '⏰', title: '잔여 기간 3년 이상', desc: '대출 만기가 얼마 남지 않았다면 갈아타기로 절감하는 이자보다 수수료와 부대비용이 클 수 있습니다.' },
-            { icon: '🎯', title: '손익분기점 24개월 이내', desc: '중도상환수수료 ÷ 월 이자 절감액이 24개월 이하라면 갈아탈 가치가 있습니다.' },
+            { icon: '📉', title: '같은 기간 총이자 비교', desc: '표면 금리만 보지 말고 남은 기간을 같게 두어 기존·신규 대출의 총이자를 비교합니다.' },
+            { icon: '🧾', title: '초기비용 전부 합산', desc: '중도상환수수료, 인지세, 근저당 설정·말소비용을 빠짐없이 더합니다.' },
+            { icon: '🎯', title: '내 보유계획 안에 회수', desc: '손익분기점이 잔여 만기뿐 아니라 실제로 대출을 유지할 계획보다 짧아야 합니다.' },
           ].map((item) => (
             <div key={item.title} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
               <div className="text-xl mb-2">{item.icon}</div>
@@ -129,7 +129,7 @@ export default function RefinancingGuideHubPage() {
           </div>
           <div className="bg-white p-5 space-y-3">
             {[
-              { ok: true, title: '중도상환수수료 면제 기간 경과 여부', desc: '보통 대출 실행 후 3년이 지나면 수수료 면제. 면제 전이라면 수수료율을 먼저 확인하세요.' },
+              { ok: true, title: '오늘자 중도상환예상금액 조회', desc: '계약 수수료율·부과 종료일·기간 체감이 반영된 실제 견적을 금융기관 앱에서 확인하세요.' },
               { ok: true, title: '신규 대출 금리와 현재 금리 차이 계산', desc: '단순 금리 비교가 아니라 총이자(잔여기간 동안)를 비교해야 합니다.' },
               { ok: true, title: '신규 대출 상품의 DSR 충족 여부 확인', desc: '갈아타려는 은행에서 새로 심사를 받아야 합니다. 소득·신용점수가 달라졌다면 한도가 다를 수 있습니다.' },
               { ok: false, title: '비용 없이 갈아탈 수 있다는 착각', desc: '인지세, 근저당 설정·말소 비용, 취급 수수료 등 부대비용이 발생합니다. 총 비용으로 계산하세요.' },
@@ -210,7 +210,7 @@ export default function RefinancingGuideHubPage() {
                 detail: '잔액 3억, 기존 5.5% → 신규 4.5%, 잔여 10년, 수수료 1%',
                 items: [
                   { label: '이자 절감액', value: '약 1,820만원', color: 'text-emerald-700' },
-                  { label: '중도상환수수료', value: '300만원 (잔액 × 1%)', color: 'text-amber-600' },
+                  { label: '중도상환수수료', value: '300만원 (계약 수수료율 1% 가정)', color: 'text-amber-600' },
                   { label: '순절감액', value: '약 1,520만원 이익', color: 'text-emerald-700 font-extrabold' },
                   { label: '손익분기점', value: '약 20개월', color: 'text-gray-600' },
                 ],
@@ -222,7 +222,7 @@ export default function RefinancingGuideHubPage() {
                 detail: '잔액 1억, 기존 4.5% → 신규 4.2%, 잔여 2년, 수수료 0.5%',
                 items: [
                   { label: '이자 절감액', value: '약 28만원', color: 'text-emerald-700' },
-                  { label: '중도상환수수료', value: '50만원 (잔액 × 0.5%)', color: 'text-amber-600' },
+                  { label: '중도상환수수료', value: '50만원 (계약 수수료율 0.5% 가정)', color: 'text-amber-600' },
                   { label: '순절감액', value: '약 22만원 손해', color: 'text-red-500 font-extrabold' },
                   { label: '손익분기점', value: '약 29개월 (잔여 24개월 초과)', color: 'text-red-500' },
                 ],
@@ -286,13 +286,13 @@ export default function RefinancingGuideHubPage() {
         <div className="grid sm:grid-cols-2 gap-3">
           {[
             { href: '/calculator/refinancing', emoji: '🔄', title: '갈아타기 손익 계산기', desc: '기존·신규 금리 입력 → 순절감액과 손익분기점 즉시 산출', type: 'calc' },
-            { href: '/calculator/prepayment-fee', emoji: '💰', title: '중도상환수수료 계산기', desc: '잔액·수수료율·잔여기간으로 정확한 수수료 계산', type: 'calc' },
+            { href: '/calculator/prepayment-fee', emoji: '💰', title: '중도상환 계산기', desc: '계약 수수료율·실행일·부과기간으로 체감 수수료 추정', type: 'calc' },
             { href: '/calculator/loan-interest', emoji: '📊', title: '대출 이자 계산기', desc: '갈아탄 후 신규 금리로 월 납입액과 총이자 확인', type: 'calc' },
             { href: '/guide/loan-additional-costs', emoji: '🧾', title: '대출 인지세·주담대 부대비용', desc: '새 대출 인지세·채권·말소비용을 실제 견적으로 합산', type: 'guide' },
             { href: '/guide/rate-reduction-request', emoji: '📉', title: '금리인하요구권 신청 방법', desc: '갈아타기 전 기존 은행에서 금리를 낮출 수 있는지 먼저 확인', type: 'guide' },
             { href: '/guide/loan-rate-statement', emoji: '🧾', title: '대출금리 산정내역서 읽는 법', desc: '기준·가산·우대금리와 재산정 주기를 같은 조건으로 비교', type: 'guide' },
             { href: '/guide/loan-cooling-off', emoji: '↩️', title: '대출 청약철회권 14일', desc: '실행 직후라면 중도상환보다 철회가 유리한지 비용 비교', type: 'guide' },
-            { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 완전 정복', desc: '수수료 공식, 면제 조건, 절약 전략 상세 가이드', type: 'guide' },
+            { href: '/guide/early-repayment-fee', emoji: '💡', title: '중도상환수수료 계산·면제 조건', desc: '2025·2026년 적용 기준과 계약서 확인 순서', type: 'guide' },
             { href: '/guide/rate-strategy', emoji: '📈', title: '고정 vs 변동금리 전략', desc: '갈아탈 때 어떤 금리 유형으로 갈아탈지 기준', type: 'guide' },
             { href: '/guide/loan-interest', emoji: '📚', title: '대출 이자 완전 정복', desc: '금리별 이자 차이와 상환 방식별 총비용 비교', type: 'guide' },
             { href: '/guide/rate-0p5-difference', emoji: '🔍', title: '금리 0.5% 차이, 총이자 얼마나 다를까', desc: '갈아탈 가치가 있는 금리차인지 판단하는 기준', type: 'guide' },
@@ -315,7 +315,7 @@ export default function RefinancingGuideHubPage() {
         </div>
       </div>
 
-      <DisclaimerNotice basis="이자 절감액 - 중도상환수수료 = 순절감액 기준 · 잔액 × 수수료율 × (잔존기간/약정기간) 공식" />
+      <DisclaimerNotice basis="2026-10-01 검토 · 순절감액 = 이자 절감액 - 중도상환수수료 - 부대비용 · 계약상 부과기간 체감 산식" />
     </div>
   )
 }

@@ -20,10 +20,10 @@ export const metadata: Metadata = {
 
 const CALCULATORS = [
   {
-    icon: <RefreshCcw className="w-5 h-5" />,
-    title: '대출 갈아타기 손익',
-    description: '수수료 차감 후 실제 절감액 계산',
-    href: '/calculator/refinancing',
+    icon: <Calculator className="w-5 h-5" />,
+    title: '대출 이자 계산기',
+    description: '금액·금리로 예상 이자 계산',
+    href: '/calculator/loan-interest'
   },
   {
     icon: <PieChart className="w-5 h-5" />,
@@ -32,28 +32,28 @@ const CALCULATORS = [
     href: '/calculator/dsr-dti-ltv',
   },
   {
-    icon: <Calculator className="w-5 h-5" />,
-    title: '대출 이자 계산기',
-    description: '금액·금리로 예상 이자 계산',
-    href: '/calculator/loan-interest'
-  },
-  {
     icon: <ArrowLeftRight className="w-5 h-5" />,
     title: '원리금 vs 원금균등',
     description: '두 상환 방식 한눈에 비교',
     href: '/calculator/repayment-compare'
   },
   {
+    icon: <RotateCcw className="w-5 h-5" />,
+    title: '중도상환 계산기',
+    description: '수수료·면제일·절감 상한 확인',
+    href: '/calculator/prepayment-fee'
+  },
+  {
+    icon: <RefreshCcw className="w-5 h-5" />,
+    title: '대출 갈아타기 손익',
+    description: '수수료 차감 후 실제 절감액 계산',
+    href: '/calculator/refinancing',
+  },
+  {
     icon: <Target className="w-5 h-5" />,
     title: '대출 한도 시뮬레이터',
     description: '소득 기반 예상 한도 확인',
     href: '/calculator/loan-limit'
-  },
-  {
-    icon: <RotateCcw className="w-5 h-5" />,
-    title: '중도상환수수료',
-    description: '조기 상환 수수료 미리 계산',
-    href: '/calculator/prepayment-fee'
   },
   {
     icon: <DollarSign className="w-5 h-5" />,
@@ -91,12 +91,12 @@ const indexJsonLd = {
       url: 'https://www.ohyess.kr/calculator',
       numberOfItems: 10,
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: '대출 갈아타기 손익 계산기', url: 'https://www.ohyess.kr/calculator/refinancing' },
+        { '@type': 'ListItem', position: 1, name: '대출 이자 계산기', url: 'https://www.ohyess.kr/calculator/loan-interest' },
         { '@type': 'ListItem', position: 2, name: 'DSR DTI LTV 계산기', url: 'https://www.ohyess.kr/calculator/dsr-dti-ltv' },
-        { '@type': 'ListItem', position: 3, name: '대출 이자 계산기', url: 'https://www.ohyess.kr/calculator/loan-interest' },
-        { '@type': 'ListItem', position: 4, name: '원리금 vs 원금균등 비교 계산기', url: 'https://www.ohyess.kr/calculator/repayment-compare' },
-        { '@type': 'ListItem', position: 5, name: '대출 한도 시뮬레이터', url: 'https://www.ohyess.kr/calculator/loan-limit' },
-        { '@type': 'ListItem', position: 6, name: '중도상환수수료 계산기', url: 'https://www.ohyess.kr/calculator/prepayment-fee' },
+        { '@type': 'ListItem', position: 3, name: '원리금 vs 원금균등 비교 계산기', url: 'https://www.ohyess.kr/calculator/repayment-compare' },
+        { '@type': 'ListItem', position: 4, name: '중도상환 계산기', url: 'https://www.ohyess.kr/calculator/prepayment-fee' },
+        { '@type': 'ListItem', position: 5, name: '대출 갈아타기 손익 계산기', url: 'https://www.ohyess.kr/calculator/refinancing' },
+        { '@type': 'ListItem', position: 6, name: '대출 한도 시뮬레이터', url: 'https://www.ohyess.kr/calculator/loan-limit' },
         { '@type': 'ListItem', position: 7, name: '월 상환 부담 체감 계산기', url: 'https://www.ohyess.kr/calculator/repayment-burden' },
         { '@type': 'ListItem', position: 8, name: '금리 변동 영향 계산기', url: 'https://www.ohyess.kr/calculator/rate-change-impact' },
         { '@type': 'ListItem', position: 9, name: '중도상환 vs 유지 비교 계산기', url: 'https://www.ohyess.kr/calculator/prepayment-comparison' },

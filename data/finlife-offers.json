@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T23:47:38.086Z",
+  "generatedAt": "2026-10-12T00:09:48.461Z",
   "disclosureMonths": {
     "mortgage": "202609",
     "rent": "202609",
@@ -8,7 +8,7 @@
   "counts": {
     "mortgage": 144,
     "rent": 90,
-    "credit": 104
+    "credit": 105
   },
   "summaries": [
     {
@@ -55,7 +55,7 @@
       "productType": "credit",
       "finGroupCode": "030300",
       "fetchedPages": 1,
-      "offerCount": 33,
+      "offerCount": 34,
       "disclosureMonth": "202609",
       "errors": []
     },
@@ -1973,6 +1973,43 @@
         "crdt_grad_10": 15.6,
         "crdt_grad_11": null,
         "crdt_grad_12": 16.34
+      }
+    },
+    {
+      "id": "credit:0010471:760101:_:_:_:1:A",
+      "productType": "credit",
+      "disclosureMonth": "202609",
+      "companyCode": "0010471",
+      "companyName": "페퍼저축은행",
+      "finGroupCode": "030300",
+      "finGroupName": "저축은행",
+      "productCode": "760101",
+      "productName": "개인신용대출",
+      "joinWay": [
+        "영업점",
+        "스마트폰",
+        "모집인",
+        "전화(텔레뱅킹)"
+      ],
+      "incidentalExpense": null,
+      "earlyRepayFee": null,
+      "delinquentRate": null,
+      "loanLimit": null,
+      "repayType": null,
+      "rateType": null,
+      "collateralType": null,
+      "creditProductType": "일반신용대출",
+      "rateMin": 13.55,
+      "rateMax": 16.8,
+      "rateAvg": 16.48,
+      "creditScoreRates": {
+        "crdt_grad_1": 13.55,
+        "crdt_grad_4": 15.92,
+        "crdt_grad_5": 16.8,
+        "crdt_grad_6": 16.18,
+        "crdt_grad_10": 14.67,
+        "crdt_grad_11": null,
+        "crdt_grad_12": null
       }
     },
     {

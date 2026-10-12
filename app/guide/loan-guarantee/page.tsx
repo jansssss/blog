@@ -47,9 +47,9 @@ const ctas = [
 ]
 
 const relatedGuides = [
+  { title: '주거안정월세대출 성실납부자 우대금리', href: '/guide/housing-stability-rent-loan-good-payer', description: '월세대출 이용 이력으로 청년 버팀목 금리 낮추기' },
   { title: '1주택자 전세대출 DSR 적용 계산', href: '/guide/jeonse-loan-dsr', description: '보증 여부가 아닌 주택 수·지역·상품으로 적용 여부 판단' },
   { title: '전세대출 완전 정리', href: '/guide/jeonse-loan', description: '전세대출 종류·한도·절차 완전 가이드' },
-  { title: '주택담보대출 완전 정리', href: '/guide/mortgage-loan', description: '주담대 한도·금리·절차 완전 가이드' },
   { title: 'DSR·DTI·LTV 완전 정리', href: '/guide/dsr-dti-ltv', description: '대출 한도 결정 3가지 핵심 지표' },
 ]
 

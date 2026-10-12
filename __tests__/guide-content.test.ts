@@ -34,8 +34,12 @@ describe('guide content registry', () => {
 
   it('marks only registry entries that clear the GSC click and CTR thresholds as hits', () => {
     expect(isGscHitGuide(loanGuaranteeGuide)).toBe(false)
-    expect(isGscHitGuide(mortgageMciMcgGuide)).toBe(true)
+    expect(isGscHitGuide(mortgageMciMcgGuide)).toBe(false)
     expect(isGscHitGuide(creditLineGuide)).toBe(false)
+    expect(isGscHitGuide({
+      ...mortgageMciMcgGuide,
+      gscHit: { asOf: '2026-10-09', clicks: 2, impressions: 20 },
+    })).toBe(true)
   })
 
   it('keeps every static guide route unique', () => {
@@ -61,8 +65,8 @@ describe('guide content registry', () => {
     expect(indexGuides.every((guide) => STATIC_GUIDES.includes(guide))).toBe(true)
   })
 
-  it('promotes a GSC hit into the homepage guide set', () => {
-    const homeGuides = getHomeGuideItems(new Date('2026-09-20T00:00:00+09:00'))
-    expect(homeGuides.some((guide) => guide.href === mortgageMciMcgGuide.href)).toBe(true)
+  it('keeps a former GSC hit in the registry after its badge observation is removed', () => {
+    expect(STATIC_GUIDES.some((guide) => guide.href === mortgageMciMcgGuide.href)).toBe(true)
+    expect(isGscHitGuide(mortgageMciMcgGuide)).toBe(false)
   })
 })

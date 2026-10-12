@@ -214,6 +214,20 @@ export default function HousingPolicyPage() {
 
       <PolicyDataNotice scope="전세·월세 등 주거 지원" />
 
+      <Link
+        href="/guide/housing-stability-rent-loan-good-payer"
+        className="mb-8 flex items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 transition-colors hover:bg-emerald-100"
+      >
+        <div className="flex items-start gap-3">
+          <Wallet className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
+          <div>
+            <p className="text-sm font-bold text-emerald-950">주거안정월세대출을 모두 갚았다면</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-800">12회차·연체 30일·전액상환·2년 조건을 확인해 청년 버팀목 연 0.2%p 우대를 놓치지 마세요.</p>
+          </div>
+        </div>
+        <span className="text-lg text-emerald-700" aria-hidden="true">→</span>
+      </Link>
+
       {/* 카테고리 선택 */}
       <div className="flex flex-wrap justify-center gap-2 mb-8">
         {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((cat) => (
